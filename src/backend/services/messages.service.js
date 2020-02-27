@@ -89,7 +89,7 @@ module.exports = {
             return this.dbCollections[collection];
         },
         convertEntitiesToResults(entity) {
-            let updateIdFn = function (ent) {
+            let updateIdFn = (ent) => {
                 ent.id = ent._id;
                 delete ent._id;
                 return ent;
