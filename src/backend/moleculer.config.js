@@ -29,7 +29,7 @@ const sysConf = require("./conf/system.json");
  */
 module.exports = {
 	// Namespace of nodes to segment your nodes on the same network.
-	namespace: "",
+	namespace: "myteams",
 	// Unique node identifier. Must be unique in a namespace.
 	nodeID: null,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
@@ -158,7 +158,7 @@ module.exports = {
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
-		enabled: true,
+		enabled: false,
 		// Available built-in reporters: "Console", "CSV", "Event", "Prometheus", "Datadog", "StatsD"
 		reporter: {
 			type: "Prometheus",
