@@ -1,0 +1,9 @@
+{
+    "mongodb": {
+        "uri": "mongodb://localhost:27017",
+        "dbName": "myteam"
+    },
+    "redis": {
+        "uri": "redis://localhost:6379"
+    }
+}
