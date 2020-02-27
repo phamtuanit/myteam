@@ -387,40 +387,6 @@
 				</div>
 			</section>
 
-			<template v-for="(section, name) in requests">
-				<section :id="name" v-if="page == name">
-					<fieldset v-for="item in section">
-						<legend>
-							Action '<code>{{ item.action }}</code>'
-						</legend>
-						<div class="content">
-							<div class="request">
-								<h4>Request:</h4>
-								<code>{{ item.method || 'GET' }} <a target="_blank" :href="item.rest">{{ item.rest }}   </a></code>
-								<a class="button" @click="callAction(item)">
-									<i class="fa fa-rocket"></i>
-									Execute
-								</a>
-							</div>
-							<div v-if="item.fields" class="parameters">
-								<h4>Parameters:</h4>
-								<div class="field" v-for="field in item.fields">
-									<label for="">{{ field.label }}: </label>
-									<input :type="field.type" :value="getFieldValue(field)" @input="setFieldValue(field, $event.target.value)"></input>
-								</div>
-							</div>
-							<div class="response" v-if="item.status">
-								<h4>Response:
-									<div class="badge" :class="{ green: item.status < 400, red: item.status >= 400 || item.status == 'ERR' }">{{ item.status }}</div>
-									<div class="badge time">{{ humanize(item.duration) }}</div>
-								</h4>
-								<pre><code>{{ item.response }}</code></pre>
-							</div>
-						</div>
-					</fieldset>
-				</section>
-			</template>
-
 			<section id="nodes" v-if="page == 'nodes'">
 				<table>
 					<thead>
@@ -502,12 +468,6 @@
 			<div class="footer-copyright">
 				Copyright &copy; 2016-2020 - Moleculer
 			</div>
-			<div class="footer-links">
-				<a href="https://github.com/moleculerjs/moleculer" class="footer-link" target="_blank">Github</a>
-				<a href="https://twitter.com/MoleculerJS" class="footer-link" target="_blank">Twitter</a>
-				<a href="https://discord.gg/TSEcDRP" class="footer-link" target="_blank">Discord</a>
-				<a href="https://stackoverflow.com/questions/tagged/moleculer" class="footer-link" target="_blank">Stack Overflow</a>
-			</div>
 		</footer>
 	</div>
 	<script type="text/javascript">
@@ -518,54 +478,13 @@
 				return {
 					menu: [
 						{ id: "home", caption: "Home" },
-						{ id: "greeter", caption: "Greeter service" },
-						{ id: "products", caption: "Products service" },
 						{ id: "nodes", caption: "Nodes" },
 						{ id: "services", caption: "Services" }
 					],
 					page: "home",
 
 					requests: {
-						greeter: [
-							{ id: "hello", action: "greeter.hello", rest: "/api/greeter/hello", response: null, status: null, duration: null },
-
-							{ id: "welcome", action: "greeter.welcome", rest: "/api/greeter/welcome", fields: [
-								{ field: "name", label: "Name", type: "text", paramType: "param", model: "welcomeName" }
-							], response: null, status: null, duration: null }
-						],
-						products: [
-							{ id: "list", action: "products.list", rest: "/api/products/", response: null, status: null, duration: null, afterResponse: response => !this.fields.productID && (this.fields.productID = response.rows[0]._id) },
-
-							{ id: "create", action: "products.create", rest: "/api/products/", method: "POST", fields: [
-								{ field: "name", label: "Name", type: "text", paramType: "body", model: "productName" },
-								{ field: "price", label: "Price", type: "number", paramType: "body", model: "productPrice" },
-							], response: null, status: null, duration: null, afterResponse: response => this.fields.productID = response._id  },
-
-							{ id: "get", action: "products.get", rest: "/api/products/:id", method: "GET", fields: [
-								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" }
-							], response: null, status: null, duration: null },
-
-							{ id: "update", action: "products.update", rest: "/api/products/:id", method: "PUT", fields: [
-								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" },
-								{ field: "name", label: "Name", type: "text", paramType: "body", model: "productName" },
-								{ field: "price", label: "Price", type: "number", paramType: "body", model: "productPrice" },
-							], response: null, status: null, duration: null },
-
-							{ id: "increase", action: "products.increaseQuantity", rest: "/api/products/:id/quantity/increase", method: "PUT", fields: [
-								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" },
-								{ field: "value", label: "Value", type: "number", paramType: "body", model: "productValue" },
-							], response: null, status: null, duration: null },
-
-							{ id: "decrease", action: "products.decreaseQuantity", rest: "/api/products/:id/quantity/decrease", method: "PUT", fields: [
-								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" },
-								{ field: "value", label: "Value", type: "number", paramType: "body", model: "productValue" },
-							], response: null, status: null, duration: null },
-
-							{ id: "delete", action: "products.delete", rest: "/api/products/:id", method: "DELETE", fields: [
-								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" }
-							], response: null, status: null, duration: null },
-
-						]
+						
 					},
 
 					fields: {
@@ -595,21 +514,6 @@
 				changePage(page) {
 					this.page = page;
 					this.updatePageResources();
-				},
-
-				humanize(ms) {
-					return ms > 1500 ? (ms / 1500).toFixed(2) + " s" : ms + " ms";
-				},
-
-				getFieldValue(field) {
-					return this.fields[field.model];
-				},
-
-				setFieldValue(field, newValue) {
-					if (field.type == "number")
-						this.fields[field.model] = Number(newValue);
-					else
-						this.fields[field.model] = newValue;
 				},
 
 				getServiceActions(svc) {
@@ -644,57 +548,6 @@
 						}
 					}
 					return "";
-				},
-
-				callAction: function (item) {
-					var startTime = Date.now();
-
-					let url = item.rest;
-					const method = item.method || "GET";
-					let body = null;
-					let params = null;
-					if (item.fields) {
-						body = {};
-						params = {};
-						item.fields.forEach(field => {
-							const value = this.getFieldValue(field);
-							if (field.paramType == "body")
-								body[field.field] = value;
-							else if (field.paramType == "param")
-								params[field.field] = value;
-							else if (field.paramType == "url")
-								url = url.replace(":" + field.field, value);
-						});
-
-						if (body && method == "GET") {
-							body = null;
-						}
-						if (params) {
-							url += "?" + new URLSearchParams(params).toString();
-						}
-					}
-
-					return fetch(url, {
-						method,
-						body: body ? JSON.stringify(body) : null,
-					    headers: {
-							'Content-Type': 'application/json'
-						}
-						}).then(function(res) {
-							item.status = res.status;
-							item.duration = Date.now() - startTime;
-							return res.json().then(json => {
-								item.response = json;
-								if (item.afterResponse)
-									return item.afterResponse(json);
-							});
-						}).catch(function (err) {
-							item.status = "ERR";
-							item.duration = Date.now() - startTime;
-							item.response = err.message;
-							console.log(err);
-						});
-
 				},
 
 				updateBrokerOptions: function (name) {
