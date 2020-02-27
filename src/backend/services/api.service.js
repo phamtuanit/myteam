@@ -54,11 +54,11 @@ module.exports = {
 				 * @param {IncomingRequest} req 
 				 * @param {ServerResponse} res 
 				 * @param {Object} data
-				 * 
+				 * */
 				onBeforeCall(ctx, route, req, res) {
 					// Set request headers to context meta
-					ctx.meta.userAgent = req.headers["user-agent"];
-				}, */
+					res.setHeader("x-handler", ctx.nodeID);
+				},
 
 				/**
 				 * After call hook. You can modify the data.
@@ -67,10 +67,15 @@ module.exports = {
 				 * @param {IncomingRequest} req 
 				 * @param {ServerResponse} res 
 				 * @param {Object} data
-				onAfterCall(ctx, route, req, res, data) {
-					// Async function which return with Promise
-					return doSomething(ctx, res, data);
-				}, */
+				 * */
+				// onAfterCall(ctx, route, req, res, data) {
+				// 	// Async function which return with Promise
+				// 	return new Promise(resolve => {
+				// 		res.setHeader("x-handler-server", ctx.nodeID);
+				// 		res.json(data);
+				// 		resolve();
+				// 	});
+				// },
 
 				// Calling options. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Calling-options
 				callingOptions: {},
