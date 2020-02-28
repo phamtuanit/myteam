@@ -3,7 +3,7 @@
         "port": 8080,
         "host": "0.0.0.0",
         "static": "public",
-        "authentication": false,
-        "authorization": false
+        "authentication": true,
+        "authorization": true
     }
 }
