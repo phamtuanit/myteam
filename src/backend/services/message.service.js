@@ -14,6 +14,8 @@ module.exports = {
     mixins: [],
     actions: {
         getMessages: {
+            auth: true,
+            roles: [1],
             rest: "GET /:conversation",
             params: {
                 limit: { type: "number", optional: true, convert: true },

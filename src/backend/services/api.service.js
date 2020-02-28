@@ -1,6 +1,7 @@
 "use strict";
 const ApiGateway = require("moleculer-web");
 const sysConf = require("../conf/system.json");
+const Errors = ApiGateway.Errors;
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -9,167 +10,224 @@ const sysConf = require("../conf/system.json");
  */
 
 module.exports = {
-	name: "api",
-	mixins: [ApiGateway],
+    name: "api",
+    mixins: [ApiGateway],
 
-	// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
-	settings: {
-		// Exposed port
-		port: process.env.PORT || sysConf.gateway.port,
+    // More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
+    settings: {
+        // Exposed port
+        port: process.env.PORT || sysConf.gateway.port,
 
-		// Exposed IP
-		ip: process.env.HOST || sysConf.gateway.host,
+        // Exposed IP
+        ip: process.env.HOST || sysConf.gateway.host,
 
-		// Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
-		use: [],
+        // Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
+        use: [],
 
-		routes: [
-			{
-				path: "/api",
+        routes: [
+            {
+                // Root
+                path: "/",
 
-				whitelist: ["**"],
+                // Middlewares
+                use: [],
 
-				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
-				use: [],
+                // Whitelist of actions (array of string mask or regex)
+                whitelist: ["auth.*"],
 
-				// Enable/disable parameter merging method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Disable-merging
-				mergeParams: true,
+                authorization: false,
+                authentication: false,
 
-				// Enable authentication. Implement the logic into `authenticate` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authentication
-				authentication: sysConf.gateway.authentication,
+                // Action aliases
+                aliases: {
+                    "POST /login": "auth.login"
+                },
 
-				// Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
-				authorization: sysConf.gateway.authorization,
+                // Use bodyparser module
+                bodyParsers: {
+                    json: true,
+                    urlencoded: { extended: true }
+                },
 
-				// The auto-alias feature allows you to declare your route alias directly in your services.
-				// The gateway will dynamically build the full routes from service schema.
-				autoAliases: true,
+                callOptions: {
+                    timeout: 3000
+                },
 
-				aliases: {},
+                onBeforeCall(ctx, route, req, res) {
+                    // Set request headers to context meta
+                    res.setHeader("H-Handler", ctx.nodeID);
+                    ctx.meta.token = req.headers["authorization"];
+                }
 
-				/** 
-				 * Before call hook. You can check the request.
-				 * @param {Context} ctx 
-				 * @param {Object} route 
-				 * @param {IncomingRequest} req 
-				 * @param {ServerResponse} res 
-				 * @param {Object} data
-				 * */
-				onBeforeCall(ctx, route, req, res) {
-					// Set request headers to context meta
-					res.setHeader("x-handler", ctx.nodeID);
-				},
+                // onAfterCall(ctx, route, req, res, data) {}
+            },
+            {
+                path: "/api",
 
-				/**
-				 * After call hook. You can modify the data.
-				 * @param {Context} ctx 
-				 * @param {Object} route 
-				 * @param {IncomingRequest} req 
-				 * @param {ServerResponse} res 
-				 * @param {Object} data
-				 * */
-				// onAfterCall(ctx, route, req, res, data) {
-				// 	// Async function which return with Promise
-				// 	return new Promise(resolve => {
-				// 		res.setHeader("x-handler-server", ctx.nodeID);
-				// 		res.json(data);
-				// 		resolve();
-				// 	});
-				// },
+                whitelist: ["**"],
 
-				// Calling options. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Calling-options
-				callingOptions: {},
+                // Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
+                use: [],
 
-				bodyParsers: {
-					json: {
-						strict: false,
-						limit: "1MB"
-					},
-					urlencoded: {
-						extended: true,
-						limit: "1MB"
-					}
-				},
+                // Enable/disable parameter merging method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Disable-merging
+                mergeParams: true,
 
-				// Mapping policy setting. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Mapping-policy
-				mappingPolicy: "all", // Available values: "all", "restrict"
+                // Enable authentication. Implement the logic into `authenticate` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authentication
+                authentication: sysConf.gateway.authentication,
 
-				// Enable/disable logging
-				logging: true
-			}
-		],
+                // Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
+                authorization: sysConf.gateway.authorization,
 
-		// Do not log client side errors (does not log an error response when the error.code is 400<=X<500)
-		log4XXResponses: false,
-		// Logging the request parameters. Set to any log level to enable it. E.g. "info"
-		logRequestParams: null,
-		// Logging the response data. Set to any log level to enable it. E.g. "info"
-		logResponseData: null,
+                // The auto-alias feature allows you to declare your route alias directly in your services.
+                // The gateway will dynamically build the full routes from service schema.
+                autoAliases: true,
 
-		// Serve assets from "public" folder. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Serve-static-files
-		assets: {
-			folder: sysConf.gateway.static || "public",
+                aliases: {},
 
-			// Options to `server-static` module
-			options: {}
-		}
-	},
+                /**
+                 * Before call hook. You can check the request.
+                 * @param {Context} ctx
+                 * @param {Object} route
+                 * @param {IncomingRequest} req
+                 * @param {ServerResponse} res
+                 * @param {Object} data
+                 * */
+                onBeforeCall(ctx, route, req, res) {
+                    // Set request headers to context meta
+                    res.setHeader("x-handler", ctx.nodeID);
+                    if (req.headers["authorization"]) {
+                        ctx.meta.token = req.headers["authorization"];
+                        if (ctx.meta.token.startsWith("Bearer ")) {
+                            ctx.meta.token = ctx.meta.token.slice(7);
+                        }
+                    }
+                    ctx.meta.headers = { ...req.headers };
+                },
 
-	methods: {
-		/**
-		 * Authenticate the request. It check the `Authorization` token value in the request header.
-		 * Check the token value & resolve the user by the token.
-		 * The resolved user will be available in `ctx.meta.user`
-		 *
-		 * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
-		 *
-		 * @param {Context} ctx
-		 * @param {Object} route
-		 * @param {IncomingRequest} req
-		 * @returns {Promise}
-		 */
-		async authenticate(ctx, route, req) {
-			// Read the token from header
-			const auth = req.headers["authorization"];
+                /**
+                 * After call hook. You can modify the data.
+                 * @param {Context} ctx
+                 * @param {Object} route
+                 * @param {IncomingRequest} req
+                 * @param {ServerResponse} res
+                 * @param {Object} data
+                 * */
+                // onAfterCall(ctx, route, req, res, data) {
+                // 	// Async function which return with Promise
+                // },
 
-			if (auth && auth.startsWith("Bearer")) {
-				const token = auth.slice(7);
+                // Global CORS settings
+                cors: {
+                    origin: "*",
+                    methods: ["GET", "POST", "PUT", "DELETE"],
+                    allowedHeaders: "*",
+                    credentials: true,
+                    maxAge: null
+                },
 
-				// Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
-				if (token == "123456") {
-					// Returns the resolved user. It will be set to the `ctx.meta.user`
-					return { id: 1, name: "John Doe" };
-				} else {
-					// Invalid token
-					throw new ApiGateway.Errors.UnAuthorizedError(
-						ApiGateway.Errors.ERR_INVALID_TOKEN
-					);
-				}
-			} else {
-				// No token. Throw an error or do nothing if anonymous access is allowed.
-				// throw new E.UnAuthorizedError(E.ERR_NO_TOKEN);
-				return null;
-			}
-		},
+                // Calling options. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Calling-options
+                callingOptions: {},
 
-		/**
-		 * Authorize the request. Check that the authenticated user has right to access the resource.
-		 *
-		 * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
-		 *
-		 * @param {Context} ctx
-		 * @param {Object} route
-		 * @param {IncomingRequest} req
-		 * @returns {Promise}
-		 */
-		async authorize(ctx, route, req) {
-			// Get the authenticated user.
-			const user = ctx.meta.user;
+                bodyParsers: {
+                    json: {
+                        strict: false,
+                        limit: "1MB"
+                    },
+                    urlencoded: {
+                        extended: true,
+                        limit: "1MB"
+                    }
+                },
 
-			// It check the `auth` property in action schema.
-			if (req.$action.auth == "required" && !user) {
-				throw new ApiGateway.Errors.UnAuthorizedError("NO_RIGHTS");
-			}
-		}
-	}
+                // Mapping policy setting. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Mapping-policy
+                mappingPolicy: "all", // Available values: "all", "restrict"
+
+                // Enable/disable logging
+                logging: true
+            }
+        ],
+
+        // Do not log client side errors (does not log an error response when the error.code is 400<=X<500)
+        log4XXResponses: false,
+        // Logging the request parameters. Set to any log level to enable it. E.g. "info"
+        logRequestParams: null,
+        // Logging the response data. Set to any log level to enable it. E.g. "info"
+        logResponseData: null,
+
+        // Serve assets from "public" folder. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Serve-static-files
+        assets: {
+            folder: sysConf.gateway.static || "public",
+
+            // Options to `server-static` module
+            options: {}
+        }
+    },
+
+    methods: {
+        /**
+         * Authenticate the request. It check the `Authorization` token value in the request header.
+         * Check the token value & resolve the user by the token.
+         * The resolved user will be available in `ctx.meta.user`
+         *
+         * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
+         *
+         * @param {Context} ctx
+         * @param {Object} route
+         * @param {IncomingRequest} req
+         * @returns {Promise}
+         */
+        authenticate(ctx, route, req) {
+            if (req.$action.auth == true) {
+                // Read the token from header
+                return this.verifyToken(ctx, ctx.meta.token);
+            }
+            return Promise.resolve();
+        },
+
+        verifyToken(ctx, token) {
+            if (token != undefined && token != "") {
+                // Verify JWT token
+                return ctx.call("v1.auth.verifyToken", { token }).then(user => {
+                    // If authorization was success, we set the user entity to ctx.meta
+                    return ctx
+                        .call("v1.user.getUser", { id: user.id })
+                        .then(user => {
+                            ctx.meta.user = user;
+                            this.logger.info("Logged in user:", user);
+                            return user;
+                        });
+                });
+            }
+
+            return Promise.reject(
+                new Errors.UnAuthorizedError(Errors.ERR_NO_TOKEN)
+            );
+        },
+
+        /**
+         * Authorize the request. Check that the authenticated user has right to access the resource.
+         *
+         * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
+         *
+         * @param {Context} ctx
+         * @param {Object} route
+         * @param {IncomingRequest} req
+         * @returns {Promise}
+         */
+        authorize(ctx, route, req) {
+            // It check the `auth` property in action schema.
+            if (req.$action.auth == true && req.$action.roles && Array.isArray(req.$action.roles)) {
+                const user = ctx.meta.user;
+                // Check the user role
+                if (user.role != undefined && user.role != "null" && req.$action.roles.indexOf(user.role) === -1) {
+                    return this.Promise.reject(
+                        new Errors.ForbiddenError(
+                            "You don't have right permission"
+                        )
+                    );
+                }
+            }
+            return null;
+        }
+    }
 };
