@@ -29,42 +29,57 @@ module.exports = {
             params: {
                 token: "string"
             },
-            handler(ctx) {
+            async handler(ctx) {
                 const { token } = ctx.params;
-                return new this.Promise((resolve, reject) => {
-                    jwt.verify(token, privateKey, (err, decoded) => {
-                        if (err) {
-                            return reject(err);
-                        }
+                try {
+                    const decoded = await jwt.verify(token, privateKey);
+                    if (decoded.forRefresh == true) {
+                        // The token is refresh-token
+                        throw new MoleculerClientError(
+                            "Token cannot be accepted"
+                        );
+                    }
 
-                        resolve(decoded.data);
-                    });
-                });
+                    const user = decoded.data;
+                    this.logger.info("Logged in user:", user);
+                    const today = new Date();
+                    const expirationDate = new Date(decoded.exp);
+                    if (today > expirationDate) {
+                        throw new MoleculerClientError("Token is expired");
+                    }
+                    return user;
+                } catch (error) {
+                    throw new MoleculerClientError(error);
+                }
             }
         },
         login: {
             rest: "POST /login",
-            params: {
-            },
-            handler(ctx) {
+            params: {},
+            async handler(ctx) {
                 const { username } = ctx.meta.headers;
                 let password = ctx.meta.headers.password;
                 const passBuf = new Buffer.from(password, "base64");
                 password = passBuf.toString();
 
                 // Search user info
-                return this.verifyUser(username, password).then(user => {
-                    ctx.meta.token = this.generateJWT(user);
-                    return user;
-                }).then(user => {
-                    const entity = { ...user };
-                    entity.refreshToken = this.generateJWT({
-                        id: user.id
-                    });
-                    return ctx.call("v1.user.update", { user: entity }).then(() => ({
-                        token: ctx.meta.token
-                    }));
+                const user = await this.verifyUser(username, password);
+                const token = this.generateJWT(user);
+                const refreshToken = this.generateJWT(
+                    { id: user.id, created: new Date().getTime() },
+                    true
+                );
+                // Update DB
+                await this.broker.call("v1.user.update", {
+                    refreshToken,
+                    user
                 });
+                return {
+                    token: {
+                        access: token,
+                        refresh: refreshToken
+                    }
+                };
             }
         }
     },
@@ -84,14 +99,18 @@ module.exports = {
          * @param {*} user The user information
          * @returns Token
          */
-        generateJWT(user) {
+        generateJWT(user, forRefresh = false) {
             const now = new Date();
             const expirationDate = new Date(now);
             expirationDate.setDate(now.getDate() + authConf.expiration.maxDate);
 
-            const payload = { data: {...user} };
+            const payload = { data: { ...user } };
+            if (forRefresh == true) {
+                payload.forRefresh = true;
+                expirationDate.setDate(expirationDate.getDate() + 5);
+            }
             payload.created = new Date().getTime();
-            payload.exp = Math.floor(expirationDate.getTime() / 1000);
+            payload.exp = Math.floor(expirationDate.getTime());
             return jwt.sign(payload, privateKey);
         },
         confirmLdap() {

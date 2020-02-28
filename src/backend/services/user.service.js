@@ -17,18 +17,28 @@ module.exports = {
                 user: "object"
             },
             async handler(ctx) {
-                const { user } = ctx.params;
-                user.updated = new Date();
+                const { user, refreshToken } = ctx.params;
+                const entity = {
+                    updated: new Date(),
+                    refreshToken
+                };
     
-                const oldEntity = await this.dbCollection.findOne({id: user.id});
+                const oldEntity = await this.dbCollection.findOne({"payload.id": user.id});
                 if (oldEntity) {
+                    entity.payload = oldEntity.payload;
+                    Object.assign(entity.payload, user);
                     // Update
                     const update = {
-                        $set: user
+                        $set:entity
                     };
                     return await this.dbCollection.updateById(oldEntity._id, update);
                 }
-                return this.dbCollection.insert(user);
+                // Add new one
+                entity.payload = { ...user };
+                if (!entity.payload.role) {
+                    entity.payload.role = 1;
+                }
+                return await this.dbCollection.insert(entity);
             }
         },
         getUser: {
@@ -40,11 +50,8 @@ module.exports = {
             },
             async handler(ctx) {
                 let { id } = ctx.params;
-                const entity = await this.dbCollection.findOne({id});
-
-                delete entity._id;
-                delete entity.refreshToken;
-                return entity;
+                const entity = await this.dbCollection.findOne({"payload.id": id});
+                return entity ? entity.payload : null;
             }
         },
     },

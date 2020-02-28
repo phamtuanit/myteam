@@ -169,8 +169,6 @@ module.exports = {
          * Check the token value & resolve the user by the token.
          * The resolved user will be available in `ctx.meta.user`
          *
-         * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
-         *
          * @param {Context} ctx
          * @param {Object} route
          * @param {IncomingRequest} req
@@ -179,51 +177,57 @@ module.exports = {
         authenticate(ctx, route, req) {
             if (req.$action.auth == true) {
                 // Read the token from header
-                return this.verifyToken(ctx, ctx.meta.token);
+                return this.verifyToken(ctx);
             }
-            return Promise.resolve();
+            return null;
         },
 
-        verifyToken(ctx, token) {
+        /**
+         * Verify given token
+         *
+         * @param {*} ctx
+         * @returns
+         */
+        async verifyToken(ctx) {
+            const token = ctx.meta.token;
             if (token != undefined && token != "") {
                 // Verify JWT token
-                return ctx.call("v1.auth.verifyToken", { token }).then(user => {
-                    // If authorization was success, we set the user entity to ctx.meta
-                    return ctx
-                        .call("v1.user.getUser", { id: user.id })
-                        .then(user => {
-                            ctx.meta.user = user;
-                            this.logger.info("Logged in user:", user);
-                            return user;
-                        });
-                });
+                const user = await ctx.call("v1.auth.verifyToken", { token });
+                ctx.meta.user = user;
+                return user;
             }
 
-            return Promise.reject(
-                new Errors.UnAuthorizedError(Errors.ERR_NO_TOKEN)
-            );
+            throw new Errors.UnAuthorizedError(Errors.ERR_NO_TOKEN);
         },
 
         /**
          * Authorize the request. Check that the authenticated user has right to access the resource.
          *
-         * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
-         *
-         * @param {Context} ctx
-         * @param {Object} route
-         * @param {IncomingRequest} req
-         * @returns {Promise}
+         * @param {*} ctx
+         * @param {*} route
+         * @param {*} req
+         * @returns NUll if you have right permission
          */
-        authorize(ctx, route, req) {
+        async authorize(ctx, route, req) {
             // It check the `auth` property in action schema.
-            if (req.$action.auth == true && req.$action.roles && Array.isArray(req.$action.roles)) {
+            if (
+                req.$action.auth == true &&
+                req.$action.roles &&
+                Array.isArray(req.$action.roles)
+            ) {
                 const user = ctx.meta.user;
+                const userEntity = await this.broker.call("v1.user.getUser", {
+                    id: user.id
+                });
                 // Check the user role
-                if (user.role != undefined && user.role != "null" && req.$action.roles.indexOf(user.role) === -1) {
-                    return this.Promise.reject(
-                        new Errors.ForbiddenError(
-                            "You don't have right permission"
-                        )
+                if (
+                    !userEntity ||
+                    userEntity.role == undefined ||
+                    userEntity.role == "null" ||
+                    req.$action.roles.indexOf(userEntity.role) === -1
+                ) {
+                    throw new Errors.ForbiddenError(
+                        "You don't have right permission"
                     );
                 }
             }
