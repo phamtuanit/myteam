@@ -7,7 +7,7 @@ const { MoleculerClientError } = require("moleculer").Errors;
  */
 
 module.exports = {
-    name: "message",
+    name: "messages",
     version: 1,
     settings: {},
     dependencies: [],
@@ -37,7 +37,7 @@ module.exports = {
                 const filter = {
                     limit,
                     offset,
-                    sort: sort || ["-createdTime"],
+                    sort: sort || ["-created"],
                     query: {}
                 };
 
@@ -47,6 +47,8 @@ module.exports = {
             }
         },
         postMessage: {
+            auth: true,
+            roles: [1],
             rest: "POST /:conversation",
             params: {
                 conversation: "string",
@@ -56,22 +58,17 @@ module.exports = {
                         type: { type: "string" },
                         content: "object"
                     }
-                },
-                from: {
-                    type: "object",
-                    props: {
-                        issuer: { type: "number", convert: true }
-                    }
                 }
             },
             async handler(ctx) {
-                const { conversation, from, body } = ctx.params;
+                const { conversation, body } = ctx.params;
                 const entity = {
-                    createdTime: new Date(),
-                    from,
+                    created: new Date(),
+                    from: {},
                     body,
                     modification: []
                 };
+                entity.from.issuer = ctx.meta.user.id;
                 entity.from.edited = false;
 
                 const dbCollection = await this.getDBCollection(conversation);
@@ -81,6 +78,8 @@ module.exports = {
             }
         },
         updateMessage: {
+            auth: true,
+            roles: [1],
             rest: "PUT /:conversation",
             params: {
                 id: "string",
@@ -108,13 +107,19 @@ module.exports = {
 
                 const oldBody = oldEntity.body;
                 const entity = { ...oldEntity };
-                entity.updatedTime = new Date();
+                entity.updated = new Date();
                 entity.body = body;
                 entity.from.edited = true;
                 // Update history
                 const modification = entity.modification || [];
-                modification.unshift(oldBody);
+                const history = {
+                    updated: new Date(),
+                    content: oldBody.content
+                };
+                modification.unshift(history);
                 entity.modification = modification;
+
+                // Update DB
                 const update = {
                     $set: entity
                 };
@@ -125,10 +130,12 @@ module.exports = {
             }
         },
         removeMessage: {
+            auth: true,
+            roles: [1],
             rest: "DELETE /:conversation",
             params: {
                 id: "string",
-                conversation: "string",
+                conversation: "string"
             },
             async handler(ctx) {
                 const { conversation, id } = ctx.params;

@@ -26,6 +26,7 @@ module.exports = {
     mixins: [],
     actions: {
         verifyToken: {
+            visibility: "public",
             params: {
                 token: "string"
             },
@@ -36,26 +37,27 @@ module.exports = {
                     if (decoded.forRefresh == true) {
                         // The token is refresh-token
                         throw new MoleculerClientError(
-                            "Token cannot be accepted"
+                            "Token cannot be accepted. Considering to use right access token."
                         );
                     }
 
                     const user = decoded.data;
-                    this.logger.info("Logged in user:", user);
                     const today = new Date();
                     const expirationDate = new Date(decoded.exp);
                     if (today > expirationDate) {
                         throw new MoleculerClientError("Token is expired");
                     }
+                    this.logger.debug("Logged in user:", user.id);
                     return user;
                 } catch (error) {
-                    throw new MoleculerClientError(error);
+                    this.logger.error(error);
+                    error.code = 401;
+                    throw error;
                 }
             }
         },
         login: {
             rest: "POST /login",
-            params: {},
             async handler(ctx) {
                 const { username } = ctx.meta.headers;
                 let password = ctx.meta.headers.password;
@@ -64,22 +66,58 @@ module.exports = {
 
                 // Search user info
                 const user = await this.verifyUser(username, password);
-                const token = this.generateJWT(user);
-                const refreshToken = this.generateJWT(
-                    { id: user.id, created: new Date().getTime() },
-                    true
-                );
+                const userToken = this.getUserToken(user);
                 // Update DB
-                await this.broker.call("v1.user.update", {
-                    refreshToken,
+                await this.broker.call("v1.users.update", {
+                    refreshToken: userToken.token.refresh,
                     user
                 });
-                return {
-                    token: {
-                        access: token,
-                        refresh: refreshToken
+                return userToken;
+            }
+        },
+        refreshToken: {
+            rest: "POST /renew-token",
+            params: {
+                token: "string"
+            },
+            async handler(ctx) {
+                const { token } = ctx.params;
+                try {
+                    const decoded = await jwt.verify(token, privateKey);
+                    if (decoded.forRefresh != true) {
+                        // The token is refresh-token
+                        throw new MoleculerClientError(
+                            "Token cannot be accepted. Considering to use refresh access token."
+                        );
                     }
-                };
+
+                    const { id } = decoded.data;
+                    const today = new Date();
+                    const expirationDate = new Date(decoded.exp);
+                    if (today > expirationDate) {
+                        throw new MoleculerClientError("Token is expired");
+                    }
+
+                    const userEntity = await this.broker.call("v1.users.getUserEntity", {
+                        id
+                    });
+
+                    if (userEntity.refreshToken != token) {
+                        throw new MoleculerClientError("Refresh token is invalid.");
+                    }
+                    
+                    const user = userEntity.payload;
+                    const userToken = this.getUserToken(user);// Update DB
+                    await this.broker.call("v1.users.update", {
+                        refreshToken: userToken.token.refresh,
+                        user: userEntity.payload
+                    });
+                    return userToken;
+                } catch (error) {
+                    this.logger.error(error);
+                    error.code = 401;
+                    throw error;
+                }
             }
         }
     },
@@ -93,6 +131,21 @@ module.exports = {
      * Methods
      */
     methods: {
+        getUserToken(user) {
+            const { token, exp } = this.generateJWT(user);
+            const refreshToken = this.generateJWT(
+                { id: user.id, created: new Date().getTime() },
+                true
+            ).token;
+            return {
+                token: {
+                    access: token,
+                    exp,
+                    refresh: refreshToken
+                }
+            };
+        },
+
         /**
          * Generate JWT
          *
@@ -109,9 +162,14 @@ module.exports = {
                 payload.forRefresh = true;
                 expirationDate.setDate(expirationDate.getDate() + 5);
             }
+            const exp = Math.floor(expirationDate.getTime());
             payload.created = new Date().getTime();
-            payload.exp = Math.floor(expirationDate.getTime());
-            return jwt.sign(payload, privateKey);
+            payload.exp = exp;
+            const token = jwt.sign(payload, privateKey);
+            return {
+                token,
+                exp
+            };
         },
         confirmLdap() {
             if (!this.ldapClient) {
@@ -234,9 +292,5 @@ module.exports = {
     /**
      * Service stopped lifecycle event handler
      */
-    async stopped() {
-        this.dbCollections.forEach(db => {
-            db.disconnect();
-        });
-    }
+    async stopped() {}
 };

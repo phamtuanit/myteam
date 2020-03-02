@@ -6,13 +6,14 @@ const MongoDBAdapter = require("../db/mongo.adapter");
  */
 
 module.exports = {
-    name: "user",
+    name: "users",
     version: 1,
     settings: {},
     dependencies: [],
     mixins: [],
     actions: {
         update: {
+            visibility: "public",
             params: {
                 user: "object"
             },
@@ -27,6 +28,7 @@ module.exports = {
                 if (oldEntity) {
                     entity.payload = oldEntity.payload;
                     Object.assign(entity.payload, user);
+                    delete entity._id;
                     // Update
                     const update = {
                         $set:entity
@@ -39,6 +41,17 @@ module.exports = {
                     entity.payload.role = 1;
                 }
                 return await this.dbCollection.insert(entity);
+            }
+        },
+        getUserEntity: {
+            visibility: "public",
+            params: {
+                id: "string"
+            },
+            async handler(ctx) {
+                let { id } = ctx.params;
+                const entity = await this.dbCollection.findOne({"payload.id": id});
+                return entity;
             }
         },
         getUser: {

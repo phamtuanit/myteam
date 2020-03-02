@@ -33,14 +33,15 @@ module.exports = {
                 use: [],
 
                 // Whitelist of actions (array of string mask or regex)
-                whitelist: ["auth.*"],
+                whitelist: ["**"],
 
                 authorization: false,
                 authentication: false,
 
-                // Action aliases
+                // Action aliases refreshToken
                 aliases: {
-                    "POST /login": "auth.login"
+                    "POST login": "v1.auth.login",
+                    "POST renew-token": "v1.auth.refreshToken"
                 },
 
                 // Use bodyparser module
@@ -55,11 +56,13 @@ module.exports = {
 
                 onBeforeCall(ctx, route, req, res) {
                     // Set request headers to context meta
-                    res.setHeader("H-Handler", ctx.nodeID);
-                    ctx.meta.token = req.headers["authorization"];
-                }
+                    ctx.meta.headers = { ...req.headers };
+                },
 
-                // onAfterCall(ctx, route, req, res, data) {}
+                onAfterCall(ctx, route, req, res, data) {
+                    res.setHeader("X-Handler", ctx.nodeID);
+                    return data;
+                }
             },
             {
                 path: "/api",
@@ -77,6 +80,9 @@ module.exports = {
 
                 // Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
                 authorization: sysConf.gateway.authorization,
+
+				// Convert "say-hi" action -> "sayHi"
+				camelCaseNames: true,
 
                 // The auto-alias feature allows you to declare your route alias directly in your services.
                 // The gateway will dynamically build the full routes from service schema.
@@ -183,7 +189,7 @@ module.exports = {
         },
 
         /**
-         * Verify given token
+         * Verify given access token
          *
          * @param {*} ctx
          * @returns
@@ -216,7 +222,7 @@ module.exports = {
                 Array.isArray(req.$action.roles)
             ) {
                 const user = ctx.meta.user;
-                const userEntity = await this.broker.call("v1.user.getUser", {
+                const userEntity = await this.broker.call("v1.users.getUser", {
                     id: user.id
                 });
                 // Check the user role
