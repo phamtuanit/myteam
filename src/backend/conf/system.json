@@ -5,5 +5,11 @@
         "static": "public",
         "authentication": true,
         "authorization": true
+    },
+    "redis": {
+        "uri": "redis://localhost:6379",
+        "cache": "/cache",
+        "bus": "/bus",
+        "transport": "/transport"
     }
 }
