@@ -1,5 +1,7 @@
 "use strict";
 const MongoDBAdapter = require("../db/mongo.adapter");
+const MsgPublisher = require("./message-publisher/message-publisher");
+const RoomSubscriber = require("./message-subscriber/room-subscriber");
 const { MoleculerClientError } = require("moleculer").Errors;
 
 /**
@@ -31,14 +33,13 @@ module.exports = {
 
                 // Get specified message
                 if (id != null && id != undefined && id != null) {
-                    return await dbCollection.findById(id);
+                    return await dbCollection.findOne({id: id});
                 }
                 // Get list of message
                 const filter = {
                     limit,
                     offset,
-                    sort: sort || ["-created"],
-                    query: {}
+                    sort: sort || ["-arrivalTime"],
                 };
 
                 return this.convertEntitiesToResults(
@@ -60,21 +61,31 @@ module.exports = {
                     }
                 }
             },
-            async handler(ctx) {
+            handler(ctx) {
                 const { conversation, body } = ctx.params;
-                const entity = {
-                    created: new Date(),
-                    from: {},
+                const { user } = ctx.meta;
+                const message = {
+                    arrivalTime: new Date(),
+                    id: new Date().getTime(), // The Id to confirm message state in Client side
+                    from: {
+                        issuer: user.id,
+                        edited: false
+                    },
+                    to: {
+                        target: conversation
+                    },
                     body,
                     modification: []
                 };
-                entity.from.issuer = ctx.meta.user.id;
-                entity.from.edited = false;
 
-                const dbCollection = await this.getDBCollection(conversation);
-                return this.convertEntitiesToResults(
-                    await dbCollection.insert(entity)
-                );
+                const newMessage = this.processMessage(message);
+                this.messagePublisher.publish(conversation, "create", newMessage);
+                return newMessage;
+
+                // const dbCollection = await this.getDBCollection(conversation);
+                // return this.convertEntitiesToResults(
+                //     await dbCollection.insert(entity)
+                // );
             }
         },
         updateMessage: {
@@ -201,6 +212,10 @@ module.exports = {
             }
 
             return data.map(updateIdFn);
+        },
+        processMessage(message) {
+            return message;
+            
         }
     },
 
@@ -209,17 +224,23 @@ module.exports = {
      */
     created() {
         this.dbCollections = {};
+        this.messagePublisher = new MsgPublisher("global-publisher", this.broker, this.logger);
+        this.messagePublisher.init();
+        this.roomSubscriber = new RoomSubscriber("global-room", this.logger);
+        this.roomSubscriber.init();
     },
 
     /**
      * Service started lifecycle event handler
      */
-    async started() {},
+    started() {
+        this.roomSubscriber.subscribe();
+    },
 
     /**
      * Service stopped lifecycle event handler
      */
-    async stopped() {
+    stopped() {
         this.dbCollections.forEach(db => {
             db.disconnect();
         });
