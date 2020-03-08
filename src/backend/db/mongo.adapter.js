@@ -12,7 +12,7 @@ module.exports = function (collection, service) {
         logger: service.logger
     };
 
-    const adapter = new MongoAdapter(uri, null, dbConf.mongodb.dbName);
+    const adapter = new MongoAdapter(uri, { useUnifiedTopology: true }, dbConf.mongodb.dbName);
     adapter.init(null, serviceConf);
 
     return adapter;

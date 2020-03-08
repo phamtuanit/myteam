@@ -10,7 +10,7 @@ const DbService = require("moleculer-db");
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
 
-module.exports = function(collection) {
+module.exports = function (collection) {
 	const cacheCleanEventName = `cache.clean.${collection}`;
 
 	const schema = {
@@ -67,7 +67,7 @@ module.exports = function(collection) {
 		const MongoAdapter = require("moleculer-db-adapter-mongo");
 		const uri = process.env.MONGO_URI || dbConf.mongodb.uri;
 
-		schema.adapter = new MongoAdapter(uri);
+		schema.adapter = new MongoAdapter(uri, { useUnifiedTopology: true });
 		schema.collection = collection;
 	} else if (process.env.TEST) {
 		// NeDB memory adapter for testing
