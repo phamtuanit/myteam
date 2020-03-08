@@ -1,5 +1,4 @@
 'use strict'
-debugger
 import { app, protocol, BrowserWindow } from 'electron'
 import {
   createProtocol,
