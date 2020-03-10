@@ -23,10 +23,7 @@ module.exports = (function() {
         },
         publish(channel, act, message) {
             const event = `${channel}.message.${act}`;
-            return this.bus.publish(event, message).then(number => {
-                this.broker.broadcastLocal("config.changed", config);
-                return number;
-            });
+            return this.bus.publish(event, message);
         }
     };
 

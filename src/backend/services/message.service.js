@@ -1,8 +1,5 @@
 "use strict";
-const MongoDBAdapter = require("../db/mongo.adapter");
-const MsgPublisher = require("./message-publisher/message-publisher");
-const RoomSubscriber = require("./message-subscriber/room-subscriber");
-const { MoleculerClientError } = require("moleculer").Errors;
+const DBCollectionService = require("../mixins/collection.db.mixin");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -13,7 +10,7 @@ module.exports = {
     version: 1,
     settings: {},
     dependencies: [],
-    mixins: [],
+    mixins: [DBCollectionService],
     actions: {
         getMessages: {
             auth: true,
@@ -33,110 +30,17 @@ module.exports = {
 
                 // Get specified message
                 if (id != null && id != undefined && id != null) {
-                    return await dbCollection.findOne({id: id});
+                    return await dbCollection.findOne({ id: id });
                 }
                 // Get list of message
                 const filter = {
                     limit,
                     offset,
-                    sort: sort || ["-arrivalTime"],
+                    sort: sort || ["-arrivalTime"]
                 };
 
                 return this.convertEntitiesToResults(
                     await dbCollection.find(filter)
-                );
-            }
-        },
-        postMessage: {
-            auth: true,
-            roles: [1],
-            rest: "POST /:conversation",
-            params: {
-                conversation: "string",
-                body: {
-                    type: "object",
-                    props: {
-                        type: { type: "string" },
-                        content: "object"
-                    }
-                }
-            },
-            handler(ctx) {
-                const { conversation, body } = ctx.params;
-                const { user } = ctx.meta;
-                const message = {
-                    arrivalTime: new Date(),
-                    id: new Date().getTime(), // The Id to confirm message state in Client side
-                    from: {
-                        issuer: user.id,
-                        edited: false
-                    },
-                    to: {
-                        target: conversation
-                    },
-                    body,
-                    modification: []
-                };
-
-                const newMessage = this.processMessage(message);
-                this.messagePublisher.publish(conversation, "create", newMessage);
-                return newMessage;
-
-                // const dbCollection = await this.getDBCollection(conversation);
-                // return this.convertEntitiesToResults(
-                //     await dbCollection.insert(entity)
-                // );
-            }
-        },
-        updateMessage: {
-            auth: true,
-            roles: [1],
-            rest: "PUT /:conversation",
-            params: {
-                id: "string",
-                conversation: "string",
-                body: {
-                    type: "object",
-                    props: {
-                        type: { type: "string" },
-                        content: "object"
-                    }
-                }
-            },
-            async handler(ctx) {
-                const { conversation, id, body } = ctx.params;
-                // Get adapter
-                const dbCollection = await this.getDBCollection(conversation);
-
-                const oldEntity = await dbCollection.findById(id);
-                if (!oldEntity) {
-                    throw new MoleculerClientError(
-                        "The message could not be found.",
-                        400
-                    );
-                }
-
-                const oldBody = oldEntity.body;
-                const entity = { ...oldEntity };
-                entity.updated = new Date();
-                entity.body = body;
-                entity.from.edited = true;
-                // Update history
-                const modification = entity.modification || [];
-                const history = {
-                    updated: new Date(),
-                    content: oldBody.content
-                };
-                modification.unshift(history);
-                entity.modification = modification;
-
-                // Update DB
-                const update = {
-                    $set: entity
-                };
-
-                return this.convertEntitiesToResults(
-                    await dbCollection.updateById(id, update)
                 );
             }
         },
@@ -171,78 +75,148 @@ module.exports = {
     /**
      * Events
      */
-    events: {},
+    events: {
+        // [NodeID].[ChannelID].message.[create/update]
+        "*.*.*.created"(payload, sender, event, ctx) {
+            const [nodeId, conversation, messageConst, act] = event.split(".");
+            const conversationId = parseInt(conversation);
+            this.conversationInfo
+                .findOne({ id: conversationId })
+                .then(conInfo => {
+                    if (conInfo.subscribers) {
+                        // 1. Save message to conversation collection in DB
+                        const convCollId = `conv-history-${conversation}`;
+                        this.getDBCollection(convCollId)
+                            .then(collection => {
+                                return collection.insert(payload).catch(err => {
+                                    this.logger.error(
+                                        "Could not store message to queue: ",
+                                        convCollId,
+                                        err
+                                    );
+                                });
+                            })
+                            .catch(err => {
+                                this.logger.error(
+                                    "Could not get DB collection",
+                                    convCollId,
+                                    err
+                                );
+                            });
 
-    /**
-     * Methods
-     */
-    methods: {
-        async getDBCollection(collection) {
-            if (!this.dbCollections[collection]) {
-                const dbCl = MongoDBAdapter(collection, this);
-                this.dbCollections[collection] = dbCl;
-                this.logger.info("Created collection adapter:", collection);
-                await dbCl.connect();
-                return dbCl;
-            }
-            return this.dbCollections[collection];
+                        // 2. Public message online subscribers or to cache in DB
+                        const msgCache = {
+                            id: new Date().getTime(),
+                            type: "message",
+                            payload: payload
+                        };
+                        conInfo.subscribers.forEach(userId => {
+                            if (userId === payload.from.issuer) {
+                                // Ignore issuer from subscribers
+                                return;
+                            }
+                            // 1. Save new information to DB of corresponding user cache
+                            const queueId = `msg-queue-${userId}`;
+                            this.getDBCollection(queueId).then(collection => {
+                                return collection
+                                    .insert(msgCache)
+                                    .catch(err => {
+                                        this.logger.error(
+                                            "Could not store message to queue: ",
+                                            queueId,
+                                            err
+                                        );
+                                    });
+                            });
+                            // TODO: msg-queue-tuanp
+
+                            // 2. Send information to live user directly
+                            // If user confirm that they received a message, then the message wil be removed in DB
+                            this.broker
+                                .call("v1.live.getUserStatus", {
+                                    userId: userId
+                                })
+                                .then(liveInfo => {
+                                    if (liveInfo.status == "Online") {
+                                        // Public message to live user
+                                        return this.messagePublisher.publish(
+                                            `${userId}`,
+                                            msgCache,
+                                            act
+                                        );
+                                    }
+                                })
+                                .catch(err => {
+                                    this.logger.error(
+                                        "Could get user live status: ",
+                                        userId,
+                                        err
+                                    );
+                                });
+                        });
+                    }
+                });
         },
-        convertEntitiesToResults(entity) {
-            let updateIdFn = ent => {
-                ent.id = ent._id;
-                delete ent._id;
-                return ent;
-            };
+        "*.*.*.updated"(payload, sender, event, ctx) {
+            const [nodeId, conversation, messageConst, act] = event.split(".");
+            const convCollId = `conv-history-${conversation}`;
 
-            if (!Array.isArray(entity)) {
-                return updateIdFn(entity);
-            }
+            // Get adapter
+            return this.getDBCollection(convCollId).then(collection => {
+                return collection
+                    .findOne({ id: payload.id })
+                    .then(oldEntity => {
+                        // 1. Verify message
+                        if (!oldEntity) {
+                            // The message not found
+                            this.logger.warn("The message could not be found.");
+                            // TODO: feedback to client
+                            return;
+                        }
+                        // 2. Update message
+                        const newEntity = payload;
+                        // Update history
+                        const modification = oldEntity.modification || [];
+                        const history = oldEntity.body;
+                        history.updated = new Date();
+                        modification.unshift(history);
+                        newEntity.modification = modification;
 
-            return entity.map(updateIdFn);
-        },
-        convertDataToEntities(data) {
-            let updateIdFn = ent => {
-                ent._id = ent.id;
-                delete ent.id;
-                return ent;
-            };
+                        // 3.Update record in DB
+                        const update = {
+                            $set: newEntity
+                        };
 
-            if (!Array.isArray(data)) {
-                return updateIdFn(data);
-            }
+                        return collection
+                            .updateById(oldEntity._id, update)
+                            .then(entity => {
+                                delete entity._id;
+                                // 4. Broadcast new change to users
 
-            return data.map(updateIdFn);
-        },
-        processMessage(message) {
-            return message;
-            
+                                return entity;
+                            });
+                    });
+            });
         }
     },
 
     /**
+     * Methods
+     */
+    methods: {},
+
+    /**
      * Service created lifecycle event handler
      */
-    created() {
-        this.dbCollections = {};
-        this.messagePublisher = new MsgPublisher("global-publisher", this.broker, this.logger);
-        this.messagePublisher.init();
-        this.roomSubscriber = new RoomSubscriber("global-room", this.logger);
-        this.roomSubscriber.init();
-    },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    started() {
-        this.roomSubscriber.subscribe();
-    },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {
-        this.dbCollections.forEach(db => {
-            db.disconnect();
-        });
-    }
+    stopped() {}
 };
