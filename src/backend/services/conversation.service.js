@@ -100,7 +100,6 @@ module.exports = {
      */
     async created() {
         // Prepare conversation information collection
-        // this.conversationInfo = await this.getDBCollection("conversations");
     },
 
     /**

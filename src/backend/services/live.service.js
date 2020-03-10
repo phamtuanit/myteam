@@ -20,7 +20,7 @@ module.exports = {
                 const { userId } = ctx.params;
                 return Promise.resolve({
                     userId,
-                    status: 'Online'
+                    status: 'Off'
                 });
             }
         }

@@ -113,7 +113,7 @@ module.exports = {
                         conInfo.subscribers.forEach(userId => {
                             if (userId === payload.from.issuer) {
                                 // Ignore issuer from subscribers
-                                return;
+                                // return; TEST
                             }
                             // 1. Save new information to DB of corresponding user cache
                             const queueId = `msg-queue-${userId}`;
@@ -208,7 +208,11 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() {
+        return this.getDBCollection("conversations").then(dbCol => {
+            this.conversationInfo = dbCol;
+        });
+    },
 
     /**
      * Service started lifecycle event handler
