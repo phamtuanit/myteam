@@ -37,3 +37,7 @@
 .theme--dark.border-y {
   border-color: rgba(255, 255, 255, 0.12);
 }
+
+.no-radius {
+  border-radius: 0;
+}
