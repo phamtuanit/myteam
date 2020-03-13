@@ -1,10 +1,12 @@
 <template>
   <v-sheet
-    width="280px"
-    class="pa-0 fill-height border-y border-y-l"
+    width="220px"
+    color="secondary-bg"
+    dark
+    class="pa-0 fill-height no-radius"
   >
-    <v-list two-line>
-      <v-subheader class="px-2">Recent chat</v-subheader>
+    <v-list class="pl-2">
+      <v-subheader class="px-2">Live Friends</v-subheader>
 
       <!-- 1 -->
       <v-list-item @click="openChat()">
@@ -14,7 +16,6 @@
 
         <v-list-item-content class="py-2 px-2">
           <v-list-item-title class="body-2">Jon Son</v-list-item-title>
-          <v-list-item-subtitle class="caption">Can I help you? It seems that you facce a big problem.</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
 
@@ -26,7 +27,6 @@
 
         <v-list-item-content class="py-2 px-2">
           <v-list-item-title class="body-2">Wilance Joy</v-list-item-title>
-          <v-list-item-subtitle class="caption">Can I help you? It seems that you facce a big problem.</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
     </v-list>
@@ -34,13 +34,13 @@
 </template>
 
 <script>
-import { fillHeight } from "../utils/layout.js";
+// import { fillHeight } from "../utils/layout.js";
 export default {
   data() {
     return {};
   },
   mounted() {
-    fillHeight(this.$el, 0);
+    // fillHeight(this.$el, 0);
   },
   methods: {
     openChat() {}
@@ -49,4 +49,7 @@ export default {
 </script>
 
 <style>
+.secondary-bg .v-list {
+  background-color: transparent;
+}
 </style>

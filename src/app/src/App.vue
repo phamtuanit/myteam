@@ -1,14 +1,14 @@
 <template>
-  <v-app id="inspire">
+  <v-app id="app">
     <v-navigation-drawer
       permanent
       mini-variant
       dark
       app
       mini-variant-width="66"
-      color="orange darken-2"
+      color="primary-bg"
     >
-      <v-list-item class="px-0 mt-2">
+      <v-list-item class="px-0 mt-2 mb-1">
         <v-avatar
           size="40"
           class="mx-auto"
@@ -17,7 +17,7 @@
         </v-avatar>
       </v-list-item>
       <!-- Chat -->
-      <v-list-item class="px-0 mt-2">
+      <v-list-item class="px-0 mt-3">
         <v-badge
           overlap
           color="red darken-3"
@@ -97,16 +97,16 @@
 
 <script>
 import ConversationList from "./components/conversation-list";
-import Conversation from "./components/conversation-live.vue";
+import Conversation from "./components/conversation-box.vue";
 import Friend from "./components/friend-zone";
 export default {
   components: { ConversationList, Conversation, Friend },
   provide() {
     return { theme: this.theme };
   },
-  data: () => {
+  data(vm) {
     return {
-      theme: window.IoC.get("theme")
+      theme: vm.$vuetify.theme
     };
   },
   created() {
@@ -121,8 +121,16 @@ export default {
 </script>
 <style lang="css">
 @import "./assets/common.css";
+@import "./assets/color.css";
 
 #app {
   height: 100%;
+}
+</style>
+
+<style scoped>
+#app >>> .v-navigation-drawer .v-navigation-drawer__border {
+  background-color: transparent !important;
+  width: 0px;
 }
 </style>
