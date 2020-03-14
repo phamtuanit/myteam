@@ -1,13 +1,17 @@
+body::-webkit-scrollbar {
+  width: 0px;
+}
+
 *::-webkit-scrollbar {
     width: 2px;
+    border-radius: 2px;
 }
 
 *::-webkit-scrollbar-thumb {
     background-color: rgba(167, 167, 167, 0.5);
 }
 
-/* Horizontol */
-
+/* Horizontal */
 *::-webkit-scrollbar:horizontal {
     height: 6px;
 }
