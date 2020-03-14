@@ -1,7 +1,7 @@
 <template>
   <v-sheet
-    width="280px"
-    class="pa-0 fill-height no-radius"
+    width="300px"
+    class="pa-0 fill-height no-border-radius"
     dark
     id="conversation-list"
     color="secondary-bg"

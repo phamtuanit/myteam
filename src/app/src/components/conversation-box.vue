@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="fill-height">
     <v-sheet class="overflow-y-auto message-container">
       <v-container
         style="height: 1500px;"
@@ -8,12 +8,15 @@
 
       </v-container>
     </v-sheet>
-    <v-list height="58">
+    <v-list
+      height="58"
+      class="py-0"
+    >
       <v-divider></v-divider>
       <v-list-item class="px-0 pr-2">
         <v-text-field
           flat
-          class="no-radius"
+          class="no-border-radius"
           v-model="message"
           hide-details
           solo
@@ -70,8 +73,8 @@ export default {
     };
   },
   mounted() {
-    fillHeight(this.$el, 0);
-    fillHeight("message-container", 58, this.$el);
+    // fillHeight(this.$el, 0);
+    fillHeight("message-container", 60, this.$el);
   },
   methods: {
     sendMessage() {

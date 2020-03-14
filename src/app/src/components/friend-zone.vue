@@ -1,16 +1,17 @@
 <template>
   <v-sheet
     width="220px"
-    color="secondary-bg"
-    dark
-    class="pa-0 fill-height no-radius"
+    class="pa-0 fill-height no-border-radius border-y border-y-l"
   >
-    <v-list class="pl-2">
-      <v-subheader class="px-2">Live Friends</v-subheader>
+    <v-list class="px-0">
+      <v-subheader class="px-3">Friends</v-subheader>
 
       <!-- 1 -->
       <v-list-item @click="openChat()">
-        <v-avatar size="30">
+        <v-avatar
+          size="30"
+          class="ml-1"
+        >
           <v-img src="https://randomuser.me/api/portraits/men/81.jpg"></v-img>
         </v-avatar>
 
@@ -21,7 +22,10 @@
 
       <!-- 2 -->
       <v-list-item @click="openChat()">
-        <v-avatar size="30">
+        <v-avatar
+          size="30"
+          class="ml-1"
+        >
           <v-img src="https://randomuser.me/api/portraits/men/41.jpg"></v-img>
         </v-avatar>
 
