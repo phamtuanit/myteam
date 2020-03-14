@@ -11,20 +11,11 @@ Vue.config.productionTip = false
 
 new Vue({
   vuetify,
-  provide() {
-    return {
-      theme: this.$vuetify.theme
-    };
-  },
   data() {
     return {
-      theme: {
-        dark: true,
-        drawer: {
-          state: true,
-          type: "permanent"
+        theme: {
+            dark: true
         }
-      }
     };
   },
   render: h => h(App),

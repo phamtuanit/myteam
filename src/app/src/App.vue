@@ -9,27 +9,16 @@
       color="primary-bg"
     >
       <v-list-item class="px-0 mt-2 mb-1">
-        <v-avatar
-          size="40"
-          class="mx-auto"
-        >
+        <v-avatar size="40" class="mx-auto">
           <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img>
         </v-avatar>
       </v-list-item>
       <!-- Chat -->
       <v-list-item class="px-0 mt-3">
-        <v-badge
-          overlap
-          color="red darken-3"
-          light
-          content="8"
-        >
+        <v-badge overlap color="red darken-3" light content="8">
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-btn
-                icon
-                v-on="on"
-              >
+              <v-btn icon v-on="on">
                 <v-icon color="white">mdi-forum-outline</v-icon>
               </v-btn>
             </template>
@@ -39,18 +28,10 @@
       </v-list-item>
       <!-- Group -->
       <v-list-item class="px-0 mt-2">
-        <v-badge
-          overlap
-          color="red darken-3"
-          light
-          content="1"
-        >
+        <v-badge overlap color="red darken-3" light content="1">
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <v-btn
-                icon
-                v-on="on"
-              >
+              <v-btn icon v-on="on">
                 <v-icon color="white">mdi-account-group</v-icon>
               </v-btn>
             </template>
@@ -60,11 +41,7 @@
       </v-list-item>
       <template v-slot:append>
         <div class="pa-2 text-center">
-          <v-btn
-            icon
-            @click="enableDarkMode"
-            title="Dark / Light"
-          >
+          <v-btn icon @click="enableDarkMode" title="Dark / Light">
             <v-icon>mdi-theme-light-dark</v-icon>
           </v-btn>
         </div>
@@ -72,14 +49,8 @@
     </v-navigation-drawer>
 
     <v-content>
-      <v-container
-        class="pa-0 fill-height"
-        fluid
-      >
-        <v-row
-          class="fill-height"
-          no-gutters
-        >
+      <v-container class="pa-0 fill-height" fluid>
+        <v-row class="fill-height" no-gutters>
           <v-col cols="auto">
             <ConversationList></ConversationList>
           </v-col>
@@ -100,13 +71,14 @@ import ConversationList from "./components/conversation-list";
 import Conversation from "./components/conversation-box.vue";
 import Friend from "./components/friend-zone";
 export default {
+  name: "App",
   components: { ConversationList, Conversation, Friend },
   provide() {
     return { theme: this.theme };
   },
-  data(vm) {
+  data() {
     return {
-      theme: vm.$vuetify.theme
+      theme: window.IoC.get("theme"),
     };
   },
   created() {
