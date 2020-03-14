@@ -17,7 +17,7 @@ module.exports = {
             roles: [1],
             rest: "POST /:conversation",
             params: {
-                conversation: "string",
+                conversation: { type: "string", optional: true},
                 body: {
                     type: "object",
                     props: {
