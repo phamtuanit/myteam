@@ -103,5 +103,5 @@ export default (function () {
         return new DynamicArg(fn);
     };
 
-    return new ServiceLocator();
+    return ServiceLocator;
 })();
