@@ -1,27 +1,30 @@
 <template>
   <div class="chat-box fill-height">
-    <v-sheet class="overflow-y-auto message-sheet" v-chat-scroll="{always: false, smooth: true}">
-      <v-card dark
+    <v-sheet
+      class="overflow-y-auto message-sheet no-border-radius"
+      v-chat-scroll="{ always: false, smooth: true }"
+    >
+      <v-list-item
         v-for="(msg, index) in messages"
         :key="msg.id"
-        color="light-blue darken-1"
-        elevation="0"
-        class="my-2 mx-2"
+        class="mt-1 px-2"
       >
-        <v-list-item>
-          <v-list-item-content class="py-1" v-html="msg.body.content.html">
-          </v-list-item-content>
-          <v-list-item-avatar>
-            <v-avatar size="30">
-              <v-img
-                :src="`https://randomuser.me/api/portraits/men/${index}.jpg`"
-              ></v-img>
-            </v-avatar>
-          </v-list-item-avatar>
-        </v-list-item>
-      </v-card>
+        <v-list-item-avatar></v-list-item-avatar>
+        <v-spacer></v-spacer>
+        <v-card flat dark class="mr-1 message--text">
+          <v-card-text class="py-2 px-3" v-html="msg.body.content.html">
+          </v-card-text>
+        </v-card>
+        <v-list-item-avatar class="ma-0">
+          <v-avatar size="30" class="mx-auto">
+            <v-img
+              :src="`https://randomuser.me/api/portraits/men/${index}.jpg`"
+            ></v-img>
+          </v-avatar>
+        </v-list-item-avatar>
+      </v-list-item>
     </v-sheet>
-    <v-list height="48" class="py-0">
+    <v-list height="48" class="py-0 no-border-radius">
       <v-divider></v-divider>
       <v-list-item class="px-0 px-2">
         <EmojiButton @select="onSelectEmoji"></EmojiButton>
@@ -66,18 +69,7 @@ export default {
     this.msgService = new MessageService();
   },
   mounted() {
-    fillHeight("message-sheet", 50, this.$el);
-
-    // // Get a reference to the div you want to auto-scroll.
-    // const parentEl = this.$el.querySelector(".message-sheet");
-    // const containerEl = this.$el.querySelector(".message-container");
-    // // Create an observer and pass it a callback.
-    // const observer = new MutationObserver(() => {
-    //   parentEl.scrollTop = parentEl.scrollHeight;
-    // });
-    // // Tell it to look for new children that will change the height.
-    // const config = { childList: true };
-    // observer.observe(containerEl, config);
+    fillHeight("message-sheet", 49, this.$el);
   },
   methods: {
     onSendMessage() {
@@ -97,7 +89,20 @@ export default {
 </script>
 
 <style lang="css" scoped>
+.chat-box >>> .message-sheet {
+  background: rgb(243, 242, 241);
+}
+
+.chat-box >>> .message-sheet.theme--dark {
+  background: #121212;
+}
+
 .chat-box >>> .theme--light.v-btn.v-btn--icon {
   color: var(--primary-color-2);
+}
+
+.chat-box >>> .v-card__text {
+  background-color: #00b0ff;
+  color: rgba(0, 0, 0, 0.75) !important;
 }
 </style>
