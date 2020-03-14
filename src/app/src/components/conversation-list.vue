@@ -4,15 +4,9 @@
     class="pa-0 fill-height no-border-radius"
     dark
     id="conversation-list"
-    color="secondary-bg"
   >
     <!-- Search -->
-    <v-list
-      dense
-      dark
-      color="secondary-bg"
-      class="pb-0"
-    >
+    <v-list dense dark class="pb-0">
       <v-list-item class="px-3 mt-1">
         <v-text-field
           prepend-inner-icon="mdi-magnify"
@@ -24,27 +18,16 @@
           clearable
           clear-icon="mdi-close"
         ></v-text-field>
-        <v-btn
-          icon
-          size="40"
-          outlined
-          class="ml-2"
-        >
+        <v-btn icon size="40" outlined class="ml-2">
           <v-icon>mdi-plus</v-icon>
         </v-btn>
       </v-list-item>
       <!-- <v-divider></v-divider> -->
     </v-list>
     <!-- Dynamic data -->
-    <v-list
-      two-line
-      dark
-      color="secondary-bg"
-      class="py-0 px-0"
-    >
+    <v-list two-line dark class="py-0 px-0">
       <v-subheader class="pl-3 pr-2">Recent chat</v-subheader>
       <v-list-item-group v-model="selectedConv">
-
         <!-- 1 -->
         <v-list-item @click="openChat()">
           <v-avatar size="30">
@@ -53,7 +36,10 @@
 
           <v-list-item-content class="py-2 px-2">
             <v-list-item-title class="body-2">Jon Son</v-list-item-title>
-            <v-list-item-subtitle class="caption">Can I help you? It seems that you facce a big problem.</v-list-item-subtitle>
+            <v-list-item-subtitle class="caption"
+              >Can I help you? It seems that you facce a big
+              problem.</v-list-item-subtitle
+            >
           </v-list-item-content>
         </v-list-item>
 
@@ -65,7 +51,10 @@
 
           <v-list-item-content class="py-2 px-2">
             <v-list-item-title class="body-2">Wilance Joy</v-list-item-title>
-            <v-list-item-subtitle class="caption">Can I help you? It seems that you facce a big problem.</v-list-item-subtitle>
+            <v-list-item-subtitle class="caption"
+              >Can I help you? It seems that you facce a big
+              problem.</v-list-item-subtitle
+            >
           </v-list-item-content>
         </v-list-item>
       </v-list-item-group>
@@ -91,6 +80,10 @@ export default {
 </script>
 
 <style scoped>
+#conversation-list, .v-list {
+  background-color: var(--primary-color-2) !important;
+}
+
 #conversation-list >>> .v-text-field.v-text-field--solo .v-input__control {
   min-height: 40px !important;
 }

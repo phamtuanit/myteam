@@ -4,10 +4,10 @@
     mini-variant
     dark
     app
-    mini-variant-width="66"
-    color="primary-bg"
+    mini-variant-width="70"
+    class="left-drawer"
   >
-    <v-list-item class="px-0 mt-2 mb-1">
+    <v-list-item class="px-0 mt-2 mb-1 mx-auto">
       <v-avatar size="40" class="mx-auto">
         <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img>
       </v-avatar>
@@ -17,7 +17,7 @@
       <v-badge overlap color="red darken-3" light content="8">
         <v-tooltip right>
           <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on">
+            <v-btn icon v-on="on" class=" mx-auto">
               <v-icon color="white">mdi-forum-outline</v-icon>
             </v-btn>
           </template>
@@ -63,5 +63,8 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.left-drawer {
+    background-color: var(--primary-color) !important;
+}
 </style>
