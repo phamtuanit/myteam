@@ -21,11 +21,12 @@
 </template>
 
 <script>
-import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import ConversationList from "./components/conversation-list";
 import ChatBox from "./components/chat-box.vue";
 import Friend from "./components/friend-zone";
 import LeftDrawer from "./components/left-drawer";
+import '@fortawesome/fontawesome-free/css/all.css';
+import 'roboto-fontface/css/roboto/roboto-fontface.css';
 export default {
   name: "App",
   components: { ConversationList, ChatBox, Friend, LeftDrawer },
