@@ -3,14 +3,21 @@ module.exports = {
     methods: {
         getDBCollection(collection) {
             if (!this.dbCollections[collection]) {
-                const dbCl = MongoDBAdapter(collection, this);
-                this.dbCollections[collection] = dbCl;
-                this.logger.info("Created collection adapter:", collection);
-                return dbCl.connect().then(() => {
-                    return dbCl;
+                const gettingTask = new Promise((resolve, reject) => {
+                    const dbCl = MongoDBAdapter(collection, this);
+                    dbCl.connect().then(() => {
+                        resolve(dbCl);
+                        this.logger.debug(">>>> Collection adapter is ready", collection);
+                    }).catch(err => {
+                        this.logger.warn(err);
+                        reject(err.message);
+                        delete this.dbCollections.collection;
+                    });
                 });
+                this.dbCollections[collection] = gettingTask;
+                return gettingTask;
             }
-            return Promise.resolve(this.dbCollections[collection]);
+            return this.dbCollections[collection];
         },
     },
     /**
@@ -22,9 +29,12 @@ module.exports = {
     /**
     * Service stopped lifecycle event handler
     */
-   stopped() {
-       this.dbCollections.forEach(db => {
-           db.disconnect();
-       });
-   }
+    stopped() {
+        Object.values(this.dbCollections).forEach(db => {
+            db.then(db => {
+                this.logger.info(">>>> Disconnect to DB");
+                db.disconnect();
+            });
+        });
+    }
 };
