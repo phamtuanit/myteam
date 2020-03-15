@@ -3,8 +3,14 @@
     <LeftDrawer></LeftDrawer>
 
     <v-content>
-      <v-container class="pa-0 fill-height" fluid>
-        <v-row class="fill-height" no-gutters>
+      <v-container
+        class="pa-0 fill-height"
+        fluid
+      >
+        <v-row
+          class="fill-height"
+          no-gutters
+        >
           <v-col cols="auto">
             <ConversationList></ConversationList>
           </v-col>
@@ -25,8 +31,6 @@ import ConversationList from "./components/conversation-list";
 import ChatBox from "./components/chat-box.vue";
 import Friend from "./components/friend-zone";
 import LeftDrawer from "./components/left-drawer";
-import '@fortawesome/fontawesome-free/css/all.css';
-import 'roboto-fontface/css/roboto/roboto-fontface.css';
 export default {
   name: "App",
   components: { ConversationList, ChatBox, Friend, LeftDrawer },
@@ -39,8 +43,7 @@ export default {
   created() {
     window.IoC.register("app", this);
   },
-  methods: {
-  }
+  methods: {}
 };
 </script>
 <style lang="css">
