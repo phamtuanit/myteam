@@ -11,20 +11,31 @@
       >
         <v-list-item-avatar></v-list-item-avatar>
         <v-spacer></v-spacer>
-        <v-card flat dark class="mr-1 message--text">
-          <v-card-text class="py-2 px-3" v-html="msg.body.content.html">
+        <v-card
+          flat
+          dark
+          class="mr-1 message--text"
+        >
+          <v-card-text
+            class="py-2 px-3"
+            v-html="msg.body.content.html"
+          >
           </v-card-text>
         </v-card>
         <v-list-item-avatar class="ma-0">
-          <v-avatar size="30" class="mx-auto">
-            <v-img
-              :src="`https://randomuser.me/api/portraits/men/${index}.jpg`"
-            ></v-img>
+          <v-avatar
+            size="30"
+            class="mx-auto"
+          >
+            <v-img :src="`https://randomuser.me/api/portraits/men/${index}.jpg`"></v-img>
           </v-avatar>
         </v-list-item-avatar>
       </v-list-item>
     </v-sheet>
-    <v-list height="48" class="py-0 no-border-radius">
+    <v-list
+      height="48"
+      class="py-0 no-border-radius"
+    >
       <v-divider></v-divider>
       <v-list-item class="px-0 px-2">
         <EmojiButton @select="onSelectEmoji"></EmojiButton>
@@ -56,27 +67,42 @@
 import { fillHeight } from "../utils/layout.js";
 import EmojiButton from "./emoji-button";
 import MessageService from "../services/message.service";
+import ConversationService from "../services/conversation.service";
 export default {
   components: { EmojiButton },
   data() {
     return {
       theme: this.$vuetify.theme,
+      conversation: null,
       message: "",
       messages: []
     };
   },
   created() {
     this.msgService = new MessageService();
+    this.conversationService = new ConversationService();
   },
   mounted() {
     fillHeight("message-sheet", 49, this.$el);
   },
   methods: {
     onSendMessage() {
-      this.msgService.post(1583816169094, this.message).then(msg => {
-        this.message = "";
-        this.messages.push(msg.data);
-      });
+      if (!this.conversation) {
+        // Create conversation
+        const group = {
+          name: "To tuana",
+          subscribers: ["tuanp", "tuana"]
+        };
+        this.conversationService.post(group).then(res => {
+          this.conversation = res.data;
+        });
+      } else {
+        // Send message
+        this.msgService.post(this.conversation.id, this.message).then(res => {
+          this.messages.push(res.data);
+          this.message = "";
+        });
+      }
     },
     onClearMessage() {
       this.message = "";
