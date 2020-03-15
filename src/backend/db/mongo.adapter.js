@@ -1,9 +1,8 @@
-
 const dbConf = require("../conf/db.json");
+const MongoAdapter = require("moleculer-db-adapter-mongo");
 
 module.exports = function (collection, service) {
     // Mongo adapter
-    const MongoAdapter = require("moleculer-db-adapter-mongo");
     const uri = process.env.MONGO_URI || dbConf.mongodb.uri;
     const serviceConf = {
         schema: {

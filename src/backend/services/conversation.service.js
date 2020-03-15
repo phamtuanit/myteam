@@ -1,5 +1,6 @@
 "use strict";
 const DBCollectionService = require("../mixins/collection.db.mixin");
+const Errors = require("moleculer").Errors;
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -12,72 +13,44 @@ module.exports = {
     dependencies: [],
     mixins: [DBCollectionService],
     actions: {
-        postMessage: {
+        createConversation: {
             auth: true,
             roles: [1],
-            rest: "POST /:conversation",
+            rest: "POST /",
             params: {
-                conversation: { type: "string", optional: true},
-                body: {
+                group: {
                     type: "object",
                     props: {
-                        type: { type: "string" },
-                        content: "object"
-                    }
-                }
-            },
-            handler(ctx) {
-                const { conversation, body } = ctx.params;
-                const { user } = ctx.meta;
-                const message = {
-                    arrivalTime: new Date(),
-                    id: new Date().getTime(), // The Id to confirm message state in Client side
-                    from: {
-                        issuer: user.id,
-                        edited: false
-                    },
-                    to: {
-                        target: conversation
-                    },
-                    body
-                };
-
-                const newMessage = this.processMessage(message, true);
-                this.publishMessage(conversation, "created", message);
-                return newMessage;
-            }
-        },
-        updateMessage: {
-            auth: true,
-            roles: [1],
-            rest: "PUT /:conversation",
-            params: {
-                id: { type: "number", convert: true },
-                conversation: "string",
-                body: {
-                    type: "object",
-                    props: {
-                        type: { type: "string" },
-                        content: "object"
+                        name: "string",
+                        subscribers: { type: "array", empty: false },
                     }
                 }
             },
             async handler(ctx) {
-                const { conversation, body, id } = ctx.params;
-                const { user } = ctx.meta;
-                const message = {
-                    updated: new Date(),
-                    id: id,
-                    from: {
-                        issuer: user.id,
-                        edited: true
-                    },
-                    body
-                };
+                const { group } = ctx.params;
+                // Get adapter
+                const dbCollection = await this.getDBCollection("conversations");
+                // 1. Create new conversation information first
+                const newConvInfo = group;
+                newConvInfo.id = new Date().getTime();
 
-                const newMessage = this.processMessage(message, false);
-                this.publishMessage(conversation, "updated", newMessage);
-                return newMessage;
+                const existinConv = await dbCollection.insert(newConvInfo);
+                this.logger.info("Could not get conversation information. Created new one.", existinConv._id);
+                delete existinConv._id;
+                return existinConv;
+            }
+        },
+        getConversation: {
+            visibility: "public",
+            params: {
+                id: { type: "number", convert: true },
+            },
+            handler(ctx) {
+                const { id } = ctx.params;
+
+                return this.getDBCollection("conversations").then(collection => {
+                    return collection.findOne({ id });
+                });
             }
         }
     },
@@ -86,29 +59,21 @@ module.exports = {
      * Methods
      */
     methods: {
-        publishMessage(conversation, evtAction, message) {
-            const eventName = `${this.broker.nodeID}.${conversation}.message.${evtAction}`;
-            this.broker.emit(eventName, message, ["messages"]);
-        },
-        processMessage(message, isNew) {
-            return message;
-        }
     },
 
     /**
      * Service created lifecycle event handler
      */
-    async created() {
-        // Prepare conversation information collection
+    created() {
     },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() { }
 };

@@ -2,8 +2,8 @@
 const sysConf = require("../../conf/system.json");
 const RedisBus = require("ioredis");
 
-module.exports = (function() {
-    const publisher = function(name, broker, logger) {
+module.exports = (function () {
+    const publisher = function (name, broker, logger) {
         this.name = name;
         this.logger = logger || console;
         this.broker = broker || {};
@@ -15,7 +15,7 @@ module.exports = (function() {
             this.bus = new RedisBus(sysConf.redis.uri + sysConf.redis.bus);
             return Promise.resolve();
         },
-        terminate() {
+        close() {
             if (this.bus) {
                 this.bus.disconnect();
             }

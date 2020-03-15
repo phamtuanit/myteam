@@ -1,5 +1,7 @@
 "use strict";
+const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
+const MessagePublisher = require("./message-publisher/message-publisher");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -15,15 +17,20 @@ module.exports = {
         getMessages: {
             auth: true,
             roles: [1],
-            rest: "GET /:conversation",
+            rest: "GET /:id",
             params: {
+                conversation: { type: "number", convert: true },
+                id: { type: "number", optional: true, convert: true },
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true },
-                conversation: "string"
             },
             async handler(ctx) {
-                let { limit, offset, conversation, id, sort } = ctx.params;
+                let { conversation } = ctx.params;
+                // Check conversation
+                this.checkConversation(conversation);
+
+                let { limit, offset, id, sort } = ctx.params;
                 limit = limit != undefined ? limit : 50;
                 offset = offset != undefined ? offset : 0;
                 const dbCollection = await this.getDBCollection(conversation);
@@ -39,35 +46,99 @@ module.exports = {
                     sort: sort || ["-arrivalTime"]
                 };
 
-                return this.convertEntitiesToResults(
-                    await dbCollection.find(filter)
-                );
+                return await dbCollection.find(filter);
+            }
+        },
+        postMessage: {
+            auth: true,
+            roles: [1],
+            rest: "POST /",
+            params: {
+                conversation: { type: "number", convert: true },
+                body: {
+                    type: "object",
+                    props: {
+                        type: { type: "string" },
+                        content: "object"
+                    }
+                }
+            },
+            async handler(ctx) {
+                const { conversation, body } = ctx.params;
+                const { user } = ctx.meta;
+                // Check conversation
+                this.checkConversation(conversation);
+
+                const message = {
+                    arrivalTime: new Date(),
+                    id: new Date().getTime(),
+                    body,
+                    from: {
+                        issuer: user.id,
+                        edited: false
+                    },
+                    to: {
+                        conversation,
+                    }
+                };
+
+                const newMessage = this.processMessage(message, true);
+                this.publishMessage(conversation, "created", message);
+                return newMessage;
+            }
+        },
+        updateMessage: {
+            auth: true,
+            roles: [1],
+            rest: "PUT /:id",
+            params: {
+                conversation: { type: "number", convert: true },
+                id: { type: "number", convert: true },
+                body: {
+                    type: "object",
+                    props: {
+                        type: { type: "string" },
+                        content: "object"
+                    }
+                }
+            },
+            async handler(ctx) {
+                const { conversation, body, id } = ctx.params;
+                const { user } = ctx.meta;
+                // Check conversation
+                this.checkConversation(conversation);
+
+                const message = {
+                    updated: new Date(),
+                    id: id,
+                    from: {
+                        issuer: user.id,
+                        edited: true
+                    },
+                    body
+                };
+
+                const newMessage = this.processMessage(message, false);
+                this.publishMessage(conversation, "updated", newMessage);
+                return newMessage;
             }
         },
         removeMessage: {
             auth: true,
             roles: [1],
-            rest: "DELETE /:conversation",
+            rest: "DELETE /:id",
             params: {
+                conversation: { type: "number", convert: true },
                 id: "string",
-                conversation: "string"
             },
             async handler(ctx) {
                 const { conversation, id } = ctx.params;
-                // Get adapter
-                const dbCollection = await this.getDBCollection(conversation);
+                // Check conversation
+                this.checkConversation(conversation);
 
-                const oldEntity = await dbCollection.findById(id);
-                if (!oldEntity) {
-                    throw new MoleculerClientError(
-                        "The message could not be found.",
-                        404
-                    );
-                }
-
-                return this.convertEntitiesToResults(
-                    await dbCollection.removeById(id)
-                );
+                const message = { id };
+                this.publishMessage(conversation, "delete", message);
+                return newMessage;
             }
         }
     },
@@ -80,17 +151,21 @@ module.exports = {
         "*.*.*.created"(payload, sender, event, ctx) {
             const [nodeId, conversation, messageConst, act] = event.split(".");
             const conversationId = parseInt(conversation);
-            this.conversationInfo
-                .findOne({ id: conversationId })
+            this.getConversation(conversationId)
                 .then(conInfo => {
-                    if (conInfo.subscribers) {
+                    if (conInfo && conInfo.subscribers) {
+                        const msgCache = {
+                            id: new Date().getTime(),
+                            type: "message",
+                            payload: payload
+                        };
                         // 1. Save message to conversation collection in DB
                         const convCollId = `conv-history-${conversation}`;
                         this.getDBCollection(convCollId)
                             .then(collection => {
                                 return collection.insert(payload).catch(err => {
                                     this.logger.error(
-                                        "Could not store message to queue: ",
+                                        "Could not store message to queue:",
                                         convCollId,
                                         err
                                     );
@@ -104,16 +179,11 @@ module.exports = {
                                 );
                             });
 
-                        // 2. Public message online subscribers or to cache in DB
-                        const msgCache = {
-                            id: new Date().getTime(),
-                            type: "message",
-                            payload: payload
-                        };
+                        // 2. Public message to online subscribers or to cache in DB
                         conInfo.subscribers.forEach(userId => {
                             if (userId === payload.from.issuer) {
                                 // Ignore issuer from subscribers
-                                // return; TEST
+                                return;
                             }
                             // 1. Save new information to DB of corresponding user cache
                             const queueId = `msg-queue-${userId}`;
@@ -128,9 +198,8 @@ module.exports = {
                                         );
                                     });
                             });
-                            // TODO: msg-queue-tuanp
 
-                            // 2. Send information to live user directly
+                            // 2. Send information to live-user directly
                             // If user confirm that they received a message, then the message wil be removed in DB
                             this.broker
                                 .call("v1.live.getUserStatus", {
@@ -155,6 +224,10 @@ module.exports = {
                                 });
                         });
                     }
+                }).catch(err => {
+                    this.logger.error(
+                        "Could get conversation information: ", conversationId, err
+                    );
                 });
         },
         "*.*.*.updated"(payload, sender, event, ctx) {
@@ -203,24 +276,41 @@ module.exports = {
     /**
      * Methods
      */
-    methods: {},
+    methods: {
+        publishMessage(conversation, evtAction, message) {
+            const eventName = `${this.broker.nodeID}.${conversation}.message.${evtAction}`;
+            return this.broker.emit(eventName, message, ["messages"]);
+        },
+        processMessage(message, isNew) {
+            return message;
+        },
+        async checkConversation(convId) {
+            const conversation = await this.getConversation(convId);
+            if (!conversation) {
+                throw new Errors.MoleculerClientError("The conversation could not be found.", 404);
+            }
+        },
+        getConversation(convId) {
+            return this.broker.call("v1.conversations.getConversation", { id: convId });
+        }
+    },
 
     /**
      * Service created lifecycle event handler
      */
     created() {
-        return this.getDBCollection("conversations").then(dbCol => {
-            this.conversationInfo = dbCol;
-        });
+        this.messagePublisher = new MessagePublisher("user-bus", this.broker, this.logger);
     },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() {
+        this.messagePublisher.close();
+    },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() { }
 };
