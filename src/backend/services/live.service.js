@@ -50,11 +50,24 @@ module.exports = {
         "*.user.connected"(user) {
             this.logger.info(`User ${user.id} has been connected.`);
             this.livingUser[user.id] = user;
+
+            // Inform to 
+            const eventName = `${this.nodeID}.user.status`;
+            this.broker.emit(eventName, {
+                user,
+                status: "on"
+            });
         },
         // [NodeID].user.disconnected
         "*.user.disconnected"(user) {
             this.logger.info(`User ${user.id} has been disconnected.`);
             delete this.livingUser[user.id];
+
+            const eventName = `${this.nodeID}.user.status`;
+            this.broker.emit(eventName, {
+                user,
+                status: "off"
+            });
         }
     },
 

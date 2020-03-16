@@ -11,6 +11,30 @@ module.exports = {
         }
     },
 
+    /**
+     * Events
+     */
+    events: {
+        // [NodeID].user.status
+        "*.user.status"(data) {
+            const userId = data.user ? data.user.id : undefined;
+
+            if (typeof userId == "string") {
+                this.logger.debug(
+                    `Status of user ${userId} has been change.`,
+                    data
+                );
+                // Broadcast to all user
+                Object.keys(this.sockets).forEach(key => {
+                    if (userId != key) {
+                        const socket = this.sockets[key];
+                        socket.send("user.status", data);
+                    }
+                });
+            }
+        }
+    },
+
     methods: {
         onConnected(socket) {
             let token = socket.handshake.query.token;
@@ -32,16 +56,16 @@ module.exports = {
         },
         handleNewUser(socket, user) {
             const connectedEvt = `${this.broker.nodeID}.user.connected`;
-            this.broker.emit(connectedEvt, user);
+            this.broker.emit(connectedEvt, user, ["live"]); // live service only
 
             socket.on("disconnect", () => {
                 this.logger.info(`User ${user.id} has been disconnected.`);
                 const disconnectedEvt = `${this.broker.nodeID}.user.disconnected`;
-                this.broker.emit(disconnectedEvt, user);
+                this.broker.emit(disconnectedEvt, user, ["live"]);
             });
         },
         onReceivedMessage(channel, message) {
-            const [ resource, userId ] = channel.split(".");
+            const [resource, userId] = channel.split(".");
             const socket = this.sockets[userId];
             if (socket) {
                 socket.send(resource, {
