@@ -233,7 +233,7 @@ module.exports = {
                 Array.isArray(req.$action.roles)
             ) {
                 const user = ctx.meta.user;
-                const userEntity = await this.broker.call("v1.users.getUser", {
+                const userEntity = await ctx.call("v1.users.getUser", {
                     id: user.id
                 });
                 // Check the user role

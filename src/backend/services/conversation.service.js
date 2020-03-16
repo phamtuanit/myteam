@@ -34,10 +34,10 @@ module.exports = {
                 const newConvInfo = group;
                 newConvInfo.id = new Date().getTime();
 
-                const existinConv = await dbCollection.insert(newConvInfo);
-                this.logger.info("Could not get conversation information. Created new one.", existinConv._id);
-                delete existinConv._id;
-                return existinConv;
+                const existingConv = await dbCollection.insert(newConvInfo);
+                this.logger.info("Could not get conversation information. Created new one.", existingConv._id);
+                delete existingConv._id;
+                return existingConv;
             }
         },
         getConversation: {

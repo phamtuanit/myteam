@@ -131,14 +131,14 @@ module.exports = {
                 conversation: { type: "number", convert: true },
                 id: "string"
             },
-            async handler(ctx) {
+            handler(ctx) {
                 const { conversation, id } = ctx.params;
                 // Check conversation
                 this.checkConversation(conversation);
 
                 const message = { id };
                 this.publishMessage(conversation, "delete", message);
-                return newMessage;
+                return message;
             }
         }
     },
