@@ -42,6 +42,8 @@ export default {
   },
   created() {
     window.IoC.register("app", this);
+    this.socket = window.IoC.get("socket");
+    this.socket.connect();
   },
   methods: {}
 };

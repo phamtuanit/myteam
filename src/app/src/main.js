@@ -8,7 +8,8 @@ Vue.use(VueChatScroll);
 import ServiceLocator from "./services/core/service-locator.js";
 window.IoC = window.ServiceLocator = new ServiceLocator();
 
-import eventBus from "./services/core/event-bus.js";
+import Emiter from "./services/core/emiter";
+const eventBus = new Emiter();
 window.IoC.register("bus", eventBus);
 
 import sysConfig from "./conf/system.json";
@@ -25,6 +26,10 @@ const requestInterceptor = require("./services/http-injector/request-injector.js
 const responseInterceptor = require("./services/http-injector/response-injector.js");
 requestInterceptor();
 responseInterceptor();
+
+const Socket = require("./services/socket.js");
+const socket = new Socket(baseServerAddr, "chat-io");
+window.IoC.register("socket", socket);
 
 Vue.config.productionTip = false;
 new Vue({
@@ -51,7 +56,7 @@ new Vue({
     watch: {
         theme: {
             deep: true,
-            handler: function(newVal) {
+            handler: function (newVal) {
                 if (newVal) {
                     window.localStorage.setItem("setting.theme", JSON.stringify(newVal));
                     this.$vuetify.theme.dark = newVal.dark;
