@@ -17,36 +17,32 @@ module.exports = {
         getMessages: {
             auth: true,
             roles: [1],
+            rest: "GET /",
+            params: {
+                conversation: { type: "number", convert: true },
+                limit: { type: "number", optional: true, convert: true },
+                offset: { type: "number", optional: true, convert: true },
+                sort: { type: "array", optional: true },
+                history: { type: "boolean", optional: true, convert: true }
+            },
+            async handler(ctx) {
+                return this.filterMessage(ctx);
+            }
+        },
+        getMessagesById: {
+            auth: true,
+            roles: [1],
             rest: "GET /:id",
             params: {
                 conversation: { type: "number", convert: true },
                 id: { type: "number", optional: true, convert: true },
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
-                sort: { type: "array", optional: true }
+                sort: { type: "array", optional: true },
+                history: { type: "boolean", optional: true, convert: true }
             },
-            async handler(ctx) {
-                let { conversation } = ctx.params;
-                // Check conversation
-                this.checkConversation(conversation);
-
-                let { limit, offset, id, sort } = ctx.params;
-                limit = limit != undefined ? limit : 50;
-                offset = offset != undefined ? offset : 0;
-                const dbCollection = await this.getDBCollection(conversation);
-
-                // Get specified message
-                if (id != null && id != undefined && id != null) {
-                    return await dbCollection.findOne({ id: id });
-                }
-                // Get list of message
-                const filter = {
-                    limit,
-                    offset,
-                    sort: sort || ["-arrivalTime"]
-                };
-
-                return await dbCollection.find(filter);
+            handler(ctx) {
+                return this.filterMessage(ctx);
             }
         },
         postMessage: {
@@ -161,7 +157,9 @@ module.exports = {
                             payload: payload
                         };
                         // 1. Save message to conversation collection in DB
-                        const convCollId = `conv-history-${conversation}`;
+                        const convCollId = this.getHistoryCollection(
+                            conversation
+                        );
                         this.getDBCollection(convCollId)
                             .then(collection => {
                                 return collection.insert(payload).catch(err => {
@@ -301,6 +299,49 @@ module.exports = {
             return this.broker.call("v1.conversations.getConversation", {
                 id: convId
             });
+        },
+        getHistoryCollection(conversation) {
+            return `conv-history-${conversation}`;
+        },
+        async filterMessage(ctx) {
+            let { conversation, history } = ctx.params;
+            // Check conversation
+            this.checkConversation(conversation);
+
+            let { id } = ctx.params;
+            try {
+                const historyColl = this.getHistoryCollection(conversation);
+                const dbCollection = await this.getDBCollection(historyColl);
+                let result = null;
+
+                // Get specified message
+                if (id != null && id != undefined && id != null) {
+                    result = await dbCollection.findOne({ id: id });
+                    result = [result];
+                } else {
+                    let { limit, offset, sort } = ctx.params;
+                    limit = limit != undefined ? limit : 50;
+                    offset = offset != undefined ? offset : 0;
+                    // Get list of message
+                    const filter = {
+                        limit,
+                        offset,
+                        sort: sort || ["-arrivalTime"]
+                    };
+
+                    result = await dbCollection.find(filter);
+                }
+                return result.map(record => {
+                    if (history != true) {
+                        delete record.modification;
+                    }
+                    delete record._id;
+                    return record;
+                });
+            } catch (error) {
+                this.logger.error(error);
+                throw new Errors.MoleculerServerError(error.message, 500);
+            }
         }
     },
 

@@ -2,6 +2,7 @@ const MongoDBAdapter = require("../db/mongo.adapter");
 module.exports = {
     methods: {
         getDBCollection(collection) {
+            collection = "" + collection; // To string
             if (!this.dbCollections[collection]) {
                 const gettingTask = new Promise((resolve, reject) => {
                     const dbCl = MongoDBAdapter(collection, this);
