@@ -9,9 +9,9 @@ class Socket {
      * Constructor
      * @param {*} namespace 
      */
-    constructor(baseUri, namespace, retryTimes = 10) {
+    constructor(baseUri, path, retryTimes = 10) {
         this.baseUri = baseUri;
-        this.namespace = namespace;
+        this.path = path;
         this.retryTimes = retryTimes;
         this.io = null;
         this.subscribers = {};
@@ -43,7 +43,7 @@ class Socket {
         return this;
     }
     /**
-     * Conect to server with token
+     * Connect to server with token
      */
     connect() {
         if (!authSvr.getToken()) {
@@ -53,7 +53,7 @@ class Socket {
 
         this.close();
         this.io = socket(this.baseUri, {
-            path: this.namespace,
+            path: this.path,
             query: {
                 token: authSvr.getToken()
             }

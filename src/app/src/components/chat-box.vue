@@ -128,7 +128,6 @@ export default {
 }
 
 .chat-box >>> .v-card__text {
-  background-color: #00b0ff;
-  color: rgba(0, 0, 0, 0.75) !important;
+  background-color: #029ce4;
 }
 </style>

@@ -28,7 +28,7 @@ requestInterceptor();
 responseInterceptor();
 
 const Socket = require("./services/socket.js");
-const socket = new Socket(baseServerAddr, "chat-io");
+const socket = new Socket(baseServerAddr, "/chat-io");
 window.IoC.register("socket", socket);
 
 Vue.config.productionTip = false;
