@@ -29,6 +29,10 @@ module.exports = {
             path: "/chat-io"
         },
 
+        assets: {
+            folder: "public"
+        },
+
         routes: [
             {
                 // Root

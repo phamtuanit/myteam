@@ -1,7 +1,15 @@
-const ApiGateway = require("moleculer-web");
+const Subscriber = require("../services/message-subscriber/redis.subscriber.js");
 const io = require("socket.io");
 module.exports = {
     name: "socket",
+
+    settings: {
+        // port: 3000,
+        server: true,
+        io: {
+            path: "chat-io"
+        }
+    },
 
     methods: {
         onConnected(socket) {
@@ -10,11 +18,15 @@ module.exports = {
                 .call("v1.auth.verifyToken", { token })
                 .then(user => {
                     socket.handshake.user = user;
+                    this.sockets[user.id] = socket;
                     this.logger.info(`User ${user.id} has been connected.`);
                     this.handleNewUser(socket, user);
                 })
                 .catch(err => {
-                    this.logger.warn("Incoming socket don't has valid access token. Disconnecting...", err.message);
+                    this.logger.warn(
+                        "Incoming socket don't has valid access token. Disconnecting...",
+                        err.message
+                    );
                     socket.disconnect();
                 });
         },
@@ -27,16 +39,39 @@ module.exports = {
                 const disconnectedEvt = `${this.broker.nodeID}.user.disconnected`;
                 this.broker.emit(disconnectedEvt, user);
             });
+        },
+        onReceivedMessage(channel, message) {
+            const [ resource, userId ] = channel.split(".");
+            const socket = this.sockets[userId];
+            if (socket) {
+                socket.send(resource, {
+                    channel,
+                    payload: message
+                });
+            }
         }
     },
 
     created() {
-        if (!this.server) {
-            this.logger.error("[server] is required for Socket-IO.");
-            return;
-        }
-        this.io = io(this.server, { path: this.settings.io.path || "chat-io" });
-        this.io.on("connection", this.onConnected);
+        // Init redis-bus
+        this.subscriber = new Subscriber("message@socket", this.logger);
+        this.subscriber.on("message", this.onReceivedMessage);
+        const syncTask = this.subscriber.connect("*.*.*").catch(err => {
+            this.logger.error("Cannot connect to redis.", err);
+        });
+
+        // Init Socket
+        this.sockets = {};
+        return syncTask.then(() => {
+            if (!this.server) {
+                this.logger.error("[server] is required for Socket-IO.");
+                return;
+            }
+            this.io = io(this.server, {
+                path: this.settings.io.path || "chat-io"
+            });
+            this.io.on("connection", this.onConnected);
+        });
     },
 
     stopped() {

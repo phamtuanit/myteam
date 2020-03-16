@@ -1,7 +1,7 @@
 "use strict";
 const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
-const MessagePublisher = require("./message-publisher/message-publisher");
+const MessagePublisher = require("./message-publisher/redis.publisher");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -157,6 +157,7 @@ module.exports = {
                         const msgCache = {
                             id: new Date().getTime(),
                             type: "message",
+                            action: act,
                             payload: payload
                         };
                         // 1. Save message to conversation collection in DB
@@ -181,10 +182,10 @@ module.exports = {
 
                         // 2. Public message to online subscribers or to cache in DB
                         conInfo.subscribers.forEach(userId => {
-                            if (userId === payload.from.issuer) {
-                                // Ignore issuer from subscribers
-                                return;
-                            }
+                            // if (userId === payload.from.issuer) {
+                            //     // Ignore issuer from subscribers
+                            //     return;
+                            // }
                             // 1. Save new information to DB of corresponding user cache
                             const queueId = `msg-queue-${userId}`;
                             this.getDBCollection(queueId).then(collection => {
@@ -207,11 +208,11 @@ module.exports = {
                                 })
                                 .then(({ status }) => {
                                     if (status == "on") {
-                                        // Public message to live user
+                                        // Public message to live user - pattern: [userId].message.[action]
+                                        const event = `message.${userId}.${act}`;
                                         return this.messagePublisher.publish(
-                                            `${userId}`,
-                                            msgCache,
-                                            act
+                                            event,
+                                            msgCache
                                         );
                                     }
                                 })
@@ -312,17 +313,18 @@ module.exports = {
             this.broker,
             this.logger
         );
+        this.messagePublisher.connect();
     },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {
-        this.messagePublisher.close();
-    },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() {
+        this.messagePublisher.close();
+    }
 };
