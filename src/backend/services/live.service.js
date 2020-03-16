@@ -11,7 +11,21 @@ module.exports = {
     mixins: [],
     actions: {
         getUserStatus: {
-            visibility: "public",
+            auth: true,
+            roles: [1],
+            rest: "GET /",
+            handler() {
+                return Object.values(this.livingUser).map(user => {
+                    return {
+                        user,
+                        status: "on"
+                    };
+                });
+            }
+        },
+        getUserStatusById: {
+            auth: true,
+            roles: [1],
             rest: "GET /:userId",
             params: {
                 userId: "string"
@@ -20,10 +34,10 @@ module.exports = {
                 const { userId } = ctx.params;
                 const user = this.livingUser[userId];
                 const status = user ? "on" : "off";
-                return Promise.resolve({
-                    user: user,
+                return {
+                    user: user || { id: userId },
                     status: status
-                });
+                };
             }
         }
     },
@@ -41,7 +55,7 @@ module.exports = {
         "*.user.disconnected"(user) {
             this.logger.info(`User ${user.id} has been disconnected.`);
             delete this.livingUser[user.id];
-        },
+        }
     },
 
     /**
