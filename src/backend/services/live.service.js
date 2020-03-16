@@ -16,11 +16,13 @@ module.exports = {
             params: {
                 userId: "string"
             },
-            async handler(ctx) {
+            handler(ctx) {
                 const { userId } = ctx.params;
+                const user = this.livingUser[userId];
+                const status = user ? "on" : "off";
                 return Promise.resolve({
-                    userId,
-                    status: 'Off'
+                    user: user,
+                    status: status
                 });
             }
         }
@@ -29,7 +31,18 @@ module.exports = {
     /**
      * Events
      */
-    events: {},
+    events: {
+        // [NodeID].user.connected
+        "*.user.connected"(user) {
+            this.logger.info(`User ${user.id} has been connected.`);
+            this.livingUser[user.id] = user;
+        },
+        // [NodeID].user.disconnected
+        "*.user.disconnected"(user) {
+            this.logger.info(`User ${user.id} has been disconnected.`);
+            delete this.livingUser[user.id];
+        },
+    },
 
     /**
      * Methods
@@ -39,7 +52,9 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() {
+        this.livingUser = {};
+    },
 
     /**
      * Service started lifecycle event handler

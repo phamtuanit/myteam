@@ -23,7 +23,7 @@ module.exports = {
                 id: { type: "number", optional: true, convert: true },
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
-                sort: { type: "array", optional: true },
+                sort: { type: "array", optional: true }
             },
             async handler(ctx) {
                 let { conversation } = ctx.params;
@@ -78,7 +78,7 @@ module.exports = {
                         edited: false
                     },
                     to: {
-                        conversation,
+                        conversation
                     }
                 };
 
@@ -129,7 +129,7 @@ module.exports = {
             rest: "DELETE /:id",
             params: {
                 conversation: { type: "number", convert: true },
-                id: "string",
+                id: "string"
             },
             async handler(ctx) {
                 const { conversation, id } = ctx.params;
@@ -205,8 +205,8 @@ module.exports = {
                                 .call("v1.live.getUserStatus", {
                                     userId: userId
                                 })
-                                .then(liveInfo => {
-                                    if (liveInfo.status == "Online") {
+                                .then(({ status }) => {
+                                    if (status == "on") {
                                         // Public message to live user
                                         return this.messagePublisher.publish(
                                             `${userId}`,
@@ -224,9 +224,12 @@ module.exports = {
                                 });
                         });
                     }
-                }).catch(err => {
+                })
+                .catch(err => {
                     this.logger.error(
-                        "Could get conversation information: ", conversationId, err
+                        "Could get conversation information: ",
+                        conversationId,
+                        err
                     );
                 });
         },
@@ -287,11 +290,16 @@ module.exports = {
         async checkConversation(convId) {
             const conversation = await this.getConversation(convId);
             if (!conversation) {
-                throw new Errors.MoleculerClientError("The conversation could not be found.", 404);
+                throw new Errors.MoleculerClientError(
+                    "The conversation could not be found.",
+                    404
+                );
             }
         },
         getConversation(convId) {
-            return this.broker.call("v1.conversations.getConversation", { id: convId });
+            return this.broker.call("v1.conversations.getConversation", {
+                id: convId
+            });
         }
     },
 
@@ -299,7 +307,11 @@ module.exports = {
      * Service created lifecycle event handler
      */
     created() {
-        this.messagePublisher = new MessagePublisher("user-bus", this.broker, this.logger);
+        this.messagePublisher = new MessagePublisher(
+            "user-bus",
+            this.broker,
+            this.logger
+        );
     },
 
     /**
@@ -312,5 +324,5 @@ module.exports = {
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { }
+    stopped() {}
 };

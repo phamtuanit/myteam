@@ -1,6 +1,7 @@
 "use strict";
 const ApiGateway = require("moleculer-web");
 const sysConf = require("../conf/system.json");
+const SocketService = require("../mixins/socket.mixin");
 const Errors = ApiGateway.Errors;
 
 /**
@@ -11,7 +12,7 @@ const Errors = ApiGateway.Errors;
 
 module.exports = {
     name: "api",
-    mixins: [ApiGateway],
+    mixins: [SocketService, ApiGateway],
 
     // More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
     settings: {
@@ -23,6 +24,10 @@ module.exports = {
 
         // Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
         use: [],
+
+        io: {
+            path: "/chat-io"
+        },
 
         routes: [
             {
@@ -81,8 +86,8 @@ module.exports = {
                 // Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
                 authorization: sysConf.gateway.authorization,
 
-				// Convert "say-hi" action -> "sayHi"
-				camelCaseNames: true,
+                // Convert "say-hi" action -> "sayHi"
+                camelCaseNames: true,
 
                 // The auto-alias feature allows you to declare your route alias directly in your services.
                 // The gateway will dynamically build the full routes from service schema.
@@ -197,10 +202,16 @@ module.exports = {
         async verifyToken(ctx) {
             const token = ctx.meta.token;
             if (token != undefined && token != "") {
-                // Verify JWT token
-                const user = await ctx.call("v1.auth.verifyToken", { token });
-                ctx.meta.user = user;
-                return user;
+                try {
+                    // Verify JWT token
+                    const user = await ctx.call("v1.auth.verifyToken", {
+                        token
+                    });
+                    ctx.meta.user = user;
+                    return user;
+                } catch (err) {
+                    this.logger.error(err.message);
+                }
             }
 
             throw new Errors.UnAuthorizedError(Errors.ERR_NO_TOKEN);
