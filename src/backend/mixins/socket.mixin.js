@@ -41,10 +41,7 @@ module.exports = {
             this.broker
                 .call("v1.auth.verifyToken", { token })
                 .then(user => {
-                    socket.handshake.user = user;
-                    this.sockets[user.id] = socket;
-                    this.logger.info(`User ${user.id} has been connected.`);
-                    this.handleNewUser(socket, user);
+                    this.handleNewSocket(socket, user);
                 })
                 .catch(err => {
                     this.logger.warn(
@@ -54,7 +51,11 @@ module.exports = {
                     socket.disconnect();
                 });
         },
-        handleNewUser(socket, user) {
+        handleNewSocket(socket, user) {
+            socket.handshake.user = user;
+            this.sockets[user.id] = socket;
+            this.logger.info(`User ${user.id} has been connected.`);
+
             const connectedEvt = `${this.broker.nodeID}.user.connected`;
             this.broker.emit(connectedEvt, user, ["live"]); // live service only
 
@@ -63,15 +64,34 @@ module.exports = {
                 const disconnectedEvt = `${this.broker.nodeID}.user.disconnected`;
                 this.broker.emit(disconnectedEvt, user, ["live"]);
             });
+
+            socket.on("join", room => {
+                socket.join(room);
+            });
+
+            socket.on("leave", room => {
+                socket.leave(room);
+            });
         },
         onReceivedMessage(channel, message) {
-            const [resource, userId] = channel.split(".");
-            const socket = this.sockets[userId];
-            if (socket) {
-                socket.send(resource, {
-                    channel,
-                    payload: message
-                });
+            const [resource, objectId, action] = channel.split(".");
+            const data = {
+                channel,
+                payload: message
+            };
+            switch (resource) {
+                case "message":
+                    {
+                        const socket = this.sockets[objectId];
+                        if (socket) {
+                            socket.send(action, data);
+                        }
+                    }
+                    break;
+
+                default:
+                    this.io.to("live").emit("live", action, data);
+                    break;
             }
         }
     },
