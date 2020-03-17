@@ -22,35 +22,78 @@ module.exports = {
                     type: "object",
                     props: {
                         name: "string",
-                        subscribers: { type: "array", empty: false },
+                        subscribers: { type: "array", empty: false }
                     }
                 }
             },
             async handler(ctx) {
                 const { group } = ctx.params;
                 // Get adapter
-                const dbCollection = await this.getDBCollection("conversations");
+                const dbCollection = await this.getDBCollection(
+                    "conversations"
+                );
                 // 1. Create new conversation information first
                 const newConvInfo = group;
                 newConvInfo.id = new Date().getTime();
 
                 const existingConv = await dbCollection.insert(newConvInfo);
-                this.logger.info("Could not get conversation information. Created new one.", existingConv._id);
+                this.logger.info(
+                    "Could not get conversation information. Created new one.",
+                    existingConv._id
+                );
                 delete existingConv._id;
                 return existingConv;
             }
         },
-        getConversation: {
-            visibility: "public",
+        getConversationById: {
+            auth: true,
+            roles: [1],
+            rest: "GET /:id",
             params: {
-                id: { type: "number", convert: true },
+                id: { type: "number", convert: true }
             },
             handler(ctx) {
                 const { id } = ctx.params;
+                return this.getDBCollection("conversations").then(
+                    collection => {
+                        return collection.findOne({ id }).then(item => {
+                            delete item._id;
+                            return item;
+                        });
+                    }
+                );
+            }
+        },
+        getConversation: {
+            auth: true,
+            roles: [1],
+            rest: "GET /",
+            params: {
+                limit: { type: "number", optional: true, convert: true },
+                offset: { type: "number", optional: true, convert: true },
+                sort: { type: "array", optional: true, convert: true }
+            },
+            handler(ctx) {
+                let { limit, offset, sort } = ctx.params;
+                limit = limit != undefined ? limit : 50;
+                offset = offset != undefined ? offset : 0;
+                // Get list of message
+                const filter = {
+                    limit,
+                    offset,
+                    sort: sort || ["id"]
+                };
 
-                return this.getDBCollection("conversations").then(collection => {
-                    return collection.findOne({ id });
-                });
+                return this.getDBCollection("conversations").then(
+                    collection => {
+                        return collection.find(filter).then(records => {
+                            return records.map((item) => {
+                                delete item._id;
+                                return item;
+                            });
+                        });
+                    }
+                );
             }
         }
     },
@@ -58,22 +101,20 @@ module.exports = {
     /**
      * Methods
      */
-    methods: {
-    },
+    methods: {},
 
     /**
      * Service created lifecycle event handler
      */
-    created() {
-    },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { }
+    stopped() {}
 };

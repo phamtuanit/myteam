@@ -38,7 +38,7 @@ module.exports = {
                 id: { type: "number", optional: true, convert: true },
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
-                sort: { type: "array", optional: true },
+                sort: { type: "array", optional: true, convert: true },
                 history: { type: "boolean", optional: true, convert: true }
             },
             handler(ctx) {
@@ -215,7 +215,7 @@ module.exports = {
                             // 2. Send information to live-user directly
                             // If user confirm that they received a message, then the message wil be removed in DB
                             this.broker
-                                .call("v1.live.getUserStatus", {
+                                .call("v1.live.getUserStatusById", {
                                     userId: userId
                                 })
                                 .catch(err => {
@@ -382,7 +382,7 @@ module.exports = {
                     const filter = {
                         limit,
                         offset,
-                        sort: sort || ["-arrivalTime"]
+                        sort: sort || ["id"]
                     };
 
                     result = await dbCollection.find(filter);
