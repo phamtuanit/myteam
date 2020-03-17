@@ -7,7 +7,7 @@ const authSvr = window.IoC.get('auth');
 class Socket {
     /**
      * Constructor
-     * @param {*} namespace 
+     * @param {*} path 
      */
     constructor(baseUri, path, retryTimes = 10) {
         this.baseUri = baseUri;
@@ -15,6 +15,8 @@ class Socket {
         this.retryTimes = retryTimes;
         this.io = null;
         this.subscribers = {};
+
+        this.rooms = ["live"];
 
         const eventBus = window.IoC.get('bus');
         eventBus.on("logout", () => this.close());
@@ -29,6 +31,11 @@ class Socket {
         if (evt && callback) {
             this.subscribers[evt] = this.subscribers[evt] || [];
             this.subscribers[evt].push(callback);
+
+            if (this.io) {
+                // WS is connected
+                this.io.on(evt, callback);
+            }
         }
         return this;
     }
@@ -67,8 +74,20 @@ class Socket {
      * Register subscriber to inner socket
      */
     registerEvents() {
+        // Register message handler
+        Object.keys(this.subscribers).forEach(evt => {
+            const callbackList = this.subscribers[evt];
+            callbackList.forEach(callback => {
+                this.io.on(evt, callback);
+            });
+        });
+
         this.io.on('connect', () => {
             console.info("Socket connection is available now");
+            // Join to given room
+            this.rooms.forEach(room => {
+                this.io.emit('join', room);
+            });
         });
 
         this.io.on('connect_error', (error) => {
@@ -81,13 +100,6 @@ class Socket {
                 // The disconnection was initiated by the server, reconnect manually
                 this.io.connect();
             }
-        });
-
-        Object.keys(this.subscribers).forEach(evt => {
-            const callackList = this.subscribers[evt];
-            callackList.forEach(callback => {
-                this.io.on(evt, callback);
-            });
         });
     }
 }
