@@ -11,31 +11,20 @@
       >
         <v-list-item-avatar></v-list-item-avatar>
         <v-spacer></v-spacer>
-        <v-card
-          flat
-          dark
-          class="mr-1 message--text"
-        >
-          <v-card-text
-            class="py-2 px-3"
-            v-html="msg.body.content.html"
-          >
+        <v-card flat dark class="mr-1 message--text">
+          <v-card-text class="py-2 px-3" v-html="msg.body.content.html">
           </v-card-text>
         </v-card>
         <v-list-item-avatar class="ma-0">
-          <v-avatar
-            size="30"
-            class="mx-auto"
-          >
-            <v-img :src="`https://randomuser.me/api/portraits/men/${index}.jpg`"></v-img>
+          <v-avatar size="30" class="mx-auto">
+            <v-img
+              :src="`https://randomuser.me/api/portraits/men/${index}.jpg`"
+            ></v-img>
           </v-avatar>
         </v-list-item-avatar>
       </v-list-item>
     </v-sheet>
-    <v-list
-      height="48"
-      class="py-0 no-border-radius"
-    >
+    <v-list height="48" class="py-0 no-border-radius">
       <v-divider></v-divider>
       <v-list-item class="px-0 px-2">
         <EmojiButton @select="onSelectEmoji"></EmojiButton>
@@ -81,6 +70,14 @@ export default {
   created() {
     this.msgService = new MessageService();
     this.conversationService = new ConversationService();
+
+    const socket = window.IoC.get("socket");
+    socket.on("live", (act, data) => {
+      console.info("---- WS-live:", act, data);
+    });
+    socket.on("message", (act, data) => {
+      console.info("---- WS-message:", act, data);
+    });
   },
   mounted() {
     fillHeight("message-sheet", 49, this.$el);
