@@ -1,5 +1,54 @@
-export default {
-    getToken() {
-        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoidHVhbnAiLCJ1c2VybmFtZSI6InR1YW5wIiwibGFzdG5hbWUiOiJ0dWFucCIsIm1haWwiOiJ0dWFucEBjb21tb24uY29tIiwiZG4iOiJjbj10dWFucCxvdT1EZXYsZGM9Y29tbW9uLGRjPWNvbSIsInBob25lIjoiMDAxLTEyMzQtNTY3OCJ9LCJjcmVhdGVkIjoxNTgzMTIxNTM1MDQ3LCJleHAiOjE1ODU3MTM1MzUwNDcsImlhdCI6MTU4MzEyMTUzNX0.QyNa9HLY4T5P84XZn-Zg9B22xy_OUe2Rd3499OGadYA";
+import axios from "axios";
+import sysConfig from "../../conf/system.json";
+const axiosInstance = axios.create({
+    baseURL: sysConfig.env == "production" ? window.location.origin : sysConfig.server.address,
+});
+
+const Service = function() {
+    this.locker = this.verifyToken();
+    this.isAuthenticated = false;
+};
+
+Service.prototype = {
+    async getToken() {
+        await this.locker;
+        const token = window.localStorage.getItem("token");
+        if (token) {
+            return JSON.parse(token).access;
+        }
+        return null;
+    },
+    verifyToken() {
+        const token = JSON.parse(window.localStorage.getItem("token"));
+        return Promise.resolve(token);
+    },
+    login(userName, password) {
+        const passCode = window.btoa(password);
+        this.locker = new Promise((resole, reject) => {
+            axiosInstance
+                .post("login", null, {
+                    headers: {
+                        "user-name": userName,
+                        "user-pass": passCode,
+                    },
+                })
+                .then(({ data }) => {
+                    if (data.token && data.token.access) {
+                        this.isAuthenticated = true;
+                        window.localStorage.setItem("token", JSON.stringify(data.token));
+                        resole(data.token.access);
+                    } else {
+                        reject("Could not get access token");
+                    }
+                })
+                .catch(err => {
+                    this.isAuthenticated = false;
+                    reject(err);
+                });
+        });
+        // Return promise
+        return this.locker;
     },
 };
+
+export default Service;

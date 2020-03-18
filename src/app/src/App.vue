@@ -1,6 +1,7 @@
 <template>
   <v-app id="app">
-    <LeftDrawer></LeftDrawer>
+    <router-view key="page"></router-view>
+    <!-- <LeftDrawer></LeftDrawer>
 
     <v-content>
       <v-container
@@ -22,7 +23,7 @@
           </v-col>
         </v-row>
       </v-container>
-    </v-content>
+    </v-content> -->
   </v-app>
 </template>
 
@@ -35,7 +36,8 @@ export default {
   name: "App",
   components: { ConversationList, ChatBox, Friend, LeftDrawer },
   provide() {
-    return { theme: this.theme };
+    const auth = window.IoC.get('auth');
+    return { theme: this.theme, auth };
   },
   data() {
     return {};
@@ -43,7 +45,7 @@ export default {
   created() {
     window.IoC.register("app", this);
     this.socket = window.IoC.get("socket");
-    this.socket.connect();
+    // TODO: this.socket.connect();
   },
   methods: {}
 };
@@ -51,6 +53,7 @@ export default {
 <style lang="css">
 @import "./assets/common.css";
 @import "./assets/color.css";
+@import "./assets/spinner.css";
 
 #app {
   height: 100%;

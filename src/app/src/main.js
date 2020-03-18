@@ -15,8 +15,8 @@ window.IoC.register("bus", eventBus);
 import sysConfig from "./conf/system.json";
 window.IoC.register("config", sysConfig);
 
-import authentication from "./services/core/authentication.js";
-window.IoC.register("auth", authentication);
+import Authentication from "./services/core/authentication.js";
+window.IoC.register("auth", new Authentication);
 
 const axios = require("axios");
 const baseServerAddr = sysConfig.env == "production" ? window.location.origin : sysConfig.server.address;
@@ -32,8 +32,13 @@ const socket = new Socket(baseServerAddr, "/chat-io");
 window.IoC.register("socket", socket);
 
 Vue.config.productionTip = false;
+
+import VueRouter from "vue-router";
+import router from "./plugins/vue-router";
+Vue.use(VueRouter);
 new Vue({
     vuetify,
+    router: router,
     provide: { config: sysConfig },
     data() {
         return {

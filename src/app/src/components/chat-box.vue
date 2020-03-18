@@ -11,8 +11,10 @@
       >
         <v-list-item-avatar></v-list-item-avatar>
         <v-spacer></v-spacer>
-        <v-card flat dark class="mr-1 message--text">
-          <v-card-text class="py-2 px-3" v-html="msg.body.content.html">
+        <v-card flat class="mr-1 message--text py-1">
+          <v-card-subtitle class="py-1" v-text="new Date().toLocaleString()">
+          </v-card-subtitle>
+          <v-card-text class="pt-0 pb-1 px-4" v-html="msg.body.content.html">
           </v-card-text>
         </v-card>
         <v-list-item-avatar class="ma-0">
@@ -124,7 +126,7 @@ export default {
   color: var(--primary-color-2);
 }
 
-.chat-box >>> .v-card__text {
+/* .chat-box >>> .v-card__text {
   background-color: #029ce4;
-}
+} */
 </style>
