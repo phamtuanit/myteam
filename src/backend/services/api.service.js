@@ -41,7 +41,16 @@ module.exports = {
                 whitelist: ["**"],
 
                 authorization: false,
+
                 authentication: false,
+
+                cors: {
+                    origin: "*",
+                    methods: ["GET", "POST", "PUT", "DELETE"],
+                    allowedHeaders: "*",
+                    credentials: true,
+                    maxAge: null
+                },
 
                 // Action aliases refreshToken
                 aliases: {

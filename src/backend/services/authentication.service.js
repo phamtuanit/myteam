@@ -59,20 +59,25 @@ module.exports = {
         login: {
             rest: "POST /login",
             async handler(ctx) {
-                const { username } = ctx.meta.headers;
-                let password = ctx.meta.headers.password;
-                const passBuf = new Buffer.from(password, "base64");
-                password = passBuf.toString();
+                const username = ctx.meta.headers["user-name"];
+                let password = ctx.meta.headers["user-pass"];
 
-                // Search user info
-                const user = await this.verifyUser(username, password);
-                const userToken = this.getUserToken(user);
-                // Update DB
-                await this.broker.call("v1.users.update", {
-                    refreshToken: userToken.token.refresh,
-                    user
-                });
-                return userToken;
+                if (username && password) {
+                    const passBuf = new Buffer.from(password, "base64");
+                    password = passBuf.toString();
+
+                    // Search user info
+                    const user = await this.verifyUser(username, password);
+                    const userToken = this.getUserToken(user);
+                    // Update DB
+                    await this.broker.call("v1.users.update", {
+                        refreshToken: userToken.token.refresh,
+                        user
+                    });
+                    return userToken;
+                } else {
+                    throw new MoleculerClientError("Missing user name or password", 400);
+                }
             }
         },
         refreshToken: {
@@ -98,16 +103,21 @@ module.exports = {
                         throw new MoleculerClientError("Token is expired");
                     }
 
-                    const userEntity = await this.broker.call("v1.users.getUserEntity", {
-                        id
-                    });
+                    const userEntity = await this.broker.call(
+                        "v1.users.getUserEntity",
+                        {
+                            id
+                        }
+                    );
 
                     if (userEntity.refreshToken != token) {
-                        throw new MoleculerClientError("Refresh token is invalid.");
+                        throw new MoleculerClientError(
+                            "Refresh token is invalid."
+                        );
                     }
-                    
+
                     const user = userEntity.payload;
-                    const userToken = this.getUserToken(user);// Update DB
+                    const userToken = this.getUserToken(user); // Update DB
                     await this.broker.call("v1.users.update", {
                         refreshToken: userToken.token.refresh,
                         user: userEntity.payload
