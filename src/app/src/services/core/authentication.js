@@ -18,15 +18,51 @@ Service.prototype = {
         }
         return null;
     },
-    verifyToken() {
+    async verifyToken() {
+        this.isAuthenticated = false;
         const token = JSON.parse(window.localStorage.getItem("token"));
-        return Promise.resolve(token);
+        if (token && token.exp && token.refresh) {
+            const expDate = new Date(token.exp);
+            const now = new Date();
+            now.setDate(now.getDate() + 1);
+            if (now >= expDate) {
+                // Renew token
+                this.locker = new Promise((resole, reject) => {
+                    axiosInstance
+                        .post("/renew-token", null, {
+                            headers: {
+                                authorization: token.refresh,
+                            },
+                        })
+                        .then(({ data }) => {
+                            if (data.token && data.token.access) {
+                                this.isAuthenticated = true;
+                                window.localStorage.setItem("token", JSON.stringify(data.token));
+                                return resole(data.token.access);
+                            } else {
+                                reject("Could not get access token");
+                            }
+                        })
+                        .catch(err => {
+                            reject(err);
+                        });
+                });
+                // Return promise
+                return this.locker;
+            }
+
+            this.isAuthenticated = true;
+            this.locker = Promise.resolve(() => token);
+        } else {
+            return Promise.reject("No token found");
+        }
     },
     login(userName, password) {
+        this.isAuthenticated = false;
         const passCode = window.btoa(password);
         this.locker = new Promise((resole, reject) => {
             axiosInstance
-                .post("login", null, {
+                .post("/login", null, {
                     headers: {
                         "user-name": userName,
                         "user-pass": passCode,
@@ -42,7 +78,6 @@ Service.prototype = {
                     }
                 })
                 .catch(err => {
-                    this.isAuthenticated = false;
                     reject(err);
                 });
         });

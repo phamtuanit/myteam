@@ -71,6 +71,12 @@ module.exports = {
                 onBeforeCall(ctx, route, req, res) {
                     // Set request headers to context meta
                     ctx.meta.headers = { ...req.headers };
+                    if (req.headers["authorization"]) {
+                        ctx.meta.token = req.headers["authorization"];
+                        if (ctx.meta.token.startsWith("Bearer ")) {
+                            ctx.meta.token = ctx.meta.token.slice(7);
+                        }
+                    }
                 },
 
                 onAfterCall(ctx, route, req, res, data) {
