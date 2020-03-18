@@ -82,11 +82,8 @@ module.exports = {
         },
         refreshToken: {
             rest: "POST /renew-token",
-            params: {
-                token: "string"
-            },
             async handler(ctx) {
-                const { token } = ctx.params;
+                const { token } = ctx.meta;
                 try {
                     const decoded = await jwt.verify(token, privateKey);
                     if (decoded.forRefresh != true) {
