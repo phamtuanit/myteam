@@ -26,13 +26,29 @@ module.exports = {
         getUser: {
             auth: true,
             roles: [1],
+            rest: "GET /",
+            async handler() {
+                const dbCollection = await this.getDBCollection("users");
+                return dbCollection.find().then(users => {
+                    if (users) {
+                        users.forEach(user => {
+                            delete user._id;
+                        });
+                    }
+                    return users;
+                });
+            }
+        },
+        getUserById: {
+            auth: true,
+            roles: [1],
             rest: "GET /:id",
             params: {
                 id: "string"
             },
-            handler(ctx) {
+            async handler(ctx) {
                 const { id } = ctx.params;
-                const dbCollection = this.getDBCollection("users");
+                const dbCollection = await this.getDBCollection("users");
                 return dbCollection.findOne({ id }).then(user => {
                     if (user) {
                         delete user._id;
@@ -49,7 +65,7 @@ module.exports = {
     events: {
         // [NodeID].user.disconnected
         "*.user.login"(user) {
-            return this.addOrUpdateUser(user, true);
+            return this.addOrUpdateUser(user);
         }
     },
 
@@ -73,13 +89,12 @@ module.exports = {
                 const update = {
                     $set: user
                 };
-                return await dbCollection.updateById(
-                    existingUser._id,
-                    update
-                ).then(en => {
-                    delete en._id;
-                    return en;
-                });
+                return await dbCollection
+                    .updateById(existingUser._id, update)
+                    .then(en => {
+                        delete en._id;
+                        return en;
+                    });
             }
         }
     },
