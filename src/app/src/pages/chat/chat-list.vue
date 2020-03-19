@@ -3,12 +3,13 @@
     width="300px"
     class="pa-0 fill-height no-border-radius"
     dark
-    id="conversation-list"
+    id="chat-list"
   >
     <!-- Search -->
     <v-list dense dark class="pb-0">
       <v-list-item class="px-3 mt-1">
         <v-text-field
+          v-model="searchText"
           prepend-inner-icon="mdi-magnify"
           label="Search"
           flat
@@ -18,15 +19,20 @@
           clearable
           clear-icon="mdi-close"
         ></v-text-field>
-        <v-btn icon size="40" outlined class="ml-2">
-          <v-icon>mdi-plus</v-icon>
+        <v-btn icon size="40" outlined class="ml-2" @click="onAddChat">
+          <v-icon v-text="plusIcon"></v-icon>
         </v-btn>
       </v-list-item>
-      <!-- <v-divider></v-divider> -->
     </v-list>
-    <!-- Dynamic data -->
+
+    <!-- List -->
     <v-list two-line dark class="py-0 px-0">
-      <v-subheader class="pl-3 pr-2">Recent chat</v-subheader>
+      <v-subheader class="pl-3 pr-2" v-text="title"></v-subheader>
+      <v-progress-linear
+        :active="loading"
+        :indeterminate="true"
+      ></v-progress-linear>
+
       <v-list-item-group v-model="selectedConv">
         <!-- 1 -->
         <v-list-item @click="openChat()">
@@ -67,39 +73,77 @@
 export default {
   data() {
     return {
-      selectedConv: null
+      loading: false,
+      selectedConv: null,
+      searchText: null,
+      displayMode: "chat"
     };
+  },
+  computed: {
+    title() {
+      return this.displayMode == "chat" ? "Conversations" : "Friends";
+    },
+    plusIcon() {
+      return "mdi-" + (this.displayMode == "chat" ? "plus" : "close");
+    }
   },
   mounted() {
     // fillHeight(this.$el, 0);
   },
   methods: {
-    openChat() {}
+    openChat() {},
+    onAddChat() {
+      // Reset search
+      this.searchText = "";
+
+      if (this.displayMode == "chat") {
+        this.displayMode = "friend";
+        // Backup data
+        this.conversationsBackup = this.conversations;
+        this.loading = true;
+        this.loadFriendList()
+          .then(list => {
+            this.conversations = list || [];
+          })
+          .finally(() => {
+            this.loading = false;
+          });
+      } else {
+        this.displayMode = "chat";
+        // Restore data
+        this.conversations = this.conversationsBackup;
+      }
+    },
+    loadFriendList() {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve([]);
+        }, 2 * 1000);
+      });
+    }
   }
 };
 </script>
 
 <style scoped>
-#conversation-list, .v-list {
+#chat-list,
+.v-list {
   background-color: var(--primary-color-2) !important;
 }
 
-#conversation-list >>> .v-text-field.v-text-field--solo .v-input__control {
+#chat-list >>> .v-text-field.v-text-field--solo .v-input__control {
   min-height: 40px !important;
 }
 
-#conversation-list
-  >>> .v-text-field--rounded
-  > .v-input__control
-  > .v-input__slot {
+#chat-list >>> .v-text-field--rounded > .v-input__control > .v-input__slot {
   padding: 0 16px;
 }
 
-#conversation-list >>> .v-text-field--rounded {
+#chat-list >>> .v-text-field--rounded {
   border-radius: 20px;
 }
 
-#conversation-list >>> .v-btn {
+#chat-list >>> .v-btn {
   border-color: rgba(255, 255, 255, 0.16);
 }
 </style>
