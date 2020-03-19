@@ -144,5 +144,9 @@ module.exports = {
         if (this.io) {
             this.io.close();
         }
+
+        if (this.subscriber) {
+            this.subscriber.close();
+        }
     }
 };
