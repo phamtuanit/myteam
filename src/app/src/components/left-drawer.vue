@@ -12,32 +12,37 @@
         <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img>
       </v-avatar>
     </v-list-item>
-    <!-- Chat -->
-    <v-list-item class="px-0 mt-3">
-      <v-badge overlap color="red darken-3" light content="8">
-        <v-tooltip right>
-          <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on" class=" mx-auto">
-              <v-icon color="white">mdi-forum-outline</v-icon>
-            </v-btn>
-          </template>
-          <span>Chat</span>
-        </v-tooltip>
-      </v-badge>
-    </v-list-item>
-    <!-- Group -->
-    <v-list-item class="px-0 mt-2">
-      <v-badge overlap color="red darken-3" light content="1">
-        <v-tooltip right>
-          <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on">
-              <v-icon color="white">mdi-account-group</v-icon>
-            </v-btn>
-          </template>
-          <span>Group</span>
-        </v-tooltip>
-      </v-badge>
-    </v-list-item>
+    <v-list>
+      <v-list-item-group mandatory>
+        <template v-for="menu in menus">
+          <v-list-item
+            :key="menu.key"
+            :value="menu"
+            :input-value="menu == activatedMenu"
+            class="px-0 my-0 pb-3 pt-4"
+            @click="onActivateMenu(menu)"
+          >
+            <v-badge
+              :value="menu.inform.count > 0"
+              :key="menu.key + 'badge'"
+              overlap
+              color="red darken-3"
+              light
+              :content="menu.inform.count"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <v-icon color="white" v-on="on" class="mx-auto pa-1"
+                    >mdi-{{ menu.icon }}</v-icon
+                  >
+                </template>
+                <span>{{ menu.name }}</span>
+              </v-tooltip>
+            </v-badge>
+          </v-list-item>
+        </template>
+      </v-list-item-group>
+    </v-list>
     <template v-slot:append>
       <div class="pa-2 text-center">
         <v-btn icon @click="enableDarkMode" title="Dark / Light">
@@ -49,15 +54,55 @@
 </template>
 
 <script>
+import menus from "../conf/main-nav";
 export default {
   data() {
     return {
-      theme: window.IoC.get("theme")
+      theme: window.IoC.get("theme"),
+      activatedMenu: null,
+      menus: menus
     };
+  },
+  watch: {
+    activatedMenu() {}
+  },
+  created() {
+    this.activateDefaultMenu();
   },
   methods: {
     enableDarkMode() {
       this.theme.dark = !this.theme.dark;
+    },
+    activateDefaultMenu() {
+      const currRouteName = this.$route.name;
+      // Lookup route from uri
+      const matchedMenu = this.menus.find(item => {
+        return item.route && item.route.name == currRouteName;
+      });
+
+      if (matchedMenu) {
+        this.onActivateMenu(matchedMenu);
+        return;
+      }
+
+      //  In case could not find menu from uri, trying to find them in menu definition
+      const defaultContext = this.menus.find(item => {
+        return item.default == true;
+      });
+      if (defaultContext) {
+        this.onActivateMenu(defaultContext);
+      }
+    },
+    onActivateMenu(menu) {
+      if (this.activatedMenu == menu) {
+        return;
+      }
+
+      if (menu.route) {
+        this.$router.push(menu.route).then(() => {
+          this.activatedMenu = menu;
+        });
+      }
     }
   }
 };
@@ -65,6 +110,6 @@ export default {
 
 <style scoped>
 .left-drawer {
-    background-color: var(--primary-color) !important;
+  background-color: var(--primary-color) !important;
 }
 </style>

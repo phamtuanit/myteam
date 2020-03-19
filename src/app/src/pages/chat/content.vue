@@ -55,10 +55,10 @@
 </template>
 
 <script>
-import { fillHeight } from "../utils/layout.js";
-import EmojiButton from "./emoji-button";
-import MessageService from "../services/message.service";
-import ConversationService from "../services/conversation.service";
+import { fillHeight } from "../../utils/layout.js";
+import EmojiButton from "../../components/emoji-button";
+import MessageService from "../../services/message.service";
+import ConversationService from "../../services/conversation.service";
 export default {
   components: { EmojiButton },
   data() {

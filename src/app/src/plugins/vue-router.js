@@ -3,11 +3,30 @@ import Preparation from "../pages/preparation.vue";
 import Login from "../pages/login.vue";
 import MainApp from "../pages/main.vue";
 
+const socket = window.IoC.get("socket");
+const auth = window.IoC.get("auth");
+
 const router = new VueRouter({
     routes: [
         { path: "/", name: "root", redirect: { name: "preparation" } },
         { path: "/login", name: "login", component: Login },
-        { path: "/app", name: "app", component: MainApp, children: [] },
+        {
+            path: "/app",
+            name: "app",
+            component: MainApp,
+            children: [
+                {
+                    name: "app-chat",
+                    path: "chat",
+                    component: () => import("../pages/chat/index.vue"),
+                },
+                // {
+                //     name: "app-channel",
+                //     path: "channel",
+                //     component: () => import("../pages/channel/index.vue"),
+                // },
+            ],
+        },
         {
             name: "preparation",
             path: "/preparation",
@@ -16,12 +35,9 @@ const router = new VueRouter({
     ],
 });
 
-const socket = window.IoC.get("socket");
-const auth = window.IoC.get("auth");
-
 function redirect(target, from, to, next) {
-    const query = from.query;
-    const params = from.params;
+    const query = to.query;
+    const params = to.params;
     query["next-to"] = to.name;
     next({ name: target, query, params });
 }

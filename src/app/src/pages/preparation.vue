@@ -49,7 +49,7 @@ export default {
     setTimeout(() => {
       this.socket.connect();
       this.redirect();
-    }, 4 * 1000);
+    }, 2 * 1000);
   },
   methods: {
     redirect() {
