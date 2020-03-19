@@ -1,6 +1,5 @@
 "use strict";
-const authConf = require("../conf/auth.json");
-const MongoDBAdapter = require("../db/mongo.adapter");
+const DBCollectionService = require("../mixins/collection.db.mixin");
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
@@ -10,48 +9,18 @@ module.exports = {
     version: 1,
     settings: {},
     dependencies: [],
-    mixins: [],
+    mixins: [DBCollectionService],
     actions: {
-        update: {
-            visibility: "public",
+        addUser: {
+            auth: true,
+            roles: [1],
+            rest: "POST /",
             params: {
                 user: "object"
             },
-            async handler(ctx) {
-                const { user, refreshToken } = ctx.params;
-                const entity = {
-                    updated: new Date(),
-                    refreshToken
-                };
-    
-                const oldEntity = await this.dbCollection.findOne({"payload.id": user.id});
-                if (oldEntity) {
-                    entity.payload = oldEntity.payload;
-                    Object.assign(entity.payload, user);
-                    delete entity._id;
-                    // Update
-                    const update = {
-                        $set:entity
-                    };
-                    return await this.dbCollection.updateById(oldEntity._id, update);
-                }
-                // Add new one
-                entity.payload = { ...user };
-                if (!entity.payload.role) {
-                    entity.payload.role = 1;
-                }
-                return await this.dbCollection.insert(entity);
-            }
-        },
-        getUserEntity: {
-            visibility: "public",
-            params: {
-                id: "string"
-            },
-            async handler(ctx) {
-                let { id } = ctx.params;
-                const entity = await this.dbCollection.findOne({"payload.id": id});
-                return entity;
+            handler(ctx) {
+                const { user } = ctx.params;
+                return this.addOrUpdateUser(user);
             }
         },
         getUser: {
@@ -61,42 +30,72 @@ module.exports = {
             params: {
                 id: "string"
             },
-            async handler(ctx) {
-                let { id } = ctx.params;
-                const entity = await this.dbCollection.findOne({"payload.id": id});
-                return entity ? entity.payload : null;
+            handler(ctx) {
+                const { id } = ctx.params;
+                const dbCollection = this.getDBCollection("users");
+                return dbCollection.findOne({ id }).then(user => {
+                    if (user) {
+                        delete user._id;
+                    }
+                    return user;
+                });
             }
-        },
+        }
     },
 
     /**
      * Events
      */
-    events: {},
+    events: {
+        // [NodeID].user.disconnected
+        "*.user.login"(user) {
+            return this.addOrUpdateUser(user, true);
+        }
+    },
 
     /**
      * Methods
      */
     methods: {
+        async addOrUpdateUser(user, addOnly = false) {
+            const dbCollection = await this.getDBCollection("users");
+            const existingUser = await dbCollection.findOne({
+                id: user.id
+            });
+            if (!existingUser) {
+                user.created = new Date();
+                return await dbCollection.insert(user).then(entity => {
+                    delete entity._id;
+                    return entity;
+                });
+            } else if (!addOnly) {
+                user.updated = new Date();
+                const update = {
+                    $set: user
+                };
+                return await dbCollection.updateById(
+                    existingUser._id,
+                    update
+                ).then(en => {
+                    delete en._id;
+                    return en;
+                });
+            }
+        }
     },
 
     /**
      * Service created lifecycle event handler
      */
-    created() {
-        this.dbCollection = MongoDBAdapter(authConf.db.collection, this);
-        this.dbCollection.connect();
-    },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    async started() {},
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {
-        return this.dbCollection.disconnect();
-    }
+    stopped() {}
 };

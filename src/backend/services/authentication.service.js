@@ -4,6 +4,8 @@ const {
     ServiceNotAvailableError,
     MoleculerServerError
 } = require("moleculer").Errors;
+const DBCollectionService = require("../mixins/collection.db.mixin");
+
 const ldap = require("ldapjs");
 const fs = require("fs");
 const path = require("path");
@@ -23,7 +25,7 @@ module.exports = {
     version: 1,
     settings: {},
     dependencies: [],
-    mixins: [],
+    mixins: [DBCollectionService],
     actions: {
         verifyToken: {
             visibility: "public",
@@ -69,14 +71,16 @@ module.exports = {
                     // Search user info
                     const user = await this.verifyUser(username, password);
                     const userToken = this.getUserToken(user);
-                    // Update DB
-                    await this.broker.call("v1.users.update", {
-                        refreshToken: userToken.token.refresh,
-                        user
-                    });
+
+                    // Inform user login
+                    const eventName = `${this.broker.nodeID}.user.login`;
+                    await this.broker.emit(eventName, user, ["users"]);
                     return userToken;
                 } else {
-                    throw new MoleculerClientError("Missing user name or password", 400);
+                    throw new MoleculerClientError(
+                        "Missing user name or password",
+                        400
+                    );
                 }
             }
         },
@@ -93,32 +97,14 @@ module.exports = {
                         );
                     }
 
-                    const { id } = decoded.data;
                     const today = new Date();
                     const expirationDate = new Date(decoded.exp);
                     if (today > expirationDate) {
                         throw new MoleculerClientError("Token is expired");
                     }
 
-                    const userEntity = await this.broker.call(
-                        "v1.users.getUserEntity",
-                        {
-                            id
-                        }
-                    );
-
-                    if (userEntity.refreshToken != token) {
-                        throw new MoleculerClientError(
-                            "Refresh token is invalid."
-                        );
-                    }
-
-                    const user = userEntity.payload;
-                    const userToken = this.getUserToken(user); // Update DB
-                    await this.broker.call("v1.users.update", {
-                        refreshToken: userToken.token.refresh,
-                        user: userEntity.payload
-                    });
+                    const user = decoded.data;
+                    const userToken = this.getUserToken(user); 
                     return userToken;
                 } catch (error) {
                     this.logger.error(error);
@@ -140,10 +126,7 @@ module.exports = {
     methods: {
         getUserToken(user) {
             const { token, exp } = this.generateJWT(user);
-            const refreshToken = this.generateJWT(
-                { id: user.id, created: new Date().getTime() },
-                true
-            ).token;
+            const refreshToken = this.generateJWT(user,  true).token;
             return {
                 token: {
                     access: token,
@@ -152,7 +135,6 @@ module.exports = {
                 }
             };
         },
-
         /**
          * Generate JWT
          *
@@ -281,7 +263,7 @@ module.exports = {
                     });
                 });
             });
-        }
+        },
     },
 
     /**

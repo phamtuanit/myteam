@@ -145,7 +145,7 @@ module.exports = {
     events: {
         // [NodeID].[ChannelID].message.[create/update]
         "*.*.*.created"(payload, sender, event, ctx) {
-            const [nodeId, conversation, messageConst, act] = event.split(".");
+            const [nodeId, constVar, conversation, act] = event.split(".");
             const conversationId = parseInt(conversation);
             this.getConversation(conversationId)
                 .catch(err => {
@@ -257,7 +257,7 @@ module.exports = {
                 });
         },
         "*.*.*.updated"(payload, sender, event, ctx) {
-            const [nodeId, conversation, messageConst, act] = event.split(".");
+            const [nodeId, constVar, conversation, act] = event.split(".");
             const convCollId = `conv-history-${conversation}`;
 
             // Get adapter
@@ -322,7 +322,7 @@ module.exports = {
      */
     methods: {
         publishMessage(conversation, evtAction, message) {
-            const eventName = `${this.broker.nodeID}.${conversation}.message.${evtAction}`;
+            const eventName = `${this.broker.nodeID}.message.${conversation}.${evtAction}`;
             return this.broker.emit(eventName, message, ["messages"]);
         },
         processMessage(message, isNew) {
