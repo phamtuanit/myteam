@@ -41,9 +41,24 @@
 
 <script>
 export default {
-    mounted() {
-        
+  inject: ["auth"],
+  created() {
+    this.socket = window.IoC.get("socket");
+  },
+  mounted() {
+    setTimeout(() => {
+      this.socket.connect();
+      this.redirect();
+    }, 4 * 1000);
+  },
+  methods: {
+    redirect() {
+      const route = this.$route;
+      const nextRoute = route.query["next-to"] || "app";
+      delete route.query["next-to"];
+      this.$router.push({ name: nextRoute, query: route.query });
     }
+  }
 };
 </script>
 

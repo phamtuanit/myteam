@@ -15,12 +15,19 @@ class Socket {
         this.retryTimes = retryTimes;
         this.io = null;
         this.subscribers = {};
+        this.rooms = [];
 
-        this.rooms = ["live"];
-
-        const eventBus = window.IoC.get('bus');
-        eventBus.on("logout", () => this.close());
-        eventBus.on("login", () => this.connect());
+        this.eventBus = window.IoC.get('bus');
+        this.eventBus.on("logout", () => this.close());
+        this.eventBus.on("login", () => this.connect());
+    }
+    /**
+     * Get socket status
+     *
+     * @memberof Socket
+     */
+    getStatus() {
+        return this.io != null && typeof this.io == "object";
     }
     /**
      * Register listener
@@ -59,16 +66,18 @@ class Socket {
         }
 
         this.close();
-        this.io = socket(this.baseUri, {
-            path: this.path,
-            query: {
-                token: authSvr.getToken()
-            }
+        return authSvr.getToken().then(token => {
+            this.io = socket(this.baseUri, {
+                path: this.path,
+                query: {
+                    token: token
+                }
+            });
+    
+            this.registerEvents();
+            this.io.connect();
+            return this;
         });
-
-        this.registerEvents();
-        this.io.connect();
-        return this;
     }
     /**
      * Register subscriber to inner socket

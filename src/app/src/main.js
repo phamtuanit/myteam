@@ -34,7 +34,7 @@ window.IoC.register("socket", socket);
 Vue.config.productionTip = false;
 
 import VueRouter from "vue-router";
-import router from "./plugins/vue-router";
+const router = require("./plugins/vue-router").default;
 Vue.use(VueRouter);
 new Vue({
     vuetify,

@@ -11,10 +11,14 @@ const Service = function() {
 
 Service.prototype = {
     async getToken() {
-        await this.locker;
-        const token = window.localStorage.getItem("token");
-        if (token) {
-            return JSON.parse(token).access;
+        try {
+            await this.locker;
+            const token = window.localStorage.getItem("token");
+            if (token) {
+                return JSON.parse(token).access;
+            }
+        } catch (error) {
+            console.error(error);
         }
         return null;
     },

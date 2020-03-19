@@ -68,10 +68,12 @@ export default {
         .login(this.userName, this.password)
         .then(() => {
           const route = this.$route;
-          const nextRoute =
-            route.query["next-to"] || route.query["nextTo"] || "root";
-          +delete route.query["next-to"];
-          this.$router.push({ name: nextRoute, query: route.query });
+          const nextRoute = route.query["next-to"] || "root";
+          delete route.query["next-to"];
+          console.info("Redirect to:", nextRoute);
+          this.$router
+            .push({ name: nextRoute, query: route.query })
+            .catch(console.error);
         })
         .finally(() => {
           this.loading = false;
