@@ -1,5 +1,5 @@
 {
-  "name": "myteam",
+  "name": "higuy",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -54,7 +54,8 @@
     },
     "rules": {
       "no-debugger": "off",
-      "no-unused-vars": "warn"
+      "no-unused-vars": "warn",
+      "vue/no-unused-components": "off"
     }
   },
   "browserslist": [
