@@ -53,7 +53,8 @@ const store = new Vuex.Store({
         },
         initialize({ commit }) {
             console.info("Setting up application");
-            return new Promise((resolve, reject) => {
+            const tasks = [];
+            let task = new Promise((resolve, reject) => {
                 console.info("Setting up: application setting");
                 try {
                     // Update theme
@@ -75,18 +76,27 @@ const store = new Vuex.Store({
                     console.info("Setting up application setting.", err);
                     reject(err);
                 }
-            })
-                .then(() => {
-                    console.info("Setting up: authentication service");
-                    const authentication = new (require("../services/core/authentication.js"))();
-                    window.IoC.register("auth", authentication);
+            });
+            tasks.push(task);
 
-                    // Waiting for token verification
-                    return authentication.getToken().then(() => {
+            task = new Promise((resolve, reject) => {
+                console.info("Setting up: authentication service");
+                const authentication = new (require("../services/core/authentication.js"))();
+                window.IoC.register("auth", authentication);
+
+                // Waiting for token verification
+                authentication
+                    .getToken()
+                    .then(() => {
                         commit("setAuthentication", true);
-                    });
-                })
-                .then(() => {
+                        resolve();
+                    })
+                    .catch(reject);
+            });
+            tasks.push(task);
+
+            task = new Promise((resolve, reject) => {
+                try {
                     console.info("Setting up: Axios");
                     const axios = require("axios");
                     axios.defaults.baseURL = baseServerAddr + config.server.api;
@@ -95,19 +105,69 @@ const store = new Vuex.Store({
                     const responseInterceptor = require("../services/http-injector/response-injector.js");
                     requestInterceptor();
                     responseInterceptor();
-                })
-                .then(() => {
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            });
+            tasks.push(task);
+
+            const socketTask = new Promise((resolve, reject) => {
+                try {
                     console.info("Setting up: socket service");
                     const Socket = require("../services/socket.js");
                     const socket = new Socket(baseServerAddr, "/chat-io");
-                    socket.connect();
-                    window.IoC.register("socket", socket);
-                })
+                    socket
+                        .connect()
+                        .then(() => {
+                            window.IoC.register("socket", socket);
+                            resolve(socket);
+                        })
+                        .catch(reject);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+            tasks.push(socketTask);
+
+            task = new Promise((resolve, reject) => {
+                socketTask.then(socket => {
+                    console.info("Setting up: chat module");
+                    try {
+                        this.dispatch("chat/initialize", socket)
+                            .then(resolve)
+                            .catch(reject);
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            });
+            tasks.push(task);
+
+            task = new Promise((resolve, reject) => {
+                socketTask.then(socket => {
+                    console.info("Setting up: channel module");
+                    try {
+                        this.dispatch("channel/initialize", socket)
+                            .then(resolve)
+                            .catch(reject);
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            });
+            tasks.push(task);
+
+            return Promise.all(tasks)
                 .then(() => {
                     console.info("Setting up application successfully");
                     commit("setInitialization", true);
                 })
                 .catch(err => {
+                    const socket = window.IoC.get("socket");
+                    if (socket) {
+                        socket.close();
+                    }
                     console.info("Setting up application failed.", err);
                     commit("setInitialization", false);
                 });

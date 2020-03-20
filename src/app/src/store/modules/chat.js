@@ -14,6 +14,9 @@ const moduleState = {
         },
     },
     actions: {
+        initialize({ commit }) {
+            return Promise.resolve();
+        },
         getAll({ commit }) {
             // service.getConversation(res => {
             //     commit("setConversations", res.data);

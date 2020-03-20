@@ -51,6 +51,7 @@ class Socket {
      */
     close() {
         if (this.io) {
+            console.info("Close Socket connection.");
             this.io.close();
         }
         this.io = undefined;

@@ -20,7 +20,9 @@ new Vue({
     data: () => ({}),
     render: h => h(App),
     created() {
-        this.$router.push({ name: "preparation" });
+        if (this.$route.name !== "preparation") {
+            this.$router.push({ name: "preparation" });
+        }
     },
     watch: {},
 }).$mount("#app");
