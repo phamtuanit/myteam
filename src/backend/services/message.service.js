@@ -1,7 +1,6 @@
 "use strict";
 const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
-const MessagePublisher = require("./message-publisher/redis.publisher");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -143,9 +142,10 @@ module.exports = {
      * Events
      */
     events: {
-        // [NodeID].[ChannelID].message.[create/update]
-        "*.*.*.created"(payload, sender, event, ctx) {
-            const [nodeId, constVar, conversation, act] = event.split(".");
+        //{nodeID}.conversation.{conversation}.message.{act}`;
+        // Ex: phuong3623-16548.conversation.1584672834896.message.created
+        "*.conversation.*.message.created"(payload, sender, event, ctx) {
+            const [nodeId, constVar, conversation, constMsg, act] = event.split(".");
             const conversationId = parseInt(conversation);
             this.getConversation(conversationId)
                 .catch(err => {
@@ -157,6 +157,9 @@ module.exports = {
                     this.revertCreatingMessage(ctx, msgCache, err);
                 })
                 .then(conInfo => {
+                    if (Array.isArray(conInfo)) {
+                        conInfo = conInfo.length > 0 ? conInfo[0] : null;
+                    }
                     if (conInfo && conInfo.subscribers) {
                         const msgCache = {
                             id: new Date().getTime(),
@@ -232,10 +235,10 @@ module.exports = {
                                 })
                                 .then(({ status }) => {
                                     if (status == "on") {
-                                        // Public message to live user - pattern: [userId].message.[action]
-                                        const event = `message.${userId}.${act}`;
-                                        return this.messagePublisher.publish(
-                                            event,
+                                        // Public message to online user . Pattern: [nodeId].message-queue.[userId].message.[action]
+                                        const eventName = `${this.broker.nodeID}.message-queue.${userId}.message.created`;
+                                        return this.broker.emit(
+                                            eventName,
                                             msgCache
                                         );
                                     }
@@ -256,8 +259,9 @@ module.exports = {
                     }
                 });
         },
-        "*.*.*.updated"(payload, sender, event, ctx) {
-            const [nodeId, constVar, conversation, act] = event.split(".");
+        //{nodeID}.conversation.{conversation}.message.update`;
+        "*.conversation.*.message.updated"(payload, sender, event, ctx) {
+            const [nodeId, constVar, conversation, constMsg, act] = event.split(".");
             const convCollId = `conv-history-${conversation}`;
 
             // Get adapter
@@ -322,8 +326,8 @@ module.exports = {
      */
     methods: {
         publishMessage(conversation, evtAction, message) {
-            const eventName = `${this.broker.nodeID}.message.${conversation}.${evtAction}`;
-            return this.broker.emit(eventName, message, ["messages"]);
+            const eventName = `${this.broker.nodeID}.conversation.${conversation}.message.${evtAction}`;
+            return this.broker.emit(eventName, message);
         },
         processMessage(message, isNew) {
             return message;
@@ -346,18 +350,19 @@ module.exports = {
             return `conv-history-${conversation}`;
         },
         revertCreatingMessage(ctx, message, error) {
-            const userId = message.payload.from.issuer;
-            const event = `message.${userId}.rejected.created`;
+            const conversation = message.to.target;
             const newMsg = { ...message };
             newMsg.error = error;
-            return this.messagePublisher.publish(event, newMsg);
+
+            const eventName = `${this.broker.nodeID}.conversation.${conversation}.message.rejected.create`;
+            return this.broker.emit(eventName, message);
         },
         revertUpdatingMessage(ctx, message, error) {
-            const userId = message.payload.from.issuer;
-            const event = `message.${userId}.rejected.updated`;
+            const conversation = message.to.target;
             const newMsg = { ...message };
             newMsg.error = error;
-            return this.messagePublisher.publish(event, newMsg);
+            const eventName = `${this.broker.nodeID}.conversation.${conversation}.message.rejected.update`;
+            return this.broker.emit(eventName, message);
         },
         async filterMessage(ctx) {
             let { conversation, history } = ctx.params;
@@ -404,14 +409,7 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {
-        this.messagePublisher = new MessagePublisher(
-            "user-bus",
-            this.broker,
-            this.logger
-        );
-        this.messagePublisher.connect();
-    },
+    created() {},
 
     /**
      * Service started lifecycle event handler
@@ -421,7 +419,5 @@ module.exports = {
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {
-        this.messagePublisher.close();
-    }
+    stopped() {}
 };

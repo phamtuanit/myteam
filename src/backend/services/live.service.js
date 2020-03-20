@@ -47,7 +47,7 @@ module.exports = {
      */
     events: {
         // [NodeID].user.connected
-        "*.user.connected"(user) {
+        "*.user.*.socket.connected"(user) {
             this.logger.info(`User ${user.id} has been connected.`);
             this.livingUser[user.id] = this.livingUser[user.id] || {
                 user,
@@ -57,7 +57,7 @@ module.exports = {
 
             if (this.livingUser[user.id].count == 1) {
                 // Inform to
-                const eventName = `${this.broker.nodeID}.user.status`;
+                const eventName = `${this.broker.nodeID}.user.${user.id}.status.on`;
                 this.broker.emit(eventName, {
                     user,
                     status: "on"
@@ -65,13 +65,13 @@ module.exports = {
             }
         },
         // [NodeID].user.disconnected
-        "*.user.disconnected"(user) {
+        "*.user.*.socket.disconnected"(user) {
             this.logger.info(`User ${user.id} has been disconnected.`);
             if (this.livingUser[user.id]) {
                 this.livingUser[user.id].count -= 1;
                 if (this.livingUser[user.id].count == 0) {
                     delete this.livingUser[user.id];
-                    const eventName = `${this.broker.nodeID}.user.status`;
+                    const eventName = `${this.broker.nodeID}.user.${user.id}.status.off`;
                     this.broker.emit(eventName, {
                         user,
                         status: "off"

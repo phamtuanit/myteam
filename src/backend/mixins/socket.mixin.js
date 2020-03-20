@@ -1,4 +1,3 @@
-const Subscriber = require("../services/message-subscriber/redis.subscriber.js");
 const io = require("socket.io");
 module.exports = {
     name: "socket",
@@ -15,10 +14,11 @@ module.exports = {
      * Events
      */
     events: {
-        // [NodeID].user.status
-        "*.user.status"(data) {
+        // [nodeID].user.[userId].status.off
+        "*.user.*.status.*"(data, sender, event, ctx) {
             const userId = data.user ? data.user.id : undefined;
             const status = data.status;
+            data.event = event;
 
             if (typeof userId == "string") {
                 this.logger.debug(
@@ -36,6 +36,19 @@ module.exports = {
                 } else if (!socketDict || Object.keys(socketDict).length <= 0) {
                     this.io.to("live").emit("live", status, data);
                 }
+            }
+        },
+        // [nodeId].message-queue.[userId].message.[action]
+        "*.message-queue.*.message.*"(message, sender, event, ctx) {
+            const [nodeId, constVar, userId, resource, act] = event.split(".");
+            const socketDict = this.sockets[userId];
+            if (socketDict && Object.keys(socketDict).length > 0) {
+                const data = {
+                    event,
+                    payload: message
+                };
+                // To private user room
+                this.io.to(userId).emit(resource, act, data);
             }
         }
     },
@@ -70,7 +83,7 @@ module.exports = {
             });
 
             // Broadcast to the others about new user
-            const connectedEvt = `${this.broker.nodeID}.user.connected`;
+            const connectedEvt = `${this.broker.nodeID}.user.${user.id}.socket.connected`;
             this.broker.emit(connectedEvt, user, ["live"]); // live service only
 
             socket.on("disconnect", () => {
@@ -92,7 +105,7 @@ module.exports = {
                     delete this.sockets[user.id];
                 }
 
-                const disconnectedEvt = `${this.broker.nodeID}.user.disconnected`;
+                const disconnectedEvt = `${this.broker.nodeID}.user.${user.id}.socket.disconnected`;
                 this.broker.emit(disconnectedEvt, user, ["live"]);
             });
 
@@ -104,49 +117,24 @@ module.exports = {
                 socket.leave(room);
             });
         },
-        onReceivedMessage(channel, message) {
-            const [resource, objectId, action] = channel.split(".");
-            const socketDict = this.sockets[objectId];
-            if (socketDict && Object.keys(socketDict).length > 0) {
-                const data = {
-                    channel,
-                    payload: message
-                };
-                // To private user room
-                this.io.to(objectId).emit(resource, action, data);
-            }
-        }
     },
 
     created() {
-        // Init redis-bus
-        this.subscriber = new Subscriber("message@socket", this.logger);
-        this.subscriber.on("message", this.onReceivedMessage);
-        const syncTask = this.subscriber.connect("*.*.*").catch(err => {
-            this.logger.error("Cannot connect to redis.", err);
-        });
-
         // Init Socket
         this.sockets = {};
-        return syncTask.then(() => {
-            if (!this.server) {
-                this.logger.error("[server] is required for Socket-IO.");
-                return;
-            }
-            this.io = io(this.server, {
-                path: this.settings.io.path || "chat-io"
-            });
-            this.io.on("connection", this.onConnected);
+        if (!this.server) {
+            this.logger.error("[server] is required for Socket-IO.");
+            return;
+        }
+        this.io = io(this.server, {
+            path: this.settings.io.path || "chat-io"
         });
+        this.io.on("connection", this.onConnected);
     },
 
     stopped() {
         if (this.io) {
             this.io.close();
-        }
-
-        if (this.subscriber) {
-            this.subscriber.close();
         }
     }
 };
