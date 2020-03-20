@@ -26,10 +26,14 @@ const store = new Vuex.Store({
     state: {
         initialized: false,
         authenticated: false,
+        theme: {
+            dark: true,
+        },
     },
     getters: {
         initialized: state => state.initialized,
         authenticated: state => state.authenticated,
+        theme: state => state.theme,
     },
     mutations: {
         setInitialization(state, status) {
@@ -38,25 +42,38 @@ const store = new Vuex.Store({
         setAuthentication(state, status) {
             state.authenticated = status;
         },
+        setTheme(state, theme) {
+            state.theme = theme;
+        },
     },
     actions: {
+        setTheme({ commit }, theme) {
+            window.localStorage.setItem("setting.theme", JSON.stringify(theme));
+            commit("setTheme", theme);
+        },
         initialize({ commit }) {
             console.info("Setting up application");
             return new Promise((resolve, reject) => {
+                console.info("Setting up: application setting");
                 try {
                     // Update theme
-                    let theme = JSON.parse(
-                        window.localStorage.getItem("setting.theme")
-                    );
-                    theme = theme || {
-                        theme: {
-                            dark: true,
-                        },
-                    };
-                    window.IoC.register("theme", theme);
+                    if (window.localStorage.getItem("setting.theme")) {
+                        const theme = JSON.parse(
+                            window.localStorage.getItem("setting.theme")
+                        );
+                        commit("setTheme", theme);
+                    } else {
+                        window.localStorage.setItem(
+                            "setting.theme",
+                            JSON.stringify(this.getters.theme)
+                        );
+                    }
+
+                    window.IoC.register("theme", this.getters.theme);
                     resolve();
-                } catch (error) {
-                    reject(error);
+                } catch (err) {
+                    console.info("Setting up application setting.", err);
+                    reject(err);
                 }
             })
                 .then(() => {
@@ -83,6 +100,7 @@ const store = new Vuex.Store({
                     console.info("Setting up: socket service");
                     const Socket = require("../services/socket.js");
                     const socket = new Socket(baseServerAddr, "/chat-io");
+                    socket.connect();
                     window.IoC.register("socket", socket);
                 })
                 .then(() => {
