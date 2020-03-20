@@ -57,7 +57,9 @@ module.exports = {
                 return this.getDBCollection("conversations").then(
                     collection => {
                         return collection.findOne({ id }).then(item => {
-                            delete item._id;
+                            if (item) {
+                                delete item._id;
+                            }
                             return item;
                         });
                     }
@@ -71,18 +73,29 @@ module.exports = {
             params: {
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
-                sort: { type: "array", optional: true, convert: true }
+                sort: { type: "array", optional: true, convert: true },
+                user: { type: "array", optional: true, convert: true }
             },
             handler(ctx) {
-                let { limit, offset, sort } = ctx.params;
+                const { user, sort } = ctx.params;
+                let { limit, offset } = ctx.params;
                 limit = limit != undefined ? limit : 50;
                 offset = offset != undefined ? offset : 0;
+
                 // Get list of message
                 const filter = {
                     limit,
                     offset,
                     sort: sort || ["id"]
                 };
+
+                if (user) {
+                    filter.query = {
+                        subscribers: {
+                            $in: user
+                        }
+                    };
+                }
 
                 return this.getDBCollection("conversations").then(
                     collection => {
@@ -95,7 +108,7 @@ module.exports = {
                     }
                 );
             }
-        }
+        },
     },
 
     /**
