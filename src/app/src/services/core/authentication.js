@@ -1,12 +1,15 @@
 const axios = require("axios");
 const sysConfig = require("../../conf/system.json");
 const axiosInstance = axios.create({
-    baseURL: sysConfig.env == "production" ? window.location.origin : sysConfig.server.address,
+    baseURL: sysConfig.env == "production"
+            ? window.location.origin
+            : sysConfig.server.address,
 });
 
 const Service = function() {
     this.locker = this.verifyToken();
     this.isAuthenticated = false;
+    this.user = null;
 };
 
 Service.prototype = {
@@ -41,7 +44,10 @@ Service.prototype = {
                         .then(({ data }) => {
                             if (data.token && data.token.access) {
                                 this.isAuthenticated = true;
-                                window.localStorage.setItem("token", JSON.stringify(data.token));
+                                window.localStorage.setItem(
+                                    "token",
+                                    JSON.stringify(data.token)
+                                );
                                 return resole(data.token.access);
                             } else {
                                 reject("Could not get access token");
@@ -55,11 +61,27 @@ Service.prototype = {
                 return this.locker;
             }
 
-            this.isAuthenticated = true;
-            this.locker = Promise.resolve(() => token);
+            this.locker = new Promise((resole, reject) => {
+                axiosInstance
+                    .post("/verify-token", null, {
+                        headers: {
+                            authorization: token,
+                        },
+                    })
+                    .then(({ data }) => {
+                        this.isAuthenticated = true;
+                        this.user = data;
+                        return token;
+                    })
+                    .catch(err => {
+                        reject(err);
+                    });
+            });
         } else {
             return Promise.reject("No token found");
         }
+
+        return this.locker;
     },
     login(userName, password) {
         this.isAuthenticated = false;
@@ -75,7 +97,11 @@ Service.prototype = {
                 .then(({ data }) => {
                     if (data.token && data.token.access) {
                         this.isAuthenticated = true;
-                        window.localStorage.setItem("token", JSON.stringify(data.token));
+                        this.user = data;
+                        window.localStorage.setItem(
+                            "token",
+                            JSON.stringify(data.token)
+                        );
                         resole(data.token.access);
                     } else {
                         reject("Could not get access token");
