@@ -98,10 +98,17 @@ export default {
         return;
       }
 
+      if (menu.route.name === this.$route.name) {
+        return;
+      }
+
       if (menu.route) {
-        this.$router.push(menu.route).then(() => {
-          this.activatedMenu = menu;
-        });
+        this.$router
+          .push(menu.route)
+          .then(() => {
+            this.activatedMenu = menu;
+          })
+          .catch(console.error);
       }
     }
   }
