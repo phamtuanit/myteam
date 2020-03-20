@@ -53,13 +53,15 @@
 
 <script>
 export default {
-  inject: ["auth"],
   data() {
     return {
       loading: false,
       userName: null,
       password: null
     };
+  },
+  created() {
+    this.auth = window.IoC.get("auth");
   },
   methods: {
     login() {
