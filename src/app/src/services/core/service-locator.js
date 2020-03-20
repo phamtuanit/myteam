@@ -1,4 +1,4 @@
-export default (function () {
+module.exports = (function () {
     const ServiceImplementation = function (constructor, args) {
         this.constructor = constructor;
         this.args = args;

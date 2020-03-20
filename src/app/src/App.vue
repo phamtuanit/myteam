@@ -7,15 +7,10 @@
 <script>
 export default {
   name: "App",
-  provide() {
-    const auth = window.IoC.get("auth");
-    return { theme: this.theme, auth };
-  },
   data() {
     return {};
   },
   created() {
-    window.IoC.register("app", this);
   },
   methods: {}
 };

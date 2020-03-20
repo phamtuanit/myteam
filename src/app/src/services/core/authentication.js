@@ -1,5 +1,5 @@
-import axios from "axios";
-import sysConfig from "../../conf/system.json";
+const axios = require("axios");
+const sysConfig = require("../../conf/system.json");
 const axiosInstance = axios.create({
     baseURL: sysConfig.env == "production" ? window.location.origin : sysConfig.server.address,
 });
@@ -90,4 +90,4 @@ Service.prototype = {
     },
 };
 
-export default Service;
+module.exports = Service;
