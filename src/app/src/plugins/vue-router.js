@@ -6,6 +6,11 @@ export default function init(store) {
         routes: [
             { path: "/", name: "root", redirect: { name: "preparation" } },
             {
+                path: "/error",
+                name: "system-error",
+                component: () => import("../pages/errors/system-error.vue"),
+            },
+            {
                 path: "/login",
                 name: "login",
                 component: () => import("../pages/login.vue"),
@@ -38,6 +43,10 @@ export default function init(store) {
     }
 
     router.beforeEach((to, from, next) => {
+        if (to.name.includes("error")) {
+            return next();
+        }
+
         const initialized = store.getters.initialized;
         if (to.name == "preparation" && !initialized) {
             // Need to be initialized
