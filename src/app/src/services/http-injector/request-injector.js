@@ -8,9 +8,12 @@ module.exports = function httpRequestSetup() {
     axios.interceptors.request.use(function (config) {
         eventBus.emit('global-loading', { isLoading: true });
         if (auth) {
-            config.headers.Authorization = auth.getToken();
+            return auth.getToken().then(token => {
+                config.headers.Authorization = token;
+                return config;
+            });
         }
-        return config;
+        return Promise.resolve(config);
     }, function (err) {
         eventBus.emit('global-loading', { isLoading: false });
         eventBus.emit("show-snack", { message: err });
