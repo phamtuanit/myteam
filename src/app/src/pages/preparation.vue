@@ -49,33 +49,68 @@ export default {
             this.timmer = null;
 
             if (this.isInitialized == true) {
-                this.redirect();
+                this.redirectToExpectation();
             }
         }, 2 * 1000);
 
         this.initialize();
     },
     mounted() {},
+    destroyed() {
+        clearTimeout(this.timmer);
+    },
     methods: {
         initialize() {
             const store = this.$store;
             store
                 .dispatch("initialize")
                 .then(() => {
-                    const theme = window.IoC.get("theme");
-                    this.$vuetify.theme.dark = theme.dark;
+                    const nextState = store.getters.appState;
+                    switch (nextState) {
+                        case "authentication":
+                            {
+                                const theme = window.IoC.get("theme");
+                                this.$vuetify.theme.dark = theme.dark;
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
 
                     this.isInitialized = store.getters.initialized;
-                    if (this.isInitialized == true && !this.timmer) {
-                        this.redirect();
+                    if (this.isInitialized == true) {
+                        if (this.timmer == null) {
+                            this.redirectToExpectation();
+                        }
+                    } else {
+                        this.initialize();
                     }
                 })
                 .catch(err => {
-                    console.error("Could not initialize application.", err);
-                    this.$router.push({ name: "system-error" });
+                    const currentState = store.getters.appState;
+                    console.error(
+                        "Got an error while initializing.",
+                        currentState,
+                        err
+                    );
+                    switch (currentState) {
+                        case "authentication":
+                            this.redirect({ name: "login" });
+                            break;
+
+                        default:
+                            this.redirect({ name: "system-error" });
+                            break;
+                    }
                 });
         },
-        redirect() {
+        redirect(nextRoute) {
+            const route = this.$route;
+            nextRoute.query = route.query;
+            this.$router.push(nextRoute);
+        },
+        redirectToExpectation() {
             const route = this.$route;
             const nextRoute = route.query["next-to"] || "app";
             delete route.query["next-to"];

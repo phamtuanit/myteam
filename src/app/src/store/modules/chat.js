@@ -1,3 +1,5 @@
+const conversationSvr = new (require("../../services/conversation.service").default)();
+
 const moduleState = {
     namespaced: true,
     getters: {},
@@ -15,12 +17,13 @@ const moduleState = {
     },
     actions: {
         initialize({ commit }) {
+
             return Promise.resolve();
         },
         getAll({ commit }) {
-            // service.getConversation(res => {
-            //     commit("setConversations", res.data);
-            // });
+            conversationSvr.find().then(res => {
+                commit("setAll", res.data);
+            });
         },
     },
 };

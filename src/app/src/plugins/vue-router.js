@@ -43,23 +43,28 @@ export default function init(store) {
     }
 
     router.beforeEach((to, from, next) => {
+        // Update query
+        if (to.query["next-to"] == to.name) {
+            delete to.query["next-to"];
+        }
+
         if (to.name.includes("error")) {
             return next();
         }
-
+        
         const initialized = store.getters.initialized;
         if (to.name == "preparation" && !initialized) {
             // Need to be initialized
             return next();
         }
-
-        if (!initialized) {
+        
+        const appState = store.getters.appState;
+        if (!initialized && appState == "startup") {
             // App is not initialized yet
             return redirect("preparation", from, to, next);
         }
 
         const authenticated = store.getters.authenticated;
-
         if (to.name == "login" && authenticated) {
             // Need to be logged in
             next({ name: "root" });

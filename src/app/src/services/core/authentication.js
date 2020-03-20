@@ -65,13 +65,13 @@ Service.prototype = {
                 axiosInstance
                     .post("/verify-token", null, {
                         headers: {
-                            authorization: token,
+                            authorization: token.access,
                         },
                     })
                     .then(({ data }) => {
                         this.isAuthenticated = true;
                         this.user = data;
-                        return token;
+                        resole(token);
                     })
                     .catch(err => {
                         reject(err);
