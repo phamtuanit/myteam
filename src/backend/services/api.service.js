@@ -55,7 +55,8 @@ module.exports = {
                 // Action aliases refreshToken
                 aliases: {
                     "POST login": "v1.auth.login",
-                    "POST renew-token": "v1.auth.refreshToken"
+                    "POST renew-token": "v1.auth.refreshToken",
+                    "POST verify-token": "v1.auth.verifyToken"
                 },
 
                 // Use bodyparser module

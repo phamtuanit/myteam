@@ -28,12 +28,15 @@ module.exports = {
     mixins: [DBCollectionService],
     actions: {
         verifyToken: {
-            visibility: "public",
+            rest: "POST /verify",
             params: {
-                token: "string"
+                token: { type: "string", optional: true }
             },
             async handler(ctx) {
-                const { token } = ctx.params;
+                const token = ctx.params.token || ctx.meta.token;
+                if (!token) {
+                    throw new MoleculerClientError("Token is missing.");
+                }
                 try {
                     const decoded = await jwt.verify(token, privateKey);
                     if (decoded.forRefresh == true) {
@@ -104,7 +107,7 @@ module.exports = {
                     }
 
                     const user = decoded.data;
-                    const userToken = this.getUserToken(user); 
+                    const userToken = this.getUserToken(user);
                     return userToken;
                 } catch (error) {
                     this.logger.error(error);
@@ -126,9 +129,10 @@ module.exports = {
     methods: {
         getUserToken(user) {
             const { token, exp } = this.generateJWT(user);
-            const refreshToken = this.generateJWT(user,  true).token;
+            const refreshToken = this.generateJWT(user, true).token;
             return {
                 token: {
+                    user,
                     access: token,
                     exp,
                     refresh: refreshToken
@@ -263,7 +267,7 @@ module.exports = {
                     });
                 });
             });
-        },
+        }
     },
 
     /**
