@@ -60,11 +60,6 @@ class Socket {
      * Connect to server with token
      */
     connect() {
-        if (!authSvr.getToken()) {
-            console.warn("The user token is empty. The connection will be created after user login.");
-            return this;
-        }
-
         this.close();
         return authSvr.getToken().then(token => {
             this.io = socket(this.baseUri, {

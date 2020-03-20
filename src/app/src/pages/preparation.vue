@@ -42,6 +42,17 @@
 <script>
 export default {
     created() {
+        this.isInitialized = false;
+
+        this.timmer = setTimeout(() => {
+            clearTimeout(this.timmer);
+            this.timmer = null;
+
+            if (this.isInitialized == true) {
+                this.redirect();
+            }
+        }, 2 * 1000);
+
         this.initialize();
     },
     mounted() {},
@@ -54,7 +65,8 @@ export default {
                     const theme = window.IoC.get("theme");
                     this.$vuetify.theme.dark = theme.dark;
 
-                    if (store.getters.initialized == true) {
+                    this.isInitialized = store.getters.initialized;
+                    if (this.isInitialized == true && !this.timmer) {
                         this.redirect();
                     }
                 })
