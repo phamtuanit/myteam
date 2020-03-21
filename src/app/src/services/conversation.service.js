@@ -3,6 +3,13 @@ const Service = function service() {
     this.name = "conversations/";
 };
 
+Service.prototype.getAllByUser = function (userName) {
+    if (typeof userName == "string" && userName) {
+        return Axios.get(this.name + `?user=${userName}`);
+    }
+    return Promise.reject("Data is invalid");
+};
+
 Service.prototype.post = function (groupInfo) {
     if (typeof groupInfo == "object" && typeof groupInfo.name == "string" && Array.isArray(groupInfo.subscribers)) {
         if (groupInfo.subscribers.length <= 0) {

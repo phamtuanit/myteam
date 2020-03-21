@@ -2,14 +2,12 @@ const axios = require("axios");
 const sysConfig = require("../../conf/system.json");
 const axiosInstance = axios.create({
     baseURL: sysConfig.env == "production"
-            ? window.location.origin
-            : sysConfig.server.address,
+        ? window.location.origin
+        : sysConfig.server.address,
 });
 
-const Service = function() {
+const Service = function () {
     this.locker = this.verifyToken();
-    this.isAuthenticated = false;
-    this.user = null;
 };
 
 Service.prototype = {
@@ -19,6 +17,18 @@ Service.prototype = {
             const token = window.localStorage.getItem("token");
             if (token) {
                 return JSON.parse(token).access;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        return null;
+    },
+    async getUser() {
+        try {
+            await this.locker;
+            const token = window.localStorage.getItem("token");
+            if (token) {
+                return JSON.parse(token).user;
             }
         } catch (error) {
             console.error(error);

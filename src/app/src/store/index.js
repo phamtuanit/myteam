@@ -3,6 +3,7 @@ const Vue = require("vue").default;
 const createLogger = require("vuex/dist/logger");
 const chatModule = require("./modules/chat");
 const channelModule = require("./modules/channel");
+const userModule = require("./modules/user");
 
 // Setup IoC
 const ServiceLocator = require("../services/core/service-locator.js");
@@ -62,11 +63,12 @@ const store = new Vuex.Store({
         },
     },
     methods: {
-        startup() {},
+        startup() { },
     },
     modules: {
-        chat: chatModule,
-        channel: channelModule,
+        chats: chatModule,
+        channels: channelModule,
+        users: userModule
     },
 });
 

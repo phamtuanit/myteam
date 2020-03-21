@@ -1,7 +1,15 @@
 <template>
-    <v-container class="fill-height" fluid id="preparation-screen">
-        <div align="center" justify="center" class="mx-auto">
-            <!-- <div class="sk-chase">
+  <v-container
+    class="fill-height"
+    fluid
+    id="preparation-screen"
+  >
+    <div
+      align="center"
+      justify="center"
+      class="mx-auto"
+    >
+      <!-- <div class="sk-chase">
         <div class="sk-chase-dot"></div>
         <div class="sk-chase-dot"></div>
         <div class="sk-chase-dot"></div>
@@ -9,34 +17,36 @@
         <div class="sk-chase-dot"></div>
         <div class="sk-chase-dot"></div>
       </div> -->
-            <div class="cssload-dots">
-                <div class="cssload-dot"></div>
-                <div class="cssload-dot"></div>
-                <div class="cssload-dot"></div>
-                <div class="cssload-dot"></div>
-                <div class="cssload-dot"></div>
-            </div>
+      <div class="cssload-dots">
+        <div class="cssload-dot"></div>
+        <div class="cssload-dot"></div>
+        <div class="cssload-dot"></div>
+        <div class="cssload-dot"></div>
+        <div class="cssload-dot"></div>
+      </div>
 
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <filter id="goo">
-                        <feGaussianBlur
-                            in="SourceGraphic"
-                            result="blur"
-                            stdDeviation="12"
-                        ></feGaussianBlur>
-                        <feColorMatrix
-                            in="blur"
-                            mode="matrix"
-                            values="1 0 0 0 0	0 1 0 0 0	0 0 1 0 0	0 0 0 18 -7"
-                            result="goo"
-                        ></feColorMatrix>
-                        <!-- <feBlend in2="goo" in="SourceGraphic" result="mix" ></feBlend> -->
-                    </filter>
-                </defs>
-            </svg>
-        </div>
-    </v-container>
+      <svg
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <filter id="goo">
+            <feGaussianBlur
+              in="SourceGraphic"
+              result="blur"
+              stdDeviation="12"
+            ></feGaussianBlur>
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0	0 1 0 0 0	0 0 1 0 0	0 0 0 18 -7"
+              result="goo"
+            ></feColorMatrix>
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  </v-container>
 </template>
 
 <script>
@@ -44,11 +54,13 @@ export default {
     created() {
         this.isInitialized = false;
 
+        // Preparation effect
         this.timmer = setTimeout(() => {
             clearTimeout(this.timmer);
             this.timmer = null;
 
             if (this.isInitialized == true) {
+                // In case preparation is finieshed
                 this.redirectToExpectation();
             }
         }, 2 * 1000);
@@ -69,6 +81,7 @@ export default {
                     switch (nextState) {
                         case "authentication":
                             {
+                                // When previous state is done "startup"
                                 const theme = window.IoC.get("theme");
                                 this.$vuetify.theme.dark = theme.dark;
                             }
@@ -80,10 +93,12 @@ export default {
 
                     this.isInitialized = store.getters.initialized;
                     if (this.isInitialized == true) {
+                        // Incase preparation is just finished before timmer is done
                         if (this.timmer == null) {
                             this.redirectToExpectation();
                         }
                     } else {
+                        // Continue preparation
                         this.initialize();
                     }
                 })
@@ -96,10 +111,12 @@ export default {
                     );
                     switch (currentState) {
                         case "authentication":
+                            // Incase could not authenticate
                             this.redirect({ name: "login" });
                             break;
 
                         default:
+                            // Other error while preparating
                             this.redirect({ name: "system-error" });
                             break;
                     }
@@ -111,6 +128,7 @@ export default {
             this.$router.push(nextRoute);
         },
         redirectToExpectation() {
+            // Redirect to given route or main page
             const route = this.$route;
             const nextRoute = route.query["next-to"] || "app";
             delete route.query["next-to"];

@@ -42,6 +42,10 @@ module.exports = {
             auth.getToken()
                 .then(token => {
                     if (token) {
+                        auth.getUser().then(user => {
+                            commit("users/setMe", user);
+                        });
+
                         commit("setAuthentication", true);
                         commit("setAppState", "http-injection");
                         resolve();
@@ -78,7 +82,7 @@ module.exports = {
                 const socket = new Socket(baseServerAddr, "/chat-io");
                 window.IoC.register("socket", socket);
                 socket.connect().then(() => {
-                    commit("setAppState", "modules-chat");
+                    commit("setAppState", "modules-user");
                     resolve();
                 }).catch(reject);
             } catch (error) {
@@ -86,11 +90,26 @@ module.exports = {
             }
         });
     },
+    "modules-user"(commit, store) {
+        return new Promise((resolve, reject) => {
+            console.info("Setting up: users module");
+            try {
+                store.dispatch("users/initialize")
+                    .then(() => {
+                        commit("setAppState", "modules-chat");
+                        resolve();
+                    })
+                    .catch(reject);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    },
     "modules-chat"(commit, store) {
         return new Promise((resolve, reject) => {
             console.info("Setting up: chat module");
             try {
-                store.dispatch("chat/initialize")
+                store.dispatch("chats/initialize")
                     .then(() => {
                         commit("setAppState", "modules-channel");
                         resolve();
@@ -105,11 +124,9 @@ module.exports = {
         return new Promise((resolve, reject) => {
             console.info("Setting up: chat module");
             try {
-                store.dispatch("channel/initialize")
+                store.dispatch("channels/initialize")
                     .then(() => {
-                        commit("setAppState", "finished");
-                        commit("setInitialization", true);
-                        console.info("Setting up application successfully");
+                        commit("setAppState", "resolve-users");
                         resolve();
                     })
                     .catch(reject);
@@ -117,5 +134,25 @@ module.exports = {
                 reject(err);
             }
         });
+    },
+    "resolve-users"(commit, store) {
+        return new Promise((resolve, reject) => {
+            console.info("Setting up: chat module");
+            try {
+                store.dispatch("users/resolveAll")
+                    .then(() => {
+                        commit("setAppState", "end");
+                        resolve();
+                    })
+                    .catch(reject);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    },
+    end(commit) {
+        commit("setAppState", "finished");
+        commit("setInitialization", true);
+        console.info("Setting up application successfully");
     }
 };
