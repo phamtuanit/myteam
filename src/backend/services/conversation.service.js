@@ -74,10 +74,11 @@ module.exports = {
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true, convert: true },
-                user: { type: "array", optional: true, convert: true }
+                user: "string",
+                channel: { type: "boolean", optional: true, convert: true, default: false },
             },
             handler(ctx) {
-                const { user, sort } = ctx.params;
+                const { user, sort, channel } = ctx.params;
                 let { limit, offset } = ctx.params;
                 limit = limit != undefined ? limit : 50;
                 offset = offset != undefined ? offset : 0;
@@ -86,15 +87,23 @@ module.exports = {
                 const filter = {
                     limit,
                     offset,
-                    sort: sort || ["id"]
+                    sort: sort || ["id"],
+                    query: {
+                        channel
+                    }
                 };
 
                 if (user) {
-                    filter.query = {
-                        subscribers: {
+                    const users = user.split(",");
+                    if (users.length > 0) {
+                        filter.query.subscribers = {
+                            $in: users
+                        }
+                    } else {
+                        filter.query.subscribers = {
                             $in: user
                         }
-                    };
+                    }
                 }
 
                 return this.getDBCollection("conversations").then(
@@ -119,15 +128,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() { }
 };
