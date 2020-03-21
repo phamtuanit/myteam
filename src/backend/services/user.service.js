@@ -27,9 +27,30 @@ module.exports = {
             auth: true,
             roles: [1],
             rest: "GET /",
-            async handler() {
+            params: {
+                user: "string",
+            },
+            async handler(ctx) {
+                const { user } = ctx.params;
                 const dbCollection = await this.getDBCollection("users");
-                return dbCollection.find().then(users => {
+
+                const filter = {
+                    query: {}
+                };
+
+                if (user) {
+                    const users = user.split(",");
+                    if (users.length > 0) {
+                        filter.query.id = {
+                            $in: users
+                        }
+                    } else {
+                        filter.query.id = {
+                            $in: user
+                        }
+                    }
+                }
+                return dbCollection.find(filter).then(users => {
                     if (users) {
                         users.forEach(user => {
                             delete user._id;
@@ -102,15 +123,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() { }
 };
