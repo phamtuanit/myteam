@@ -6,15 +6,14 @@ const {
 } = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
 
-const ldap = require("ldapjs");
 const fs = require("fs");
 const path = require("path");
-const authConf = require("../conf/auth.json");
-// const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const privateKey = fs.readFileSync(
-    path.resolve(__dirname, "../keys/server.private.pem")
-);
+
+const keyPath = path.resolve(__dirname, "../keys/server.private.pem");
+const privateKey = fs.readFileSync(keyPath);
+
+const authConf = require("../conf/auth.json");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -72,7 +71,7 @@ module.exports = {
                     password = passBuf.toString();
 
                     // Search user info
-                    const user = await this.verifyUser(username, password);
+                    const user = await this.ldap.verify(username, password);
                     const userToken = this.getUserToken(user);
 
                     // Inform user login
@@ -164,126 +163,25 @@ module.exports = {
                 exp
             };
         },
-        confirmLdap() {
-            if (!this.ldapClient) {
-                try {
-                    this.ldapClient = ldap.createClient({
-                        url: authConf.server
-                    });
-                    return true;
-                } catch (error) {
-                    this.logger.error(error);
-                    this.ldapClient = null;
-                    return false;
-                }
-            }
-            return true;
-        },
-        verifyUser(userName, password) {
-            if (!this.confirmLdap()) {
-                return Promise.reject(
-                    new ServiceNotAvailableError(
-                        "Could not connect to LDAP server"
-                    )
-                );
-            }
-
-            return new Promise((resolve, reject) => {
-                this.ldapSearch("", userName).then(users => {
-                    const user = users[0];
-                    this.ldapClient.bind(user.dn, password, err => {
-                        if (err) {
-                            reject(new MoleculerServerError(err));
-                        } else {
-                            resolve(user);
-                        }
-                    });
-                });
-            });
-        },
-        ldapSearch(dn, userName) {
-            if (!this.confirmLdap()) {
-                return Promise.reject(
-                    new ServiceNotAvailableError(
-                        "Could not connect to LDAP server"
-                    )
-                );
-            }
-
-            let dnSearch;
-            let filter;
-            if (!dn) {
-                dnSearch = `ou=Dev,dc=common,dc=com`;
-                filter = { filter: `(uid=${userName})`, scope: "sub" };
-            } else {
-                dnSearch = dn;
-                filter = { scope: "sub" };
-            }
-
-            return new Promise((resolve, reject) => {
-                this.ldapClient.search(dnSearch, filter, (err, res) => {
-                    if (err) {
-                        this.logger.error("ERROR: " + err);
-                        reject(
-                            new MoleculerClientError(
-                                "Cannot recognize user. " + err
-                            )
-                        );
-                        return;
-                    }
-
-                    const searchList = [];
-                    res.on("searchEntry", function(entry) {
-                        searchList.push(entry);
-                    });
-                    res.on("error", function(err) {
-                        reject(new MoleculerServerError(err.message));
-                    });
-                    res.on("end", () => {
-                        if (searchList.length >= 1) {
-                            const users = [];
-                            searchList.forEach(item => {
-                                const ldapUser = item.object;
-                                const userInfo = {
-                                    id: ldapUser.uid,
-                                    username: ldapUser.uid,
-                                    firstname: ldapUser.givenName,
-                                    lastname: ldapUser.sn,
-                                    mail: ldapUser.mail,
-                                    dn: ldapUser.dn,
-                                    phone: ldapUser.telephoneNumber
-                                };
-                                users.push(userInfo);
-                            });
-
-                            resolve(users);
-                        } else {
-                            reject(
-                                new MoleculerClientError(
-                                    "Cannot recognize user"
-                                )
-                            );
-                        }
-                    });
-                });
-            });
-        }
     },
 
     /**
      * Service created lifecycle event handler
      */
     created() {
-        this.ldapClient = null;
+        const ldap = require("../ldap-wrapper/ldap.adapter.js");
+        this.ldap = new ldap(this.logger);
     },
 
     /**
      * Service started lifecycle event handler
      */
-    async started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    async stopped() {}
+    stopped() {
+        this.ldap.close();
+    }
 };
