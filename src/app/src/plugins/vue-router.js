@@ -37,13 +37,17 @@ export default function init(store) {
 
     function redirect(target, from, to, next) {
         const query = to.query;
+
+        // Update query
+        if (query["next-to"] !== to.name) {
+            query["next-to"] = to.name;
+        }
+
         const params = to.params;
-        query["next-to"] = to.name;
         next({ name: target, query, params });
     }
 
     router.beforeEach((to, from, next) => {
-        // Update query
         if (to.query["next-to"] == to.name) {
             delete to.query["next-to"];
         }
@@ -51,13 +55,13 @@ export default function init(store) {
         if (to.name.includes("error")) {
             return next();
         }
-        
+
         const initialized = store.getters.initialized;
         if (to.name == "preparation" && !initialized) {
             // Need to be initialized
             return next();
         }
-        
+
         const appState = store.getters.appState;
         if (!initialized && appState == "startup") {
             // App is not initialized yet
