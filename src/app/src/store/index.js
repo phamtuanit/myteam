@@ -47,9 +47,10 @@ const store = new Vuex.Store({
         },
     },
     actions: {
-        setTheme({ commit }, theme) {
+        async setTheme({ commit }, theme) {
             window.localStorage.setItem("setting.theme", JSON.stringify(theme));
             commit("setTheme", theme);
+            return theme;
         },
         initialize({ commit }) {
             const state = this.getters.appState;

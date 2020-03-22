@@ -45,43 +45,9 @@
         class="pl-3 pr-2"
         v-text="title"
       ></v-subheader>
-      <v-progress-linear
-        :active="loading"
-        :indeterminate="true"
-      ></v-progress-linear>
-
-      <v-list-item-group v-if="displayMode == 'friend'">
-        <!-- Friend list -->
-        <template v-for="friend in friendList">
-          <v-list-item
-            :key="friend.id"
-            v-if="!friend._isMe"
-            @click="openChat(null, friend)"
-          >
-            <v-avatar size="30">
-              <v-img src="https://randomuser.me/api/portraits/men/81.jpg"></v-img>
-            </v-avatar>
-
-            <v-list-item-content class="py-2 px-2">
-              <v-list-item-title
-                class="body-2"
-                v-text="`${friend.firstname}, ${friend.lastname}`"
-              ></v-list-item-title>
-              <v-list-item-subtitle
-                class="caption"
-                v-text="friend.mail"
-              ></v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-        </template>
-      </v-list-item-group>
 
       <!-- Chat list -->
-      <v-list-item-group
-        v-else
-        v-model="activatedChat"
-      >
+      <v-list-item-group v-model="activatedChat">
         <v-list-item
           v-for="chat in chatList"
           :key="chat.id"
@@ -113,22 +79,18 @@ import { mapState } from "vuex";
 export default {
     data() {
         return {
-            loading: false,
             searchText: null,
-            displayMode: "chat",
-            friendList: [],
         };
     },
     computed: {
         title() {
-            return this.displayMode == "chat" ? "Conversations" : "Friends";
+            return "Conversations";
         },
         plusIcon() {
-            return "mdi-" + (this.displayMode == "chat" ? "plus" : "close");
+            return "mdi-plus";
         },
         ...mapState({
             chatList: state => state.chats.all,
-            cachedUsers: state => Object.values(state.users.all),
         }),
         activatedChat: {
             get() {
@@ -151,7 +113,6 @@ export default {
                 delete newQuery._status;
                 newQuery._id = val.id;
                 this.$router.updateQuery(newQuery);
-                this.displayMode == "chat";
             }
         },
     },
@@ -182,61 +143,14 @@ export default {
     },
     methods: {
         openChat(chat, friend) {
-            if (!chat) {
-                if (this.selectedItem == friend) {
-                    return;
-                }
-
-                // Incase user selected a chat in friend list
-                const newQuery = { ...this.$route.query };
-                newQuery._id = friend.id;
-                newQuery._status = "temp";
-                this.$router.updateQuery(newQuery);
-            } else {
-                if (this.activatedChat.id == chat.id) {
-                    return;
-                }
-
-                // Incase user re-open existing chat
-                this.$store.dispatch("chats/activeChat", chat.id);
-            }
-        },
-        onAddChat() {
-            if (this.displayMode == "chat") {
-                this.displayMode = "friend";
-                if (!this.searchText) {
-                    this.friendList = this.cachedUsers;
-                } else {
-                    this.searchLocker.then(this.searchFriend);
-                }
-            } else {
-                this.displayMode = "chat";
-            }
-        },
-        searchFriend() {
-            if (!this.searchText) {
-                this.searchLocker = Promise.resolve();
+            if (this.activatedChat.id == chat.id) {
                 return;
             }
 
-            // Delay loading
-            const timmer = setTimeout(() => {
-                this.loading = true;
-            }, 2 * 1000);
-
-            // Request searching
-            this.searchLocker = this.$store
-                .dispatch("users/findUser", this.searchText)
-                .then(users => {
-                    this.friendList = users;
-                })
-                .catch(console.error)
-                .finally(() => {
-                    clearTimeout(timmer);
-                    this.loading = false;
-                    this.searchLocker = Promise.resolve();
-                });
+            // Incase user re-open existing chat
+            this.$store.dispatch("chats/activeChat", chat.id);
         },
+        onAddChat() {},
         getChatName(chat) {
             if (chat.name) {
                 return chat.name;

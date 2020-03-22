@@ -25,7 +25,6 @@ const moduleState = {
             state.all.push(chat);
         },
         addMessage(state, { chatId, message }) {
-            debugger
             const chat = state.all.find(c => c.id == chatId);
             if (chat) {
                 chat.messages = chat.messages || [];
@@ -77,6 +76,10 @@ const moduleState = {
             return newConv;
         },
         activeChat({ commit, state }, id) {
+            if (state.active && state.active.id == id) {
+                return;
+            }
+
             const chat = state.all.find(i => i.id == id);
             if (chat) {
                 commit("setActivate", chat);
