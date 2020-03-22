@@ -28,16 +28,18 @@ module.exports = {
             roles: [1],
             rest: "GET /",
             params: {
-                user: "string",
+                user: { type: "string", optional: true },
+                text: { type: "string", optional: true }
             },
             async handler(ctx) {
-                const { user } = ctx.params;
+                const { user, text } = ctx.params;
                 const dbCollection = await this.getDBCollection("users");
 
                 const filter = {
                     query: {}
                 };
 
+                // query by given user
                 if (user) {
                     const users = user.split(",");
                     if (users.length > 0) {
@@ -50,14 +52,27 @@ module.exports = {
                         }
                     }
                 }
-                return dbCollection.find(filter).then(users => {
-                    if (users) {
-                        users.forEach(user => {
-                            delete user._id;
-                        });
+
+                // Text search
+                if (text) {
+                    filter.search = text;
+                }
+
+                const result = await dbCollection.find(filter);
+
+                // Delete _id and get status
+                if (result) {
+                    const userIds = result.map(i => i.id);
+                    const statusList = await ctx.call("v1.live.getUserStatusById", { userId: userIds });
+
+                    for (let index = 0; index < result.length; index++) {
+                        const userInfo = result[index];
+                        delete userInfo._id;
+                        userInfo.status = statusList[index].status;
                     }
-                    return users;
-                });
+                }
+
+                return result;
             }
         },
         getUserById: {
@@ -77,7 +92,7 @@ module.exports = {
                     return user;
                 });
             }
-        }
+        },
     },
 
     /**
@@ -128,7 +143,15 @@ module.exports = {
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    async started() {
+        const dbCollection = await this.getDBCollection("users");
+        dbCollection.collection.createIndex({
+            firstname: "text",
+            lastname: "text",
+            mail: "text",
+            phone: "text"
+        })
+    },
 
     /**
      * Service stopped lifecycle event handler
