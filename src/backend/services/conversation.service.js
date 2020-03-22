@@ -1,5 +1,6 @@
 "use strict";
 const DBCollectionService = require("../mixins/collection.db.mixin");
+const { cleanDbMark } = require("../utils/entity");
 const Errors = require("moleculer").Errors;
 
 /**
@@ -21,8 +22,9 @@ module.exports = {
                 group: {
                     type: "object",
                     props: {
-                        name: "string",
-                        subscribers: { type: "array", empty: false }
+                        name: { type: "string", optional: true },
+                        subscribers: { type: "array", empty: false },
+                        channel: { type: "boolean", optional: true, convert: true, default: true },
                     }
                 }
             },
@@ -32,16 +34,16 @@ module.exports = {
                 const dbCollection = await this.getDBCollection(
                     "conversations"
                 );
-                // 1. Create new conversation information first
+
                 const newConvInfo = group;
                 newConvInfo.id = new Date().getTime();
 
                 const existingConv = await dbCollection.insert(newConvInfo);
                 this.logger.info(
-                    "Could not get conversation information. Created new one.",
+                    "Could not insert conversation.",
                     existingConv._id
                 );
-                delete existingConv._id;
+                cleanDbMark(existingConv);
                 return existingConv;
             }
         },
@@ -56,12 +58,7 @@ module.exports = {
                 const { id } = ctx.params;
                 return this.getDBCollection("conversations").then(
                     collection => {
-                        return collection.findOne({ id }).then(item => {
-                            if (item) {
-                                delete item._id;
-                            }
-                            return item;
-                        });
+                        return collection.findOne({ id }).then(cleanDbMark);
                     }
                 );
             }
@@ -74,7 +71,7 @@ module.exports = {
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true, convert: true },
-                user: "string",
+                user: { type: "string", optional: true },
                 channel: { type: "boolean", optional: true, convert: true, default: false },
             },
             handler(ctx) {
@@ -109,10 +106,7 @@ module.exports = {
                 return this.getDBCollection("conversations").then(
                     collection => {
                         return collection.find(filter).then(records => {
-                            return records.map((item) => {
-                                delete item._id;
-                                return item;
-                            });
+                            return records.map(cleanDbMark);
                         });
                     }
                 );

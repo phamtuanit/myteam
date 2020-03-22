@@ -54,7 +54,6 @@ module.exports = {
                     type: "object",
                     props: {
                         type: { type: "string" },
-                        content: "object"
                     }
                 }
             },
@@ -409,15 +408,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() { }
 };

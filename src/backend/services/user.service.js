@@ -1,5 +1,6 @@
 "use strict";
 const DBCollectionService = require("../mixins/collection.db.mixin");
+const { cleanDbMark } = require("../utils/entity");
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
@@ -21,6 +22,19 @@ module.exports = {
             handler(ctx) {
                 const { user } = ctx.params;
                 return this.addOrUpdateUser(user);
+            }
+        },
+        getUserById: {
+            auth: true,
+            roles: [1],
+            rest: "GET /:id",
+            params: {
+                id: "string"
+            },
+            async handler(ctx) {
+                const { id } = ctx.params;
+                const dbCollection = await this.getDBCollection("users");
+                return dbCollection.findOne({ id }).then(cleanDbMark);
             }
         },
         getUser: {
@@ -67,30 +81,12 @@ module.exports = {
 
                     for (let index = 0; index < result.length; index++) {
                         const userInfo = result[index];
-                        delete userInfo._id;
+                        cleanDbMark(userInfo);
                         userInfo.status = statusList[index].status;
                     }
                 }
 
                 return result;
-            }
-        },
-        getUserById: {
-            auth: true,
-            roles: [1],
-            rest: "GET /:id",
-            params: {
-                id: "string"
-            },
-            async handler(ctx) {
-                const { id } = ctx.params;
-                const dbCollection = await this.getDBCollection("users");
-                return dbCollection.findOne({ id }).then(user => {
-                    if (user) {
-                        delete user._id;
-                    }
-                    return user;
-                });
             }
         },
     },
@@ -127,10 +123,7 @@ module.exports = {
                 };
                 return await dbCollection
                     .updateById(existingUser._id, update)
-                    .then(en => {
-                        delete en._id;
-                        return en;
-                    });
+                    .then(cleanDbMark);
             }
         }
     },
