@@ -4,7 +4,6 @@ const Service = function service() {
 };
 
 Service.prototype.create = function (convId, body, type = "html") {
-    debugger
     if (typeof convId == "number" && (typeof body == "object" || typeof body == "string")) {
         body.type = body.type || type || "html";
         const msg = {

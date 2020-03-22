@@ -22,7 +22,7 @@
           </v-card-subtitle>
           <v-card-text
             class="pt-0 pb-1 px-4"
-            v-html="msg.body.content.html"
+            v-html="msg.body.content"
           >
           </v-card-text>
         </v-card>
@@ -36,6 +36,8 @@
         </v-list-item-avatar>
       </v-list-item>
     </v-sheet>
+
+    <!-- Input -->
     <v-list
       height="48"
       class="py-0 no-border-radius"
@@ -70,26 +72,33 @@
 <script>
 import { fillHeight } from "../../utils/layout.js";
 import EmojiButton from "../../components/emoji-button";
+import { mapState } from "vuex";
 export default {
     components: { EmojiButton },
     data() {
         return {
             theme: this.$vuetify.theme,
-            chatId: null,
             newMessage: "",
-            messages: [],
         };
     },
+    computed: {
+        ...mapState({
+            activatedChat: state => state.chats.active,
+        }),
+        chatId() {
+            return this.activatedChat ? this.activatedChat.id : -1;
+        },
+        messages() {
+            return this.activatedChat.messages || [];
+        },
+    },
     watch: {
-        "$route.query"(query) {
-            this.friendId = query._id;
-            this.chatId = query._id;
-            this.status = query._status;
+        activatedChat() {
             this.loadChatContent();
         },
     },
     created() {
-        this.chatId = this.$route.query._id;
+        this.loadChatContent();
     },
     mounted() {
         fillHeight("message-sheet", 49, this.$el);
@@ -116,7 +125,7 @@ export default {
                 };
                 this.$store
                     .dispatch("chats/sendMessage", msg)
-                    .then(res => {
+                    .then(() => {
                         this.newMessage = null;
                     })
                     .catch(console.error);
@@ -128,15 +137,7 @@ export default {
         onSelectEmoji(emoji) {
             this.newMessage += emoji.native;
         },
-        loadChatContent() {
-            if (this.status == "temp") {
-                // Incase user just created temporary chat. New conversation need to be created later
-
-                return;
-            }
-
-            // Incase user want to open existing chat
-        },
+        loadChatContent() {},
     },
 };
 </script>
