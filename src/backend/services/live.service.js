@@ -28,10 +28,26 @@ module.exports = {
             roles: [1],
             rest: "GET /:userId",
             params: {
-                userId: "string"
+                userId: "any"
             },
             handler(ctx) {
                 const { userId } = ctx.params;
+
+                // Get list of user status
+                if (Array.isArray(userId)) {
+                    const result = [];
+                    userId.forEach(id => {
+                        const user = this.livingUser[id];
+                        const status = user ? "on" : "off";
+                        result.push({
+                            info: user,
+                            status: status
+                        });
+                    });
+                    return result;
+                }
+
+                // Get single user status
                 const user = this.livingUser[userId];
                 const status = user ? "on" : "off";
                 return {
@@ -96,10 +112,10 @@ module.exports = {
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() { }
 };
