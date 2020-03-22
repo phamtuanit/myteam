@@ -6,11 +6,11 @@ const channelModule = require("./modules/channel");
 const userModule = require("./modules/user");
 
 // Setup IoC
-const ServiceLocator = require("../services/core/service-locator.js");
+const ServiceLocator = require("../plugins/service-locator.js");
 window.IoC = window.ServiceLocator = new ServiceLocator();
 
 // Setup event Bus
-const eventBus = new (require("../services/core/emitter"))();
+const eventBus = new (require("../plugins/emitter"))();
 window.IoC.register("bus", eventBus);
 
 const appStateMap = require("./app-state.js");

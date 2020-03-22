@@ -34,7 +34,7 @@ module.exports = {
             console.info("Setting up: authentication service");
             let auth = window.IoC.register("auth");
             if (!auth) {
-                auth = new (require("../services/core/authentication.js"))();
+                auth = new (require("../services/core/authentication.service.js"))();
                 window.IoC.register("auth", auth);
             }
 
@@ -62,8 +62,8 @@ module.exports = {
                 const axios = require("axios");
                 axios.defaults.baseURL = baseServerAddr + config.server.api;
 
-                const requestInterceptor = require("../services/http-injector/request-injector.js");
-                const responseInterceptor = require("../services/http-injector/response-injector.js");
+                const requestInterceptor = require("../utils/http-injector/request-injector.js");
+                const responseInterceptor = require("../utils/http-injector/response-injector.js");
                 requestInterceptor();
                 responseInterceptor();
 
@@ -78,7 +78,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
             try {
                 console.info("Setting up: socket service");
-                const Socket = require("../services/socket.js");
+                const Socket = require("../plugins/socket.js");
                 const socket = new Socket(baseServerAddr, "/chat-io");
                 window.IoC.register("socket", socket);
                 socket.connect().then(() => {

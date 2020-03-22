@@ -9,6 +9,7 @@ const moduleState = {
     },
     getters: {
         getUser: state => (id) => state.users.find(u => u.id === id),
+        getUsers: state => state.users,
         getMe: state => state.me,
     },
     mutations: {
@@ -20,14 +21,14 @@ const moduleState = {
             state.users[user.id] = user;
         },
         require(state, userIds) {
-            const userCache = this.state.users.users;
+            const userCache = state.users;
             if (Array.isArray(userIds)) {
                 userIds.forEach(ui => {
-                    if (!userCache[ui]) {
+                    if (!userCache[ui] && !state.requireList.has(ui)) {
                         state.requireList.add(ui);
                     }
                 });
-            } else if (!userCache[userIds]) {
+            } else if (!userCache[userIds] && !state.requireList.has(userIds)) {
                 state.requireList.add(userIds);
             }
         },
@@ -69,6 +70,9 @@ const moduleState = {
                     commit("cache", users);
                 }
             }
+        },
+        findUser(store, text) {
+            return service.search(text).then(res => res.data);
         }
     },
 };
