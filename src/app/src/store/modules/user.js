@@ -2,14 +2,14 @@ const service = new (require("../../services/user.service.js").default)();
 const moduleState = {
     namespaced: true,
     state: {
-        all: {},
+        all: [],
         requireList: new Set(),
         me: null,
         moduleState: "startup",
     },
     getters: {
-        getUser: state => (id) => state.all[id],
-        getAll: state => Object.values(state.all),
+        getUser: state => (id) => state.all.find(i => i.id == id),
+        getAll: state => state.all,
         getMe: state => state.me,
     },
     mutations: {
@@ -19,30 +19,43 @@ const moduleState = {
         setMe(state, user) {
             user._isMe = true;
             state.me = user;
-            state.all[user.id] = user;
+            state.all.push(user);
         },
         require(state, userIds) {
             const userCache = state.all;
             if (Array.isArray(userIds)) {
                 userIds.forEach(ui => {
-                    if (!userCache[ui] && !state.requireList.has(ui)) {
+                    const exisintUser = userCache.find(i => i.id == ui);
+                    if (!exisintUser && !state.requireList.has(ui)) {
                         state.requireList.add(ui);
                     }
                 });
-            } else if (!userCache[userIds] && !state.requireList.has(userIds)) {
-                state.requireList.add(userIds);
+            } else {
+                const exisintUser = userCache.find(i => i.id == userIds);
+                if (!exisintUser && !state.requireList.has(userIds)) {
+                    state.requireList.add(userIds);
+                }
             }
         },
         cache(state, users) {
+            const userCache = state.all;
             if (Array.isArray(users)) {
                 users.forEach(user => {
-                    state.all[user.id] = state.all[user.id] || user;
-                    Object.assign(state.all[user.id], user);
+                    const exisintUser = userCache.find(i => i.id == user.id);
+                    if (exisintUser) {
+                        Object.assign(exisintUser, user);
+                    } else {
+                        userCache.push(user);
+                    }
                     state.requireList.delete(user.id);
                 });
             } else {
-                state.all[users.id] = state.all[users.id] || users;
-                Object.assign(state.all[users.id], users);
+                const exisintUser = userCache.find(i => i.id == users.id);
+                if (exisintUser) {
+                    Object.assign(exisintUser, users);
+                } else {
+                    userCache.push(users);
+                }
                 state.requireList.delete(users.id);
             }
         }
@@ -65,7 +78,7 @@ const moduleState = {
             const remainUserIds = [];
 
             users.forEach(userId => {
-                result[userId] = null;
+                result[userId] = { id: userId };
                 // Try to find user in cache first
                 const userInfo = getters.getUser(userId);
                 if (userInfo) {
