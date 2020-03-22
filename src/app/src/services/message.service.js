@@ -3,13 +3,12 @@ const Service = function service() {
     this.name = "messages/";
 };
 
-Service.prototype.post = function (convId, rawBody, type) {
-    if (typeof convId == "number" && (typeof rawBody == "object" || typeof rawBody == "string")) {
+Service.prototype.create = function (convId, body, type = "html") {
+    debugger
+    if (typeof convId == "number" && (typeof body == "object" || typeof body == "string")) {
+        body.type = body.type || type || "html";
         const msg = {
-            body: {
-                type: type || "html",
-                content: typeof rawBody == "object" ? rawBody : { html: rawBody },
-            },
+            body
         };
         console.info(`Posting new message to [${convId}]`);
         return Axios.post(this.name + `?conversation=${convId}`, msg);

@@ -2,6 +2,10 @@ import VueRouter from "vue-router";
 import Preparation from "../pages/preparation.vue";
 
 export default function init(store) {
+    VueRouter.prototype.updateQuery = function update(query) {
+        const newQuery = JSON.parse(JSON.stringify(query));
+        return this.replace({ query: newQuery });
+    }
     const router = new VueRouter({
         routes: [
             { path: "/", name: "root", redirect: { name: "preparation" } },

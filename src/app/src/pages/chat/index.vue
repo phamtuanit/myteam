@@ -1,5 +1,8 @@
 <template>
-  <v-row class="fill-height" no-gutters>
+  <v-row
+    class="fill-height"
+    no-gutters
+  >
     <v-col cols="auto">
       <ChatList></ChatList>
     </v-col>
@@ -17,7 +20,14 @@ import ChatList from "./chat-list";
 import ChatContent from "./content.vue";
 import FriendList from "./friend-list";
 export default {
-  components: { ChatList, ChatContent, FriendList }
+    components: { ChatList, ChatContent, FriendList },
+    created() {
+        if (this.$route.query._status == "temp") {
+            this.$nextTick(() => {
+                this.$router.updateQuery({});
+            });
+        }
+    },
 };
 </script>
 

@@ -10,8 +10,8 @@ Service.prototype.getAllByUser = function (userName) {
     return Promise.reject("Data is invalid");
 };
 
-Service.prototype.post = function (groupInfo) {
-    if (typeof groupInfo == "object" && typeof groupInfo.name == "string" && Array.isArray(groupInfo.subscribers)) {
+Service.prototype.create = function (groupInfo) {
+    if (typeof groupInfo == "object" && Array.isArray(groupInfo.subscribers)) {
         if (groupInfo.subscribers.length <= 0) {
             return Promise.reject("[subscribers] is required for new conversation");
         }
