@@ -21,4 +21,8 @@ Service.prototype.getByIds = function (userIds) {
     return Promise.reject("Data is invalid");
 };
 
+Service.prototype.search = function (text) {
+    return Axios.get(this.name + "?text=" + text);
+};
+
 export default Service;
