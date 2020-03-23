@@ -1,6 +1,7 @@
 "use strict";
 const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
+const { cleanDbMark } = require("../utils/entity");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -364,11 +365,10 @@ module.exports = {
             return this.broker.emit(eventName, message);
         },
         async filterMessage(ctx) {
-            let { conversation, history } = ctx.params;
+            const { conversation, history, id } = ctx.params;
             // Check conversation
             this.checkConversation(conversation);
 
-            let { id } = ctx.params;
             try {
                 const historyColl = this.getHistoryCollection(conversation);
                 const dbCollection = await this.getDBCollection(historyColl);
@@ -395,8 +395,7 @@ module.exports = {
                     if (history != true) {
                         delete record.modification;
                     }
-                    delete record._id;
-                    return record;
+                    return cleanDbMark(record);
                 });
             } catch (error) {
                 this.logger.error(error);

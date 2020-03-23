@@ -84,7 +84,7 @@ module.exports = {
                 const filter = {
                     limit,
                     offset,
-                    sort: sort || ["id"],
+                    sort: sort || ["-id"],
                     query: {
                         channel
                     }
