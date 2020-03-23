@@ -1,13 +1,7 @@
 <template>
     <v-list-item class="px-2 message-item your-message" :data-msg-index="index">
         <v-list-item-avatar class="ma-0">
-            <v-avatar size="30" class="mx-auto">
-                <v-img
-                    :src="
-                        `https://randomuser.me/api/portraits/men/${index}.jpg`
-                    "
-                ></v-img>
-            </v-avatar>
+            <UserAvatar :user="user" />
         </v-list-item-avatar>
         <v-card flat class="ml-1 message--text py-1">
             <v-card-subtitle class="py-1" v-text="displayTime">
@@ -21,8 +15,10 @@
 </template>
 
 <script>
+import UserAvatar from "../../components/user-avatar.vue";
 export default {
-    props: ["index", "message"],
+    props: ["index", "message", "user"],
+    components: {UserAvatar},
     computed: {
         displayTime() {
             return new Date(this.message.arrivalTime).toLocaleString();

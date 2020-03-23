@@ -15,6 +15,7 @@
                 ></MyMessage>
                 <YourMessage
                     v-else
+                    :user="destUser"
                     :key="msg.id"
                     :index="index"
                     :message="msg"
@@ -64,13 +65,24 @@ export default {
         return {
             theme: this.$vuetify.theme,
             newMessage: "",
-            messages: []
+            messages: [],
         };
     },
     computed: {
         ...mapState({
             activatedChat: state => state.chats.active,
         }),
+        destUser() {
+            if (this.activatedChat) {
+                const subscribers = this.activatedChat.subscribers.filter(
+                    user => !user._isMe
+                );
+                if (subscribers.length > 0) {
+                    return subscribers[0];
+                }
+            }
+            return {};
+        },
         chatId() {
             return this.activatedChat ? this.activatedChat.id : -1;
         },
@@ -78,7 +90,7 @@ export default {
     watch: {
         activatedChat() {
             this.messages = this.activatedChat.messages;
-        }
+        },
     },
     created() {
         if (this.activatedChat) {
@@ -111,7 +123,7 @@ export default {
                 this.$store
                     .dispatch("chats/sendMessage", msg)
                     .then(() => {
-                        this.newMessage = null;
+                        this.newMessage = "";
                     })
                     .catch(console.error);
             }
@@ -146,22 +158,22 @@ export default {
 }
 
 .message-sheet >>> .your-message + .your-message {
-  margin-top: 4px !important;
+    margin-top: 4px !important;
 }
 
 .message-sheet >>> .your-message .v-avatar {
-  visibility: hidden;
+    visibility: hidden;
 }
 .message-sheet >>> .your-message:first-of-type .v-avatar {
-  visibility: inherit;
+    visibility: inherit;
 }
 
 .message-sheet >>> .my-message + .your-message .v-avatar {
-  visibility: inherit;
+    visibility: inherit;
 }
 
 .message-sheet >>> .my-message + .my-message {
-  margin-top: 4px !important;
+    margin-top: 4px !important;
 }
 
 /* .message-sheet >>> .my-message:last-of-type {
