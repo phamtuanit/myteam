@@ -116,6 +116,13 @@ export default {
     },
     mounted() {
         this.searchLocker = Promise.resolve();
+
+        // Update url query
+        if (!this.$route.query._id && this.activatedChat) {
+            const newQuery = { ...this.$route.query };
+            newQuery._id = this.activatedChat.id;
+            this.$router.updateQuery(newQuery);
+        }
     },
     methods: {
         openChat(chat) {
