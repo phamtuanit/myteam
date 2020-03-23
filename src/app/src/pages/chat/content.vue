@@ -25,7 +25,7 @@
         </v-sheet>
 
         <!-- Input -->
-        <v-list height="48" class="py-0 no-border-radius">
+        <v-list height="48" v-show="activatedChat" class="py-0 no-border-radius">
             <v-list-item class="px-0 px-2">
                 <EmojiButton @select="onSelectEmoji"></EmojiButton>
                 <v-text-field

@@ -4,7 +4,9 @@
             <UserAvatar :user="user" />
         </v-list-item-avatar>
         <v-card flat class="ml-1 message--text py-1">
-            <v-card-subtitle class="py-1" v-text="displayTime">
+            <v-card-subtitle class="py-1">
+                <span class="font-weight-medium mr-2" v-text="fullName"></span>
+                <span v-text="time"></span>
             </v-card-subtitle>
             <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
             </v-card-text>
@@ -20,7 +22,11 @@ export default {
     props: ["index", "message", "user"],
     components: {UserAvatar},
     computed: {
-        displayTime() {
+        fullName() {
+            const nameArr = [this.user.firstName, this.user.lastName]
+            return this.user.fullName || nameArr.join(", ");
+        },
+        time() {
             return new Date(this.message.arrivalTime).toLocaleString();
         }
     }
