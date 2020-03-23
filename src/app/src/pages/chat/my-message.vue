@@ -1,9 +1,9 @@
 <template>
-    <v-list-item class="px-2 my-message">
+    <v-list-item class="px-2 message-item my-message" :data-msg-index="index">
         <v-list-item-avatar></v-list-item-avatar>
         <v-spacer></v-spacer>
         <v-card flat class="mr-1 message--text py-1">
-            <v-card-subtitle class="py-1" v-text="new Date().toLocaleString()">
+            <v-card-subtitle class="py-1" v-text="displayTime">
             </v-card-subtitle>
             <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
             </v-card-text>
@@ -14,6 +14,11 @@
 <script>
 export default {
     props: ["index", "message"],
+    computed: {
+        displayTime() {
+            return new Date(this.message.arrivalTime).toLocaleString();
+        }
+    }
 };
 </script>
 
