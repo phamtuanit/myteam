@@ -8,7 +8,7 @@ const moduleState = {
         moduleState: "startup",
     },
     getters: {
-        getUser: state => (id) => state.all.find(i => i.id == id),
+        getUser: state => id => state.all.find(i => i.id == id),
         getAll: state => state.all,
         getMe: state => state.me,
     },
@@ -18,6 +18,7 @@ const moduleState = {
         },
         setMe(state, user) {
             user._isMe = true;
+            user.status = "on";
             state.me = user;
             state.all.push(user);
         },
@@ -25,14 +26,14 @@ const moduleState = {
             const userCache = state.all;
             if (Array.isArray(userIds)) {
                 userIds.forEach(ui => {
-                    const exisintUser = userCache.find(i => i.id == ui);
-                    if (!exisintUser && !state.requireList.has(ui)) {
+                    const existingUser = userCache.find(i => i.id == ui);
+                    if (!existingUser && !state.requireList.has(ui)) {
                         state.requireList.add(ui);
                     }
                 });
             } else {
-                const exisintUser = userCache.find(i => i.id == userIds);
-                if (!exisintUser && !state.requireList.has(userIds)) {
+                const existingUser = userCache.find(i => i.id == userIds);
+                if (!existingUser && !state.requireList.has(userIds)) {
                     state.requireList.add(userIds);
                 }
             }
@@ -41,31 +42,31 @@ const moduleState = {
             const userCache = state.all;
             if (Array.isArray(users)) {
                 users.forEach(user => {
-                    const exisintUser = userCache.find(i => i.id == user.id);
-                    if (exisintUser) {
-                        Object.assign(exisintUser, user);
+                    const existingUser = userCache.find(i => i.id == user.id);
+                    if (existingUser) {
+                        Object.assign(existingUser, user);
                     } else {
+                        user.status = user.status || "off";
                         userCache.push(user);
                     }
                     state.requireList.delete(user.id);
                 });
             } else {
-                const exisintUser = userCache.find(i => i.id == users.id);
-                if (exisintUser) {
-                    Object.assign(exisintUser, users);
+                const existingUser = userCache.find(i => i.id == users.id);
+                if (existingUser) {
+                    Object.assign(existingUser, users);
                 } else {
+                    users.status = users.status || "off";
                     userCache.push(users);
                 }
                 state.requireList.delete(users.id);
             }
-        }
+        },
     },
     actions: {
-        initialize({ commit }) {
-            const socket = window.IoC.get("socket");
-            socket.on("live", (act, data) => {
-                console.info("---- WS-live:", act, data);
-            });
+        async initialize({ commit }) {
+            // Setup Socket
+            await this.dispatch("users/setupSocket");
 
             commit("setModuleState", "initialized");
         },
@@ -97,11 +98,15 @@ const moduleState = {
                 commit("cache", userList);
             }
 
-            return Array.isArray(userId) ? Object.values(result) : Object.values(result)[0];
+            return Array.isArray(userId)
+                ? Object.values(result)
+                : Object.values(result)[0];
         },
         async resolveAll({ state, commit }) {
             if (state.requireList.size > 0) {
-                const res = await service.getByIds(Array.from(state.requireList));
+                const res = await service.getByIds(
+                    Array.from(state.requireList)
+                );
                 const users = res.data;
 
                 if (users && users.length > 0) {
@@ -124,7 +129,25 @@ const moduleState = {
 
                 return users;
             });
-        }
+        },
+        setupSocket({ commit }) {
+            const socket = window.IoC.get("socket");
+            socket.on("live", (act, data) => {
+                console.log("-----WS:", act, data);
+                const user = data.user;
+                switch (act) {
+                    case "on":
+                    case "off":
+                        user.status = data.status;
+                        commit("cache", user);
+                        break;
+
+                    default:
+                        console.warn("Unsupported message.", data);
+                        break;
+                }
+            });
+        },
     },
 };
 

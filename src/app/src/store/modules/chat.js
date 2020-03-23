@@ -5,6 +5,7 @@ const moduleState = {
     namespaced: true,
     getters: {
         getAllChat: state => state.all,
+        getChat: state => id => state.all.find(i => i.id == id),
     },
     state: {
         all: [],
@@ -32,6 +33,12 @@ const moduleState = {
             state.active = chat;
         },
         addChat(state, chat) {
+            if (!chat.messages) {
+                chat.messages = [];
+            }
+            if (!chat.recent) {
+                chat.recent = {};
+            }
             state.all.push(chat);
         },
         addMessage(state, { chatId, message }) {
@@ -40,12 +47,23 @@ const moduleState = {
             }
             const chat = state.all.find(c => c.id == chatId);
             if (chat) {
-                if (!chat.messages) {
-                    chat.messages = [];
+                // Incase has chat in cache
+                if (message.from && message.from.issuer) {
+                    const me = this.state.users.me;
+                    message._isMe = message.from.issuer == me.id;
                 }
 
-                message._isMe = true;
-                chat.messages.push(message);
+                if (!chat.messages) {
+                    chat.messages = [message];
+                } else {
+                    const foundMessage = chat.messages.find(i => i.id == message.id);
+                    if (!foundMessage) {
+                        chat.messages.push(message);
+                    } else {
+                        Object.assign(foundMessage, message);
+                    }
+                }
+
                 chat.recent = message;
             }
         },
@@ -68,6 +86,18 @@ const moduleState = {
                         );
                         conv.subscribers = users;
                     }
+                }
+            }
+
+            commit("setAll", convList);
+
+            // Setup Socket
+            await this.dispatch("chats/setupSocket");
+
+            // Get message history from server after configured socket
+            if (convList) {
+                for (let index = 0; index < convList.length; index++) {
+                    const conv = convList[index];
 
                     // Load conversation content
                     const content = await this.dispatch(
@@ -88,14 +118,6 @@ const moduleState = {
                     });
                 }
             }
-
-            commit("setAll", convList);
-
-            // Setup Socket
-            const socket = window.IoC.get("socket");
-            socket.on("message", (act, data) => {
-                console.info("---- WS-message:", act, data);
-            });
 
             commit("setModuleState", "initialized");
         },
@@ -125,7 +147,17 @@ const moduleState = {
                 return chat;
             }
         },
-        sendMessage({ commit, state }, { chatId, body }) {
+        async loadChat({ commit }, chatId) {
+            const conv = (await convService.getAllById(chatId)).data;
+            if (conv) {
+                const subscribers = await this.dispatch("users/resolve", conv.subscribers);
+                conv.subscribers = subscribers;
+                
+                commit("addChat", conv);
+                return conv;
+            }
+        },
+        sendMessage({ commit }, { chatId, body }) {
             return messageService.create(parseInt(chatId), body).then(res => {
                 const payload = {
                     chatId,
@@ -142,6 +174,42 @@ const moduleState = {
                 });
             }
             return Promise.reject("No conversation id");
+        },
+        setupSocket({ commit, state }) {
+            const socket = window.IoC.get("socket");
+            socket.on("message", (act, data) => {
+                switch (act) {
+                    case "created":
+                        if (!data.payload || !data.payload) {
+                            break;
+                        }
+
+                        {
+                            const message = data.payload.payload;
+                            const chatId = message.to.conversation;
+
+                            const existingConv = state.all.find(i => i.id == chatId);
+                            if (existingConv) {
+                                commit("addMessage", { chatId, message });
+                            } else {
+                                // Incase no chat in cache.
+                                this.dispatch("chats/loadChat", chatId).then(chat => {
+                                    if (chat) {
+                                        commit("addMessage", { chatId, message });
+                                    }
+                                }).catch(console.error);
+                            }
+                        }
+                        break;
+                    case "rejected":
+                        commit("rejectedMessage", data);
+                        break;
+
+                    default:
+                        console.warn("Unsupported message.", data);
+                        break;
+                }
+            });
         },
     },
 };

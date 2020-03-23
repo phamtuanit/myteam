@@ -10,6 +10,13 @@ Service.prototype.getAllByUser = function (userName) {
     return Promise.reject("Data is invalid");
 };
 
+Service.prototype.getAllById = function (id) {
+    if (typeof id == "number") {
+        return Axios.get(this.name + id);
+    }
+    return Promise.reject("Data is invalid");
+};
+
 Service.prototype.create = function (groupInfo) {
     if (typeof groupInfo == "object" && Array.isArray(groupInfo.subscribers)) {
         if (groupInfo.subscribers.length <= 0) {

@@ -64,20 +64,26 @@ export default {
         return {
             theme: this.$vuetify.theme,
             newMessage: "",
+            messages: []
         };
     },
     computed: {
         ...mapState({
             activatedChat: state => state.chats.active,
-            messages: state => state.chats.active.messages,
         }),
         chatId() {
             return this.activatedChat ? this.activatedChat.id : -1;
         },
     },
     watch: {
+        activatedChat() {
+            this.messages = this.activatedChat.messages;
+        }
     },
     created() {
+        if (this.activatedChat) {
+            this.messages = this.activatedChat.messages;
+        }
     },
     mounted() {
         fillHeight("message-sheet", 49, this.$el);
@@ -144,14 +150,14 @@ export default {
 }
 
 .message-sheet >>> .your-message .v-avatar {
-  opacity: 0;
+  visibility: hidden;
 }
 .message-sheet >>> .your-message:first-of-type .v-avatar {
-  opacity: 1;
+  visibility: inherit;
 }
 
 .message-sheet >>> .my-message + .your-message .v-avatar {
-  opacity: 1;
+  visibility: inherit;
 }
 
 .message-sheet >>> .my-message + .my-message {

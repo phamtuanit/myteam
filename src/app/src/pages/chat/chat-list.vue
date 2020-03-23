@@ -1,94 +1,68 @@
 <template>
-  <v-sheet
-    width="300px"
-    class="pa-0 fill-height no-border-radius"
-    dark
-    id="chat-list"
-  >
-    <!-- Search -->
-    <v-list
-      dense
-      dark
-      class="pb-0"
+    <v-sheet
+        width="300px"
+        class="pa-0 fill-height no-border-radius"
+        dark
+        id="chat-list"
     >
-      <v-list-item class="px-3 mt-1">
-        <v-text-field
-          v-model="searchText"
-          prepend-inner-icon="mdi-magnify"
-          label="Search"
-          flat
-          solo-inverted
-          rounded
-          hide-details
-          clearable
-          clear-icon="mdi-close"
-        ></v-text-field>
-        <v-btn
-          icon
-          size="40"
-          outlined
-          class="ml-2"
-          @click="onAddChat"
-        >
-          <v-icon v-text="plusIcon"></v-icon>
-        </v-btn>
-      </v-list-item>
-    </v-list>
+        <!-- Search -->
+        <v-list dense dark class="pb-0">
+            <v-list-item class="px-3 mt-1">
+                <v-text-field
+                    v-model="searchText"
+                    prepend-inner-icon="mdi-magnify"
+                    label="Search"
+                    flat
+                    solo-inverted
+                    rounded
+                    hide-details
+                    clearable
+                    clear-icon="mdi-close"
+                ></v-text-field>
+            </v-list-item>
+        </v-list>
 
-    <!-- List -->
-    <v-list
-      two-line
-      dark
-      class="py-0 px-0"
-    >
-      <v-subheader
-        class="pl-3 pr-2"
-        v-text="title"
-      ></v-subheader>
+        <!-- List -->
+        <v-list two-line dark class="py-0 px-0">
+            <v-subheader class="pl-3 pr-2">Conversations</v-subheader>
 
-      <!-- Chat list -->
-      <v-list-item-group v-model="activatedChat" mandatory>
-        <v-list-item
-          v-for="chat in chatList"
-          :key="chat.id"
-          :value="chat"
-          @click="openChat(chat, chat.user)"
-        >
-          <v-avatar size="30">
-            <v-img src="https://randomuser.me/api/portraits/men/81.jpg"></v-img>
-          </v-avatar>
+            <!-- Chat list -->
+            <v-list-item-group v-model="activatedChat" mandatory>
+                <v-list-item
+                    v-for="chat in chatList"
+                    :key="chat.id"
+                    :value="chat"
+                    @click="openChat(chat)"
+                >
+                    <UserAvatar :user="getTargetUser(chat)" />
 
-          <v-list-item-content class="py-2 px-2">
-            <v-list-item-title
-              class="body-2"
-              v-text="getChatName(chat)"
-            ></v-list-item-title>
-            <v-list-item-subtitle
-              class="caption"
-              v-text="chat.recentMessage"
-            ></v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list-item-group>
-    </v-list>
-  </v-sheet>
+                    <v-list-item-content class="py-2 px-2">
+                        <v-list-item-title
+                            class="body-2"
+                            v-text="getChatName(chat)"
+                        ></v-list-item-title>
+                        <v-list-item-subtitle
+                            class="caption"
+                            v-text="getRecentMessage(chat)"
+                        ></v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+            </v-list-item-group>
+        </v-list>
+    </v-sheet>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import UserAvatar from "../../components/user-avatar.vue";
 export default {
+    components: { UserAvatar },
     data() {
         return {
             searchText: null,
         };
     },
     computed: {
-        title() {
-            return "Conversations";
-        },
-        plusIcon() {
-            return "mdi-plus";
-        },
         ...mapState({
             chatList: state => state.chats.all,
         }),
@@ -97,9 +71,9 @@ export default {
                 return this.$store.state.chats.active;
             },
             set(val) {
-              if (val) {
-                return this.$store.dispatch("chats/activeChat", val.id);
-              }
+                if (val) {
+                    return this.$store.dispatch("chats/activeChat", val.id);
+                }
             },
         },
     },
@@ -144,7 +118,7 @@ export default {
         this.searchLocker = Promise.resolve();
     },
     methods: {
-        openChat(chat, friend) {
+        openChat(chat) {
             if (this.activatedChat.id == chat.id) {
                 return;
             }
@@ -152,7 +126,6 @@ export default {
             // Incase user re-open existing chat
             this.$store.dispatch("chats/activeChat", chat.id);
         },
-        onAddChat() {},
         getChatName(chat) {
             if (chat.name) {
                 return chat.name;
@@ -160,8 +133,36 @@ export default {
 
             const friends = chat.subscribers
                 .filter(user => !user._isMe)
-                .map(user => user.firstname + ", " + user.lastname);
+                .map(user => {
+                    return (
+                        user.fullName || user.firstName + ", " + user.lastName
+                    );
+                });
             return friends.join(", ");
+        },
+        getRecentMessage(chat) {
+            if (!chat || !chat.recent || !chat.recent.body) {
+                return "...";
+            }
+
+            const msgType = chat.recent.body.type || "html";
+            switch (msgType) {
+                case "html":
+                    return chat.recent.body.content;
+
+                default:
+                    break;
+            }
+        },
+        getTargetUser(chat) {
+            if (chat) {
+                const friends = chat.subscribers.filter(user => !user._isMe);
+                if (friends.length > 0) {
+                    return friends[0];
+                }
+            }
+            // Dummy data
+            return {};
         },
     },
 };
