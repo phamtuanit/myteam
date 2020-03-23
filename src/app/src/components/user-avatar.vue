@@ -7,7 +7,7 @@
         overlap
         bordered
     >
-        <Avatar :user-name="user.fullName" :src="user.avatar" :size="30"></Avatar>
+        <Avatar :user-name="user.fullName" :src="user.avatar" :size="30" :animation="animation"></Avatar>
         <!-- <v-avatar size="30">
             <v-img src="https://randomuser.me/api/portraits/men/81.jpg"></v-img>
         </v-avatar> -->
@@ -17,7 +17,10 @@
 <script>
 import Avatar from "./avatar";
 export default {
-    props: ["user"],
+    props: {
+        user: Object,
+        animation: Boolean
+    },
     components: { Avatar },
     computed: {
         isOnline() {

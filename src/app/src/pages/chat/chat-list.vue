@@ -34,7 +34,7 @@
                     :value="chat"
                     @click="openChat(chat)"
                 >
-                    <UserAvatar :user="getTargetUser(chat)" />
+                    <UserAvatar :user="getTargetUser(chat)" :animation="activatedChat.id == chat.id"/>
 
                     <v-list-item-content class="py-2 px-2">
                         <v-list-item-title
