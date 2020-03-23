@@ -1,7 +1,7 @@
 <template>
     <v-sheet
         id="friend-list"
-        width="220px"
+        width="250px"
         class="pa-0 fill-height no-border-radius"
     >
         <!-- Search -->
@@ -19,7 +19,7 @@
                     clear-icon="mdi-close"
                 ></v-text-field>
 
-                <v-btn icon class="ml-2" outlined @click="onAddChat">
+                <v-btn icon class="ml-2" outlined @click="onAddChat" :disabled="!selectedUser">
                     <v-icon>mdi-plus</v-icon>
                 </v-btn>
             </v-list-item>
@@ -42,7 +42,7 @@
                         :value="user"
                         v-if="!user._isMe"
                     >
-                        <UserAvatar :user="user" />
+                        <UserAvatar :user-name="me.fullName" :user="user" />
 
                         <v-list-item-content class="py-2 px-2">
                             <v-list-item-title
@@ -76,6 +76,7 @@ export default {
     },
     computed: {
         ...mapState({
+            me: state => state.users.me,
             cachedUsers: state => state.users.all,
         }),
     },
@@ -164,5 +165,25 @@ export default {
 
 #friend-list >>> .v-text-field--rounded {
     border-radius: 20px;
+}
+
+#friend-list >>> .theme--light.v-btn {
+    color: #043752c7;
+}
+
+#friend-list >>> .theme--light.v-btn--outlined {
+    border: 1.5px solid #043752c7;
+}
+
+#friend-list >>> .theme--dark.v-btn--outlined {
+    border: 1.5px solid #ffffffca;
+}
+
+#friend-list >>> .theme--light.v-btn--outlined.v-btn--disabled {
+    border: 1.5px solid rgba(0, 0, 0, 0.26) !important;
+}
+
+#friend-list >>> .theme--dark.v-btn--outlined.v-btn--disabled {
+    border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
 }
 </style>
