@@ -4,37 +4,11 @@
       class="overflow-y-auto message-sheet no-border-radius"
       v-chat-scroll="{ always: false, smooth: true }"
     >
-      <v-list-item
-        v-for="(msg, index) in messages"
-        :key="msg.id"
-        class="mt-1 px-2"
-      >
-        <v-list-item-avatar></v-list-item-avatar>
-        <v-spacer></v-spacer>
-        <v-card
-          flat
-          class="mr-1 message--text py-1"
-        >
-          <v-card-subtitle
-            class="py-1"
-            v-text="new Date().toLocaleString()"
-          >
-          </v-card-subtitle>
-          <v-card-text
-            class="pt-0 pb-1 px-4"
-            v-html="msg.body.content"
-          >
-          </v-card-text>
-        </v-card>
-        <v-list-item-avatar class="ma-0">
-          <v-avatar
-            size="30"
-            class="mx-auto"
-          >
-            <v-img :src="`https://randomuser.me/api/portraits/men/${index}.jpg`"></v-img>
-          </v-avatar>
-        </v-list-item-avatar>
-      </v-list-item>
+    <!-- MineMessage -->
+    <template v-for="(msg, index) in messages">
+      <MyMessage v-if="msg._isMe == true" :key="msg.id" :index="index" :message="msg" class="mt-3"></MyMessage>
+      <YourMessage v-else :key="msg.id" :index="index" :message="msg" class="mt-3"></YourMessage>
+    </template>
     </v-sheet>
 
     <!-- Input -->
@@ -71,9 +45,12 @@
 <script>
 import { fillHeight } from "../../utils/layout.js";
 import EmojiButton from "../../components/emoji-button";
+import MyMessage from "./my-message";
+import YourMessage from "./your-message";
+
 import { mapState } from "vuex";
 export default {
-    components: { EmojiButton },
+    components: { EmojiButton, MyMessage, YourMessage },
     data() {
         return {
             theme: this.$vuetify.theme,
@@ -134,7 +111,9 @@ export default {
             this.newMessage = "";
         },
         onSelectEmoji(emoji) {
+          if (emoji.native) {
             this.newMessage += emoji.native;
+          }
         },
         loadChatContent() {},
     },
