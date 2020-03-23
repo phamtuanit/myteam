@@ -133,7 +133,6 @@ const moduleState = {
         setupSocket({ commit }) {
             const socket = window.IoC.get("socket");
             socket.on("live", (act, data) => {
-                console.log("-----WS:", act, data);
                 const user = data.user;
                 switch (act) {
                     case "on":
