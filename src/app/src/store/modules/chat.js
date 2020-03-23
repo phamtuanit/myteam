@@ -164,7 +164,7 @@ const moduleState = {
         },
         activeChat({ commit, state }, id) {
             if (state.active && state.active.id == id) {
-                return;
+                return state.active;
             }
 
             const chat = state.all.find(i => i.id == id);
