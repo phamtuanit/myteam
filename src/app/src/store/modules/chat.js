@@ -22,7 +22,7 @@ const moduleState = {
             if (!chat) {
                 return;
             }
-            
+
             if (!chat.messages) {
                 chat.messages = [];
             }
@@ -35,11 +35,16 @@ const moduleState = {
             state.all.push(chat);
         },
         addMessage(state, { chatId, message }) {
+            if (!message || typeof chatId != "number") {
+                return;
+            }
             const chat = state.all.find(c => c.id == chatId);
             if (chat) {
                 if (!chat.messages) {
                     chat.messages = [];
                 }
+
+                message._isMe = true;
                 chat.messages.push(message);
                 chat.recent = message;
             }
@@ -74,6 +79,13 @@ const moduleState = {
                         conv.messages.length > 0
                             ? conv.messages[conv.messages.length - 1]
                             : {};
+
+                    // Update Me info
+                    conv.messages.forEach(msg => {
+                        if (msg.from && msg.from.issuer == me.id) {
+                            msg._isMe = true;
+                        }
+                    });
                 }
             }
 
