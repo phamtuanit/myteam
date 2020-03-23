@@ -59,11 +59,11 @@ module.exports = {
                     if (users.length > 0) {
                         filter.query.id = {
                             $in: users
-                        }
+                        };
                     } else {
                         filter.query.id = {
                             $in: user
-                        }
+                        };
                     }
                 }
 
@@ -77,7 +77,10 @@ module.exports = {
                 // Delete _id and get status
                 if (result) {
                     const userIds = result.map(i => i.id);
-                    const statusList = await ctx.call("v1.live.getUserStatusById", { userId: userIds });
+                    const statusList = await ctx.call(
+                        "v1.live.getUserStatusById",
+                        { userId: userIds }
+                    );
 
                     for (let index = 0; index < result.length; index++) {
                         const userInfo = result[index];
@@ -88,7 +91,7 @@ module.exports = {
 
                 return result;
             }
-        },
+        }
     },
 
     /**
@@ -131,7 +134,7 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {},
 
     /**
      * Service started lifecycle event handler
@@ -143,11 +146,11 @@ module.exports = {
             lastname: "text",
             mail: "text",
             phone: "text"
-        })
+        });
     },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { }
+    stopped() {}
 };
