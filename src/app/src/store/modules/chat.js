@@ -47,6 +47,8 @@ const moduleState = {
             }
             const chat = state.all.find(c => c.id == chatId);
             if (chat) {
+                message.status = "valid";
+
                 // Incase has chat in cache
                 if (message.from && message.from.issuer) {
                     const me = this.state.users.me;
@@ -56,7 +58,9 @@ const moduleState = {
                 if (!chat.messages) {
                     chat.messages = [message];
                 } else {
-                    const foundMessage = chat.messages.find(i => i.id == message.id);
+                    const foundMessage = chat.messages.find(
+                        i => i.id == message.id
+                    );
                     if (!foundMessage) {
                         chat.messages.push(message);
                     } else {
@@ -66,6 +70,28 @@ const moduleState = {
 
                 chat.recent = message;
             }
+        },
+        rejectedMessage(state, { action: preAct, payload: message, error }) {
+            const chatId = message.to.conversation;
+            if ( typeof chatId != "number") {
+                console.warn("Could not detect chatId. Ignore this information.");
+                return;
+            }
+            const chat = state.all.find(c =>c.id == chatId);
+            if (!chat) {
+                console.warn("Could not find existing chat. Ignore this information.");
+                return;
+            }
+
+            const existingMsg = chat.messages.find(i => i.id == message.id);
+            if (!existingMsg) {
+                console.info("Could not find existing message. Ignore this information.");
+                return;
+            }
+
+            existingMsg.status = preAct + "-rejected";
+            existingMsg.error = "The message could not be sent!";
+            console.info("A message was rejected.", error);
         },
     },
     actions: {
@@ -150,9 +176,12 @@ const moduleState = {
         async loadChat({ commit }, chatId) {
             const conv = (await convService.getAllById(chatId)).data;
             if (conv) {
-                const subscribers = await this.dispatch("users/resolve", conv.subscribers);
+                const subscribers = await this.dispatch(
+                    "users/resolve",
+                    conv.subscribers
+                );
                 conv.subscribers = subscribers;
-                
+
                 commit("addChat", conv);
                 return conv;
             }
@@ -188,16 +217,23 @@ const moduleState = {
                             const message = data.payload.payload;
                             const chatId = message.to.conversation;
 
-                            const existingConv = state.all.find(i => i.id == chatId);
+                            const existingConv = state.all.find(
+                                i => i.id == chatId
+                            );
                             if (existingConv) {
                                 commit("addMessage", { chatId, message });
                             } else {
                                 // Incase no chat in cache.
-                                this.dispatch("chats/loadChat", chatId).then(chat => {
-                                    if (chat) {
-                                        commit("addMessage", { chatId, message });
-                                    }
-                                }).catch(console.error);
+                                this.dispatch("chats/loadChat", chatId)
+                                    .then(chat => {
+                                        if (chat) {
+                                            commit("addMessage", {
+                                                chatId,
+                                                message,
+                                            });
+                                        }
+                                    })
+                                    .catch(console.error);
                             }
                         }
                         break;

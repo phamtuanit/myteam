@@ -173,7 +173,7 @@ export default {
 }
 
 .message-sheet >>> .my-message + .my-message {
-    margin-top: 4px !important;
+    margin-top: 6px !important;
 }
 
 /* .message-sheet >>> .my-message:last-of-type {
