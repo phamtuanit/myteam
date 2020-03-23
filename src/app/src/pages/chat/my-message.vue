@@ -6,16 +6,12 @@
         <v-list-item-avatar></v-list-item-avatar>
         <v-spacer></v-spacer>
         <v-card flat class="mr-1 message-card py-1" :disabled="hasError">
-            <v-card-subtitle class="py-1">
-                <span v-text="displayTime"></span>
-                <v-icon
-                    v-if="hasError"
-                    small
-                    color="red lighten-1"
-                    class="mx-2"
+            <div class="py-1 px-4">
+                <span class="caption" v-text="time"></span>
+                <v-icon v-if="hasError" small color="red lighten-1" class="mx-2"
                     >mdi-alert</v-icon
                 >
-            </v-card-subtitle>
+            </div>
             <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
             </v-card-text>
         </v-card>
@@ -26,7 +22,7 @@
 export default {
     props: ["index", "message"],
     computed: {
-        displayTime() {
+        time() {
             return new Date(this.message.arrivalTime).toLocaleString();
         },
         hasError() {

@@ -4,10 +4,10 @@
             <UserAvatar :user="user" />
         </v-list-item-avatar>
         <v-card flat class="ml-1 message--text py-1">
-            <v-card-subtitle class="py-1">
-                <span class="font-weight-medium mr-2" v-text="fullName"></span>
-                <span v-text="time"></span>
-            </v-card-subtitle>
+            <div class="py-1 px-4">
+                <span class="subtitle-2 mr-2" v-text="fullName"></span>
+                <span class="caption" v-text="time"></span>
+            </div>
             <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
             </v-card-text>
         </v-card>
