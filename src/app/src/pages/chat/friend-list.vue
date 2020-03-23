@@ -1,73 +1,74 @@
 <template>
-  <v-sheet
-    id="friend-list"
-    width="220px"
-    class="pa-0 fill-height no-border-radius"
-  >
-    <!-- Search -->
-    <v-list
-      dense
-      class="pb-0"
+    <v-sheet
+        id="friend-list"
+        width="220px"
+        class="pa-0 fill-height no-border-radius"
     >
-      <v-list-item class="px-3 mt-1">
-        <v-text-field
-          v-model="searchText"
-          prepend-inner-icon="mdi-magnify"
-          label="Search"
-          flat
-          solo-inverted
-          rounded
-          hide-details
-          clearable
-          clear-icon="mdi-close"
-        ></v-text-field>
-      </v-list-item>
-    </v-list>
+        <!-- Search -->
+        <v-list dense class="pb-0">
+            <v-list-item class="px-3 mt-1">
+                <v-text-field
+                    v-model="searchText"
+                    prepend-inner-icon="mdi-magnify"
+                    label="Search"
+                    flat
+                    solo-inverted
+                    rounded
+                    hide-details
+                    clearable
+                    clear-icon="mdi-close"
+                ></v-text-field>
 
-    <!-- Friends -->
-    <v-list
-      two-line
-      class="py-0 px-0"
-    >
-      <v-subheader class="pl-3 pr-2">Friends</v-subheader>
+                <v-btn icon size="40" outlined class="ml-2" @click="onAddChat">
+                    <v-icon>mdi-plus</v-icon>
+                </v-btn>
+            </v-list-item>
+        </v-list>
 
-      <v-progress-linear
-        :active="loading"
-        :indeterminate="true"
-      ></v-progress-linear>
+        <!-- Friends -->
+        <v-list two-line class="py-0 px-0">
+            <v-subheader class="pl-3 pr-2">Friends</v-subheader>
 
-      <!-- List -->
-      <template v-for="user in friendList">
-        <v-list-item
-          :key="user.id"
-          v-if="!user._isMe"
-          @click="openChat(user)"
-        >
-          <v-avatar size="30">
-            <v-img src="https://randomuser.me/api/portraits/men/81.jpg"></v-img>
-          </v-avatar>
+            <v-progress-linear
+                :active="loading"
+                :indeterminate="true"
+            ></v-progress-linear>
 
-          <v-list-item-content class="py-2 px-2">
-            <v-list-item-title
-              class="body-2"
-              v-text="getDisplayName(user)"
-            ></v-list-item-title>
-            <v-list-item-subtitle
-              class="caption"
-              v-text="user.mail"
-            ></v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </template>
-    </v-list>
-  </v-sheet>
+            <!-- List -->
+            <v-list-item-group v-model="selectedUser">
+                <template v-for="user in friendList">
+                    <v-list-item
+                        :key="user.id"
+                        :value="user"
+                        v-if="!user._isMe"
+                    >
+                        <UserAvatar :user="user" />
+
+                        <v-list-item-content class="py-2 px-2">
+                            <v-list-item-title
+                                class="body-2"
+                                v-text="getDisplayName(user)"
+                            ></v-list-item-title>
+                            <v-list-item-subtitle
+                                class="caption"
+                                v-text="user.mail"
+                            ></v-list-item-subtitle>
+                        </v-list-item-content>
+                    </v-list-item>
+                </template>
+            </v-list-item-group>
+        </v-list>
+    </v-sheet>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import UserAvatar from "../../components/user-avatar.vue";
 export default {
+    components: { UserAvatar },
     data() {
         return {
+            selectedUser: null,
             loading: false,
             searchText: null,
             friendList: [],
@@ -88,7 +89,8 @@ export default {
         this.friendList = this.cachedUsers;
     },
     methods: {
-        openChat(user) {
+        onAddChat() {
+            const user = this.selectedUser;
             const existingChat = this.$store.state.chats.all.find(chat => {
                 if (chat.subscribers && chat.subscribers.length == 2) {
                     const matchedSub = chat.subscribers.filter(sub => {
@@ -102,13 +104,21 @@ export default {
 
             if (existingChat) {
                 // Active exsiting chat
-                this.$store.dispatch("chats/activeChat", existingChat.id);
+                this.$store
+                    .dispatch("chats/activeChat", existingChat.id)
+                    .then(() => {
+                        this.selectedUser = null;
+                    })
+                    .catch(console.error);
                 return;
             }
 
             // Create new conversation first
             this.$store
                 .dispatch("chats/createChat", user.id)
+                .then(() => {
+                    this.selectedUser = null;
+                })
                 .catch(console.error);
         },
         searchFriend() {
@@ -137,7 +147,7 @@ export default {
                 });
         },
         getDisplayName(user) {
-            return user.firstname + ", " + user.lastname;
+            return user.fullName || user.firstName + ", " + user.lastName;
         },
     },
 };
@@ -154,5 +164,9 @@ export default {
 
 #friend-list >>> .v-text-field--rounded {
     border-radius: 20px;
+}
+
+#friend-list >>> .v-btn.v-btn--icon {
+    color: var(--primary-color-2);
 }
 </style>
