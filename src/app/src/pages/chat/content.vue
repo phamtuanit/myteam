@@ -146,6 +146,9 @@ export default {
 .message-sheet >>> .your-message .v-avatar {
   opacity: 0;
 }
+.message-sheet >>> .your-message:first-of-type .v-avatar {
+  opacity: 1;
+}
 
 .message-sheet >>> .my-message + .your-message .v-avatar {
   opacity: 1;
