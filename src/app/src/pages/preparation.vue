@@ -130,8 +130,11 @@ export default {
         redirectToExpectation() {
             // Redirect to given route or main page
             const route = this.$route;
-            const nextRoute = route.query["next-to"] || "app";
+            let nextRoute = route.query["next-to"] || "app";
             delete route.query["next-to"];
+            if (nextRoute == "login") {
+                nextRoute = "app";
+            }
             this.$router.push({ name: nextRoute, query: route.query });
         },
     },

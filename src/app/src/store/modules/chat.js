@@ -19,6 +19,16 @@ const moduleState = {
             state.all = chat;
         },
         setActivate(state, chat) {
+            if (!chat) {
+                return;
+            }
+            
+            if (!chat.messages) {
+                chat.messages = [];
+            }
+            if (!chat.recent) {
+                chat.recent = {};
+            }
             state.active = chat;
         },
         addChat(state, chat) {
@@ -27,10 +37,12 @@ const moduleState = {
         addMessage(state, { chatId, message }) {
             const chat = state.all.find(c => c.id == chatId);
             if (chat) {
-                chat.messages = chat.messages || [];
+                if (!chat.messages) {
+                    chat.messages = [];
+                }
+                chat.messages.push(message);
+                chat.recent = message;
             }
-            chat.messages.push(message);
-            chat.recent = message;
         },
     },
     actions: {
@@ -45,11 +57,26 @@ const moduleState = {
                     const conv = convList[index];
                     if (conv.subscribers && conv.subscribers.length > 0) {
                         // Get user info
-                        const users = await this.dispatch("users/resolve", conv.subscribers);
+                        const users = await this.dispatch(
+                            "users/resolve",
+                            conv.subscribers
+                        );
                         conv.subscribers = users;
                     }
+
+                    // Load conversation content
+                    const content = await this.dispatch(
+                        "chats/getConversationContent",
+                        conv.id
+                    );
+                    conv.messages = content || [];
+                    conv.recent =
+                        conv.messages.length > 0
+                            ? conv.messages[conv.messages.length - 1]
+                            : {};
                 }
             }
+
             commit("setAll", convList);
 
             // Setup Socket
@@ -64,8 +91,8 @@ const moduleState = {
             const me = this.state.users.me;
             const convInfo = {
                 channel: false,
-                subscribers: [me.id, friendId]
-            }
+                subscribers: [me.id, friendId],
+            };
             const newConv = (await convService.create(convInfo)).data;
             // Get user info
             const friendInfo = await this.dispatch("users/resolve", friendId);
@@ -90,11 +117,19 @@ const moduleState = {
             return messageService.create(parseInt(chatId), body).then(res => {
                 const payload = {
                     chatId,
-                    message: res.data
-                }
+                    message: res.data,
+                };
                 commit("addMessage", payload);
                 return res.data;
             });
+        },
+        getConversationContent(ctx, chatId) {
+            if (typeof chatId == "number") {
+                return messageService.get(parseInt(chatId)).then(res => {
+                    return res.data;
+                });
+            }
+            return Promise.reject("No conversation id");
         },
     },
 };

@@ -47,7 +47,7 @@
       ></v-subheader>
 
       <!-- Chat list -->
-      <v-list-item-group v-model="activatedChat">
+      <v-list-item-group v-model="activatedChat" mandatory>
         <v-list-item
           v-for="chat in chatList"
           :key="chat.id"
@@ -97,7 +97,9 @@ export default {
                 return this.$store.state.chats.active;
             },
             set(val) {
+              if (val) {
                 return this.$store.dispatch("chats/activeChat", val.id);
+              }
             },
         },
     },

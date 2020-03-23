@@ -42,7 +42,6 @@
       height="48"
       class="py-0 no-border-radius"
     >
-      <v-divider></v-divider>
       <v-list-item class="px-0 px-2">
         <EmojiButton @select="onSelectEmoji"></EmojiButton>
         <v-text-field
@@ -89,7 +88,7 @@ export default {
             return this.activatedChat ? this.activatedChat.id : -1;
         },
         messages() {
-            return this.activatedChat.messages || [];
+            return this.activatedChat ? this.activatedChat.messages || [] : [];
         },
     },
     watch: {
