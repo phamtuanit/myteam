@@ -98,7 +98,7 @@ export default {
         }
     },
     mounted() {
-        fillHeight("message-sheet", 49, this.$el);
+        fillHeight("message-sheet", 48, this.$el);
     },
     methods: {
         onSendMessage() {
@@ -175,8 +175,4 @@ export default {
 .message-sheet >>> .my-message + .my-message {
     margin-top: 6px !important;
 }
-
-/* .message-sheet >>> .my-message:last-of-type {
-  border-bottom-right-radius: 30px !important;
-} */
 </style>

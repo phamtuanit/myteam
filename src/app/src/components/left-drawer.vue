@@ -8,12 +8,13 @@
     class="left-drawer"
   >
     <v-list-item class="px-0 mt-2 mb-1 mx-auto">
-      <v-avatar
-        size="40"
+      <Avatar
+        :size="40"
+        :user-name="me.fullName"
         class="mx-auto"
+        :src="me.avatar"
       >
-        <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img>
-      </v-avatar>
+      </Avatar>
     </v-list-item>
     <v-list>
       <v-list-item-group mandatory>
@@ -64,13 +65,22 @@
 
 <script>
 import menus from "../conf/main-nav";
+import { mapState } from "vuex";
+
+import Avatar from "./avatar";
 export default {
+    components: { Avatar },
     data() {
         return {
             theme: window.IoC.get("theme"),
             activatedMenu: null,
             menus: menus,
         };
+    },
+    computed: {
+        ...mapState({
+            me: state => state.users.me,
+        }),
     },
     mounted() {
         this.activateDefaultMenu();
