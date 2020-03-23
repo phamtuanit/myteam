@@ -11,14 +11,14 @@
                     :key="msg.id"
                     :index="index"
                     :message="msg"
-                    class="mt-3 mb-1"
+                    class="mt-3"
                 ></MyMessage>
                 <YourMessage
                     v-else
                     :key="msg.id"
                     :index="index"
                     :message="msg"
-                    class="mt-2 mb-1"
+                    class="mt-3"
                 ></YourMessage>
             </template>
         </v-sheet>
@@ -76,12 +76,8 @@ export default {
         },
     },
     watch: {
-        activatedChat() {
-            this.loadChatContent();
-        },
     },
     created() {
-        this.loadChatContent();
     },
     mounted() {
         fillHeight("message-sheet", 49, this.$el);
@@ -122,7 +118,6 @@ export default {
                 this.newMessage += emoji.native;
             }
         },
-        loadChatContent() {},
     },
 };
 </script>
@@ -143,4 +138,24 @@ export default {
 .message-sheet >>> div.message-item:last-child {
     margin-bottom: 12px !important;
 }
+
+.message-sheet >>> .your-message + .your-message {
+  margin-top: 4px !important;
+}
+
+.message-sheet >>> .your-message .v-avatar {
+  opacity: 0;
+}
+
+.message-sheet >>> .my-message + .your-message .v-avatar {
+  opacity: 1;
+}
+
+.message-sheet >>> .my-message + .my-message {
+  margin-top: 4px !important;
+}
+
+/* .message-sheet >>> .my-message:last-of-type {
+  border-bottom-right-radius: 30px !important;
+} */
 </style>
