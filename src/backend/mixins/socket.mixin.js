@@ -50,6 +50,19 @@ module.exports = {
                 // To private user room
                 this.io.to(userId).emit(resource, act, data);
             }
+        },
+        // [nodeID].conversation.[conversation].message.[rejected].[create]
+        "*.conversation.*.message.rejected.*"(message, sender, event, ctx) {
+            const [nodeId, constVar, convId, resource, act, preAct] = event.split(".");
+            const fromUser = message.payload.from.issuer;
+
+            const socketDict = this.sockets[fromUser];
+            if (socketDict && Object.keys(socketDict).length > 0) {
+                message.event = event;
+                message.error = message.error ? message.error.message : "Server unknown error";
+                // To private user room
+                this.io.to(fromUser).emit(resource, act, message);
+            }
         }
     },
 

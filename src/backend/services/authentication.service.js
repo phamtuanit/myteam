@@ -1,8 +1,6 @@
 "use strict";
 const {
     MoleculerClientError,
-    ServiceNotAvailableError,
-    MoleculerServerError
 } = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
 

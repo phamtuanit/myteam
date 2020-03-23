@@ -100,7 +100,7 @@ service.prototype = {
                             const ldapUser = item.object;
                             const userInfo = {
                                 id: ldapUser.uid,
-                                username: ldapUser.uid,
+                                userName: ldapUser.uid,
                                 firstName: ldapUser.givenName,
                                 lastNme: ldapUser.sn,
                                 fullName: ldapUser.cn,
