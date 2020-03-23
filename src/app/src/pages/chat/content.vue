@@ -141,6 +141,6 @@ export default {
 }
 
 .message-sheet >>> div.message-item:last-child {
-    margin-bottom: 16px !important;
+    margin-bottom: 12px !important;
 }
 </style>
