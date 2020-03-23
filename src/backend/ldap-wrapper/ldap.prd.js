@@ -1,11 +1,16 @@
 
+const {
+    MoleculerClientError,
+    ServiceNotAvailableError,
+    MoleculerServerError
+} = require("moleculer").Errors;
 const ldap = require("ldapjs");
 const authConf = require("../conf/auth.json");
 
-const service = function (logger) {
+const service = function(logger) {
     this.logger = logger || console;
     this.ldapClient = null;
-}
+};
 
 service.prototype = {
     close() {
@@ -32,9 +37,7 @@ service.prototype = {
     verify(userName, password) {
         if (!this.confirmLdap()) {
             return Promise.reject(
-                new ServiceNotAvailableError(
-                    "Could not connect to LDAP server"
-                )
+                new ServiceNotAvailableError("Could not connect to LDAP server")
             );
         }
 
@@ -54,9 +57,7 @@ service.prototype = {
     search(dn, userName) {
         if (!this.confirmLdap()) {
             return Promise.reject(
-                new ServiceNotAvailableError(
-                    "Could not connect to LDAP server"
-                )
+                new ServiceNotAvailableError("Could not connect to LDAP server")
             );
         }
 
@@ -64,7 +65,10 @@ service.prototype = {
         let filter;
         if (!dn) {
             dnSearch = authConf.rootDn;
-            filter = { filter: `(${authConf.idMap}=${userName})`, scope: "sub" };
+            filter = {
+                filter: `(${authConf.idMap}=${userName})`,
+                scope: "sub"
+            };
         } else {
             dnSearch = dn;
             filter = { scope: "sub" };
@@ -83,10 +87,10 @@ service.prototype = {
                 }
 
                 const searchList = [];
-                res.on("searchEntry", function (entry) {
+                res.on("searchEntry", function(entry) {
                     searchList.push(entry);
                 });
-                res.on("error", function (err) {
+                res.on("error", function(err) {
                     reject(new MoleculerServerError(err.message));
                 });
                 res.on("end", () => {
@@ -97,8 +101,9 @@ service.prototype = {
                             const userInfo = {
                                 id: ldapUser.uid,
                                 username: ldapUser.uid,
-                                firstname: ldapUser.givenName,
-                                lastname: ldapUser.sn,
+                                firstName: ldapUser.givenName,
+                                lastNme: ldapUser.sn,
+                                fullName: ldapUser.cn,
                                 mail: ldapUser.mail,
                                 dn: ldapUser.dn,
                                 phone: ldapUser.telephoneNumber
@@ -109,15 +114,13 @@ service.prototype = {
                         resolve(users);
                     } else {
                         reject(
-                            new MoleculerClientError(
-                                "Cannot recognize user"
-                            )
+                            new MoleculerClientError("Cannot recognize user")
                         );
                     }
                 });
             });
         });
     }
-}
+};
 
-module.exports = service; 
+module.exports = service;
