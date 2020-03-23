@@ -1,45 +1,54 @@
 <template>
-  <div class="chat-box fill-height">
-    <v-sheet
-      class="overflow-y-auto message-sheet no-border-radius"
-      v-chat-scroll="{ always: false, smooth: true }"
-    >
-    <!-- MineMessage -->
-    <template v-for="(msg, index) in messages">
-      <MyMessage v-if="msg._isMe == true" :key="msg.id" :index="index" :message="msg" class="mt-3"></MyMessage>
-      <YourMessage v-else :key="msg.id" :index="index" :message="msg" class="mt-3"></YourMessage>
-    </template>
-    </v-sheet>
-
-    <!-- Input -->
-    <v-list
-      height="48"
-      class="py-0 no-border-radius"
-    >
-      <v-list-item class="px-0 px-2">
-        <EmojiButton @select="onSelectEmoji"></EmojiButton>
-        <v-text-field
-          flat
-          class="no-border-radius"
-          v-model="newMessage"
-          hide-details
-          solo
-          clearable
-          @keyup.esc="onClearMessage"
-          @keyup.enter="onSendMessage"
-          clear-icon="mdi-close"
-        ></v-text-field>
-        <v-btn
-          icon
-          class="send-btn"
-          :disabled="!newMessage"
-          @click="onSendMessage"
+    <div class="chat-box fill-height">
+        <v-sheet
+            class="overflow-y-auto message-sheet no-border-radius"
+            v-chat-scroll="{ always: false, smooth: true }"
         >
-          <v-icon>mdi-send</v-icon>
-        </v-btn>
-      </v-list-item>
-    </v-list>
-  </div>
+            <!-- MineMessage -->
+            <template v-for="(msg, index) in messages">
+                <MyMessage
+                    v-if="msg._isMe == true"
+                    :key="msg.id"
+                    :index="index"
+                    :message="msg"
+                    class="mt-3 mb-1"
+                ></MyMessage>
+                <YourMessage
+                    v-else
+                    :key="msg.id"
+                    :index="index"
+                    :message="msg"
+                    class="mt-2 mb-1"
+                ></YourMessage>
+            </template>
+        </v-sheet>
+
+        <!-- Input -->
+        <v-list height="48" class="py-0 no-border-radius">
+            <v-list-item class="px-0 px-2">
+                <EmojiButton @select="onSelectEmoji"></EmojiButton>
+                <v-text-field
+                    flat
+                    class="no-border-radius"
+                    v-model="newMessage"
+                    hide-details
+                    solo
+                    clearable
+                    @keyup.esc="onClearMessage"
+                    @keyup.enter="onSendMessage"
+                    clear-icon="mdi-close"
+                ></v-text-field>
+                <v-btn
+                    icon
+                    class="send-btn"
+                    :disabled="!newMessage"
+                    @click="onSendMessage"
+                >
+                    <v-icon>mdi-send</v-icon>
+                </v-btn>
+            </v-list-item>
+        </v-list>
+    </div>
 </template>
 
 <script>
@@ -60,12 +69,10 @@ export default {
     computed: {
         ...mapState({
             activatedChat: state => state.chats.active,
+            messages: state => state.chats.active.messages,
         }),
         chatId() {
             return this.activatedChat ? this.activatedChat.id : -1;
-        },
-        messages() {
-            return this.activatedChat ? this.activatedChat.messages || [] : [];
         },
     },
     watch: {
@@ -111,9 +118,9 @@ export default {
             this.newMessage = "";
         },
         onSelectEmoji(emoji) {
-          if (emoji.native) {
-            this.newMessage += emoji.native;
-          }
+            if (emoji.native) {
+                this.newMessage += emoji.native;
+            }
         },
         loadChatContent() {},
     },
@@ -133,7 +140,7 @@ export default {
     color: var(--primary-color-2);
 }
 
-/* .chat-box >>> .v-card__text {
-  background-color: #029ce4;
-} */
+.message-sheet >>> div.message-item:last-child {
+    margin-bottom: 16px !important;
+}
 </style>
