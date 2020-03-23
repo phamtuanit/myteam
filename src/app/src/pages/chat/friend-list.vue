@@ -19,7 +19,7 @@
                     clear-icon="mdi-close"
                 ></v-text-field>
 
-                <v-btn icon size="40" outlined class="ml-2" @click="onAddChat">
+                <v-btn icon class="ml-2" outlined @click="onAddChat">
                     <v-icon>mdi-plus</v-icon>
                 </v-btn>
             </v-list-item>
@@ -164,9 +164,5 @@ export default {
 
 #friend-list >>> .v-text-field--rounded {
     border-radius: 20px;
-}
-
-#friend-list >>> .v-btn.v-btn--icon {
-    color: var(--primary-color-2);
 }
 </style>
