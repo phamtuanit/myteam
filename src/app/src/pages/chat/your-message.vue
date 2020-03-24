@@ -11,13 +11,16 @@
                     <v-icon size="18" color="yellow darken-2" class="ml-2" title=":like:"
                         >mdi-thumb-up</v-icon
                     >
-                    <v-icon size="18" color="orange" class="ml-2" title=":happy:"
+                    <v-icon size="18" color="red darken-2" class="ml-2" title=":heart:"
+                        >mdi-heart</v-icon
+                    >
+                    <v-icon size="18" color="yellow darken-2" class="ml-2" title=":happy:"
                         >mdi-emoticon-excited</v-icon
                     >
                     <v-icon size="18" color="blue darken-2" class="ml-2" title=":cry:"
                         >mdi-emoticon-cry</v-icon
                     >
-                    <v-icon size="18" color="red darken-1" class="ml-2" title=":angry:"
+                    <v-icon size="18" color="yellow darken-2" class="ml-2" title=":angry:"
                         >mdi-emoticon-angry</v-icon
                     >
                     <v-icon size="18" class="mx-2" title="more"
@@ -104,6 +107,16 @@ export default {
     -webkit-box-align: center;
     align-items: center;
     border-radius: 5px;
+}
+
+.message-actions .v-icon {
+    opacity: 0.6;
+}
+
+.message-actions .v-icon:not(:last-of-type):hover {
+    transition: all 0.2s ease-in;
+    opacity: 1;
+    transform: scale(1.2);
 }
 
 .message-card-wrapper:hover .message-actions-wrapper {
