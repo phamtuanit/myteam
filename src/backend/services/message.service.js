@@ -13,6 +13,26 @@ module.exports = {
     settings: {},
     dependencies: [],
     mixins: [DBCollectionService],
+
+    /**
+     * Events
+     */
+    events: {
+        // message-queue.[userId].message.confirmed
+        async "message-queue.*.message.confirmed"(payload, sender, event, ctx) {
+            const [constVar, userId] = event.split(".");
+
+            const queueId = `msg-queue-${userId}`;
+            const dbCollection = await this.getDBCollection(queueId);
+
+            const msg = await dbCollection.findOne({ id: payload.id });
+
+            if (msg) {
+                return await dbCollection.removeById(msg._id);
+            }
+        },
+    },
+
     actions: {
         getMessages: {
             auth: true,
@@ -61,8 +81,6 @@ module.exports = {
             async handler(ctx) {
                 const { conversation, body } = ctx.params;
                 const { user } = ctx.meta;
-                // Check conversation
-                this.checkConversation(conversation);
 
                 const message = {
                     arrivalTime: new Date(),
@@ -78,8 +96,7 @@ module.exports = {
                 };
 
                 const newMessage = this.processMessage(message, true);
-                await this.storeMessage(newMessage, ctx);
-                return newMessage;
+                return await this.storeMessage(newMessage, ctx);
             },
         },
         updateMessage: {
@@ -100,8 +117,6 @@ module.exports = {
             async handler(ctx) {
                 const { conversation, body, id } = ctx.params;
                 const { user } = ctx.meta;
-                // Check conversation
-                this.checkConversation(conversation);
 
                 const message = {
                     updated: new Date(),
@@ -117,8 +132,7 @@ module.exports = {
                 };
 
                 const newMessage = this.processMessage(message, false);
-                this.publishMessage(conversation, "updated", newMessage);
-                return newMessage;
+                return await this.updateMessage(newMessage, ctx);
             },
         },
         removeMessage: {
@@ -129,99 +143,86 @@ module.exports = {
                 conversation: { type: "number", convert: true },
                 id: "string",
             },
-            handler(ctx) {
-                const { conversation, id } = ctx.params;
+            async handler(ctx) {
+                const { conversation: conversationId, id } = ctx.params;
+
                 // Check conversation
-                this.checkConversation(conversation);
+                let convInfo = await ctx.call(
+                    "v1.conversations.getConversation",
+                    {
+                        id: conversationId,
+                    }
+                );
 
-                const message = { id };
-                this.publishMessage(conversation, "delete", message);
-                return message;
-            },
-        },
-    },
-
-    /**
-     * Events
-     */
-    events: {
-        //conversation.{conversation}.message.{act}`;
-        // Ex: conversation.1584672834896.message.created
-        "conversation.*.message.created"(payload, sender, event, ctx) {
-            const [constVar, conversation, constMsg, act] = event.split(".");
-        },
-        //conversation.{conversation}.message.update`;
-        "conversation.*.message.updated"(payload, sender, event, ctx) {
-            const [constVar, conversation, constMsg, act] = event.split(".");
-            const convCollId = `conv-history-${conversation}`;
-
-            // Get adapter
-            return this.getDBCollection(convCollId)
-                .catch(err => {
-                    this.logger.error(
-                        "Could save updated message to DB.",
-                        convCollId,
-                        err
+                if (!convInfo || convInfo.length <= 0) {
+                    throw new Errors.MoleculerClientError(
+                        "The conversation could not be found.",
+                        404
                     );
-                    this.revertUpdatingMessage(ctx, payload, err);
-                })
-                .then(collection => {
-                    return collection
-                        .findOne({ id: payload.id })
-                        .then(oldEntity => {
-                            // 1. Verify message
-                            if (!oldEntity) {
-                                // The message not found
-                                this.logger.warn(
-                                    "The message could not be found."
-                                );
-                                // TODO: feedback to client
-                                return;
-                            }
-                            // 2. Update message
-                            const newEntity = payload;
-                            // Update history
-                            const modification = oldEntity.modification || [];
-                            const history = oldEntity.body;
-                            history.updated = new Date();
-                            modification.unshift(history);
-                            newEntity.modification = modification;
+                }
 
-                            // 3.Update record in DB
-                            const update = {
-                                $set: newEntity,
-                            };
+                convInfo = convInfo.length > 0 ? convInfo[0] : null;
 
-                            return collection
-                                .updateById(oldEntity._id, update)
-                                .then(entity => {
-                                    delete entity._id;
-                                    // 4. Broadcast new change to users
+                const convCollId = this.getHistoryCollectionName(
+                    conversationId
+                );
 
-                                    return entity;
-                                });
-                        })
-                        .catch(err => {
-                            this.logger.error(
-                                "Could save updated message to DB.",
-                                err
-                            );
-                            this.revertUpdatingMessage(ctx, payload, err);
-                        });
+                // Get adapter
+                const dbCollection = await this.getDBCollection(convCollId);
+                const existingEntity = await dbCollection.findOne({
+                    id: message.id,
                 });
-        },
-        // message-queue.[userId].message.confirmed
-        async "message-queue.*.message.confirmed"(payload, sender, event, ctx) {
-            const [constVar, userId] = event.split(".");
 
-            const queueId = `msg-queue-${userId}`;
-            const dbCollection = await this.getDBCollection(queueId);
+                // 1. Verify existing message
+                if (!existingEntity) {
+                    // The message not found
+                    this.logger.warn("The message could not be found.");
+                    return;
+                }
 
-            const msg = await dbCollection.findOne({ id: payload.id });
+                // 2. Delete record
+                await dbCollection.removeById(existingEntity._id);
 
-            if (msg) {
-                return dbCollection.removeById(msg._id);
-            }
+                // 3. Store information to message queue
+                if (convInfo.subscribers && convInfo.subscribers.length > 0) {
+                    const msgQueue = {
+                        id: new Date().getTime(),
+                        type: "message",
+                        action: "removed",
+                        payload: existingEntity,
+                    };
+
+                    for (
+                        let index = 0;
+                        index < convInfo.subscribers.length;
+                        index++
+                    ) {
+                        const userId = convInfo.subscribers[index];
+                        if (userId == message.from.issuer) {
+                            // Ignore issuer from subscribers
+                            continue;
+                        }
+
+                        // Store information to message queue
+                        const queueId = `msg-queue-${userId}`;
+                        this.getDBCollection(queueId)
+                            .then(collection => {
+                                collection
+                                    .insert(cleanDbMark(msgQueue))
+                                    .catch(this.logger.error);
+                            })
+                            .catch(this.logger.error);
+
+                        // Emit event to live user
+                        const eventName = `message-queue.${userId}.message.created`;
+                        this.broker
+                            .emit(eventName, cleanDbMark(msgQueue))
+                            .catch(this.logger.error);
+                    }
+                }
+
+                return cleanDbMark(existingEntity);
+            },
         },
     },
 
@@ -229,49 +230,25 @@ module.exports = {
      * Methods
      */
     methods: {
-        publishMessage(conversation, evtAction, message) {
-            const eventName = `conversation.${conversation}.message.${evtAction}`;
-            return this.broker.emit(eventName, message);
-        },
         processMessage(message, isNew) {
             return message;
         },
-        async checkConversation(convId) {
-            const conversation = await this.getConversation(convId);
-            if (!conversation) {
+        getHistoryCollectionName(conversation) {
+            return `conv-history-${conversation}`;
+        },
+        async filterMessage(ctx) {
+            const { conversation, history, id } = ctx.params;
+            // Check conversation
+            let convInfo = await ctx.call("v1.conversations.getConversation", {
+                id: conversation,
+            });
+
+            if (!convInfo || convInfo.length <= 0) {
                 throw new Errors.MoleculerClientError(
                     "The conversation could not be found.",
                     404
                 );
             }
-        },
-        getConversation(convId) {
-            return this.broker.call("v1.conversations.getConversation", {
-                id: convId,
-            });
-        },
-        getHistoryCollectionName(conversation) {
-            return `conv-history-${conversation}`;
-        },
-        revertCreatingMessage(ctx, message, error) {
-            const conversation = message.payload.to.conversation;
-            const newMsg = { ...message };
-            newMsg.error = error;
-
-            const eventName = `conversation.${conversation}.message.rejected.create`;
-            return this.broker.emit(eventName, newMsg);
-        },
-        revertUpdatingMessage(ctx, message, error) {
-            const conversation = message.to.target;
-            const newMsg = { ...message };
-            newMsg.error = error;
-            const eventName = `conversation.${conversation}.message.rejected.update`;
-            return this.broker.emit(eventName, message);
-        },
-        async filterMessage(ctx) {
-            const { conversation, history, id } = ctx.params;
-            // Check conversation
-            this.checkConversation(conversation);
 
             try {
                 const historyColl = this.getHistoryCollectionName(conversation);
@@ -306,9 +283,125 @@ module.exports = {
                 throw new Errors.MoleculerServerError(error.message, 500);
             }
         },
+        async updateMessage(message, ctx) {
+            const conversationId = message.to.conversation;
+
+            // Check conversation
+            let convInfo = await ctx.call("v1.conversations.getConversation", {
+                id: conversationId,
+            });
+
+            if (Array.isArray(convInfo)) {
+                convInfo = convInfo.length > 0 ? convInfo[0] : null;
+            }
+
+            if (!convInfo) {
+                throw new Errors.MoleculerClientError(
+                    "The conversation could not be found.",
+                    404
+                );
+            }
+
+            const convCollId = this.getHistoryCollectionName(conversationId);
+
+            // Get adapter
+            const dbCollection = await this.getDBCollection(convCollId);
+            const oldEntity = await dbCollection.findOne({ id: message.id });
+
+            // 1. Verify existing message
+            if (!oldEntity) {
+                // The message not found
+                this.logger.warn("The message could not be found.");
+                throw new Errors.MoleculerClientError(
+                    "Original could not be found.",
+                    400
+                );
+            }
+
+            // 2. Update message
+            const newEntity = message;
+            // Update history
+            const modification = oldEntity.modification || [];
+            const history = oldEntity.body;
+            history.updated = new Date();
+            modification.unshift(history);
+            newEntity.modification = modification;
+
+            // 3.Update record in DB
+            const update = {
+                $set: newEntity,
+            };
+
+            const updatedEntity = await dbCollection.updateById(
+                oldEntity._id,
+                update
+            );
+            cleanDbMark(updatedEntity);
+
+            const msgQueue = {
+                id: new Date(payload.updated).getTime(),
+                type: "message",
+                action: "updated",
+                payload: payload,
+            };
+
+            if (convInfo.subscribers && convInfo.subscribers.length > 0) {
+                const payload = { ...updatedEntity };
+                payload.modification = [];
+
+                // 2. Save information to user queue
+                for (
+                    let index = 0;
+                    index < convInfo.subscribers.length;
+                    index++
+                ) {
+                    const userId = convInfo.subscribers[index];
+                    if (userId == message.from.issuer) {
+                        // Ignore issuer from subscribers
+                        continue;
+                    }
+
+                    // 2.1 Save new information to DB of corresponding user cache
+                    const queueId = `msg-queue-${userId}`;
+                    const msgQueueCollection = await this.getDBCollection(
+                        queueId
+                    );
+                    await msgQueueCollection.insert(msgQueue);
+                    // Clean _id
+                    cleanDbMark(msgQueue);
+                }
+
+                // 3. Send information to WS
+                for (
+                    let index = 0;
+                    index < convInfo.subscribers.length;
+                    index++
+                ) {
+                    const userId = convInfo.subscribers[index];
+                    if (userId == message.from.issuer) {
+                        // Ignore issuer from subscribers
+                        continue;
+                    }
+
+                    // Send information to live-user directly
+                    // If user confirm that they received a message, then the message wil be removed in DB
+                    const eventName = `message-queue.${userId}.message.created`;
+                    this.broker
+                        .emit(eventName, msgQueue)
+                        .catch(this.logger.error);
+                }
+            }
+
+            // Broadcast message
+            const eventName = `conversation.${conversationId}.message.updated`;
+            this.broker.emit(eventName, updatedEntity);
+
+            return updatedEntity;
+        },
         async storeMessage(message, ctx) {
             const conversationId = parseInt(message.to.conversation);
-            const msgCache = {
+            const msgQueue = {
+                id: message.id,
                 type: "message",
                 action: "created",
                 payload: message,
@@ -323,6 +416,13 @@ module.exports = {
             }
 
             if (!convInfo) {
+                throw new Errors.MoleculerClientError(
+                    "The conversation could not be found.",
+                    404
+                );
+            }
+
+            if (!convInfo) {
                 throw new Error("Conversation not found");
             }
 
@@ -331,13 +431,9 @@ module.exports = {
             const dbCollection = await this.getDBCollection(convCollId);
             // Insert one more record
             const entity = dbCollection.insert(message);
+            cleanDbMark(entity);
 
-            // Clean _id
-            cleanDbMark(msgCache);
-
-            if (convInfo && convInfo.subscribers) {
-                msgCache.id = new Date().getTime();
-
+            if (convInfo.subscribers && convInfo.subscribers.length > 0) {
                 // 2. Save information to user queue and send message to WS
                 for (
                     let index = 0;
@@ -355,35 +451,35 @@ module.exports = {
                     const msgQueueCollection = await this.getDBCollection(
                         queueId
                     );
-                    await msgQueueCollection.insert(msgCache);
+                    await msgQueueCollection.insert(msgQueue);
                     // Clean _id
-                    cleanDbMark(msgCache);
+                    cleanDbMark(msgQueue);
+                }
 
-                    // 2.2 Send information to live-user directly
-                    // If user confirm that they received a message, then the message wil be removed in DB
-                    try {
-                        const { status } = await ctx.call(
-                            "v1.live.getUserById",
-                            {
-                                userId: userId,
-                            }
-                        );
-                        if (status == "on") {
-                            // Public message to online user . Pattern: [nodeId].message-queue.[userId].message.[action]
-                            const eventName = `message-queue.${userId}.message.created`;
-                            this.broker
-                                .emit(eventName, msgCache)
-                                .catch(this.logger.error);
-                        }
-                    } catch (err) {
-                        this.logger.error(
-                            "Could publish new message: ",
-                            userId,
-                            err
-                        );
+                // 3. Send message to WS
+                for (
+                    let index = 0;
+                    index < convInfo.subscribers.length;
+                    index++
+                ) {
+                    const userId = convInfo.subscribers[index];
+                    if (userId == message.from.issuer) {
+                        // Ignore issuer from subscribers
+                        continue;
                     }
+
+                    // Send information to live-user directly
+                    // If user confirm that they received a message, then the message wil be removed in DB
+                    const eventName = `message-queue.${userId}.message.created`;
+                    this.broker
+                        .emit(eventName, msgQueue)
+                        .catch(this.logger.error);
                 }
             }
+
+            // Broadcast message
+            const eventName = `conversation.${conversationId}.message.created`;
+            this.broker.emit(eventName, entity);
 
             return entity;
         },

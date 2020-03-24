@@ -73,8 +73,6 @@ module.exports = function(collection) {
         // NeDB memory adapter for testing
         schema.adapter = new DbService.MemoryAdapter();
     } else {
-        // NeDB file DB adapter
-
         // Create data folder
         const dbPath = "./DB/mongodb-mem";
         if (!fs.existsSync(dbPath)) {
