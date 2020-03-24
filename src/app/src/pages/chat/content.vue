@@ -158,7 +158,7 @@ export default {
 }
 
 .message-sheet >>> .your-message + .your-message {
-    margin-top: 4px !important;
+    margin-top: 6px !important;
 }
 
 .message-sheet >>> .your-message .v-avatar {
