@@ -78,7 +78,7 @@ module.exports = {
                 if (result) {
                     const userIds = result.map(i => i.id);
                     const statusList = await ctx.call(
-                        "v1.live.getUserStatusById",
+                        "v1.live.getUserById",
                         { userId: userIds }
                     );
 
@@ -98,8 +98,8 @@ module.exports = {
      * Events
      */
     events: {
-        // [NodeID].user.disconnected
-        "*.user.login"(user) {
+        // user.disconnected
+        "user.login"(user) {
             return this.addOrUpdateUser(user);
         }
     },
@@ -142,8 +142,8 @@ module.exports = {
     async started() {
         const dbCollection = await this.getDBCollection("users");
         dbCollection.collection.createIndex({
-            firstname: "text",
-            lastname: "text",
+            firstName: "text",
+            lastNme: "text",
             mail: "text",
             phone: "text"
         });

@@ -14,8 +14,8 @@ module.exports = {
      * Events
      */
     events: {
-        // [nodeID].user.[userId].status.off
-        "*.user.*.status.*"(data, sender, event, ctx) {
+        // user.[userId].status.off
+        "user.*.status.*"(data, sender, event, ctx) {
             const userId = data.user ? data.user.id : undefined;
             const status = data.status;
             data.event = event;
@@ -39,9 +39,9 @@ module.exports = {
             }
         },
         // [nodeId].message-queue.[userId].message.created
-        "*.message-queue.*.message.created"(message, sender, event, ctx) {
+        "message-queue.*.message.created"(message, sender, event, ctx) {
             const act = "created";
-            const [nodeId, constVar, userId, resource] = event.split(".");
+            const [constVar, userId, resource] = event.split(".");
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
                 message.event = event;
@@ -49,9 +49,9 @@ module.exports = {
                 this.io.to(userId).emit(resource, act, message);
             }
         },
-        // [nodeID].conversation.[conversation].message.[rejected].[create]
-        "*.conversation.*.message.rejected.*"(message, sender, event, ctx) {
-            const [nodeId, constVar, convId, resource, act, preAct] = event.split(".");
+        // conversation.[conversation].message.rejected.[create]
+        "conversation.*.message.rejected.*"(message, sender, event, ctx) {
+            const [constVar, convId, resource, act] = event.split(".");
             const fromUser = message.payload.from.issuer;
 
             const socketDict = this.sockets[fromUser];
@@ -94,7 +94,7 @@ module.exports = {
             });
 
             // Broadcast to the others about new user
-            const connectedEvt = `${this.broker.nodeID}.user.${user.id}.socket.connected`;
+            const connectedEvt = `user.${user.id}.socket.connected`;
             this.broker.emit(connectedEvt, user, ["live"]); // live service only
 
             socket.on("confirm", data => {
@@ -120,7 +120,7 @@ module.exports = {
                     delete this.sockets[user.id];
                 }
 
-                const disconnectedEvt = `${this.broker.nodeID}.user.${user.id}.socket.disconnected`;
+                const disconnectedEvt = `user.${user.id}.socket.disconnected`;
                 this.broker.emit(disconnectedEvt, user, ["live"]);
             });
 
@@ -152,7 +152,7 @@ module.exports = {
             if (!info || !socket || !socket.handshake.user) {
                 return;
             }
-            
+
             const userId = socket.handshake.user.id;
             if (userId) {
                 const event = `message-queue.${userId}.message.confirmed`;

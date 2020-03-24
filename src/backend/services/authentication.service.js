@@ -73,7 +73,7 @@ module.exports = {
                     const userToken = this.getUserToken(user);
 
                     // Inform user login
-                    const eventName = `${this.broker.nodeID}.user.login`;
+                    const eventName = `user.login`;
                     await this.broker.emit(eventName, user, ["users"]);
                     return userToken;
                 } else {
