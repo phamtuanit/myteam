@@ -34,7 +34,10 @@
                     :value="chat"
                     @click="openChat(chat)"
                 >
-                    <UserAvatar :user="getTargetUser(chat)" :animation="activatedChat && activatedChat.id == chat.id && getTargetUser(chat).status == 'on'"/>
+                    <UserAvatar
+                        :user="getTargetUser(chat)"
+                        :animation="enableOnlineEffect(chat)"
+                    />
 
                     <v-list-item-content class="py-2 px-2">
                         <v-list-item-title
@@ -170,6 +173,13 @@ export default {
             }
             // Dummy data
             return {};
+        },
+        enableOnlineEffect(chat) {
+            return (
+                this.activatedChat &&
+                this.activatedChat.id == chat.id &&
+                this.getTargetUser(chat).status == "on"
+            );
         },
     },
 };
