@@ -4,7 +4,7 @@ let eventBus = null;
 
 function informNewMessage() {
     const payload = {
-        sender: "app-channel",
+        sender: "app-chat",
         inform: {
             count: 1
         }
@@ -219,6 +219,20 @@ const moduleState = {
         setupSocket({ commit, state }) {
             const socket = window.IoC.get("socket");
             socket.on("message", (act, data) => {
+                const message = data.payload;
+                // Send confirm message
+                socket.emit("confirm", {
+                    status: "confirmed",
+                    id: data.id,
+                    type: data.type,
+                    action: act,
+                    payload: {
+                        id: message.id,
+                        from: message.from,
+                        to: message.to
+                    }
+                });
+                // Handle event
                 switch (act) {
                     case "created":
                         if (!data.payload || !data.payload) {
@@ -226,7 +240,6 @@ const moduleState = {
                         }
 
                         {
-                            const message = data.payload.payload;
                             const chatId = message.to.conversation;
 
                             const existingConv = state.all.find(

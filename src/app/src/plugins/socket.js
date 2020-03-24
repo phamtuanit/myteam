@@ -46,6 +46,15 @@ class Socket {
         }
         return this;
     }
+    emit(evt, payload) {
+        if (this.io) {
+            payload.created = new Date().getTime();
+            this.io.emit(evt, payload);
+        } else {
+            console.warn("WS is not ready to use.");
+        }
+        return this;
+    }
     /**
      * Close Socket
      */
