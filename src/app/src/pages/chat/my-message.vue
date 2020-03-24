@@ -6,7 +6,7 @@
         <v-list-item-avatar></v-list-item-avatar>
         <v-spacer></v-spacer>
         <v-card flat class="mr-1 message-card py-1" :disabled="hasError">
-            <div class="py-1 px-4">
+            <div class="py-1 px-4 card-header">
                 <span class="caption" v-text="time"></span>
                 <v-icon v-if="hasError" small color="red lighten-1" class="mx-2"
                     >mdi-alert</v-icon
@@ -36,9 +36,32 @@ export default {
 </script>
 
 <style scoped>
+.card-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+    -webkit-box-flex: 1;
+}
+
 .message-error >>> .message-card {
-    border-bottom-color: #ef5350;
+    border-bottom-color: #ef5350ec;
     border-bottom-width: 2px;
     border-bottom-style: solid;
+}
+
+.message-card {
+    position: relative;
+}
+
+.message-card.v-card::before {
+    position: absolute;
+    content: " ";
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 0;
+    background-color: rgba(25, 118, 210, 0.07);
 }
 </style>
