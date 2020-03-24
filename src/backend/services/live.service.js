@@ -18,17 +18,17 @@ module.exports = {
                 return Object.values(this.livingUser).map(user => {
                     return {
                         info: user,
-                        status: "on"
+                        status: "on",
                     };
                 });
-            }
+            },
         },
         getUserById: {
             auth: true,
             roles: [1],
             rest: "GET /:userId",
             params: {
-                userId: "any"
+                userId: "any",
             },
             handler(ctx) {
                 const { userId } = ctx.params;
@@ -41,7 +41,7 @@ module.exports = {
                         const status = user ? "on" : "off";
                         result.push({
                             info: user,
-                            status: status
+                            status: status,
                         });
                     });
                     return result;
@@ -52,10 +52,10 @@ module.exports = {
                 const status = user ? "on" : "off";
                 return {
                     info: user,
-                    status: status
+                    status: status,
                 };
-            }
-        }
+            },
+        },
     },
 
     /**
@@ -67,7 +67,7 @@ module.exports = {
             this.logger.info(`User ${user.id} has been connected.`);
             this.livingUser[user.id] = this.livingUser[user.id] || {
                 user,
-                count: 0
+                count: 0,
             };
             this.livingUser[user.id].count += 1;
 
@@ -76,7 +76,7 @@ module.exports = {
                 const eventName = `user.${user.id}.status.on`;
                 this.broker.emit(eventName, {
                     user,
-                    status: "on"
+                    status: "on",
                 });
             }
         },
@@ -90,11 +90,11 @@ module.exports = {
                     const eventName = `user.${user.id}.status.off`;
                     this.broker.emit(eventName, {
                         user,
-                        status: "off"
+                        status: "off",
                     });
                 }
             }
-        }
+        },
     },
 
     /**
@@ -112,10 +112,10 @@ module.exports = {
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { }
+    stopped() {},
 };

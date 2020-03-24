@@ -6,8 +6,8 @@ module.exports = {
         // port: 3000,
         server: true,
         io: {
-            path: "chat-io"
-        }
+            path: "chat-io",
+        },
     },
 
     /**
@@ -57,11 +57,13 @@ module.exports = {
             const socketDict = this.sockets[fromUser];
             if (socketDict && Object.keys(socketDict).length > 0) {
                 message.event = event;
-                message.error = message.error ? message.error.message : "Server unknown error";
+                message.error = message.error
+                    ? message.error.message
+                    : "Server unknown error";
                 // To private user room
                 this.io.to(fromUser).emit(resource, act, message);
             }
-        }
+        },
     },
 
     methods: {
@@ -139,7 +141,7 @@ module.exports = {
                         case "created":
                             this.cleanMessageQueue(socket, data);
                             break;
-                    
+
                         default:
                             console.warn("Unsupported message type");
                             break;
@@ -158,7 +160,7 @@ module.exports = {
                 const event = `message-queue.${userId}.message.confirmed`;
                 this.broker.emit(event, info, ["messages"]);
             }
-        }
+        },
     },
 
     created() {
@@ -169,7 +171,7 @@ module.exports = {
             return;
         }
         this.io = io(this.server, {
-            path: this.settings.io.path || "chat-io"
+            path: this.settings.io.path || "chat-io",
         });
         this.io.on("connection", this.onConnected);
     },
@@ -178,5 +180,5 @@ module.exports = {
         if (this.io) {
             this.io.close();
         }
-    }
+    },
 };

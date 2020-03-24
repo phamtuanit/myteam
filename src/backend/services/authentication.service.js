@@ -1,7 +1,5 @@
 "use strict";
-const {
-    MoleculerClientError,
-} = require("moleculer").Errors;
+const { MoleculerClientError } = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
 
 const fs = require("fs");
@@ -27,7 +25,7 @@ module.exports = {
         verifyToken: {
             rest: "POST /verify",
             params: {
-                token: { type: "string", optional: true }
+                token: { type: "string", optional: true },
             },
             async handler(ctx) {
                 const token = ctx.params.token || ctx.meta.token;
@@ -56,7 +54,7 @@ module.exports = {
                     error.code = 401;
                     throw error;
                 }
-            }
+            },
         },
         login: {
             rest: "POST /login",
@@ -82,7 +80,7 @@ module.exports = {
                         400
                     );
                 }
-            }
+            },
         },
         refreshToken: {
             rest: "POST /renew-token",
@@ -111,8 +109,8 @@ module.exports = {
                     error.code = 401;
                     throw error;
                 }
-            }
-        }
+            },
+        },
     },
 
     /**
@@ -132,8 +130,8 @@ module.exports = {
                     user,
                     access: token,
                     exp,
-                    refresh: refreshToken
-                }
+                    refresh: refreshToken,
+                },
             };
         },
         /**
@@ -158,7 +156,7 @@ module.exports = {
             const token = jwt.sign(payload, privateKey);
             return {
                 token,
-                exp
+                exp,
             };
         },
     },
@@ -174,12 +172,12 @@ module.exports = {
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
     stopped() {
         this.ldap.close();
-    }
+    },
 };

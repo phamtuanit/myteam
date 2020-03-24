@@ -26,7 +26,7 @@ module.exports = {
         use: [],
 
         io: {
-            path: "/chat-io"
+            path: "/chat-io",
         },
 
         routes: [
@@ -49,24 +49,24 @@ module.exports = {
                     methods: ["GET", "POST", "PUT", "DELETE"],
                     allowedHeaders: "*",
                     credentials: true,
-                    maxAge: null
+                    maxAge: null,
                 },
 
                 // Action aliases refreshToken
                 aliases: {
                     "POST login": "v1.auth.login",
                     "POST renew-token": "v1.auth.refreshToken",
-                    "POST verify-token": "v1.auth.verifyToken"
+                    "POST verify-token": "v1.auth.verifyToken",
                 },
 
                 // Use bodyparser module
                 bodyParsers: {
                     json: true,
-                    urlencoded: { extended: true }
+                    urlencoded: { extended: true },
                 },
 
                 callOptions: {
-                    timeout: 3000
+                    timeout: 3000,
                 },
 
                 onBeforeCall(ctx, route, req, res) {
@@ -83,7 +83,7 @@ module.exports = {
                 onAfterCall(ctx, route, req, res, data) {
                     res.setHeader("X-Handler", ctx.nodeID);
                     return data;
-                }
+                },
             },
             {
                 path: "/api",
@@ -149,7 +149,7 @@ module.exports = {
                     methods: ["GET", "POST", "PUT", "DELETE"],
                     allowedHeaders: "*",
                     credentials: true,
-                    maxAge: null
+                    maxAge: null,
                 },
 
                 // Calling options. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Calling-options
@@ -158,20 +158,20 @@ module.exports = {
                 bodyParsers: {
                     json: {
                         strict: false,
-                        limit: "1MB"
+                        limit: "1MB",
                     },
                     urlencoded: {
                         extended: true,
-                        limit: "1MB"
-                    }
+                        limit: "1MB",
+                    },
                 },
 
                 // Mapping policy setting. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Mapping-policy
                 mappingPolicy: "all", // Available values: "all", "restrict"
 
                 // Enable/disable logging
-                logging: true
-            }
+                logging: true,
+            },
         ],
 
         // Do not log client side errors (does not log an error response when the error.code is 400<=X<500)
@@ -186,8 +186,8 @@ module.exports = {
             folder: sysConf.gateway.static || "public",
 
             // Options to `server-static` module
-            options: {}
-        }
+            options: {},
+        },
     },
 
     methods: {
@@ -221,7 +221,7 @@ module.exports = {
                 try {
                     // Verify JWT token
                     const user = await ctx.call("v1.auth.verifyToken", {
-                        token
+                        token,
                     });
                     ctx.meta.user = user;
                     return user;
@@ -250,7 +250,7 @@ module.exports = {
             ) {
                 const user = ctx.meta.user;
                 const userEntity = await ctx.call("v1.users.getUser", {
-                    id: user.id
+                    id: user.id,
                 });
                 // Check the user role
                 if (
@@ -265,6 +265,6 @@ module.exports = {
                 }
             }
             return null;
-        }
-    }
+        },
+    },
 };

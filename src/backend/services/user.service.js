@@ -17,25 +17,25 @@ module.exports = {
             roles: [1],
             rest: "POST /",
             params: {
-                user: "object"
+                user: "object",
             },
             handler(ctx) {
                 const { user } = ctx.params;
                 return this.addOrUpdateUser(user);
-            }
+            },
         },
         getUserById: {
             auth: true,
             roles: [1],
             rest: "GET /:id",
             params: {
-                id: "string"
+                id: "string",
             },
             async handler(ctx) {
                 const { id } = ctx.params;
                 const dbCollection = await this.getDBCollection("users");
                 return dbCollection.findOne({ id }).then(cleanDbMark);
-            }
+            },
         },
         getUser: {
             auth: true,
@@ -43,14 +43,14 @@ module.exports = {
             rest: "GET /",
             params: {
                 user: { type: "string", optional: true },
-                text: { type: "string", optional: true }
+                text: { type: "string", optional: true },
             },
             async handler(ctx) {
                 const { user, text } = ctx.params;
                 const dbCollection = await this.getDBCollection("users");
 
                 const filter = {
-                    query: {}
+                    query: {},
                 };
 
                 // query by given user
@@ -58,11 +58,11 @@ module.exports = {
                     const users = user.split(",");
                     if (users.length > 0) {
                         filter.query.id = {
-                            $in: users
+                            $in: users,
                         };
                     } else {
                         filter.query.id = {
-                            $in: user
+                            $in: user,
                         };
                     }
                 }
@@ -77,10 +77,9 @@ module.exports = {
                 // Delete _id and get status
                 if (result) {
                     const userIds = result.map(i => i.id);
-                    const statusList = await ctx.call(
-                        "v1.live.getUserById",
-                        { userId: userIds }
-                    );
+                    const statusList = await ctx.call("v1.live.getUserById", {
+                        userId: userIds,
+                    });
 
                     for (let index = 0; index < result.length; index++) {
                         const userInfo = result[index];
@@ -90,8 +89,8 @@ module.exports = {
                 }
 
                 return result;
-            }
-        }
+            },
+        },
     },
 
     /**
@@ -101,7 +100,7 @@ module.exports = {
         // user.disconnected
         "user.login"(user) {
             return this.addOrUpdateUser(user);
-        }
+        },
     },
 
     /**
@@ -111,7 +110,7 @@ module.exports = {
         async addOrUpdateUser(user, addOnly = false) {
             const dbCollection = await this.getDBCollection("users");
             const existingUser = await dbCollection.findOne({
-                id: user.id
+                id: user.id,
             });
             if (!existingUser) {
                 user.created = new Date();
@@ -122,13 +121,13 @@ module.exports = {
             } else if (!addOnly) {
                 user.updated = new Date();
                 const update = {
-                    $set: user
+                    $set: user,
                 };
                 return await dbCollection
                     .updateById(existingUser._id, update)
                     .then(cleanDbMark);
             }
-        }
+        },
     },
 
     /**
@@ -145,12 +144,12 @@ module.exports = {
             firstName: "text",
             lastNme: "text",
             mail: "text",
-            phone: "text"
+            phone: "text",
         });
     },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() {},
 };

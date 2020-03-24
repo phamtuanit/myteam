@@ -1,8 +1,8 @@
 const authConf = require("../conf/auth.json");
 
-const service = function (logger) {
+const service = function(logger) {
     this.logger = logger || console;
-}
+};
 
 service.prototype = {
     close() {
@@ -11,6 +11,6 @@ service.prototype = {
     verify() {
         return Promise.resolve(authConf.debug.user);
     },
-}
+};
 
-module.exports = service; 
+module.exports = service;

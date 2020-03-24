@@ -6,14 +6,19 @@ module.exports = {
             if (!this.dbCollections[collection]) {
                 const gettingTask = new Promise((resolve, reject) => {
                     const dbCl = MongoDBAdapter(collection, this);
-                    dbCl.connect().then(() => {
-                        resolve(dbCl);
-                        this.logger.debug(">>>> Collection adapter is ready", collection);
-                    }).catch(err => {
-                        this.logger.warn(err);
-                        reject(err.message);
-                        delete this.dbCollections.collection;
-                    });
+                    dbCl.connect()
+                        .then(() => {
+                            resolve(dbCl);
+                            this.logger.debug(
+                                ">>>> Collection adapter is ready",
+                                collection
+                            );
+                        })
+                        .catch(err => {
+                            this.logger.warn(err);
+                            reject(err.message);
+                            delete this.dbCollections.collection;
+                        });
                 });
                 this.dbCollections[collection] = gettingTask;
                 return gettingTask;
@@ -22,14 +27,14 @@ module.exports = {
         },
     },
     /**
-    * Service created lifecycle event handler
-    */
+     * Service created lifecycle event handler
+     */
     async created() {
         this.dbCollections = {};
     },
     /**
-    * Service stopped lifecycle event handler
-    */
+     * Service stopped lifecycle event handler
+     */
     stopped() {
         Object.values(this.dbCollections).forEach(db => {
             db.then(db => {
@@ -37,5 +42,5 @@ module.exports = {
                 db.disconnect();
             });
         });
-    }
+    },
 };

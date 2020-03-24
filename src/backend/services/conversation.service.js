@@ -24,9 +24,14 @@ module.exports = {
                     props: {
                         name: { type: "string", optional: true },
                         subscribers: { type: "array", empty: false },
-                        channel: { type: "boolean", optional: true, convert: true, default: true },
-                    }
-                }
+                        channel: {
+                            type: "boolean",
+                            optional: true,
+                            convert: true,
+                            default: true,
+                        },
+                    },
+                },
             },
             async handler(ctx) {
                 const { group } = ctx.params;
@@ -45,14 +50,14 @@ module.exports = {
                 );
                 cleanDbMark(existingConv);
                 return existingConv;
-            }
+            },
         },
         getConversationById: {
             auth: true,
             roles: [1],
             rest: "GET /:id",
             params: {
-                id: { type: "number", convert: true }
+                id: { type: "number", convert: true },
             },
             handler(ctx) {
                 const { id } = ctx.params;
@@ -61,7 +66,7 @@ module.exports = {
                         return collection.findOne({ id }).then(cleanDbMark);
                     }
                 );
-            }
+            },
         },
         getConversation: {
             auth: true,
@@ -72,7 +77,12 @@ module.exports = {
                 offset: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true, convert: true },
                 user: { type: "string", optional: true },
-                channel: { type: "boolean", optional: true, convert: true, default: false },
+                channel: {
+                    type: "boolean",
+                    optional: true,
+                    convert: true,
+                    default: false,
+                },
             },
             handler(ctx) {
                 const { user, sort, channel } = ctx.params;
@@ -86,20 +96,20 @@ module.exports = {
                     offset,
                     sort: sort || ["-id"],
                     query: {
-                        channel
-                    }
+                        channel,
+                    },
                 };
 
                 if (user) {
                     const users = user.split(",");
                     if (users.length > 0) {
                         filter.query.subscribers = {
-                            $in: users
-                        }
+                            $in: users,
+                        };
                     } else {
                         filter.query.subscribers = {
-                            $in: user
-                        }
+                            $in: user,
+                        };
                     }
                 }
 
@@ -110,7 +120,7 @@ module.exports = {
                         });
                     }
                 );
-            }
+            },
         },
     },
 
@@ -122,15 +132,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { }
+    stopped() {},
 };

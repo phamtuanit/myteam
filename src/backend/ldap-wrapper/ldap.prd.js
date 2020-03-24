@@ -1,8 +1,7 @@
-
 const {
     MoleculerClientError,
     ServiceNotAvailableError,
-    MoleculerServerError
+    MoleculerServerError,
 } = require("moleculer").Errors;
 const ldap = require("ldapjs");
 const authConf = require("../conf/auth.json");
@@ -23,7 +22,7 @@ service.prototype = {
         if (!this.ldapClient) {
             try {
                 this.ldapClient = ldap.createClient({
-                    url: authConf.server
+                    url: authConf.server,
                 });
                 return true;
             } catch (error) {
@@ -67,7 +66,7 @@ service.prototype = {
             dnSearch = authConf.rootDn;
             filter = {
                 filter: `(${authConf.idMap}=${userName})`,
-                scope: "sub"
+                scope: "sub",
             };
         } else {
             dnSearch = dn;
@@ -106,7 +105,7 @@ service.prototype = {
                                 fullName: ldapUser.cn,
                                 mail: ldapUser.mail,
                                 dn: ldapUser.dn,
-                                phone: ldapUser.telephoneNumber
+                                phone: ldapUser.telephoneNumber,
                             };
                             users.push(userInfo);
                         });
@@ -120,7 +119,7 @@ service.prototype = {
                 });
             });
         });
-    }
+    },
 };
 
 module.exports = service;
