@@ -23,11 +23,11 @@ module.exports = {
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true },
-                history: { type: "boolean", optional: true, convert: true }
+                history: { type: "boolean", optional: true, convert: true },
             },
             async handler(ctx) {
                 return this.filterMessage(ctx);
-            }
+            },
         },
         getMessagesById: {
             auth: true,
@@ -39,11 +39,11 @@ module.exports = {
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true, convert: true },
-                history: { type: "boolean", optional: true, convert: true }
+                history: { type: "boolean", optional: true, convert: true },
             },
             handler(ctx) {
                 return this.filterMessage(ctx);
-            }
+            },
         },
         postMessage: {
             auth: true,
@@ -54,9 +54,9 @@ module.exports = {
                 body: {
                     type: "object",
                     props: {
-                        type: { type: "string" }
-                    }
-                }
+                        type: { type: "string" },
+                    },
+                },
             },
             async handler(ctx) {
                 const { conversation, body } = ctx.params;
@@ -70,17 +70,17 @@ module.exports = {
                     body,
                     from: {
                         issuer: user.id,
-                        edited: false
+                        edited: false,
                     },
                     to: {
-                        conversation
-                    }
+                        conversation,
+                    },
                 };
 
                 const newMessage = this.processMessage(message, true);
-                this.publishMessage(conversation, "created", message);
+                await this.storeMessage(newMessage, ctx);
                 return newMessage;
-            }
+            },
         },
         updateMessage: {
             auth: true,
@@ -93,9 +93,9 @@ module.exports = {
                     type: "object",
                     props: {
                         type: { type: "string" },
-                        content: "object"
-                    }
-                }
+                        content: "object",
+                    },
+                },
             },
             async handler(ctx) {
                 const { conversation, body, id } = ctx.params;
@@ -108,15 +108,18 @@ module.exports = {
                     id: id,
                     from: {
                         issuer: user.id,
-                        edited: true
+                        edited: true,
                     },
-                    body
+                    to: {
+                        conversation: conversation,
+                    },
+                    body,
                 };
 
                 const newMessage = this.processMessage(message, false);
                 this.publishMessage(conversation, "updated", newMessage);
                 return newMessage;
-            }
+            },
         },
         removeMessage: {
             auth: true,
@@ -124,7 +127,7 @@ module.exports = {
             rest: "DELETE /:id",
             params: {
                 conversation: { type: "number", convert: true },
-                id: "string"
+                id: "string",
             },
             handler(ctx) {
                 const { conversation, id } = ctx.params;
@@ -134,148 +137,22 @@ module.exports = {
                 const message = { id };
                 this.publishMessage(conversation, "delete", message);
                 return message;
-            }
-        }
+            },
+        },
     },
 
     /**
      * Events
      */
     events: {
-        //{nodeID}.conversation.{conversation}.message.{act}`;
-        // Ex: phuong3623-16548.conversation.1584672834896.message.created
-        "*.conversation.*.message.created"(payload, sender, event, ctx) {
-            const [nodeId, constVar, conversation, constMsg, act] = event.split(
-                "."
-            );
-            const conversationId = parseInt(conversation);
-            const msgCache = {
-                type: "message",
-                action: act,
-                payload: payload
-            };
-
-            this.getConversation(conversationId)
-                .catch(err => {
-                    this.logger.error(
-                        "Could get conversation information: ",
-                        conversationId,
-                        err
-                    );
-                    this.revertCreatingMessage(ctx, msgCache, err);
-                })
-                .then(conInfo => {
-                    if (Array.isArray(conInfo)) {
-                        conInfo = conInfo.length > 0 ? conInfo[0] : null;
-                    }
-                    if (conInfo && conInfo.subscribers) {
-                        // 1. Save message to conversation collection in DB
-                        const convCollId = this.getHistoryCollection(
-                            conversation
-                        );
-                        this.getDBCollection(convCollId)
-                            .then(collection => {
-                                return collection
-                                    .insert(payload)
-                                    .then(entity => {
-                                        // Clean _id
-                                        cleanDbMark(msgCache);
-                                        // 2. Public message to online subscribers or to cache in DB
-                                        msgCache.id = new Date().getTime();
-                                        conInfo.subscribers.forEach(userId => {
-                                            if (userId == payload.from.issuer) {
-                                                // Ignore issuer from subscribers
-                                                return entity;
-                                            }
-                                            // 2.1. Save new information to DB of corresponding user cache
-                                            const queueId = `msg-queue-${userId}`;
-                                            this.getDBCollection(queueId).then(
-                                                collection => {
-                                                    return collection
-                                                        .insert(msgCache)
-                                                        .then(() => {
-                                                            // Clean _id
-                                                            cleanDbMark(msgCache);
-                                                        })
-                                                        .catch(err => {
-                                                            this.logger.error(
-                                                                "Could not store message to queue: ",
-                                                                queueId,
-                                                                err
-                                                            );
-                                                        });
-                                                }
-                                            );
-
-                                            // 2.2. Send information to live-user directly
-                                            // If user confirm that they received a message, then the message wil be removed in DB
-                                            this.broker
-                                                .call(
-                                                    "v1.live.getUserStatusById",
-                                                    {
-                                                        userId: userId
-                                                    }
-                                                )
-                                                .catch(err => {
-                                                    this.logger.error(
-                                                        "Could get user status: ",
-                                                        userId,
-                                                        err
-                                                    );
-                                                })
-                                                .then(({ status }) => {
-                                                    if (status == "on") {
-                                                        // Public message to online user . Pattern: [nodeId].message-queue.[userId].message.[action]
-                                                        const eventName = `${this.broker.nodeID}.message-queue.${userId}.message.created`;
-                                                        return this.broker.emit(
-                                                            eventName,
-                                                            msgCache
-                                                        );
-                                                    }
-                                                })
-                                                .catch(err => {
-                                                    this.logger.error(
-                                                        "Could publish new message: ",
-                                                        userId,
-                                                        err
-                                                    );
-                                                });
-                                        });
-
-                                        return entity;
-                                    })
-                                    .catch(err => {
-                                        this.logger.error(
-                                            "Could not store message to queue:",
-                                            convCollId,
-                                            err
-                                        );
-                                    });
-                            })
-                            .catch(err => {
-                                this.logger.error(
-                                    "Could not get DB collection",
-                                    convCollId,
-                                    err
-                                );
-                                this.revertCreatingMessage(ctx, msgCache, err);
-                            });
-                    }
-                })
-                .catch(err => {
-                    this.logger.error(
-                        "Could save message to DB: ",
-                        conversationId,
-                        err
-                    );
-                    this.revertCreatingMessage(ctx, msgCache, err);
-                });
+        //conversation.{conversation}.message.{act}`;
+        // Ex: conversation.1584672834896.message.created
+        "conversation.*.message.created"(payload, sender, event, ctx) {
+            const [constVar, conversation, constMsg, act] = event.split(".");
         },
-        //{nodeID}.conversation.{conversation}.message.update`;
-        "*.conversation.*.message.updated"(payload, sender, event, ctx) {
-            const [nodeId, constVar, conversation, constMsg, act] = event.split(
-                "."
-            );
+        //conversation.{conversation}.message.update`;
+        "conversation.*.message.updated"(payload, sender, event, ctx) {
+            const [constVar, conversation, constMsg, act] = event.split(".");
             const convCollId = `conv-history-${conversation}`;
 
             // Get adapter
@@ -312,7 +189,7 @@ module.exports = {
 
                             // 3.Update record in DB
                             const update = {
-                                $set: newEntity
+                                $set: newEntity,
                             };
 
                             return collection
@@ -345,7 +222,7 @@ module.exports = {
             if (msg) {
                 return dbCollection.removeById(msg._id);
             }
-        }
+        },
     },
 
     /**
@@ -353,7 +230,7 @@ module.exports = {
      */
     methods: {
         publishMessage(conversation, evtAction, message) {
-            const eventName = `${this.broker.nodeID}.conversation.${conversation}.message.${evtAction}`;
+            const eventName = `conversation.${conversation}.message.${evtAction}`;
             return this.broker.emit(eventName, message);
         },
         processMessage(message, isNew) {
@@ -370,10 +247,10 @@ module.exports = {
         },
         getConversation(convId) {
             return this.broker.call("v1.conversations.getConversation", {
-                id: convId
+                id: convId,
             });
         },
-        getHistoryCollection(conversation) {
+        getHistoryCollectionName(conversation) {
             return `conv-history-${conversation}`;
         },
         revertCreatingMessage(ctx, message, error) {
@@ -381,14 +258,14 @@ module.exports = {
             const newMsg = { ...message };
             newMsg.error = error;
 
-            const eventName = `${this.broker.nodeID}.conversation.${conversation}.message.rejected.create`;
+            const eventName = `conversation.${conversation}.message.rejected.create`;
             return this.broker.emit(eventName, newMsg);
         },
         revertUpdatingMessage(ctx, message, error) {
             const conversation = message.to.target;
             const newMsg = { ...message };
             newMsg.error = error;
-            const eventName = `${this.broker.nodeID}.conversation.${conversation}.message.rejected.update`;
+            const eventName = `conversation.${conversation}.message.rejected.update`;
             return this.broker.emit(eventName, message);
         },
         async filterMessage(ctx) {
@@ -397,7 +274,7 @@ module.exports = {
             this.checkConversation(conversation);
 
             try {
-                const historyColl = this.getHistoryCollection(conversation);
+                const historyColl = this.getHistoryCollectionName(conversation);
                 const dbCollection = await this.getDBCollection(historyColl);
                 let result = null;
 
@@ -413,7 +290,7 @@ module.exports = {
                     const filter = {
                         limit,
                         offset,
-                        sort: sort || ["id"]
+                        sort: sort || ["id"],
                     };
 
                     result = await dbCollection.find(filter);
@@ -428,7 +305,88 @@ module.exports = {
                 this.logger.error(error);
                 throw new Errors.MoleculerServerError(error.message, 500);
             }
-        }
+        },
+        async storeMessage(message, ctx) {
+            const conversationId = parseInt(message.to.conversation);
+            const msgCache = {
+                type: "message",
+                action: "created",
+                payload: message,
+            };
+
+            let convInfo = await ctx.call("v1.conversations.getConversation", {
+                id: conversationId,
+            });
+
+            if (Array.isArray(convInfo)) {
+                convInfo = convInfo.length > 0 ? convInfo[0] : null;
+            }
+
+            if (!convInfo) {
+                throw new Error("Conversation not found");
+            }
+
+            // 1 Save message to conversation collection in DB
+            const convCollId = this.getHistoryCollectionName(conversationId);
+            const dbCollection = await this.getDBCollection(convCollId);
+            // Insert one more record
+            const entity = dbCollection.insert(message);
+
+            // Clean _id
+            cleanDbMark(msgCache);
+
+            if (convInfo && convInfo.subscribers) {
+                msgCache.id = new Date().getTime();
+
+                // 2. Save information to user queue and send message to WS
+                for (
+                    let index = 0;
+                    index < convInfo.subscribers.length;
+                    index++
+                ) {
+                    const userId = convInfo.subscribers[index];
+                    if (userId == message.from.issuer) {
+                        // Ignore issuer from subscribers
+                        continue;
+                    }
+
+                    // 2.1 Save new information to DB of corresponding user cache
+                    const queueId = `msg-queue-${userId}`;
+                    const msgQueueCollection = await this.getDBCollection(
+                        queueId
+                    );
+                    await msgQueueCollection.insert(msgCache);
+                    // Clean _id
+                    cleanDbMark(msgCache);
+
+                    // 2.2 Send information to live-user directly
+                    // If user confirm that they received a message, then the message wil be removed in DB
+                    try {
+                        const { status } = await ctx.call(
+                            "v1.live.getUserById",
+                            {
+                                userId: userId,
+                            }
+                        );
+                        if (status == "on") {
+                            // Public message to online user . Pattern: [nodeId].message-queue.[userId].message.[action]
+                            const eventName = `message-queue.${userId}.message.created`;
+                            this.broker
+                                .emit(eventName, msgCache)
+                                .catch(this.logger.error);
+                        }
+                    } catch (err) {
+                        this.logger.error(
+                            "Could publish new message: ",
+                            userId,
+                            err
+                        );
+                    }
+                }
+            }
+
+            return entity;
+        },
     },
 
     /**
@@ -444,5 +402,5 @@ module.exports = {
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {}
+    stopped() {},
 };
