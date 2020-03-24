@@ -1,15 +1,39 @@
 <template>
     <v-list-item class="px-2 message-item your-message" :data-msg-index="index">
         <v-list-item-avatar class="ma-0">
-            <UserAvatar :user="user" online-effect/>
+            <UserAvatar :user="user" online-effect />
         </v-list-item-avatar>
         <div class="ml-1 message-card-wrapper">
+            <!-- Action -->
+            <div class="message-actions-wrapper">
+                <v-spacer></v-spacer>
+                <v-card class="message-actions py-1" elevation="1">
+                    <v-icon size="18" color="yellow darken-2" class="ml-2" title=":like:"
+                        >mdi-thumb-up</v-icon
+                    >
+                    <v-icon size="18" color="orange" class="ml-2" title=":happy:"
+                        >mdi-emoticon-excited</v-icon
+                    >
+                    <v-icon size="18" color="blue darken-2" class="ml-2" title=":cry:"
+                        >mdi-emoticon-cry</v-icon
+                    >
+                    <v-icon size="18" color="red darken-1" class="ml-2" title=":angry:"
+                        >mdi-emoticon-angry</v-icon
+                    >
+                    <v-icon size="18" class="mx-2" title="more"
+                        >mdi-dots-vertical</v-icon
+                    >
+                </v-card>
+                <!-- <div class="message-actions py-1">
+                    
+                </div> -->
+            </div>
+            <!-- Message -->
             <v-card flat class="message-card py-1">
                 <div class="py-1 px-4 card-header">
                     <span class="subtitle-2 mr-2" v-text="fullName"></span>
                     <span class="caption" v-text="time"></span>
                     <v-spacer></v-spacer>
-                    <v-icon small class="ml-2 like-icon">mdi-thumb-up</v-icon>
                 </div>
                 <v-card-text
                     class="pt-0 pb-1 px-4"
@@ -56,20 +80,38 @@ export default {
     -webkit-box-flex: 1;
 }
 
-.v-icon.like-icon {
-    position: relative;
-    opacity: 0.4;
-    color: #1565c0 !important;
-    transition: all .2s ease-in-out;
-}
-
-.v-icon.like-icon:not(.active):hover {
-    opacity: 1;
+.message-actions .v-icon {
     cursor: pointer;
-    transform: scale(1.1);
 }
 
-.v-icon.like-icon.active {
+.message-actions-wrapper {
+    visibility: hidden;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+    -webkit-box-flex: 1;
+    background: transparent;
+    opacity: 0;
+    left: 0;
+    right: -20px;
+    top: -25px;
+    transform: scale(0.9);
+}
+
+.message-actions {
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.message-card-wrapper:hover .message-actions-wrapper {
+    visibility: visible;
+    z-index: 99;
     opacity: 1;
+    top: -20px;
+    transform: scale(1);
+    transition: all 0.2s ease-in;
 }
 </style>
