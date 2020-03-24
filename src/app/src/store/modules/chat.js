@@ -1,5 +1,16 @@
 const messageService = new (require("../../services/message.service").default)();
 const convService = new (require("../../services/conversation.service").default)();
+let eventBus = null;
+
+function informNewMessage() {
+    const payload = {
+        sender: "app-channel",
+        inform: {
+            count: 1
+        }
+    }
+    eventBus.emit("drawer.inform", payload);
+}
 
 const moduleState = {
     namespaced: true,
@@ -57,6 +68,7 @@ const moduleState = {
 
                 if (!chat.messages) {
                     chat.messages = [message];
+                    informNewMessage(message);
                 } else {
                     const foundMessage = chat.messages.find(
                         i => i.id == message.id
@@ -66,9 +78,8 @@ const moduleState = {
                     } else {
                         Object.assign(foundMessage, message);
                     }
+                    informNewMessage(message);
                 }
-
-                chat.recent = message;
             }
         },
         rejectedMessage(state, { action: preAct, payload: message, error }) {
@@ -96,6 +107,7 @@ const moduleState = {
     },
     actions: {
         async initialize(ctx) {
+            eventBus = window.IoC.get("bus");
             const { commit, rootState } = ctx;
             const me = rootState.users.me;
             const res = await convService.getAllByUser(me.id);

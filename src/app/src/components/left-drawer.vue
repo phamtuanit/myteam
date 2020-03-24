@@ -1,66 +1,64 @@
 <template>
-  <v-navigation-drawer
-    permanent
-    mini-variant
-    dark
-    app
-    mini-variant-width="70"
-    class="left-drawer"
-  >
-    <v-list-item class="px-0 mt-2 mb-1 mx-auto">
-      <Avatar
-        :size="40"
-        :user-name="me.fullName"
-        class="mx-auto"
-        :src="me.avatar"
-      >
-      </Avatar>
-    </v-list-item>
-    <v-list>
-      <v-list-item-group mandatory>
-        <template v-for="menu in menus">
-          <v-list-item
-            :key="menu.key"
-            :value="menu"
-            :input-value="menu == activatedMenu"
-            class="px-0 my-0 pb-3 pt-4"
-            @click="onActivateMenu(menu)"
-          >
-            <v-badge
-              :value="menu.inform.count > 0"
-              :key="menu.key + 'badge'"
-              overlap
-              color="red darken-3"
-              light
-              :content="menu.inform.count"
+    <v-navigation-drawer
+        permanent
+        mini-variant
+        dark
+        app
+        mini-variant-width="70"
+        class="left-drawer"
+    >
+        <v-list-item class="px-0 mt-2 mb-1 mx-auto">
+            <Avatar
+                :size="40"
+                :user-name="me.fullName"
+                class="mx-auto"
+                :src="me.avatar"
             >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-icon
-                    color="white"
-                    v-on="on"
-                    class="mx-auto pa-1"
-                  >mdi-{{ menu.icon }}</v-icon>
+            </Avatar>
+        </v-list-item>
+        <v-list>
+            <v-list-item-group mandatory>
+                <template v-for="menu in menus">
+                    <v-list-item
+                        :key="menu.key"
+                        :value="menu"
+                        :input-value="menu == activatedMenu"
+                        class="px-0 my-0 pb-3 pt-4"
+                        @click="onActivateMenu(menu)"
+                    >
+                        <v-badge
+                            :value="menu.inform && menu.inform.count > 0"
+                            :key="menu.key + 'badge'"
+                            overlap
+                            color="red darken-3"
+                            light
+                            :dot="menu.inform && menu.inform.count > 99"
+                            :content="menu.inform.count"
+                        >
+                            <v-tooltip right>
+                                <template v-slot:activator="{ on }">
+                                    <v-icon
+                                        color="white"
+                                        v-on="on"
+                                        class="mx-auto pa-1"
+                                        >mdi-{{ menu.icon }}</v-icon
+                                    >
+                                </template>
+                                <span>{{ menu.name }}</span>
+                            </v-tooltip>
+                        </v-badge>
+                    </v-list-item>
                 </template>
-                <span>{{ menu.name }}</span>
-              </v-tooltip>
-            </v-badge>
-          </v-list-item>
+            </v-list-item-group>
+        </v-list>
+        <template v-slot:append>
+            <div class="pa-2 text-center">
+                <v-btn icon @click="enableDarkMode" title="Dark / Light">
+                    <v-icon>mdi-theme-light-dark</v-icon>
+                </v-btn>
+            </div>
         </template>
-      </v-list-item-group>
-    </v-list>
-    <template v-slot:append>
-      <div class="pa-2 text-center">
-        <v-btn
-          icon
-          @click="enableDarkMode"
-          title="Dark / Light"
-        >
-          <v-icon>mdi-theme-light-dark</v-icon>
-        </v-btn>
-      </div>
-    </template>
-  </v-navigation-drawer>
+    </v-navigation-drawer>
 </template>
 
 <script>
@@ -82,8 +80,16 @@ export default {
             me: state => state.users.me,
         }),
     },
+    watch: {
+        activatedMenu(val) {
+            if (val && val.inform) {
+                val.inform.count = 0;
+            }
+        },
+    },
     mounted() {
         this.activateDefaultMenu();
+        this.setUpEvent();
     },
     methods: {
         enableDarkMode() {
@@ -126,6 +132,7 @@ export default {
             }
 
             if (menu.route.name === this.$route.name) {
+                this.activatedMenu = menu;
                 return;
             }
 
@@ -137,6 +144,44 @@ export default {
                     })
                     .catch(console.error);
             }
+        },
+        setUpEvent() {
+            const bus = window.IoC.get("bus");
+            bus.on("drawer.inform", payload => {
+                const sender = payload.sender;
+                if (
+                    this.activatedMenu.route &&
+                    this.activatedMenu.route.name == sender
+                ) {
+                    console.debug(
+                        "The module is avtivated. Ignore information.",
+                        payload
+                    );
+                    return;
+                }
+
+                if (
+                    !payload.inform ||
+                    typeof payload.inform.count != "number"
+                ) {
+                    console.warn(
+                        "Information doesn't include required inforamtion.",
+                        payload
+                    );
+                    return;
+                }
+
+                const menu = this.menus.find(
+                    me => me.route && me.route.name == sender
+                );
+                if (
+                    menu &&
+                    menu.inform &&
+                    typeof menu.inform.count == "number"
+                ) {
+                    menu.inform.count += payload.inform.count;
+                }
+            });
         },
     },
 };

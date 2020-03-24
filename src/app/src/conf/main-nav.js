@@ -4,7 +4,7 @@ export default [
         name: "Chat",
         icon: "forum-outline",
         inform: {
-            count: 2,
+            count: 0,
         },
         route: {
             name: "app-chat",
@@ -16,7 +16,7 @@ export default [
         name: "Channel",
         icon: "account-group",
         inform: {
-            count: 1,
+            count: 0,
         },
         route: {
             name: "app-channel",
