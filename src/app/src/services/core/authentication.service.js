@@ -64,6 +64,7 @@ Service.prototype = {
                             }
                         })
                         .catch(err => {
+                            console.error("Got an error while refreshing token.", err);
                             reject(err);
                         });
                 });
@@ -84,6 +85,7 @@ Service.prototype = {
                         resole(token);
                     })
                     .catch(err => {
+                        console.error("Got an error while verify token.", err);
                         reject(err);
                     });
             });
