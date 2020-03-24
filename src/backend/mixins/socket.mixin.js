@@ -38,17 +38,15 @@ module.exports = {
                 }
             }
         },
-        // [nodeId].message-queue.[userId].message.[action]
-        "*.message-queue.*.message.*"(message, sender, event, ctx) {
-            const [nodeId, constVar, userId, resource, act] = event.split(".");
+        // [nodeId].message-queue.[userId].message.created
+        "*.message-queue.*.message.created"(message, sender, event, ctx) {
+            const act = "created";
+            const [nodeId, constVar, userId, resource] = event.split(".");
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
-                const data = {
-                    event,
-                    payload: message
-                };
+                message.event = event;
                 // To private user room
-                this.io.to(userId).emit(resource, act, data);
+                this.io.to(userId).emit(resource, act, message);
             }
         },
         // [nodeID].conversation.[conversation].message.[rejected].[create]
@@ -99,6 +97,10 @@ module.exports = {
             const connectedEvt = `${this.broker.nodeID}.user.${user.id}.socket.connected`;
             this.broker.emit(connectedEvt, user, ["live"]); // live service only
 
+            socket.on("confirm", data => {
+                return this.onSocketConfirmed(socket, data);
+            });
+
             socket.on("disconnect", () => {
                 this.logger.info(`User ${user.id} has been disconnected.`);
 
@@ -130,6 +132,33 @@ module.exports = {
                 socket.leave(room);
             });
         },
+        onSocketConfirmed(socket, data) {
+            if (data.status == "confirmed") {
+                if (data.type == "message" && data.action) {
+                    switch (data.action) {
+                        case "created":
+                            this.cleanMessageQueue(socket, data);
+                            break;
+                    
+                        default:
+                            console.warn("Unsupported message type");
+                            break;
+                    }
+                    return;
+                }
+            }
+        },
+        cleanMessageQueue(socket, info) {
+            if (!info || !socket || !socket.handshake.user) {
+                return;
+            }
+            
+            const userId = socket.handshake.user.id;
+            if (userId) {
+                const event = `message-queue.${userId}.message.confirmed`;
+                this.broker.emit(event, info, ["messages"]);
+            }
+        }
     },
 
     created() {

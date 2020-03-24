@@ -54,7 +54,7 @@ module.exports = {
                 body: {
                     type: "object",
                     props: {
-                        type: { type: "string" },
+                        type: { type: "string" }
                     }
                 }
             },
@@ -145,7 +145,9 @@ module.exports = {
         //{nodeID}.conversation.{conversation}.message.{act}`;
         // Ex: phuong3623-16548.conversation.1584672834896.message.created
         "*.conversation.*.message.created"(payload, sender, event, ctx) {
-            const [nodeId, constVar, conversation, constMsg, act] = event.split(".");
+            const [nodeId, constVar, conversation, constMsg, act] = event.split(
+                "."
+            );
             const conversationId = parseInt(conversation);
             const msgCache = {
                 type: "message",
@@ -173,13 +175,82 @@ module.exports = {
                         );
                         this.getDBCollection(convCollId)
                             .then(collection => {
-                                return collection.insert(payload).catch(err => {
-                                    this.logger.error(
-                                        "Could not store message to queue:",
-                                        convCollId,
-                                        err
-                                    );
-                                });
+                                return collection
+                                    .insert(payload)
+                                    .then(entity => {
+                                        // Clean _id
+                                        cleanDbMark(msgCache);
+                                        // 2. Public message to online subscribers or to cache in DB
+                                        msgCache.id = new Date().getTime();
+                                        conInfo.subscribers.forEach(userId => {
+                                            if (userId == payload.from.issuer) {
+                                                // Ignore issuer from subscribers
+                                                return entity;
+                                            }
+                                            // 2.1. Save new information to DB of corresponding user cache
+                                            const queueId = `msg-queue-${userId}`;
+                                            this.getDBCollection(queueId).then(
+                                                collection => {
+                                                    return collection
+                                                        .insert(msgCache)
+                                                        .then(() => {
+                                                            // Clean _id
+                                                            cleanDbMark(msgCache);
+                                                        })
+                                                        .catch(err => {
+                                                            this.logger.error(
+                                                                "Could not store message to queue: ",
+                                                                queueId,
+                                                                err
+                                                            );
+                                                        });
+                                                }
+                                            );
+
+                                            // 2.2. Send information to live-user directly
+                                            // If user confirm that they received a message, then the message wil be removed in DB
+                                            this.broker
+                                                .call(
+                                                    "v1.live.getUserStatusById",
+                                                    {
+                                                        userId: userId
+                                                    }
+                                                )
+                                                .catch(err => {
+                                                    this.logger.error(
+                                                        "Could get user status: ",
+                                                        userId,
+                                                        err
+                                                    );
+                                                })
+                                                .then(({ status }) => {
+                                                    if (status == "on") {
+                                                        // Public message to online user . Pattern: [nodeId].message-queue.[userId].message.[action]
+                                                        const eventName = `${this.broker.nodeID}.message-queue.${userId}.message.created`;
+                                                        return this.broker.emit(
+                                                            eventName,
+                                                            msgCache
+                                                        );
+                                                    }
+                                                })
+                                                .catch(err => {
+                                                    this.logger.error(
+                                                        "Could publish new message: ",
+                                                        userId,
+                                                        err
+                                                    );
+                                                });
+                                        });
+
+                                        return entity;
+                                    })
+                                    .catch(err => {
+                                        this.logger.error(
+                                            "Could not store message to queue:",
+                                            convCollId,
+                                            err
+                                        );
+                                    });
                             })
                             .catch(err => {
                                 this.logger.error(
@@ -189,59 +260,6 @@ module.exports = {
                                 );
                                 this.revertCreatingMessage(ctx, msgCache, err);
                             });
-
-                        // 2. Public message to online subscribers or to cache in DB
-                        msgCache.id = new Date().getTime();
-                        conInfo.subscribers.forEach(userId => {
-                            if (userId === payload.from.issuer) {
-                                // Ignore issuer from subscribers
-                                return;
-                            }
-                            // 1. Save new information to DB of corresponding user cache
-                            const queueId = `msg-queue-${userId}`;
-                            this.getDBCollection(queueId).then(collection => {
-                                return collection
-                                    .insert(msgCache)
-                                    .catch(err => {
-                                        this.logger.error(
-                                            "Could not store message to queue: ",
-                                            queueId,
-                                            err
-                                        );
-                                    });
-                            });
-
-                            // 2. Send information to live-user directly
-                            // If user confirm that they received a message, then the message wil be removed in DB
-                            this.broker
-                                .call("v1.live.getUserStatusById", {
-                                    userId: userId
-                                })
-                                .catch(err => {
-                                    this.logger.error(
-                                        "Could get user live status: ",
-                                        userId,
-                                        err
-                                    );
-                                })
-                                .then(({ status }) => {
-                                    if (status == "on") {
-                                        // Public message to online user . Pattern: [nodeId].message-queue.[userId].message.[action]
-                                        const eventName = `${this.broker.nodeID}.message-queue.${userId}.message.created`;
-                                        return this.broker.emit(
-                                            eventName,
-                                            msgCache
-                                        );
-                                    }
-                                })
-                                .catch(err => {
-                                    this.logger.error(
-                                        "Could publish new message: ",
-                                        userId,
-                                        err
-                                    );
-                                });
-                        });
                     }
                 })
                 .catch(err => {
@@ -251,11 +269,13 @@ module.exports = {
                         err
                     );
                     this.revertCreatingMessage(ctx, msgCache, err);
-                })
+                });
         },
         //{nodeID}.conversation.{conversation}.message.update`;
         "*.conversation.*.message.updated"(payload, sender, event, ctx) {
-            const [nodeId, constVar, conversation, constMsg, act] = event.split(".");
+            const [nodeId, constVar, conversation, constMsg, act] = event.split(
+                "."
+            );
             const convCollId = `conv-history-${conversation}`;
 
             // Get adapter
@@ -312,6 +332,19 @@ module.exports = {
                             this.revertUpdatingMessage(ctx, payload, err);
                         });
                 });
+        },
+        // message-queue.[userId].message.confirmed
+        async "message-queue.*.message.confirmed"(payload, sender, event, ctx) {
+            const [constVar, userId] = event.split(".");
+
+            const queueId = `msg-queue-${userId}`;
+            const dbCollection = await this.getDBCollection(queueId);
+
+            const msg = await dbCollection.findOne({ id: payload.id });
+
+            if (msg) {
+                return dbCollection.removeById(msg._id);
+            }
         }
     },
 
@@ -401,15 +434,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { }
+    stopped() {}
 };
