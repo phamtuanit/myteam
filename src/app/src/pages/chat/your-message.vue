@@ -1,7 +1,7 @@
 <template>
     <v-list-item class="px-2 message-item your-message" :data-msg-index="index">
         <v-list-item-avatar class="ma-0">
-            <UserAvatar :user="user" />
+            <UserAvatar :user="user" online-effect/>
         </v-list-item-avatar>
         <div class="ml-1 message-card-wrapper">
             <v-card flat class="message-card py-1">

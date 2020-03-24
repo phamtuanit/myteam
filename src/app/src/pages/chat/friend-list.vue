@@ -42,7 +42,7 @@
                         :value="user"
                         v-if="!user._isMe"
                     >
-                        <UserAvatar :user-name="me.fullName" :user="user" />
+                        <UserAvatar :user-name="me.fullName" :user="user" online-effect/>
 
                         <v-list-item-content class="py-2 px-2">
                             <v-list-item-title

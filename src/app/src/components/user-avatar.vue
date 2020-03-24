@@ -7,10 +7,12 @@
         overlap
         bordered
     >
-        <Avatar :user-name="user.fullName" :src="user.avatar" :size="30" :animation="animation"></Avatar>
-        <!-- <v-avatar size="30">
-            <v-img src="https://randomuser.me/api/portraits/men/81.jpg"></v-img>
-        </v-avatar> -->
+        <Avatar
+            :user-name="user.fullName"
+            :src="user.avatar"
+            :size="30"
+            :animation="infinity == true || enableAnimation"
+        ></Avatar>
     </v-badge>
 </template>
 
@@ -19,9 +21,25 @@ import Avatar from "./avatar";
 export default {
     props: {
         user: Object,
-        animation: Boolean
+        onlineEffect: Boolean,
+        infinity: Boolean,
     },
     components: { Avatar },
+    data() {
+        return {
+            enableAnimation: this.infinity,
+        };
+    },
+    watch: {
+        isOnline(val) {
+            if (this.onlineEffect == true && this.infinity == false && val == true) {
+                this.enableAnimation = true;
+                setTimeout(() => {
+                    this.enableAnimation = false;
+                }, 5 * 1000);
+            }
+        },
+    },
     computed: {
         isOnline() {
             return this.user.status == "on";

@@ -36,7 +36,7 @@
                 >
                     <UserAvatar
                         :user="getTargetUser(chat)"
-                        :animation="enableOnlineEffect(chat)"
+                        :infinity="enableOnlineEffect(chat)"
                     />
 
                     <v-list-item-content class="py-2 px-2">
