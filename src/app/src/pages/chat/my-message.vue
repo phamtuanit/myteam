@@ -8,7 +8,8 @@
         <v-card flat class="mr-1 message-card py-1" :disabled="hasError">
             <div class="py-1 px-4 card-header">
                 <span class="caption" v-text="time"></span>
-                <v-icon v-if="hasError" small color="red lighten-1" class="mx-2"
+                <v-spacer></v-spacer>
+                <v-icon v-if="hasError" small color="red lighten-1" class="ml-2"
                     >mdi-alert</v-icon
                 >
             </div>
@@ -45,8 +46,8 @@ export default {
 }
 
 .message-error >>> .message-card {
-    border-bottom-color: #ef5350ec;
-    border-bottom-width: 2px;
+    border-bottom-color: #ef5350c7;
+    border-bottom-width: 1px;
     border-bottom-style: solid;
 }
 
