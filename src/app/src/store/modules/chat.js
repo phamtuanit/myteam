@@ -6,9 +6,9 @@ function informNewMessage() {
     const payload = {
         sender: "app-chat",
         inform: {
-            count: 1
-        }
-    }
+            count: 1,
+        },
+    };
     eventBus.emit("drawer.inform", payload);
 }
 
@@ -58,7 +58,7 @@ const moduleState = {
             }
             const chat = state.all.find(c => c.id == chatId);
             if (chat) {
-                message.status = "valid";
+                message.status = null;
 
                 // Incase has chat in cache
                 if (message.from && message.from.issuer) {
@@ -82,21 +82,42 @@ const moduleState = {
                 }
             }
         },
+        removeMessage(state, { chatId, message }) {
+            const chat = state.all.find(c => c.id == chatId);
+            if (chat) {
+                const existingMsg = chat.messages.find(i => i.id == message.id);
+                if (existingMsg) {
+                    existingMsg.status = "removed";
+
+                    const me = this.state.users.me;
+                    if (me.id != existingMsg.from.issuer) {
+                        existingMsg.body.content =
+                            "It has been removed by owner";
+                    }
+                }
+            }
+        },
         rejectedMessage(state, { action: preAct, payload: message, error }) {
             const chatId = message.to.conversation;
-            if ( typeof chatId != "number") {
-                console.warn("Could not detect chatId. Ignore this information.");
+            if (typeof chatId != "number") {
+                console.warn(
+                    "Could not detect chatId. Ignore this information."
+                );
                 return;
             }
-            const chat = state.all.find(c =>c.id == chatId);
+            const chat = state.all.find(c => c.id == chatId);
             if (!chat) {
-                console.warn("Could not find existing chat. Ignore this information.");
+                console.warn(
+                    "Could not find existing chat. Ignore this information."
+                );
                 return;
             }
 
             const existingMsg = chat.messages.find(i => i.id == message.id);
             if (!existingMsg) {
-                console.info("Could not find existing message. Ignore this information.");
+                console.info(
+                    "Could not find existing message. Ignore this information."
+                );
                 return;
             }
 
@@ -208,6 +229,19 @@ const moduleState = {
                 return res.data;
             });
         },
+        async deleteMessage({ commit }, message) {
+            const convId = message.to.conversation;
+            const msg = await messageService
+                .delete(convId, message.id)
+                .then(res => {
+                    return res.data;
+                });
+
+            if (msg && msg.id) {
+                commit("removeMessage", { chatId: convId, message });
+                return msg.id;
+            }
+        },
         getConversationContent(ctx, chatId) {
             if (typeof chatId == "number") {
                 return messageService.get(parseInt(chatId)).then(res => {
@@ -229,9 +263,11 @@ const moduleState = {
                     payload: {
                         id: message.id,
                         from: message.from,
-                        to: message.to
-                    }
+                        to: message.to,
+                    },
                 });
+                
+                const chatId = message.to.conversation;
                 // Handle event
                 switch (act) {
                     case "created":
@@ -240,8 +276,6 @@ const moduleState = {
                         }
 
                         {
-                            const chatId = message.to.conversation;
-
                             const existingConv = state.all.find(
                                 i => i.id == chatId
                             );
@@ -264,6 +298,9 @@ const moduleState = {
                         break;
                     case "rejected":
                         commit("rejectedMessage", data);
+                        break;
+                    case "removed":
+                        commit("removeMessage", { chatId, message });
                         break;
 
                     default:

@@ -12,6 +12,7 @@
                     :index="index"
                     :message="msg"
                     class="mt-4"
+                    @delete="onDeleteMyMessage"
                 ></MyMessage>
                 <YourMessage
                     v-else
@@ -101,6 +102,14 @@ export default {
         fillHeight("message-sheet", 48, this.$el);
     },
     methods: {
+        onClearMessage() {
+            this.newMessage = "";
+        },
+        onSelectEmoji(emoji) {
+            if (emoji.native) {
+                this.newMessage += emoji.native;
+            }
+        },
         onSendMessage() {
             if (this.status == "temp") {
                 // Create new conversation first
@@ -128,13 +137,8 @@ export default {
                     .catch(console.error);
             }
         },
-        onClearMessage() {
-            this.newMessage = "";
-        },
-        onSelectEmoji(emoji) {
-            if (emoji.native) {
-                this.newMessage += emoji.native;
-            }
+        onDeleteMyMessage(message) {
+            this.$store.dispatch("chats/deleteMessage", message).catch(console.error);
         },
     },
 };
