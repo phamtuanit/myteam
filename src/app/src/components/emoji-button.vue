@@ -7,7 +7,6 @@
     internal-activator
     transition="scroll-y-transition"
     :close-on-content-click="false"
-    @keyup.enter="showEmojiPicker = false"
   >
     <template v-slot:activator="{ on }">
       <v-btn icon v-on="on">
@@ -22,6 +21,7 @@
       set="twitter"
       :infiniteScroll="true"
       @select="onSelectEmoji"
+      @keyup.esc="showEmojiPicker = false"
     ></picker>
   </v-menu>
 </template>
