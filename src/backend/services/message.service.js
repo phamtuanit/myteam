@@ -362,7 +362,7 @@ module.exports = {
                 const msgQueue = {
                     id: new Date().getTime(),
                     type: "message",
-                    action: "updated",
+                    action: "reacted",
                     payload: result,
                 };
 
