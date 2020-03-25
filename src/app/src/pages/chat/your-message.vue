@@ -4,47 +4,6 @@
             <UserAvatar :user="user" online-effect />
         </v-list-item-avatar>
         <div class="ml-1 message-card-wrapper">
-            <!-- Action -->
-            <div class="message-actions-wrapper">
-                <v-spacer></v-spacer>
-                <v-card class="message-actions py-1" elevation="1">
-                    <v-icon
-                        size="18"
-                        color="yellow darken-3"
-                        class="ml-2"
-                        title=":like:"
-                        >mdi-thumb-up</v-icon
-                    >
-                    <v-icon
-                        size="18"
-                        color="red darken-3"
-                        class="ml-2"
-                        title=":heart:"
-                        >mdi-heart</v-icon
-                    >
-                    <v-icon
-                        size="18"
-                        color="yellow darken-3"
-                        class="ml-2"
-                        title=":happy:"
-                        >mdi-emoticon-excited</v-icon
-                    >
-                    <v-icon
-                        size="18"
-                        color="blue darken-2"
-                        class="ml-2"
-                        title=":cry:"
-                        >mdi-emoticon-cry</v-icon
-                    >
-                    <v-icon
-                        size="18"
-                        color="yellow darken-3"
-                        class="mx-2"
-                        title=":angry:"
-                        >mdi-emoticon-angry</v-icon
-                    >
-                </v-card>
-            </div>
             <!-- Message -->
             <v-card flat class="message-card py-1">
                 <div class="py-1 px-4 card-header">
@@ -52,14 +11,56 @@
                     <span class="caption" v-text="time"></span>
                     <v-spacer></v-spacer>
 
-                    <v-menu transition="slide-x-transition" right>
+                    <!-- <v-menu transition="slide-x-transition" right>
                         <template v-slot:activator="{ on }">
                             <v-icon small class="ml-3" title="more" v-on="on"
                                 >mdi-dots-vertical</v-icon
                             >
                         </template>
                         <v-card min-height="100" min-width="150" flat> </v-card>
-                    </v-menu>
+                    </v-menu> -->
+
+                    <!-- Action -->
+                    <div class="message-actions-wrapper">
+                        <v-spacer></v-spacer>
+                        <v-card class="message-actions py-1 px-1" elevation="1">
+                            <v-icon
+                                size="18"
+                                color="yellow darken-3"
+                                class="ml-2"
+                                title=":like:"
+                                >mdi-thumb-up</v-icon
+                            >
+                            <v-icon
+                                size="18"
+                                color="red darken-3"
+                                class="ml-2"
+                                title=":heart:"
+                                >mdi-heart</v-icon
+                            >
+                            <v-icon
+                                size="18"
+                                color="yellow darken-3"
+                                class="ml-2"
+                                title=":happy:"
+                                >mdi-emoticon-excited</v-icon
+                            >
+                            <v-icon
+                                size="18"
+                                color="blue darken-1"
+                                class="ml-2"
+                                title=":cry:"
+                                >mdi-emoticon-cry</v-icon
+                            >
+                            <v-icon
+                                size="18"
+                                color="yellow darken-3"
+                                class="mx-2"
+                                title=":angry:"
+                                >mdi-emoticon-angry</v-icon
+                            >
+                        </v-card>
+                    </div>
                 </div>
                 <v-card-text
                     class="pt-0 pb-1 px-4"
@@ -119,9 +120,8 @@ export default {
     -webkit-box-flex: 1;
     background: transparent;
     left: 0;
-    right: -20px;
+    right: -30px;
     top: -25px;
-    transform: scale(0.9);
 }
 
 .message-actions {
@@ -131,7 +131,11 @@ export default {
     border-radius: 5px;
 }
 
-.message-actions-wrapper:hover .v-icon {
+.message-actions.v-card {
+    border-radius: 14px;
+}
+
+.card-header:hover .v-icon {
     opacity: 0.5;
 }
 
@@ -141,11 +145,10 @@ export default {
     transform: scale(1.2);
 }
 
-.message-card-wrapper:hover .message-actions-wrapper {
+.card-header:hover .message-actions-wrapper {
     visibility: visible;
     z-index: 99;
-    top: -20px;
-    transform: scale(1);
+    right: -20px;
     transition: all 0.2s ease-in;
 }
 </style>
