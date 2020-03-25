@@ -3,8 +3,19 @@
         class="px-2 message-item my-message"
         :class="{ 'message-error': hasError }"
     >
-        <v-list-item-avatar></v-list-item-avatar>
+        <!-- Empty space -->
+        <!-- <v-list-item-avatar></v-list-item-avatar> -->
         <v-spacer></v-spacer>
+        <!-- Actions -->
+        <div class="message-actions mr-1">
+            <v-btn icon small class="mx-auto">
+                <v-icon small>mdi-delete</v-icon>
+            </v-btn>
+            <v-btn icon small class="mx-auto">
+                <v-icon small>mdi-dots-vertical</v-icon>
+            </v-btn>
+        </div>
+        <!-- Content -->
         <v-card flat class="mr-1 message-card py-1" :disabled="hasError">
             <div class="py-1 px-4 card-header">
                 <span class="caption" v-text="time"></span>
