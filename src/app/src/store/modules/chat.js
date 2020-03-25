@@ -92,7 +92,7 @@ const moduleState = {
                     const me = this.state.users.me;
                     if (me.id != existingMsg.from.issuer) {
                         existingMsg.body.content =
-                            "It has been removed by owner";
+                            "It has been removed by author";
                     }
                 }
             }
@@ -266,7 +266,7 @@ const moduleState = {
                         to: message.to,
                     },
                 });
-                
+
                 const chatId = message.to.conversation;
                 // Handle event
                 switch (act) {
@@ -308,6 +308,23 @@ const moduleState = {
                         break;
                 }
             });
+        },
+        async reactMessage({ commit, state }, { type, message }) {
+            const chatId = message.to.conversation;
+
+            const chat = state.all.find(c => c.id == chatId);
+            if (chat) {
+                console.warn(
+                    "Could not find existing chat. Ignore this information."
+                );
+
+                await messageService
+                .react(chatId, message.id, type)
+                .then(res => {
+                    return res.data;
+                });
+            }
+            return;
         },
     },
 };

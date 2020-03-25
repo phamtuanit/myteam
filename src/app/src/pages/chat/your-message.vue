@@ -26,6 +26,7 @@
                             color="yellow darken-3"
                             class="ml-2"
                             title=":like:"
+                            @click="onReact('like')"
                             >mdi-thumb-up</v-icon
                         >
                         <v-icon
@@ -33,6 +34,7 @@
                             color="red darken-3"
                             class="ml-2"
                             title=":heart:"
+                            @click="onReact('heart')"
                             >mdi-heart</v-icon
                         >
                         <v-icon
@@ -40,6 +42,7 @@
                             color="yellow darken-3"
                             class="ml-2"
                             title=":happy:"
+                            @click="onReact('happy')"
                             >mdi-emoticon-excited</v-icon
                         >
                         <v-icon
@@ -47,6 +50,7 @@
                             color="blue darken-1"
                             class="ml-2"
                             title=":cry:"
+                            @click="onReact('cry')"
                             >mdi-emoticon-cry</v-icon
                         >
                         <v-icon
@@ -54,6 +58,7 @@
                             color="yellow darken-3"
                             class="mx-2"
                             title=":angry:"
+                            @click="onReact('angry')"
                             >mdi-emoticon-angry</v-icon
                         >
                     </v-card>
@@ -122,6 +127,11 @@ export default {
         if (!("status" in this.message)) {
             this.$set(this.message, "status", null);
         }
+    },
+    methods: {
+        onReact(type) {
+            this.$emit("react", type, this.message);
+        },
     },
 };
 </script>

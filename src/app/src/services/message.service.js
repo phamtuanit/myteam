@@ -14,7 +14,7 @@ Service.prototype.get = function(convId, filter = {}) {
 
         queries.unshift(`?conversation=${convId}`);
         const queryStr = queries.join("&");
-        console.info(`Posting new message to [${convId}]`);
+        console.info(`Getting message in [${convId}]`);
         return Axios.get(this.name + queryStr);
     }
     return Promise.reject("Data is invalid");
@@ -47,6 +47,18 @@ Service.prototype.update = function(convId, msg) {
     }
     return Promise.reject("Data is invalid");
 };
+
+Service.prototype.react = function (convId, msgId, type) {
+    if (
+        typeof convId == "number" &&
+        typeof type == "string" &&
+        typeof msgId == "number"
+    ) {
+        console.info(`Updating reaction ${convId}/${msgId}.`, type);
+        return Axios.put(this.name + msgId + `/reactions/${type}?conversation=${convId}`);
+    }
+    return Promise.reject("Data is invalid");
+}
 
 Service.prototype.delete = function(convId, msgId) {
     if (typeof convId == "number" && typeof msgId == "number") {
