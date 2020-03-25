@@ -8,28 +8,42 @@
             <div class="message-actions-wrapper">
                 <v-spacer></v-spacer>
                 <v-card class="message-actions py-1" elevation="1">
-                    <v-icon size="18" color="yellow darken-2" class="ml-2" title=":like:"
+                    <v-icon
+                        size="18"
+                        color="yellow darken-3"
+                        class="ml-2"
+                        title=":like:"
                         >mdi-thumb-up</v-icon
                     >
-                    <v-icon size="18" color="red darken-2" class="ml-2" title=":heart:"
+                    <v-icon
+                        size="18"
+                        color="red darken-3"
+                        class="ml-2"
+                        title=":heart:"
                         >mdi-heart</v-icon
                     >
-                    <v-icon size="18" color="yellow darken-2" class="ml-2" title=":happy:"
+                    <v-icon
+                        size="18"
+                        color="yellow darken-3"
+                        class="ml-2"
+                        title=":happy:"
                         >mdi-emoticon-excited</v-icon
                     >
-                    <v-icon size="18" color="blue darken-2" class="ml-2" title=":cry:"
+                    <v-icon
+                        size="18"
+                        color="blue darken-2"
+                        class="ml-2"
+                        title=":cry:"
                         >mdi-emoticon-cry</v-icon
                     >
-                    <v-icon size="18" color="yellow darken-2" class="ml-2" title=":angry:"
+                    <v-icon
+                        size="18"
+                        color="yellow darken-3"
+                        class="mx-2"
+                        title=":angry:"
                         >mdi-emoticon-angry</v-icon
                     >
-                    <v-icon size="18" class="mx-2" title="more"
-                        >mdi-dots-vertical</v-icon
-                    >
                 </v-card>
-                <!-- <div class="message-actions py-1">
-                    
-                </div> -->
             </div>
             <!-- Message -->
             <v-card flat class="message-card py-1">
@@ -37,6 +51,15 @@
                     <span class="subtitle-2 mr-2" v-text="fullName"></span>
                     <span class="caption" v-text="time"></span>
                     <v-spacer></v-spacer>
+
+                    <v-menu transition="slide-x-transition" right>
+                        <template v-slot:activator="{ on }">
+                            <v-icon small class="ml-3" title="more" v-on="on"
+                                >mdi-dots-vertical</v-icon
+                            >
+                        </template>
+                        <v-card min-height="100" min-width="150" flat> </v-card>
+                    </v-menu>
                 </div>
                 <v-card-text
                     class="pt-0 pb-1 px-4"
@@ -95,7 +118,6 @@ export default {
     -webkit-box-align: center;
     -webkit-box-flex: 1;
     background: transparent;
-    opacity: 0;
     left: 0;
     right: -20px;
     top: -25px;
@@ -109,11 +131,11 @@ export default {
     border-radius: 5px;
 }
 
-.message-actions .v-icon {
-    opacity: 0.6;
+.message-actions-wrapper:hover .v-icon {
+    opacity: 0.5;
 }
 
-.message-actions .v-icon:not(:last-of-type):hover {
+.message-actions .v-icon:hover {
     transition: all 0.2s ease-in;
     opacity: 1;
     transform: scale(1.2);
@@ -122,7 +144,6 @@ export default {
 .message-card-wrapper:hover .message-actions-wrapper {
     visibility: visible;
     z-index: 99;
-    opacity: 1;
     top: -20px;
     transform: scale(1);
     transition: all 0.2s ease-in;
