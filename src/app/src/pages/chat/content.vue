@@ -11,7 +11,7 @@
                     :key="msg.id"
                     :index="index"
                     :message="msg"
-                    class="mt-3"
+                    class="mt-4"
                 ></MyMessage>
                 <YourMessage
                     v-else
@@ -19,7 +19,7 @@
                     :key="msg.id"
                     :index="index"
                     :message="msg"
-                    class="mt-3"
+                    class="mt-4"
                 ></YourMessage>
             </template>
         </v-sheet>
@@ -154,11 +154,11 @@ export default {
 }
 
 .message-sheet >>> div.message-item:last-child {
-    margin-bottom: 12px !important;
+    margin-bottom: 16px !important;
 }
 
 .message-sheet >>> .your-message + .your-message {
-    margin-top: 6px !important;
+    margin-top: 8px !important;
 }
 
 .message-sheet >>> .your-message .v-avatar {
@@ -173,6 +173,10 @@ export default {
 }
 
 .message-sheet >>> .my-message + .my-message {
-    margin-top: 6px !important;
+    margin-top: 8px !important;
+}
+
+.message-sheet >>> .theme--light.v-card > .v-card__text {
+    color: rgba(0, 0, 0, 0.8);
 }
 </style>
