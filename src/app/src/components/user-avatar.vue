@@ -11,7 +11,7 @@
             :user-name="user.fullName"
             :src="user.avatar"
             :size="30"
-            :animation="infinity == true || enableAnimation"
+            :animation="animation"
         ></Avatar>
     </v-badge>
 </template>
@@ -37,6 +37,8 @@ export default {
                 setTimeout(() => {
                     this.enableAnimation = false;
                 }, 5 * 1000);
+            } else {
+                this.enableAnimation = false;
             }
         },
     },
@@ -44,6 +46,9 @@ export default {
         isOnline() {
             return this.user.status == "on";
         },
+        animation() {
+            return this.infinity == true || this.enableAnimation;
+        }
     },
 };
 </script>
