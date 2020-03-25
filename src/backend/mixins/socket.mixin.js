@@ -169,6 +169,8 @@ module.exports = {
 
     stopped() {
         if (this.io) {
+            this.logger.info("Broadcast live status to all WS client.");
+            this.io.to("live").emit("live", "broadcast", { status: "off" });
             this.io.close();
         }
     },
