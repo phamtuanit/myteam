@@ -153,6 +153,7 @@ export default {
     color: var(--primary-color-2);
 }
 
+/* Message aligment */
 .message-sheet >>> div.message-item:last-child {
     margin-bottom: 16px !important;
 }
@@ -161,6 +162,11 @@ export default {
     margin-top: 8px !important;
 }
 
+.message-sheet >>> .my-message + .my-message {
+    margin-top: 8px !important;
+}
+
+/* Message avatar */
 .message-sheet >>> .your-message .v-avatar {
     visibility: hidden;
 }
@@ -172,11 +178,19 @@ export default {
     visibility: inherit;
 }
 
-.message-sheet >>> .my-message + .my-message {
-    margin-top: 8px !important;
-}
-
+/* Message text */
 .message-sheet >>> .theme--light.v-card > .v-card__text {
     color: rgba(0, 0, 0, 0.8);
+}
+
+/* Message actions */
+.message-sheet >>> .message-actions {
+    align-items: center;
+    opacity: 0;
+}
+
+.message-sheet >>> .message-item:hover > .message-actions {
+    opacity: 1;
+    transition: all 0.2s ease-in;
 }
 </style>
