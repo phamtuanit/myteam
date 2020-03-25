@@ -309,11 +309,6 @@ module.exports = {
                         i => i.user == user.id
                     );
 
-                    if (status != true && !lastReaction) {
-                        // Incase user has never been reacted and don't want to reaction
-                        return null;
-                    }
-
                     if (status == true) {
                         if (lastReaction) {
                             // Incase user was reacted -> change type only
@@ -354,6 +349,9 @@ module.exports = {
                             message._id,
                             update
                         );
+                    } else {
+                        // Incase user has never been reacted and don't want to reaction
+                        return null;
                     }
                 }
 
