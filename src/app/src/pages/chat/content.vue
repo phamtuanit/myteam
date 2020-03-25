@@ -22,6 +22,7 @@
                     :message="msg"
                     class="mt-4"
                     @react="onReact"
+                    @dereact="onDereact"
                 ></YourMessage>
             </template>
         </v-sheet>
@@ -141,8 +142,11 @@ export default {
         onDeleteMyMessage(message) {
             this.$store.dispatch("chats/deleteMessage", message).catch(console.error);
         },
-        onReact(type, message) {
-            this.$store.dispatch("chats/reactMessage", {type, message, status: true }).catch(console.error);
+        onReact(type, message, status = true) {
+            this.$store.dispatch("chats/reactMessage", {type, message, status }).catch(console.error);
+        },
+        onDereact(type, message) {
+            this.onReact(type, message, false);
         },
     },
 };

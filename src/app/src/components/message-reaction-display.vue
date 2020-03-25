@@ -1,0 +1,110 @@
+<template>
+    <div class="reaction-emoji" v-show="emojis.length > 0">
+        <div class="emoji-panel px-1">
+            <template v-for="reaction in emojis">
+                <v-icon
+                    :key="reaction.type + '-icon'"
+                    small
+                    class="mx-1"
+                    :color="reaction.color"
+                    v-text="'mdi-' + reaction.icon"
+                    @click="reaction.mine == true ? onReaction(reaction) : ''"
+                ></v-icon>
+                <small
+                    class="mr-1"
+                    :key="reaction.type + '-count'"
+                    v-show="reaction.reactors.length > 1"
+                    v-text="reaction.reactors.length"
+                ></small>
+            </template>
+        </div>
+    </div>
+</template>
+
+<script>
+import { mapState } from "vuex";
+export default {
+    props: ["message"],
+    computed: {
+        ...mapState({
+            me: state => state.users.me,
+        }),
+        emojis() {
+            if (!this.message.reactions || this.message.reactions.length <= 0) {
+                return [];
+            }
+
+            const emojis = {};
+            this.message.reactions.forEach(reaction => {
+                const style = this.getReactionStyle(reaction.type);
+                if (!emojis[reaction.type]) {
+                    emojis[reaction.type] = {
+                        mine: this.me.id == reaction.user,
+                        type: reaction.type,
+                        ...style,
+                        reactors: [reaction.user],
+                    };
+                } else {
+                    emojis[reaction.type].reactors.push(reaction.user);
+                    emojis[reaction.type].mine |= reaction.user;
+                }
+            });
+
+            return Object.values(emojis);
+        },
+    },
+    methods: {
+        getReactionStyle(type) {
+            let icon = "";
+            let color = "yellow darken-3";
+            switch (type) {
+                case "like":
+                    icon = "thumb-up";
+                    break;
+                case "heart":
+                    icon = "heart";
+                    color = "red darken-1";
+                    break;
+                case "happy":
+                    icon = "emoticon-excited";
+                    break;
+                case "angry":
+                case "cry":
+                    icon = "emoticon-" + type;
+                    color = "blue darken-1";
+                    break;
+
+                default:
+                    break;
+            }
+            return { icon, color };
+        },
+        onReaction(reaction) {
+            this.$emit("react", reaction.type);
+        },
+    },
+};
+</script>
+
+<style scoped>
+.reaction-emoji {
+    position: relative;
+    height: 5px;
+}
+
+.reaction-emoji .emoji-panel {
+    position: absolute;
+    bottom: -4px;
+    right: 0;
+}
+
+.emoji-panel:hover .v-icon {
+    opacity: 0.6;
+}
+
+.emoji-panel .v-icon:hover {
+    transition: all 0.2s ease-in;
+    opacity: 1;
+    transform: scale(1.2);
+}
+</style>

@@ -66,6 +66,7 @@
             </div>
             <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
             </v-card-text>
+            <ReactionEmoji :message="message" class="px-4" @react="onClearReaction"></ReactionEmoji>
         </v-card>
 
         <!-- Actions -->
@@ -80,9 +81,10 @@
 
 <script>
 import UserAvatar from "../../components/user-avatar.vue";
+import ReactionEmoji from "../../components/message-reaction-display";
 export default {
     props: ["index", "message", "user"],
-    components: { UserAvatar },
+    components: { UserAvatar, ReactionEmoji },
     data() {
         return {
             messageStatus: null,
@@ -132,6 +134,9 @@ export default {
         onReact(type) {
             this.$emit("react", type, this.message);
         },
+        onClearReaction(type) {
+            this.$emit("dereact", type, this.message);
+        }
     },
 };
 </script>

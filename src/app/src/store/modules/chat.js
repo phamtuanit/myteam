@@ -97,6 +97,15 @@ const moduleState = {
                 }
             }
         },
+        updateMessage(state, { chatId, message }) {
+            const chat = state.all.find(c => c.id == chatId);
+            if (chat) {
+                const existingMsg = chat.messages.find(i => i.id == message.id);
+                if (existingMsg) {
+                    Object.assign(existingMsg, message);
+                }
+            }
+        },
         rejectedMessage(state, { action: preAct, payload: message, error }) {
             const chatId = message.to.conversation;
             if (typeof chatId != "number") {
@@ -296,8 +305,9 @@ const moduleState = {
                             }
                         }
                         break;
-                    case "rejected":
-                        commit("rejectedMessage", data);
+                    case "reacted":
+                    case "updated":
+                        commit("updateMessage", { chatId, message });
                         break;
                     case "removed":
                         commit("removeMessage", { chatId, message });
@@ -311,22 +321,45 @@ const moduleState = {
         },
         async reactMessage({ commit, state }, { type, message, status }) {
             const chatId = message.to.conversation;
+            const me = this.state.users.me;
 
             const chat = state.all.find(c => c.id == chatId);
             if (chat) {
+                if (message.reactions == undefined) {
+                    message.reactions = [];
+                } else {
+                    const lastReaction = message.reactions.find(r => r.user == me.id);
+                    if (status == false) {
+                        if (!lastReaction) {
+                            // Incase user has never reacted
+                            return;
+                        }
+                    } else {
+                        if (lastReaction && lastReaction.type == type) {
+                            // Incase user has reacted
+                            return;
+                        }
+                    }
+                }
+
+                return await messageService
+                    .react(chatId, message.id, type, status)
+                    .then(res => {
+                        return res.data;
+                    })
+                    .then(newMsg => {
+                        commit("updateMessage", {
+                            chatId,
+                            message: {
+                                id: message.id,
+                                reactions: newMsg.reactions,
+                            },
+                        });
+                    });
+            } else {
                 console.warn(
                     "Could not find existing chat. Ignore this information."
                 );
-                
-                if (message.reactions == undefined) {
-                    message.reactions = [];
-                }
-
-                await messageService
-                .react(chatId, message.id, type, status)
-                .then(res => {
-                    return res.data;
-                });
             }
             return;
         },
