@@ -21,9 +21,9 @@
                     </v-menu> -->
 
                     <!-- Action -->
-                    <div class="message-actions-wrapper">
+                    <div class="message-reactions-wrapper">
                         <v-spacer></v-spacer>
-                        <v-card class="message-actions py-1 px-1" elevation="1">
+                        <v-card class="message-reactions py-1 px-1" elevation="1">
                             <v-icon
                                 size="18"
                                 color="yellow darken-3"
@@ -107,11 +107,11 @@ export default {
     -webkit-box-flex: 1;
 }
 
-.message-actions .v-icon {
+.message-reactions .v-icon {
     cursor: pointer;
 }
 
-.message-actions-wrapper {
+.message-reactions-wrapper {
     visibility: hidden;
     position: absolute;
     display: flex;
@@ -124,14 +124,14 @@ export default {
     top: -25px;
 }
 
-.message-actions {
+.message-reactions {
     display: flex;
     -webkit-box-align: center;
     align-items: center;
     border-radius: 5px;
 }
 
-.message-actions.v-card {
+.message-reactions.v-card {
     border-radius: 14px;
 }
 
@@ -139,13 +139,13 @@ export default {
     opacity: 0.5;
 }
 
-.message-actions .v-icon:hover {
+.message-reactions .v-icon:hover {
     transition: all 0.2s ease-in;
     opacity: 1;
     transform: scale(1.2);
 }
 
-.card-header:hover .message-actions-wrapper {
+.card-header:hover .message-reactions-wrapper {
     visibility: visible;
     z-index: 99;
     right: -20px;
