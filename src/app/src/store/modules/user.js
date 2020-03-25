@@ -62,6 +62,9 @@ const moduleState = {
                 state.requireList.delete(users.id);
             }
         },
+        setStatus(state, { user, status }) {
+            user.status = status;
+        },
     },
     actions: {
         async initialize({ commit }) {
@@ -140,10 +143,21 @@ const moduleState = {
                         user.status = data.status;
                         commit("cache", user);
                         break;
+                    case "broadcast":
+                        this.dispatch("users/changeStatusAll", data.status);
+                        break;
 
                     default:
                         console.warn("Unsupported message.", data);
                         break;
+                }
+            });
+        },
+        changeStatusAll({ state, commit }, status) {
+            state.all.forEach(user => {
+                if (user._isMe != true) {
+                    user.status = status;
+                    commit("setStatus", { user, status })
                 }
             });
         },
