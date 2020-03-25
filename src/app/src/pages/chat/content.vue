@@ -158,6 +158,10 @@ export default {
 }
 
 /* Message aligment */
+.message-sheet >>> div.your-message:first-of-type {
+    margin-top: 25px !important;
+}
+
 .message-sheet >>> div.message-item:last-child {
     margin-bottom: 16px !important;
 }
