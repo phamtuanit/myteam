@@ -220,6 +220,7 @@ module.exports = {
                     }
                 }
 
+                // Clean _id
                 cleanDbMark(message);
 
                 // Broadcast message
@@ -227,6 +228,182 @@ module.exports = {
                 this.broker.emit(eventName, message);
 
                 return message;
+            },
+        },
+        reactionMessage: {
+            auth: true,
+            roles: [1],
+            rest: "PUT /:id/reactions/:type",
+            params: {
+                conversation: { type: "number", convert: true },
+                id: { type: "number", convert: true },
+                type: "string",
+                status: { type: "boolean", convert: true, default: true },
+            },
+            async handler(ctx) {
+                const {
+                    conversation: conversationId,
+                    id,
+                    type,
+                    status,
+                } = ctx.params;
+                const { user } = ctx.meta;
+
+                // Check conversation
+                let convInfo = await ctx.call(
+                    "v1.conversations.getConversation",
+                    {
+                        id: conversationId,
+                    }
+                );
+
+                if (!convInfo || convInfo.length <= 0) {
+                    throw new Errors.MoleculerClientError(
+                        "The conversation could not be found.",
+                        404
+                    );
+                }
+
+                convInfo = convInfo.length > 0 ? convInfo[0] : null;
+
+                const convCollId = this.getHistoryCollectionName(
+                    conversationId
+                );
+
+                // Get adapter
+                const dbCollection = await this.getDBCollection(convCollId);
+                const message = await dbCollection.findOne({ id });
+
+                // 1. Verify existing message
+                if (!message) {
+                    // The message not found
+                    this.logger.warn("The message could not be found.");
+                    throw new Errors.MoleculerClientError(
+                        "The message could not be found",
+                        404
+                    );
+                }
+
+                let result = null;
+                const reactionInfo = {
+                    user: user.id,
+                    type,
+                };
+
+                if (!message.reactions) {
+                    // Incase reactions is null
+                    if (status == true) {
+                        const update = {
+                            $set: {
+                                reactions: [ reactionInfo ],
+                            },
+                        };
+                        result = await dbCollection.updateById(
+                            message._id,
+                            update
+                        );
+                    }
+                    return null;
+                } else {
+                    const lastReaction = message.reactions.find(
+                        i => i.user == user.id
+                    );
+
+                    if (status != true && !lastReaction) {
+                        // Incase user has never been reacted and don't want to reaction
+                        return null;
+                    }
+
+                    if (status == true) {
+                        if (lastReaction) {
+                            // Incase user was reacted -> change type only
+                            const update = {
+                                $set: {
+                                    "reactions.$.type": type,
+                                },
+                            };
+                            result = await dbCollection.update(
+                                {
+                                    _id: message._id,
+                                    "reactions.user": user.id,
+                                },
+                                update
+                            );
+                        } else {
+                            // Incase user has never been reacted - Add new
+                            const update = {
+                                $push: {
+                                    reactions: reactionInfo,
+                                },
+                            };
+                            result = await dbCollection.updateById(
+                                message._id,
+                                update
+                            );
+                        }
+                    } else if (lastReaction) {
+                        // Incase user was reacted - remove
+                        const update = {
+                            $pull: {
+                                reactions: {
+                                    user: user.id,
+                                },
+                            },
+                        };
+                        result = await dbCollection.updateById(
+                            message._id,
+                            update
+                        );
+                    }
+                }
+
+                result == result || message;
+                result.modification = [];
+                cleanDbMark(result);
+
+                const msgQueue = {
+                    id: new Date().getTime(),
+                    type: "message",
+                    action: "updated",
+                    payload: result,
+                };
+
+                if (convInfo.subscribers && convInfo.subscribers.length > 0) {
+                    // Save information to user queue
+                    for (
+                        let index = 0;
+                        index < convInfo.subscribers.length;
+                        index++
+                    ) {
+                        const userId = convInfo.subscribers[index];
+                        if (userId == message.from.issuer) {
+                            // Ignore issuer from subscribers
+                            continue;
+                        }
+
+                        try {
+                            // Save new information to DB of corresponding user cache
+                            const queueId = `msg-queue-${userId}`;
+                            const msgQueueCollection = await this.getDBCollection(
+                                queueId
+                            );
+                            await msgQueueCollection.insert(
+                                cleanDbMark(msgQueue)
+                            );
+                        } catch (error) {
+                            this.logger.warn(
+                                "Could not save message to queue.",
+                                msgQueue
+                            );
+                        }
+                    }
+                }
+
+                // Broadcast message
+                const eventName = `conversation.${conversationId}.message.updated.reacted`;
+                this.broker.emit(eventName, result);
+
+                return result;
             },
         },
     },
@@ -366,14 +543,19 @@ module.exports = {
                         continue;
                     }
 
-                    // 2.1 Save new information to DB of corresponding user cache
-                    const queueId = `msg-queue-${userId}`;
-                    const msgQueueCollection = await this.getDBCollection(
-                        queueId
-                    );
-                    await msgQueueCollection.insert(msgQueue);
-                    // Clean _id
-                    cleanDbMark(msgQueue);
+                    try {
+                        // 2.1 Save new information to DB of corresponding user cache
+                        const queueId = `msg-queue-${userId}`;
+                        const msgQueueCollection = await this.getDBCollection(
+                            queueId
+                        );
+                        await msgQueueCollection.insert(cleanDbMark(msgQueue));
+                    } catch (error) {
+                        this.logger.warn(
+                            "Could not save message to queue.",
+                            msgQueue
+                        );
+                    }
                 }
 
                 // 3. Send information to WS
@@ -434,6 +616,11 @@ module.exports = {
             // 1 Save message to conversation collection in DB
             const convCollId = this.getHistoryCollectionName(conversationId);
             const dbCollection = await this.getDBCollection(convCollId);
+
+            // Define default key
+            message.modification = [];
+            message.reaction = [];
+
             // Insert one more record
             const entity = dbCollection.insert(message);
             cleanDbMark(entity);
@@ -451,14 +638,19 @@ module.exports = {
                         continue;
                     }
 
-                    // 2.1 Save new information to DB of corresponding user cache
-                    const queueId = `msg-queue-${userId}`;
-                    const msgQueueCollection = await this.getDBCollection(
-                        queueId
-                    );
-                    await msgQueueCollection.insert(msgQueue);
-                    // Clean _id
-                    cleanDbMark(msgQueue);
+                    try {
+                        // 2.1 Save new information to DB of corresponding user cache
+                        const queueId = `msg-queue-${userId}`;
+                        const msgQueueCollection = await this.getDBCollection(
+                            queueId
+                        );
+                        await msgQueueCollection.insert(cleanDbMark(msgQueue));
+                    } catch (error) {
+                        this.logger.warn(
+                            "Could not save message to queue.",
+                            msgQueue
+                        );
+                    }
                 }
 
                 // 3. Send message to WS
