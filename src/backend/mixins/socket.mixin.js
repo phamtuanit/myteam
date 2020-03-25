@@ -39,9 +39,8 @@ module.exports = {
             }
         },
         // [nodeId].message-queue.[userId].message.created
-        "message-queue.*.message.created"(message, sender, event, ctx) {
-            const act = "created";
-            const [constVar, userId, resource] = event.split(".");
+        "message-queue.*.message.created|removed"(message, sender, event, ctx) {
+            const [constVar, userId, resource, act] = event.split(".");
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
                 message.event = event;
@@ -137,15 +136,7 @@ module.exports = {
         onSocketConfirmed(socket, data) {
             if (data.status == "confirmed") {
                 if (data.type == "message" && data.action) {
-                    switch (data.action) {
-                        case "created":
-                            this.cleanMessageQueue(socket, data);
-                            break;
-
-                        default:
-                            console.warn("Unsupported message type");
-                            break;
-                    }
+                    this.cleanMessageQueue(socket, data);
                     return;
                 }
             }

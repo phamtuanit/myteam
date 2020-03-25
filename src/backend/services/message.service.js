@@ -141,7 +141,7 @@ module.exports = {
             rest: "DELETE /:id",
             params: {
                 conversation: { type: "number", convert: true },
-                id: "string",
+                id: { type: "number", convert: true },
             },
             async handler(ctx) {
                 const { conversation: conversationId, id } = ctx.params;
@@ -169,19 +169,18 @@ module.exports = {
 
                 // Get adapter
                 const dbCollection = await this.getDBCollection(convCollId);
-                const existingEntity = await dbCollection.findOne({
-                    id: message.id,
-                });
+                const message = await dbCollection.findOne({ id });
 
                 // 1. Verify existing message
-                if (!existingEntity) {
+                if (!message) {
                     // The message not found
                     this.logger.warn("The message could not be found.");
                     return;
                 }
 
                 // 2. Delete record
-                await dbCollection.removeById(existingEntity._id);
+                message.deleted = new Date();
+                await dbCollection.removeById(message._id);
 
                 // 3. Store information to message queue
                 if (convInfo.subscribers && convInfo.subscribers.length > 0) {
@@ -189,7 +188,7 @@ module.exports = {
                         id: new Date().getTime(),
                         type: "message",
                         action: "removed",
-                        payload: existingEntity,
+                        payload: message,
                     };
 
                     for (
@@ -214,14 +213,20 @@ module.exports = {
                             .catch(this.logger.error);
 
                         // Emit event to live user
-                        const eventName = `message-queue.${userId}.message.created`;
+                        const eventName = `message-queue.${userId}.message.removed`;
                         this.broker
                             .emit(eventName, cleanDbMark(msgQueue))
                             .catch(this.logger.error);
                     }
                 }
 
-                return cleanDbMark(existingEntity);
+                cleanDbMark(message);
+
+                // Broadcast message
+                const eventName = `conversation.${conversationId}.message.removed`;
+                this.broker.emit(eventName, message);
+
+                return message;
             },
         },
     },
