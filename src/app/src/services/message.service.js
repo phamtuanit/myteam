@@ -48,14 +48,15 @@ Service.prototype.update = function(convId, msg) {
     return Promise.reject("Data is invalid");
 };
 
-Service.prototype.react = function (convId, msgId, type) {
+Service.prototype.react = function (convId, msgId, type, status) {
     if (
         typeof convId == "number" &&
         typeof type == "string" &&
-        typeof msgId == "number"
+        typeof msgId == "number" &&
+        typeof status == "boolean"
     ) {
         console.info(`Updating reaction ${convId}/${msgId}.`, type);
-        return Axios.put(this.name + msgId + `/reactions/${type}?conversation=${convId}`);
+        return Axios.put(this.name + msgId + `/reactions/${type}?status=${status}&conversation=${convId}`);
     }
     return Promise.reject("Data is invalid");
 }

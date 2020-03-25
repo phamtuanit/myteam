@@ -142,7 +142,7 @@ export default {
             this.$store.dispatch("chats/deleteMessage", message).catch(console.error);
         },
         onReact(type, message) {
-            this.$store.dispatch("chats/reactMessage", {type, message }).catch(console.error);
+            this.$store.dispatch("chats/reactMessage", {type, message, status: true }).catch(console.error);
         },
     },
 };

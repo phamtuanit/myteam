@@ -309,7 +309,7 @@ const moduleState = {
                 }
             });
         },
-        async reactMessage({ commit, state }, { type, message }) {
+        async reactMessage({ commit, state }, { type, message, status }) {
             const chatId = message.to.conversation;
 
             const chat = state.all.find(c => c.id == chatId);
@@ -317,9 +317,13 @@ const moduleState = {
                 console.warn(
                     "Could not find existing chat. Ignore this information."
                 );
+                
+                if (message.reactions == undefined) {
+                    message.reactions = [];
+                }
 
                 await messageService
-                .react(chatId, message.id, type)
+                .react(chatId, message.id, type, status)
                 .then(res => {
                     return res.data;
                 });
