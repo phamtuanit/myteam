@@ -1,28 +1,30 @@
 <template>
     <v-list-item
         class="px-2 message-item my-message"
-        :class="{ 'message-error': hasError }"
+        :class="{ 'message-error': !isAvailable }"
     >
-        <!-- Empty space -->
-        <!-- <v-list-item-avatar></v-list-item-avatar> -->
         <v-spacer></v-spacer>
         <!-- Actions -->
-        <div class="message-actions mr-1">
-            <v-btn icon small class="mx-auto">
+        <div class="message-actions mr-1" v-if="isAvailable">
+            <v-btn icon small class="mx-auto" @click="onDeleteMessage">
                 <v-icon small>mdi-delete</v-icon>
             </v-btn>
-            <v-btn icon small class="mx-auto">
-                <v-icon small>mdi-dots-vertical</v-icon>
-            </v-btn>
         </div>
+        <v-list-item-avatar v-else>
+            <!-- Empty space -->
+        </v-list-item-avatar>
         <!-- Content -->
-        <v-card flat class="mr-1 message-card py-1" :disabled="hasError">
+        <v-card flat class="mr-1 message-card py-1" :disabled="!isAvailable">
             <div class="py-1 px-4 card-header">
                 <span class="caption" v-text="time"></span>
                 <v-spacer></v-spacer>
-                <v-icon v-if="hasError" small color="red lighten-1" class="ml-2"
-                    >mdi-alert</v-icon
-                >
+                <v-icon
+                    v-if="!isAvailable"
+                    small
+                    color="red lighten-1"
+                    class="ml-2"
+                    v-text="warnIcon"
+                ></v-icon>
             </div>
             <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
             </v-card-text>
@@ -33,15 +35,52 @@
 <script>
 export default {
     props: ["index", "message"],
+    data() {
+        return {
+            messageStatus: null,
+        };
+    },
     computed: {
         time() {
             return new Date(this.message.arrivalTime).toLocaleString();
         },
-        hasError() {
-            return (
-                typeof this.message.status == "string" &&
-                this.message.status != "valid"
-            );
+        isAvailable() {
+            return !this.message.status;
+        },
+        warnIcon() {
+            if (this.isAvailable) {
+                return "";
+            }
+
+            switch (this.messageStatus) {
+                case "rejected":
+                    return "mdi-alert";
+                case "removed":
+                    return "mdi-delete-variant";
+
+                default:
+                    break;
+            }
+
+            return "";
+        },
+    },
+    watch: {
+        message: {
+            deep: true,
+            handler(val) {
+                this.messageStatus = val.status;
+            },
+        },
+    },
+    created() {
+        if (!("status" in this.message)) {
+            this.$set(this.message, "status", null);
+        }
+    },
+    methods: {
+        onDeleteMessage() {
+            this.$emit("delete", this.message);
         },
     },
 };
@@ -58,7 +97,7 @@ export default {
 
 .message-error >>> .message-card {
     border-bottom-color: #ef5350c7;
-    border-bottom-width: 1px;
+    border-bottom-width: 2px;
     border-bottom-style: solid;
 }
 
@@ -74,6 +113,6 @@ export default {
     top: 0;
     bottom: 0;
     z-index: 0;
-    background-color: rgba(25, 118, 210, 0.07);
+    background-color: rgba(25, 118, 210, 0.08);
 }
 </style>

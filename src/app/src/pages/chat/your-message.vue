@@ -4,13 +4,21 @@
             <UserAvatar :user="user" online-effect />
         </v-list-item-avatar>
         <!-- Message -->
-        <v-card flat class="message-card py-1 ml-1">
+        <v-card flat class="message-card py-1 ml-1" :disabled="!isAvailable">
             <div class="py-1 px-4 card-header">
                 <span class="subtitle-2 mr-2" v-text="fullName"></span>
                 <span class="caption" v-text="time"></span>
                 <v-spacer></v-spacer>
+                <v-icon
+                    v-if="!isAvailable"
+                    small
+                    color="red lighten-1"
+                    class="ml-2"
+                    v-text="warnIcon"
+                ></v-icon>
+
                 <!-- Reactions -->
-                <div class="message-reactions-wrapper">
+                <div class="message-reactions-wrapper" v-if="isAvailable">
                     <v-spacer></v-spacer>
                     <v-card class="message-reactions py-1 px-1" elevation="1">
                         <v-icon
@@ -56,7 +64,7 @@
         </v-card>
 
         <!-- Actions -->
-        <div class="message-actions ml-1">
+        <div class="message-actions ml-1" v-if="isAvailable">
             <v-btn icon small class="mx-auto">
                 <v-icon small>mdi-reply</v-icon>
             </v-btn>
@@ -70,6 +78,11 @@ import UserAvatar from "../../components/user-avatar.vue";
 export default {
     props: ["index", "message", "user"],
     components: { UserAvatar },
+    data() {
+        return {
+            messageStatus: null,
+        };
+    },
     computed: {
         fullName() {
             const nameArr = [this.user.firstName, this.user.lastName];
@@ -78,6 +91,37 @@ export default {
         time() {
             return new Date(this.message.arrivalTime).toLocaleString();
         },
+        isAvailable() {
+            return !this.message.status;
+        },
+        warnIcon() {
+            if (this.isAvailable) {
+                return "";
+            }
+
+            switch (this.messageStatus) {
+                case "removed":
+                    return "mdi-delete-variant";
+
+                default:
+                    break;
+            }
+
+            return "";
+        },
+    },
+    watch: {
+        message: {
+            deep: true,
+            handler(val) {
+                this.messageStatus = val.status;
+            },
+        },
+    },
+    created() {
+        if (!("status" in this.message)) {
+            this.$set(this.message, "status", null);
+        }
     },
 };
 </script>
