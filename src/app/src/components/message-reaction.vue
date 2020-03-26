@@ -1,24 +1,32 @@
 <template>
-    <div class="reaction-emoji" v-show="emojis.length > 0">
-        <div class="emoji-panel px-1">
-            <template v-for="reaction in emojis">
-                <v-icon
-                    :key="reaction.type + '-icon'"
-                    small
-                    class="mx-1"
-                    :color="reaction.color"
-                    v-text="'mdi-' + reaction.icon"
-                    @click="reaction.mine == true ? onReaction(reaction) : ''"
-                ></v-icon>
-                <small
-                    class="mr-1"
-                    :key="reaction.type + '-count'"
-                    v-show="reaction.reactors.length > 1"
-                    v-text="reaction.reactors.length"
-                ></small>
-            </template>
+    <transition v-if="emojis.length > 0">
+        <div class="reaction-emoji">
+            <div class="emoji-panel px-1">
+                <template v-for="reaction in emojis">
+                    <transition :key="reaction.type + '-icon'">
+                        <v-icon
+                            size="18"
+                            class="mx-1"
+                            :class="{ 'my-reaction': reaction.mine == true }"
+                            :color="reaction.color"
+                            v-text="'mdi-' + reaction.icon"
+                            @click="
+                                reaction.mine == true
+                                    ? onReaction(reaction)
+                                    : ''
+                            "
+                        ></v-icon>
+                    </transition>
+                    <small
+                        class="mr-1"
+                        :key="reaction.type + '-count'"
+                        v-show="reaction.reactors.length > 1"
+                        v-text="reaction.reactors.length"
+                    ></small>
+                </template>
+            </div>
         </div>
-    </div>
+    </transition>
 </template>
 
 <script>
@@ -69,9 +77,12 @@ export default {
                     icon = "emoticon-excited";
                     break;
                 case "angry":
+                    icon = "emoticon-angry";
+                    color = "red light-1";
+                    break;
                 case "cry":
-                    icon = "emoticon-" + type;
-                    color = "blue darken-1";
+                    icon = "emoticon-cry";
+                    color = "blue light-1";
                     break;
 
                 default:
@@ -89,21 +100,33 @@ export default {
 <style scoped>
 .reaction-emoji {
     position: relative;
-    height: 5px;
+    height: 10px;
 }
 
 .reaction-emoji .emoji-panel {
     position: absolute;
-    bottom: -4px;
+    bottom: -2px;
     right: 0;
 }
 
-.emoji-panel:hover .v-icon {
-    opacity: 0.6;
+.emoji-panel .v-icon {
+    opacity: 1;
 }
 
-.emoji-panel .v-icon:hover {
-    transition: all 0.2s ease-in;
+.emoji-panel:hover .v-icon:not(.my-reaction) {
+    opacity: 0.6;
+    transition: all 0.2s ease-in-out;
+    transform: scale(0.9);
+    cursor: default;
+}
+
+.emoji-panel:hover .v-icon.my-reaction {
+    transition: all 0.2s ease-in-out;
+    transform: scale(1.1);
+}
+
+.emoji-panel .v-icon.my-reaction:hover {
+    transition: all 0.2s ease-in-out;
     opacity: 1;
     transform: scale(1.2);
 }
