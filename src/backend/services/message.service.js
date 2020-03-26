@@ -295,7 +295,7 @@ module.exports = {
                     if (status == true) {
                         const update = {
                             $set: {
-                                reactions: [ reactionInfo ],
+                                reactions: [reactionInfo],
                             },
                         };
                         result = await dbCollection.updateById(
@@ -363,7 +363,12 @@ module.exports = {
                     id: new Date().getTime(),
                     type: "message",
                     action: "reacted",
-                    payload: result,
+                    payload: {
+                        id: result.id,
+                        reactions: result.reactions,
+                        from: result.from,
+                        to: result.to
+                    },
                 };
 
                 if (convInfo.subscribers && convInfo.subscribers.length > 0) {
@@ -373,21 +378,26 @@ module.exports = {
                         index < convInfo.subscribers.length;
                         index++
                     ) {
-                        const userId = convInfo.subscribers[index];
-                        if (userId == message.from.issuer) {
-                            // Ignore issuer from subscribers
+                        const subscriberId = convInfo.subscribers[index];
+                        if (subscriberId == user.id) {
+                            // Ignore reactor
                             continue;
                         }
 
                         try {
                             // Save new information to DB of corresponding user cache
-                            const queueId = `msg-queue-${userId}`;
+                            const queueId = `msg-queue-${subscriberId}`;
                             const msgQueueCollection = await this.getDBCollection(
                                 queueId
                             );
                             await msgQueueCollection.insert(
                                 cleanDbMark(msgQueue)
                             );
+
+                            const eventName = `message-queue.${subscriberId}.message.reacted`;
+                            this.broker
+                                .emit(eventName, msgQueue)
+                                .catch(this.logger.error);
                         } catch (error) {
                             this.logger.warn(
                                 "Could not save message to queue.",
@@ -617,7 +627,7 @@ module.exports = {
 
             // Define default key
             message.modification = [];
-            message.reaction = [];
+            message.reactions = [];
 
             // Insert one more record
             const entity = dbCollection.insert(message);

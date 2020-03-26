@@ -39,7 +39,7 @@ module.exports = {
             }
         },
         // [nodeId].message-queue.[userId].message.created
-        "message-queue.*.message.created|removed"(message, sender, event, ctx) {
+        "message-queue.*.message.created|removed|reacted"(message, sender, event, ctx) {
             const [constVar, userId, resource, act] = event.split(".");
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
