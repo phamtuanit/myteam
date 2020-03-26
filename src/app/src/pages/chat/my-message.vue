@@ -28,13 +28,18 @@
             </div>
             <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
             </v-card-text>
+
+            <!-- Reacted Emoji -->
+            <ReactionEmoji :message="message" class="px-4"></ReactionEmoji>
         </v-card>
     </v-list-item>
 </template>
 
 <script>
+import ReactionEmoji from "../../components/message-emoji.vue";
 export default {
     props: ["index", "message"],
+    components: { ReactionEmoji },
     data() {
         return {
             messageStatus: null,
