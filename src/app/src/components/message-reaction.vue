@@ -59,12 +59,12 @@ export default {
 
 <style scoped>
 .reactions-wrapper {
-    position: absolute;
     display: flex;
     align-items: center;
     -webkit-box-align: center;
     -webkit-box-flex: 1;
     background: transparent;
+    height: 26px;
 }
 
 .reactions-panel .v-icon {

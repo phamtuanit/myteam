@@ -1,12 +1,13 @@
 <template>
-    <transition v-if="emojis.length > 0">
+    <v-scale-transition v-if="emojis.length > 0">
         <div class="reaction-emoji">
-            <div class="emoji-panel px-1">
-                <template v-for="reaction in emojis">
-                    <transition :key="reaction.type + '-icon'">
+            <div class="emoji-panel px-1" :class="{ left: left }">
+                <v-scale-transition group>
+                    <template v-for="reaction in emojis">
                         <v-icon
                             size="18"
                             class="mx-1"
+                            :key="reaction.type + '-icon'"
                             :class="{ 'my-reaction': reaction.mine == true }"
                             :color="reaction.color"
                             v-text="'mdi-' + reaction.icon"
@@ -16,23 +17,26 @@
                                     : ''
                             "
                         ></v-icon>
-                    </transition>
-                    <small
-                        class="mr-1"
-                        :key="reaction.type + '-count'"
-                        v-show="reaction.reactors.length > 1"
-                        v-text="reaction.reactors.length"
-                    ></small>
-                </template>
+                        <small
+                            class="mr-1"
+                            :key="reaction.type + '-count'"
+                            v-show="reaction.reactors.length > 1"
+                            v-text="reaction.reactors.length"
+                        ></small>
+                    </template>
+                </v-scale-transition>
             </div>
         </div>
-    </transition>
+    </v-scale-transition >
 </template>
 
 <script>
 import { mapState } from "vuex";
 export default {
-    props: ["message"],
+    props: {
+        message: Object,
+        left: Boolean,
+    },
     computed: {
         ...mapState({
             me: state => state.users.me,
@@ -107,6 +111,12 @@ export default {
     position: absolute;
     bottom: -2px;
     right: 0;
+    left: unset;
+}
+
+.reaction-emoji .emoji-panel.left {
+    right: unset;
+    left: 0;
 }
 
 .emoji-panel .v-icon {
