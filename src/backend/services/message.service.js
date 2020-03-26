@@ -580,7 +580,7 @@ module.exports = {
 
                     // Send information to live-user directly
                     // If user confirm that they received a message, then the message wil be removed in DB
-                    const eventName = `message-queue.${userId}.message.created`;
+                    const eventName = `message-queue.${userId}.message.updated`;
                     this.broker
                         .emit(eventName, msgQueue)
                         .catch(this.logger.error);
