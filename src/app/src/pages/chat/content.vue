@@ -174,12 +174,8 @@ export default {
     margin-bottom: 16px !important;
 }
 
-.message-sheet >>> .your-message + .your-message {
-    margin-top: 8px !important;
-}
-
-.message-sheet >>> .my-message + .my-message {
-    margin-top: 8px !important;
+.message-sheet >>> .your-message + .your-message, .my-message + .my-message {
+    margin-top: 12px !important;
 }
 
 /* Message avatar */

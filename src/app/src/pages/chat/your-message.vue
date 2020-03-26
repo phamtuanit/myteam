@@ -16,57 +16,63 @@
                     class="ml-2"
                     v-text="warnIcon"
                 ></v-icon>
-
-                <!-- Reactions -->
-                <div class="message-reactions-wrapper" v-if="isAvailable">
-                    <v-spacer></v-spacer>
-                    <v-card class="message-reactions py-1 px-1" elevation="1">
-                        <v-icon
-                            size="18"
-                            color="yellow darken-3"
-                            class="ml-2"
-                            title=":like:"
-                            @click="onReact('like')"
-                            >mdi-thumb-up</v-icon
-                        >
-                        <v-icon
-                            size="18"
-                            color="red darken-3"
-                            class="ml-2"
-                            title=":heart:"
-                            @click="onReact('heart')"
-                            >mdi-heart</v-icon
-                        >
-                        <v-icon
-                            size="18"
-                            color="yellow darken-3"
-                            class="ml-2"
-                            title=":happy:"
-                            @click="onReact('happy')"
-                            >mdi-emoticon-excited</v-icon
-                        >
-                        <v-icon
-                            size="18"
-                            color="blue darken-1"
-                            class="ml-2"
-                            title=":cry:"
-                            @click="onReact('cry')"
-                            >mdi-emoticon-cry</v-icon
-                        >
-                        <v-icon
-                            size="18"
-                            color="yellow darken-3"
-                            class="mx-2"
-                            title=":angry:"
-                            @click="onReact('angry')"
-                            >mdi-emoticon-angry</v-icon
-                        >
-                    </v-card>
-                </div>
             </div>
-            <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
+            <v-card-text class="message-content pt-0 pb-1 px-4" v-html="message.body.content">
             </v-card-text>
-            <ReactionEmoji :message="message" class="px-4" @react="onClearReaction"></ReactionEmoji>
+
+            <!-- Reacted Emoji -->
+            <ReactionEmoji
+                :message="message"
+                class="px-4"
+                @react="onClearReaction"
+            ></ReactionEmoji>
+
+            <!-- Reactions -->
+            <div class="message-reactions-wrapper" v-if="isAvailable">
+                <v-card class="message-reactions py-1 px-1" elevation="1">
+                    <v-icon
+                        size="18"
+                        color="yellow darken-3"
+                        class="ml-2"
+                        title=":like:"
+                        @click="onReact('like')"
+                        >mdi-thumb-up</v-icon
+                    >
+                    <v-icon
+                        size="18"
+                        color="red darken-3"
+                        class="ml-2"
+                        title=":heart:"
+                        @click="onReact('heart')"
+                        >mdi-heart</v-icon
+                    >
+                    <v-icon
+                        size="18"
+                        color="yellow darken-3"
+                        class="ml-2"
+                        title=":happy:"
+                        @click="onReact('happy')"
+                        >mdi-emoticon-excited</v-icon
+                    >
+                    <v-icon
+                        size="18"
+                        color="blue light-1"
+                        class="ml-2"
+                        title=":cry:"
+                        @click="onReact('cry')"
+                        >mdi-emoticon-cry</v-icon
+                    >
+                    <v-icon
+                        size="18"
+                        color="red light-1"
+                        class="mx-2"
+                        title=":angry:"
+                        @click="onReact('angry')"
+                        >mdi-emoticon-angry</v-icon
+                    >
+                </v-card>
+                <v-spacer></v-spacer>
+            </div>
         </v-card>
 
         <!-- Actions -->
@@ -81,7 +87,7 @@
 
 <script>
 import UserAvatar from "../../components/user-avatar.vue";
-import ReactionEmoji from "../../components/message-reaction-display";
+import ReactionEmoji from "../../components/message-reaction.vue";
 export default {
     props: ["index", "message", "user"],
     components: { UserAvatar, ReactionEmoji },
@@ -136,7 +142,7 @@ export default {
         },
         onClearReaction(type) {
             this.$emit("dereact", type, this.message);
-        }
+        },
     },
 };
 </script>
@@ -166,20 +172,19 @@ export default {
 .message-reactions-wrapper {
     visibility: hidden;
     position: absolute;
+    z-index: 99;
     display: flex;
     align-items: center;
     -webkit-box-align: center;
     -webkit-box-flex: 1;
     background: transparent;
-    left: 0;
-    right: -30px;
-    top: -25px;
+    left: 10px;
+    bottom: -25px;
 }
 
-.card-header:hover .message-reactions-wrapper {
+.message-card:hover .message-reactions-wrapper {
     visibility: visible;
-    z-index: 99;
-    right: -20px;
+    bottom: -15px;
     transition: all 0.2s ease-in;
 }
 
