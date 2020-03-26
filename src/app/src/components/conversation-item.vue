@@ -6,7 +6,7 @@
             class="py-2 pl-3 pr-2 content__text"
         >
             <v-list-item-title
-                class="subtitle-2"
+                class="subtitle-2 mb-0"
                 v-text="conversationName"
             ></v-list-item-title>
             <v-list-item-subtitle
