@@ -23,56 +23,13 @@
             <!-- Reacted Emoji -->
             <ReactionEmoji
                 :message="message"
-                class="px-4"
-                @react="onClearReaction"
+                class="px-4 reactions-emojis"
+                @change="onClearReaction"
             ></ReactionEmoji>
 
             <!-- Reactions -->
-            <div class="message-reactions-wrapper" v-if="isAvailable">
-                <v-card class="message-reactions py-1 px-1" elevation="1">
-                    <v-icon
-                        size="18"
-                        color="yellow darken-3"
-                        class="ml-2"
-                        title=":like:"
-                        @click="onReact('like')"
-                        >mdi-thumb-up</v-icon
-                    >
-                    <v-icon
-                        size="18"
-                        color="red darken-3"
-                        class="ml-2"
-                        title=":heart:"
-                        @click="onReact('heart')"
-                        >mdi-heart</v-icon
-                    >
-                    <v-icon
-                        size="18"
-                        color="yellow darken-3"
-                        class="ml-2"
-                        title=":happy:"
-                        @click="onReact('happy')"
-                        >mdi-emoticon-excited</v-icon
-                    >
-                    <v-icon
-                        size="18"
-                        color="blue light-1"
-                        class="ml-2"
-                        title=":cry:"
-                        @click="onReact('cry')"
-                        >mdi-emoticon-cry</v-icon
-                    >
-                    <v-icon
-                        size="18"
-                        color="red light-1"
-                        class="mx-2"
-                        title=":angry:"
-                        @click="onReact('angry')"
-                        >mdi-emoticon-angry</v-icon
-                    >
-                </v-card>
-                <v-spacer></v-spacer>
-            </div>
+            <Reaction @react="onReact" class="reactions-panel" :selected="reactedType"  v-if="isAvailable">
+            </Reaction>
         </v-card>
 
         <!-- Actions -->
@@ -87,16 +44,22 @@
 
 <script>
 import UserAvatar from "../../components/user-avatar.vue";
-import ReactionEmoji from "../../components/message-reaction.vue";
+import ReactionEmoji from "../../components/message-emoji.vue";
+import Reaction from "../../components/message-reaction.vue";
+
+import { mapState } from "vuex";
 export default {
     props: ["index", "message", "user"],
-    components: { UserAvatar, ReactionEmoji },
+    components: { UserAvatar, ReactionEmoji, Reaction },
     data() {
         return {
             messageStatus: null,
         };
     },
     computed: {
+        ...mapState({
+            me: state => state.users.me,
+        }),
         fullName() {
             const nameArr = [this.user.firstName, this.user.lastName];
             return this.user.fullName || nameArr.join(", ");
@@ -122,6 +85,14 @@ export default {
 
             return "";
         },
+        reactedType() {
+            if (!this.message || !this.message.reactions) {
+                return "";
+            }
+
+            const lastReaction = this.message.reactions.find(r => r.user == this.me.id);
+            return lastReaction ? lastReaction.type : "";
+        }
     },
     watch: {
         message: {
@@ -137,8 +108,8 @@ export default {
         }
     },
     methods: {
-        onReact(type) {
-            this.$emit("react", type, this.message);
+        onReact(reaction) {
+            this.$emit("react", reaction.type, this.message);
         },
         onClearReaction(type) {
             this.$emit("dereact", type, this.message);
@@ -165,48 +136,23 @@ export default {
 }
 
 /* Reactions */
-.message-reactions .v-icon {
-    cursor: pointer;
-}
-
-.message-reactions-wrapper {
+.message-item >>> .reactions-wrapper {
     visibility: hidden;
     position: absolute;
     z-index: 99;
-    display: flex;
-    align-items: center;
-    -webkit-box-align: center;
-    -webkit-box-flex: 1;
-    background: transparent;
     left: 10px;
     bottom: -25px;
 }
 
-.message-card:hover .message-reactions-wrapper {
+.message-item >>> .message-card:hover .reactions-wrapper {
     visibility: visible;
     bottom: -15px;
     transition: all 0.2s ease-in;
 }
 
-.message-reactions {
-    display: flex;
-    -webkit-box-align: center;
-    align-items: center;
-    border-radius: 5px;
+.reactions-emojis:hover + .reactions-panel {
+    transition: all 0.5s ease-out;
+    opacity: 0;
 }
 
-.message-reactions.v-card {
-    border-radius: 14px;
-}
-
-.message-reactions:hover .v-icon {
-    transition: all 0.2s ease-in;
-    opacity: 0.5;
-}
-
-.message-reactions .v-icon:hover {
-    transition: all 0.2s ease-in;
-    opacity: 1;
-    transform: scale(1.2);
-}
 </style>
