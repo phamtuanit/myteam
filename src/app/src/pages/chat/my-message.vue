@@ -26,11 +26,11 @@
                     v-text="warnIcon"
                 ></v-icon>
             </div>
-            <v-card-text class="pt-0 pb-1 px-4" v-html="message.body.content">
+            <v-card-text class="py-0 px-4" v-html="message.body.content">
             </v-card-text>
 
             <!-- Reacted Emoji -->
-            <ReactionEmoji :message="message" class="px-4"></ReactionEmoji>
+            <ReactionEmoji :message="message" class="px-4 mt-2"></ReactionEmoji>
         </v-card>
     </v-list-item>
 </template>

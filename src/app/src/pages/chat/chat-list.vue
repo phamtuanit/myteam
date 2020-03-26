@@ -28,28 +28,30 @@
 
             <!-- Chat list -->
             <v-list-item-group v-model="activatedChat" mandatory>
-                <v-list-item
-                    v-for="chat in chatList"
-                    :key="chat.id"
-                    :value="chat"
-                    @click="openChat(chat)"
-                >
-                    <UserAvatar
-                        :user="getTargetUser(chat)"
-                        :infinity="enableOnlineEffect(chat)"
-                    />
+                <v-slide-y-transition group>
+                    <v-list-item
+                        v-for="chat in chatList"
+                        :key="chat.id"
+                        :value="chat"
+                        @click="openChat(chat)"
+                    >
+                        <UserAvatar
+                            :user="getTargetUser(chat)"
+                            :infinity="enableOnlineEffect(chat)"
+                        />
 
-                    <v-list-item-content class="py-2 px-2">
-                        <v-list-item-title
-                            class="body-2"
-                            v-text="getChatName(chat)"
-                        ></v-list-item-title>
-                        <v-list-item-subtitle
-                            class="caption"
-                            v-text="getRecentMessage(chat)"
-                        ></v-list-item-subtitle>
-                    </v-list-item-content>
-                </v-list-item>
+                        <v-list-item-content class="py-2 px-2">
+                            <v-list-item-title
+                                class="body-2"
+                                v-text="getChatName(chat)"
+                            ></v-list-item-title>
+                            <v-list-item-subtitle
+                                class="caption"
+                                v-text="getRecentMessage(chat)"
+                            ></v-list-item-subtitle>
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-slide-y-transition>
             </v-list-item-group>
         </v-list>
     </v-sheet>

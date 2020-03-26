@@ -5,30 +5,36 @@
             v-chat-scroll="{ always: false, smooth: true }"
         >
             <!-- MineMessage -->
-            <template v-for="(msg, index) in messages">
-                <MyMessage
-                    v-if="msg._isMe == true"
-                    :key="msg.id"
-                    :index="index"
-                    :message="msg"
-                    class="mt-4"
-                    @delete="onDeleteMyMessage"
-                ></MyMessage>
-                <YourMessage
-                    v-else
-                    :user="destUser"
-                    :key="msg.id"
-                    :index="index"
-                    :message="msg"
-                    class="mt-4"
-                    @react="onReact"
-                    @dereact="onDereact"
-                ></YourMessage>
-            </template>
+            <v-slide-y-transition group>
+                <template v-for="(msg, index) in messages">
+                    <MyMessage
+                        v-if="msg._isMe == true"
+                        :key="msg.id"
+                        :index="index"
+                        :message="msg"
+                        class="mt-4"
+                        @delete="onDeleteMyMessage"
+                    ></MyMessage>
+                    <YourMessage
+                        v-else
+                        :user="destUser"
+                        :key="msg.id"
+                        :index="index"
+                        :message="msg"
+                        class="mt-4"
+                        @react="onReact"
+                        @dereact="onDereact"
+                    ></YourMessage>
+                </template>
+            </v-slide-y-transition>
         </v-sheet>
 
         <!-- Input -->
-        <v-list height="48" v-show="activatedChat" class="py-0 no-border-radius">
+        <v-list
+            height="48"
+            v-show="activatedChat"
+            class="py-0 no-border-radius"
+        >
             <v-list-item class="px-0 px-2">
                 <EmojiButton @select="onSelectEmoji"></EmojiButton>
                 <v-text-field
@@ -140,10 +146,14 @@ export default {
             }
         },
         onDeleteMyMessage(message) {
-            this.$store.dispatch("chats/deleteMessage", message).catch(console.error);
+            this.$store
+                .dispatch("chats/deleteMessage", message)
+                .catch(console.error);
         },
         onReact(type, message, status = true) {
-            this.$store.dispatch("chats/reactMessage", {type, message, status }).catch(console.error);
+            this.$store
+                .dispatch("chats/reactMessage", { type, message, status })
+                .catch(console.error);
         },
         onDereact(type, message) {
             this.onReact(type, message, false);
@@ -170,12 +180,13 @@ export default {
     margin-top: 25px !important;
 }
 
-.message-sheet >>> div.message-item:last-child {
-    margin-bottom: 16px !important;
+.message-sheet >>> .your-message + .your-message,
+.my-message + .my-message {
+    margin-top: 12px !important;
 }
 
-.message-sheet >>> .your-message + .your-message, .my-message + .my-message {
-    margin-top: 12px !important;
+.message-sheet >>> div.message-item:last-child {
+    margin-bottom: 25px !important;
 }
 
 /* Message avatar */

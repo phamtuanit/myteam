@@ -17,13 +17,13 @@
                     v-text="warnIcon"
                 ></v-icon>
             </div>
-            <v-card-text class="message-content pt-0 pb-1 px-4" v-html="message.body.content">
+            <v-card-text class="message-content py-0 px-4" v-html="message.body.content">
             </v-card-text>
 
             <!-- Reacted Emoji -->
             <ReactionEmoji
                 :message="message"
-                class="px-4 reactions-emojis"
+                class="px-4 mt-1 reactions-emojis"
                 @change="onClearReaction"
             ></ReactionEmoji>
 
@@ -139,15 +139,15 @@ export default {
 .message-item >>> .reactions-wrapper {
     visibility: hidden;
     position: absolute;
-    z-index: 99;
-    left: 10px;
-    bottom: -25px;
+    left: 30px;
+    bottom: -15px;
 }
 
 .message-item >>> .message-card:hover .reactions-wrapper {
-    visibility: visible;
-    bottom: -15px;
     transition: all 0.2s ease-in;
+    visibility: visible;
+    z-index: 9;
+    left: 10px;
 }
 
 .reactions-emojis:hover + .reactions-panel {

@@ -19,7 +19,13 @@
                     clear-icon="mdi-close"
                 ></v-text-field>
 
-                <v-btn icon class="ml-2" outlined @click="onAddChat" :disabled="!selectedUser">
+                <v-btn
+                    icon
+                    class="ml-2"
+                    outlined
+                    @click="onAddChat"
+                    :disabled="!selectedUser"
+                >
                     <v-icon>mdi-plus</v-icon>
                 </v-btn>
             </v-list-item>
@@ -36,26 +42,32 @@
 
             <!-- List -->
             <v-list-item-group v-model="selectedUser">
-                <template v-for="user in friendList">
-                    <v-list-item
-                        :key="user.id"
-                        :value="user"
-                        v-if="!user._isMe"
-                    >
-                        <UserAvatar :user-name="me.fullName" :user="user" online-effect/>
+                <v-slide-y-transition group>
+                    <template v-for="user in friendList">
+                        <v-list-item
+                            :key="user.id"
+                            :value="user"
+                            v-if="!user._isMe"
+                        >
+                            <UserAvatar
+                                :user-name="me.fullName"
+                                :user="user"
+                                online-effect
+                            />
 
-                        <v-list-item-content class="py-2 px-2">
-                            <v-list-item-title
-                                class="body-2"
-                                v-text="getDisplayName(user)"
-                            ></v-list-item-title>
-                            <v-list-item-subtitle
-                                class="caption"
-                                v-text="user.mail"
-                            ></v-list-item-subtitle>
-                        </v-list-item-content>
-                    </v-list-item>
-                </template>
+                            <v-list-item-content class="py-2 px-2">
+                                <v-list-item-title
+                                    class="body-2"
+                                    v-text="getDisplayName(user)"
+                                ></v-list-item-title>
+                                <v-list-item-subtitle
+                                    class="caption"
+                                    v-text="user.mail"
+                                ></v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </template>
+                </v-slide-y-transition>
             </v-list-item-group>
         </v-list>
     </v-sheet>
