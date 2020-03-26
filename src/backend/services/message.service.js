@@ -79,7 +79,7 @@ module.exports = {
                 },
             },
             async handler(ctx) {
-                const { conversation, body } = ctx.params;
+                const { conversation, body, to } = ctx.params;
                 const { user } = ctx.meta;
 
                 const message = {
@@ -95,8 +95,26 @@ module.exports = {
                     },
                 };
 
+                let convInfo = await ctx.call("v1.conversations.getConversationById", {
+                    id: conversation,
+                });
+    
+                if (convInfo) {
+                    if (!to || typeof to.user != "string") {
+                        const error = "'to.user' is required incase you want to create new conversation.";
+                        this.logger.warn(error, to);
+                        throw new Errors.MoleculerClientError(error)
+                    }
+
+                    const conv = {
+                        subscribers: [user.id, to.user],
+                        channel: false
+                    }
+                    convInfo = await ctx.call("v1.conversations.createConversation", conv);
+                }
+
                 const newMessage = this.processMessage(message, true);
-                return await this.storeMessage(newMessage, ctx);
+                return await this.storeMessage(newMessage, ctx, convInfo);
             },
         },
         updateMessage: {
@@ -585,7 +603,7 @@ module.exports = {
 
             return updatedEntity;
         },
-        async storeMessage(message, ctx) {
+        async storeMessage(message, ctx, convObj) {
             const conversationId = parseInt(message.to.conversation);
             const msgQueue = {
                 id: message.id,
@@ -594,9 +612,9 @@ module.exports = {
                 payload: message,
             };
 
-            let convInfo = await ctx.call("v1.conversations.getConversationById", {
+            let convInfo = convObj || (await ctx.call("v1.conversations.getConversationById", {
                 id: conversationId,
-            });
+            }));
 
             if (!convInfo) {
                 throw new Errors.MoleculerClientError(

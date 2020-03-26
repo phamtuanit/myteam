@@ -278,10 +278,15 @@ const moduleState = {
             if (chat && chat._isTemp == true) {
                 // Create conversation first
                 const user = chat.subscribers[0];
-                chat = await this.dispatch("chats/createChat", user.id);
-                setTimeout(() => {
-                    commit("removeChat", chatId);
-                }, 1000);
+                const me = this.state.users.me;
+
+                const convInfo = {
+                    channel: false,
+                    subscribers: [me.id, user.id],
+                };
+                const newConv = (await convService.create(convInfo)).data;
+                newConv.subscribers = [me, user];
+                Object.assign(chat, newConv);
             }
 
             return await messageService.create(chat.id, body).then(res => {
@@ -290,6 +295,7 @@ const moduleState = {
                     message: res.data,
                 };
                 commit("addMessage", payload);
+                commit("setActivate", chat);
                 return res.data;
             });
         },

@@ -63,7 +63,7 @@ export default {
                 // In case preparation is finieshed
                 this.redirectToExpectation();
             }
-        }, 2 * 1000);
+        }, 1 * 1000);
 
         this.initialize();
     },
