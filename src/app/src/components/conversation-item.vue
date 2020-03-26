@@ -6,12 +6,12 @@
             class="py-2 pl-3 pr-2 content__text"
         >
             <v-list-item-title
-                class="body-2"
+                class="subtitle-2"
                 v-text="conversationName"
             ></v-list-item-title>
             <v-list-item-subtitle
                 class="caption"
-                :class="{'blue--text darken-1 font-italic font-weight-bold': hasNewMessage }"
+                :class="{'font-weight-bold': hasNewMessage }"
                 v-text="recentMessage"
             ></v-list-item-subtitle>
         </v-list-item-content>
