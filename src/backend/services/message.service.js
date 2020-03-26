@@ -148,20 +148,18 @@ module.exports = {
 
                 // Check conversation
                 let convInfo = await ctx.call(
-                    "v1.conversations.getConversation",
+                    "v1.conversations.getConversationById",
                     {
                         id: conversationId,
                     }
                 );
 
-                if (!convInfo || convInfo.length <= 0) {
+                if (!convInfo) {
                     throw new Errors.MoleculerClientError(
                         "The conversation could not be found.",
                         404
                     );
                 }
-
-                convInfo = convInfo.length > 0 ? convInfo[0] : null;
 
                 const convCollId = this.getHistoryCollectionName(
                     conversationId
@@ -251,20 +249,18 @@ module.exports = {
 
                 // Check conversation
                 let convInfo = await ctx.call(
-                    "v1.conversations.getConversation",
+                    "v1.conversations.getConversationById",
                     {
                         id: conversationId,
                     }
                 );
 
-                if (!convInfo || convInfo.length <= 0) {
+                if (!convInfo) {
                     throw new Errors.MoleculerClientError(
                         "The conversation could not be found.",
                         404
                     );
                 }
-
-                convInfo = convInfo.length > 0 ? convInfo[0] : null;
 
                 const convCollId = this.getHistoryCollectionName(
                     conversationId
@@ -429,11 +425,11 @@ module.exports = {
         async filterMessage(ctx) {
             const { conversation, history, id } = ctx.params;
             // Check conversation
-            let convInfo = await ctx.call("v1.conversations.getConversation", {
+            let convInfo = await ctx.call("v1.conversations.getConversationById", {
                 id: conversation,
             });
 
-            if (!convInfo || convInfo.length <= 0) {
+            if (!convInfo) {
                 throw new Errors.MoleculerClientError(
                     "The conversation could not be found.",
                     404
@@ -477,13 +473,9 @@ module.exports = {
             const conversationId = message.to.conversation;
 
             // Check conversation
-            let convInfo = await ctx.call("v1.conversations.getConversation", {
+            let convInfo = await ctx.call("v1.conversations.getConversationById", {
                 id: conversationId,
             });
-
-            if (Array.isArray(convInfo)) {
-                convInfo = convInfo.length > 0 ? convInfo[0] : null;
-            }
 
             if (!convInfo) {
                 throw new Errors.MoleculerClientError(
@@ -602,13 +594,9 @@ module.exports = {
                 payload: message,
             };
 
-            let convInfo = await ctx.call("v1.conversations.getConversation", {
+            let convInfo = await ctx.call("v1.conversations.getConversationById", {
                 id: conversationId,
             });
-
-            if (Array.isArray(convInfo)) {
-                convInfo = convInfo.length > 0 ? convInfo[0] : null;
-            }
 
             if (!convInfo) {
                 throw new Errors.MoleculerClientError(
