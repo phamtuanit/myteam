@@ -1,5 +1,6 @@
 <template>
-    <div class="conversation-item" @click="onOpenConv">
+    <div class="conversation-item pr-2" @click="onOpenConv" 
+        :class="{'has-new-message': hasNewMessage }">
         <UserAvatar :user="targetUser" :infinity="hasNewMessage" />
 
         <v-list-item-content
@@ -134,8 +135,33 @@ export default {
     align-items: center;
     -webkit-box-align: center;
     -webkit-box-flex: 1;
+    flex: 1 1 100%;
     text-decoration: none;
     outline: none;
+}
+
+.has-new-message {
+    position: relative;
+}
+
+.has-new-message::after {
+    animation: opacity 0.2s linear;
+    content: "";
+    position: absolute;
+    background-color: #FFEA00;
+    width: 3px;
+    left: -16px;
+    bottom: -3px;
+    top: -3px;
+}
+
+@keyframes opacity {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .content__text {
