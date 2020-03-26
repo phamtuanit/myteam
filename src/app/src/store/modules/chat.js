@@ -2,7 +2,12 @@ const messageService = new (require("../../services/message.service").default)()
 const convService = new (require("../../services/conversation.service").default)();
 let eventBus = null;
 
-function informNewMessage() {
+function informNewMessage(message) {
+    if (message._isMe == true) {
+        message.seen = true;
+        return;
+    }
+
     const payload = {
         sender: "app-chat",
         inform: {
@@ -58,6 +63,7 @@ const moduleState = {
             }
             const chat = state.all.find(c => c.id == chatId);
             if (chat) {
+                message.seen = false;
                 message.status = null;
 
                 // Incase has chat in cache
@@ -68,6 +74,7 @@ const moduleState = {
 
                 if (!chat.messages) {
                     chat.messages = [message];
+                    chat.recent = message;
                     informNewMessage(message);
                 } else {
                     const foundMessage = chat.messages.find(
@@ -75,10 +82,13 @@ const moduleState = {
                     );
                     if (!foundMessage) {
                         chat.messages.push(message);
+                        chat.recent = message;
+                        informNewMessage(message);
                     } else {
+                        message.seen = foundMessage.seen;
                         Object.assign(foundMessage, message);
+                        chat.recent = foundMessage;
                     }
-                    informNewMessage(message);
                 }
             }
         },
@@ -134,6 +144,20 @@ const moduleState = {
             existingMsg.error = "The message could not be sent!";
             console.info("A message was rejected.", error);
         },
+        watchAllMessage(state, convId) {
+            const conv = state.all.find(c => c.id == convId);
+            if (conv && conv.messages && conv.messages.length > 0) {
+                for (let index = 0; index < conv.messages.length; index++) {
+                    const message = conv.messages[index];
+                    if (message.seen == true) {
+                        return;
+                    } else {
+                        message.seen = true;
+                    }
+                }
+                return conv;
+            }
+        },
     },
     actions: {
         async initialize(ctx) {
@@ -180,6 +204,7 @@ const moduleState = {
 
                     // Update Me info
                     conv.messages.forEach(msg => {
+                        msg.seen = null;
                         if (msg.from && msg.from.issuer == me.id) {
                             msg._isMe = true;
                         }
@@ -328,7 +353,9 @@ const moduleState = {
                 if (message.reactions == undefined) {
                     message.reactions = [];
                 } else {
-                    const lastReaction = message.reactions.find(r => r.user == me.id);
+                    const lastReaction = message.reactions.find(
+                        r => r.user == me.id
+                    );
                     if (status == false) {
                         if (!lastReaction) {
                             // Incase user has never reacted
@@ -362,6 +389,9 @@ const moduleState = {
                 );
             }
             return;
+        },
+        async watchAllMessage({ commit }, convId) {
+            return commit("watchAllMessage", convId);
         },
     },
 };
