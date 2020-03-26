@@ -48,6 +48,7 @@
                             :key="user.id"
                             :value="user"
                             v-if="!user._isMe"
+                            @click="onAddChat(user)"
                         >
                             <UserAvatar
                                 :user-name="me.fullName"
@@ -102,8 +103,8 @@ export default {
         this.friendList = this.cachedUsers;
     },
     methods: {
-        onAddChat() {
-            const user = this.selectedUser;
+        onAddChat(selectedUser) {
+            const user = selectedUser || this.selectedUser;
             const existingChat = this.$store.state.chats.all.find(chat => {
                 if (chat.subscribers && chat.subscribers.length == 2) {
                     const matchedSub = chat.subscribers.filter(sub => {
@@ -128,7 +129,7 @@ export default {
 
             // Create new conversation first
             this.$store
-                .dispatch("chats/createChat", user.id)
+                .dispatch("chats/activeTmpChat", user)
                 .then(() => {
                     this.selectedUser = null;
                 })

@@ -57,6 +57,12 @@ const moduleState = {
             }
             state.all.push(chat);
         },
+        removeChat(state, convId) {
+            const index = state.all.findIndex(i => i.id == convId);
+            if (index >= 0) {
+                state.all.splice(index, 1);
+            }
+        },
         addMessage(state, { chatId, message }) {
             if (!message || typeof chatId != "number") {
                 return;
@@ -229,6 +235,20 @@ const moduleState = {
             commit("addChat", newConv);
             return newConv;
         },
+        async activeTmpChat({ commit }, user) {
+            const me = this.state.users.me;
+            const convInfo = {
+                id: new Date().getTime(),
+                channel: false,
+                subscribers: [user, me],
+                messages: [],
+                recent: null,
+                _isTemp: true,
+            };
+            commit("setActivate", convInfo);
+            commit("addChat", convInfo);
+            return convInfo;
+        },
         activeChat({ commit, state }, id) {
             if (state.active && state.active.id == id) {
                 return state.active;
@@ -253,10 +273,20 @@ const moduleState = {
                 return conv;
             }
         },
-        sendMessage({ commit }, { chatId, body }) {
-            return messageService.create(parseInt(chatId), body).then(res => {
+        async sendMessage({ commit, state }, { chatId, body }) {
+            let chat = state.all.find(i => i.id == chatId);
+            if (chat && chat._isTemp == true) {
+                // Create conversation first
+                const user = chat.subscribers[0];
+                chat = await this.dispatch("chats/createChat", user.id);
+                setTimeout(() => {
+                    commit("removeChat", chatId);
+                }, 1000);
+            }
+
+            return await messageService.create(chat.id, body).then(res => {
                 const payload = {
-                    chatId,
+                    chatId: chat.id,
                     message: res.data,
                 };
                 commit("addMessage", payload);
