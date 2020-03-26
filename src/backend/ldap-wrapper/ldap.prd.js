@@ -98,7 +98,7 @@ service.prototype = {
                         searchList.forEach(item => {
                             const ldapUser = item.object;
                             const userInfo = {
-                                id: ldapUser.uid,
+                                id: ldapUser.uid.replace(/\./g, "-"),
                                 userName: ldapUser.uid,
                                 firstName: ldapUser.givenName,
                                 lastNme: ldapUser.sn,
