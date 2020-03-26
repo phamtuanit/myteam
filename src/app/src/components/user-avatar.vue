@@ -41,6 +41,11 @@ export default {
                 this.enableAnimation = false;
             }
         },
+        infinity(val) {
+            if (!val) {
+                this.enableAnimation = val;
+            }
+        }
     },
     computed: {
         isOnline() {

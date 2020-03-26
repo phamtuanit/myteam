@@ -55,7 +55,7 @@
                                 online-effect
                             />
 
-                            <v-list-item-content class="py-2 px-2">
+                            <v-list-item-content class="py-2 pl-3 pr-2">
                                 <v-list-item-title
                                     class="body-2"
                                     v-text="getDisplayName(user)"

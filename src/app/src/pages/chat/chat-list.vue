@@ -33,23 +33,9 @@
                         v-for="chat in chatList"
                         :key="chat.id"
                         :value="chat"
-                        @click="openChat(chat)"
+                        @click="onSelect"
                     >
-                        <UserAvatar
-                            :user="getTargetUser(chat)"
-                            :infinity="enableOnlineEffect(chat)"
-                        />
-
-                        <v-list-item-content class="py-2 px-2">
-                            <v-list-item-title
-                                class="body-2"
-                                v-text="getChatName(chat)"
-                            ></v-list-item-title>
-                            <v-list-item-subtitle
-                                class="caption"
-                                v-text="getRecentMessage(chat)"
-                            ></v-list-item-subtitle>
-                        </v-list-item-content>
+                        <Conversation :conversation="chat" />
                     </v-list-item>
                 </v-slide-y-transition>
             </v-list-item-group>
@@ -60,8 +46,9 @@
 <script>
 import { mapState } from "vuex";
 import UserAvatar from "../../components/user-avatar.vue";
+import Conversation from "../../components/conversation-item.vue";
 export default {
-    components: { UserAvatar },
+    components: { UserAvatar, Conversation },
     data() {
         return {
             searchText: null,
@@ -130,58 +117,13 @@ export default {
         }
     },
     methods: {
-        openChat(chat) {
+        onSelect(chat) {
             if (this.activatedChat.id == chat.id) {
                 return;
             }
 
             // Incase user re-open existing chat
             this.$store.dispatch("chats/activeChat", chat.id);
-        },
-        getChatName(chat) {
-            if (chat.name) {
-                return chat.name;
-            }
-
-            const friends = chat.subscribers
-                .filter(user => !user._isMe)
-                .map(user => {
-                    return (
-                        user.fullName || user.firstName + ", " + user.lastName
-                    );
-                });
-            return friends.join(", ");
-        },
-        getRecentMessage(chat) {
-            if (!chat || !chat.recent || !chat.recent.body) {
-                return "...";
-            }
-
-            const msgType = chat.recent.body.type || "html";
-            switch (msgType) {
-                case "html":
-                    return chat.recent.body.content;
-
-                default:
-                    break;
-            }
-        },
-        getTargetUser(chat) {
-            if (chat) {
-                const friends = chat.subscribers.filter(user => !user._isMe);
-                if (friends.length > 0) {
-                    return friends[0];
-                }
-            }
-            // Dummy data
-            return {};
-        },
-        enableOnlineEffect(chat) {
-            return (
-                this.activatedChat &&
-                this.activatedChat.id == chat.id &&
-                this.getTargetUser(chat).status == "on"
-            );
         },
     },
 };

@@ -34,7 +34,7 @@
 
         <!-- Actions -->
         <div class="message-actions ml-1" v-if="isAvailable">
-            <v-btn icon small class="mx-auto">
+            <v-btn icon small class="mx-auto" @click="onReply">
                 <v-icon small>mdi-reply</v-icon>
             </v-btn>
         </div>
@@ -114,6 +114,9 @@ export default {
         onClearReaction(type) {
             this.$emit("dereact", type, this.message);
         },
+        onReply(){
+            this.$emit("reply", this.message);
+        }
     },
 };
 </script>

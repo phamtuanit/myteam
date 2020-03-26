@@ -24,6 +24,7 @@
                         class="mt-4"
                         @react="onReact"
                         @dereact="onDereact"
+                        @reply="onReply"
                     ></YourMessage>
                 </template>
             </v-slide-y-transition>
@@ -158,6 +159,9 @@ export default {
         onDereact(type, message) {
             this.onReact(type, message, false);
         },
+        onReply(message) {
+
+        }
     },
 };
 </script>
