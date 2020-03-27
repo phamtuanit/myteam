@@ -1,7 +1,7 @@
 <template>
-    <div>
-        <v-sheet height="60" class="pa-0 header no-border-radius">
-            <v-list-item class="px-4 ma-0">
+    <div class="fill-height">
+        <v-sheet height="60" class="pa-0 header no-border-radius border-xb">
+            <v-list-item class="px-4 ma-0" v-if="activatedChat">
                 <Avatar
                     :user-name="destUser.fullName"
                     :src="destUser.avatar"
@@ -15,7 +15,7 @@
                 ></v-list-item-title>
             </v-list-item>
         </v-sheet>
-        <v-row class="fill-height chat-box " no-gutters>
+        <v-row class="chat-box" no-gutters>
             <v-col>
                 <v-sheet
                     class="overflow-y-auto message-sheet no-border-radius"
@@ -182,6 +182,18 @@ export default {
     -webkit-box-align: center;
     -webkit-box-flex: 1;
     flex: 1 1 100%;
+}
+
+.v-sheet.border-xb {
+    border-bottom: 1px solid;
+}
+
+.theme--light.border-xb {
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+.theme--dark.border-xb {
+    border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Messages */

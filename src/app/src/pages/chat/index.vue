@@ -4,7 +4,7 @@
             <ChatList></ChatList>
         </v-col>
         <v-col>
-            <ChatContent v-if="activatedChat"></ChatContent>
+            <ChatContent></ChatContent>
         </v-col>
     </v-row>
 </template>
@@ -21,13 +21,7 @@ export default {
             activatedChat: state => state.chats.active,
         }),
     },
-    created() {
-        // if (this.$route.query._status == "temp") {
-        //     this.$nextTick(() => {
-        //         this.$router.updateQuery({});
-        //     });
-        // }
-    },
+    created() {},
 };
 </script>
 
