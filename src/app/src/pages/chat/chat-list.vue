@@ -29,14 +29,14 @@
             <!-- Chat list -->
             <v-list-item-group v-model="activatedChat" mandatory>
                 <!-- <v-slide-y-transition group> -->
-                    <v-list-item
-                        v-for="chat in chatList"
-                        :key="chat.id || chat._id"
-                        :value="chat"
-                        @click="onSelect"
-                    >
-                        <Conversation :conversation="chat" />
-                    </v-list-item>
+                <v-list-item
+                    v-for="chat in chatList"
+                    :key="chat.id || chat._id"
+                    :value="chat"
+                    @click="onSelect(chat)"
+                >
+                    <Conversation :conversation="chat" />
+                </v-list-item>
                 <!-- </v-slide-y-transition> -->
             </v-list-item-group>
         </v-list>
@@ -64,7 +64,10 @@ export default {
             },
             set(val) {
                 if (val) {
-                    return this.$store.dispatch("chats/activeChat", val.id);
+                    return this.$store.dispatch(
+                        "chats/activeChat",
+                        val.id || val._id
+                    );
                 }
             },
         },
@@ -76,16 +79,22 @@ export default {
             }
         },
         activatedChat(val) {
-            if (val && val.id != this.$route.query._id) {
-                const newQuery = { ...this.$route.query };
-                delete newQuery._status;
-                newQuery._id = val.id;
-                this.$router.updateQuery(newQuery);
+            if (val) {
+                const convId = val.id || val._id;
+                if (convId != this.$route.query._id) {
+                    const newQuery = { ...this.$route.query };
+                    delete newQuery._status;
+                    if (val._isTemp == true) {
+                        newQuery._status = "temp";
+                    }
+                    newQuery._id = val.id || val._id;
+                    this.$router.updateQuery(newQuery);
+                }
             }
         },
     },
     created() {
-        if (this.$route.query.status == "tmp") {
+        if (this.$route.query._status == "temp") {
             this.$router.updateQuery({});
         } else if (this.$route.query._id) {
             return this.$store
@@ -118,7 +127,10 @@ export default {
     },
     methods: {
         onSelect(chat) {
-            if (this.activatedChat.id == chat.id) {
+            if (
+                this.activatedChat.id == chat.id ||
+                this.activatedChat._id == chat._id
+            ) {
                 return;
             }
 
