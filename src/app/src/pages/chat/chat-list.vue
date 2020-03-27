@@ -79,6 +79,7 @@ export default {
             }
         },
         "activatedChat.id"() {
+            // To support change tmp conversation to real
             this.updateUrlQuery();
         },
         activatedChat() {
@@ -138,8 +139,7 @@ export default {
                     if (this.activatedChat._isTemp == true) {
                         newQuery._status = "temp";
                     }
-                    newQuery._id =
-                        this.activatedChat.id || this.activatedChat._id;
+                    newQuery._id = convId;
                     this.$router.updateQuery(newQuery);
                 }
             } else {

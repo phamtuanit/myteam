@@ -239,11 +239,11 @@ const moduleState = {
             const me = this.state.users.me;
             const convInfo = {
                 id: null,
-                _id: new Date().getTime(),
                 channel: false,
                 subscribers: [user, me],
                 messages: [],
                 recent: null,
+                _id: new Date().getTime(),
                 _isTemp: true,
             };
             commit("setActivate", convInfo);
