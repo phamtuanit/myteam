@@ -1,6 +1,5 @@
 <template>
     <div class="reactions-wrapper">
-        <v-spacer></v-spacer>
         <v-card class="reactions-panel py-1 px-1" elevation="1">
             <v-icon
                 v-for="reaction in reactions"
@@ -14,7 +13,6 @@
                 v-text="'mdi-' + reaction.icon"
             ></v-icon>
         </v-card>
-        <v-spacer></v-spacer>
     </div>
 </template>
 
@@ -60,12 +58,9 @@ export default {
 
 <style scoped>
 .reactions-wrapper {
-    display: flex;
-    align-items: center;
-    -webkit-box-align: center;
-    -webkit-box-flex: 1;
-    background: transparent;
+    width: 140px;
     height: 26px;
+    position: relative;
 }
 
 .reactions-panel .v-icon {

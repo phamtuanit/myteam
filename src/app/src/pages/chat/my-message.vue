@@ -13,6 +13,7 @@
         <v-list-item-avatar v-else>
             <!-- Empty space -->
         </v-list-item-avatar>
+
         <!-- Content -->
         <v-card flat class="mr-1 message-card py-1" :disabled="!isAvailable">
             <div class="py-1 px-4 card-header">
@@ -25,12 +26,14 @@
                     class="ml-2"
                     v-text="warnIcon"
                 ></v-icon>
+                <!-- Reacted Emoji -->
+                <ReactionEmoji
+                    :message="message"
+                    class="ml-2"
+                ></ReactionEmoji>
             </div>
             <v-card-text class="py-0 px-4" v-html="message.body.content">
             </v-card-text>
-
-            <!-- Reacted Emoji -->
-            <ReactionEmoji :message="message" class="px-4 mt-2"></ReactionEmoji>
         </v-card>
     </v-list-item>
 </template>

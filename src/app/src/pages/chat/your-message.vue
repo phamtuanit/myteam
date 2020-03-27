@@ -4,33 +4,50 @@
             <UserAvatar :user="user" online-effect />
         </v-list-item-avatar>
         <!-- Message -->
-        <v-card flat class="message-card py-1 ml-1" :disabled="!isAvailable">
-            <div class="py-1 px-4 card-header">
-                <span class="subtitle-2 mr-2" v-text="fullName"></span>
-                <span class="caption" v-text="time"></span>
+        <div class="message-content">
+            <v-card
+                flat
+                class="message-card py-1 ml-1"
+                :disabled="!isAvailable"
+            >
+                <div class="py-1 px-4 card-header">
+                    <span class="subtitle-2 mr-2" v-text="fullName"></span>
+                    <span class="caption" v-text="time"></span>
+                    <v-spacer></v-spacer>
+                    <v-icon
+                        v-if="!isAvailable"
+                        small
+                        color="red lighten-1"
+                        class="ml-2"
+                        v-text="warnIcon"
+                    ></v-icon>
+                    <!-- Reacted Emoji -->
+                    <ReactionEmoji
+                        :message="message"
+                        class="ml-2"
+                        @change="onClearReaction"
+                    ></ReactionEmoji>
+                </div>
+                <v-card-text
+                    class="message-content py-0 px-4"
+                    v-html="message.body.content"
+                >
+                </v-card-text>
+            </v-card>
+
+            <div class="message-content__bottom">
                 <v-spacer></v-spacer>
-                <v-icon
-                    v-if="!isAvailable"
-                    small
-                    color="red lighten-1"
-                    class="ml-2"
-                    v-text="warnIcon"
-                ></v-icon>
+
+                <div class="custom-align">
+                    <!-- Reactions -->
+                    <Reaction
+                        @react="onReact"
+                        :selected="reactedType"
+                        v-if="isAvailable"
+                    />
+                </div>
             </div>
-            <v-card-text class="message-content py-0 px-4" v-html="message.body.content">
-            </v-card-text>
-
-            <!-- Reacted Emoji -->
-            <ReactionEmoji
-                :message="message"
-                class="px-4 reactions-emojis"
-                @change="onClearReaction"
-            ></ReactionEmoji>
-
-            <!-- Reactions -->
-            <Reaction @react="onReact" class="reactions-panel" :selected="reactedType"  v-if="isAvailable">
-            </Reaction>
-        </v-card>
+        </div>
 
         <!-- Actions -->
         <div class="message-actions ml-1" v-if="isAvailable">
@@ -90,9 +107,11 @@ export default {
                 return "";
             }
 
-            const lastReaction = this.message.reactions.find(r => r.user == this.me.id);
+            const lastReaction = this.message.reactions.find(
+                r => r.user == this.me.id
+            );
             return lastReaction ? lastReaction.type : "";
-        }
+        },
     },
     watch: {
         message: {
@@ -114,9 +133,9 @@ export default {
         onClearReaction(type) {
             this.$emit("dereact", type, this.message);
         },
-        onReply(){
+        onReply() {
             this.$emit("reply", this.message);
-        }
+        },
     },
 };
 </script>
@@ -125,8 +144,26 @@ export default {
 .message-card-wrapper {
     position: relative;
 }
+
 .message-card {
     position: relative;
+}
+
+.message-content__bottom {
+    position: relative;
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+    -webkit-box-flex: 1;
+}
+
+.custom-align {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+    right: 0;
+    top: -10px;
 }
 
 /* Card header */
@@ -138,24 +175,23 @@ export default {
     -webkit-box-flex: 1;
 }
 
-/* Reactions */
-.message-item >>> .reactions-wrapper {
-    visibility: hidden;
-    position: absolute;
-    left: -10px;
-    bottom: -15px;
-}
-
-.message-item >>> .message-card:hover .reactions-wrapper {
-    transition: all 0.2s ease-in;
-    visibility: visible;
-    z-index: 9;
-    left: 10px;
-}
-
 .reactions-emojis:hover + .reactions-panel {
     transition: all 0.5s ease-out;
     opacity: 0;
 }
 
+/* Reactions */
+.message-content__bottom >>> .reactions-panel {
+    position: absolute;
+    visibility: hidden;
+    bottom: 0;
+    top: 0;
+    right: 30px;
+}
+
+.message-content:hover >>> .reactions-panel {
+    transition: all 0.2s ease-in;
+    visibility: visible;
+    right: 16px;
+}
 </style>

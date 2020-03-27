@@ -1,7 +1,7 @@
 <template>
-    <v-scale-transition v-if="emojis.length > 0">
+    <v-scale-transition>
         <div class="reaction-emoji">
-            <div class="emoji-panel px-1" :class="{ left: left }">
+            <div class="emoji-panel px-1" v-show="emojis.length > 0">
                 <template v-for="reaction in emojis">
                     <v-icon
                         size="18"
@@ -26,7 +26,6 @@ import { mapState } from "vuex";
 export default {
     props: {
         message: Object,
-        left: Boolean,
     },
     computed: {
         ...mapState({
@@ -94,29 +93,13 @@ export default {
 
 <style scoped>
 .reaction-emoji {
-    position: relative;
-    height: 0px;
+    height: 24px;
 }
 
-.emoji-panel.v-card {
-    border-radius: 14px;
-}
-
-.reaction-emoji .emoji-panel {
-    z-index: 99;
-    position: absolute;
-    bottom: -15px;
-    right: 5px;
-    left: unset;
-}
-
-.reaction-emoji .emoji-panel.left {
-    right: unset;
-    left: 0;
-}
-
-.emoji-panel .v-icon {
-    opacity: 1;
+.emoji-panel {
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
 }
 
 .emoji-panel:hover *:not(.my-reaction) {

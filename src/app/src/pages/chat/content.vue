@@ -172,7 +172,7 @@ export default {
 
 .message-sheet >>> .your-message + .your-message,
 .my-message + .my-message {
-    margin-top: 12px !important;
+    margin-top: 18px !important;
 }
 
 .message-sheet >>> div.message-item:last-child {
