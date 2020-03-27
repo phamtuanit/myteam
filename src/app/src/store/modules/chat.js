@@ -238,6 +238,7 @@ const moduleState = {
         async activeTmpChat({ commit }, user) {
             const me = this.state.users.me;
             const convInfo = {
+                id: null,
                 _id: new Date().getTime(),
                 channel: false,
                 subscribers: [user, me],
@@ -345,6 +346,7 @@ const moduleState = {
                 });
 
                 const chatId = message.to.conversation;
+                const me = this.state.users.me;
                 // Handle event
                 switch (act) {
                     case "created":
@@ -353,11 +355,31 @@ const moduleState = {
                         }
 
                         {
-                            const existingConv = state.all.find(
-                                i => i.id == chatId
-                            );
+                            const existingConv = state.all.find(conv => {
+                                if (conv.id == chatId) {
+                                    return true;
+                                }
+
+                                if (conv.channel == false) {
+                                    if (conv.subscribers && conv.subscribers.length == 2) {
+                                        const matchedSub = conv.subscribers.filter(sub => {
+                                            return sub.id == me.id || sub.id == message.from.issuer;
+                                        });
+
+                                        return matchedSub.length == 2;
+                                    }
+                                }
+                                return false;
+                            });
+
+                            if (existingConv._isTemp == true) {
+                                existingConv.id = chatId;
+                                delete existingConv._id;
+                                delete existingConv._isTemp;
+                            }
+
                             if (existingConv) {
-                                commit("addMessage", { chatId, message });
+                                commit("addMessage", { chatId: existingConv.id, message });
                             } else {
                                 // Incase no chat in cache.
                                 this.dispatch("chats/loadChat", chatId)

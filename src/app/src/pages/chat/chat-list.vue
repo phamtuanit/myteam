@@ -78,19 +78,11 @@ export default {
                 this.searchLocker.then(this.searchFriend);
             }
         },
-        activatedChat(val) {
-            if (val) {
-                const convId = val.id || val._id;
-                if (convId != this.$route.query._id) {
-                    const newQuery = { ...this.$route.query };
-                    delete newQuery._status;
-                    if (val._isTemp == true) {
-                        newQuery._status = "temp";
-                    }
-                    newQuery._id = val.id || val._id;
-                    this.$router.updateQuery(newQuery);
-                }
-            }
+        "activatedChat.id"() {
+            this.updateUrlQuery();
+        },
+        activatedChat() {
+            this.updateUrlQuery();
         },
     },
     created() {
@@ -136,6 +128,23 @@ export default {
 
             // Incase user re-open existing chat
             this.$store.dispatch("chats/activeChat", chat.id);
+        },
+        updateUrlQuery() {
+            if (this.activatedChat) {
+                const convId = this.activatedChat.id || this.activatedChat._id;
+                if (convId != this.$route.query._id) {
+                    const newQuery = { ...this.$route.query };
+                    delete newQuery._status;
+                    if (this.activatedChat._isTemp == true) {
+                        newQuery._status = "temp";
+                    }
+                    newQuery._id =
+                        this.activatedChat.id || this.activatedChat._id;
+                    this.$router.updateQuery(newQuery);
+                }
+            } else {
+                this.$router.updateQuery({});
+            }
         },
     },
 };
