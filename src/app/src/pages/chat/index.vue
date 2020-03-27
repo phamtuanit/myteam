@@ -6,31 +6,27 @@
         <v-col>
             <ChatContent v-if="activatedChat"></ChatContent>
         </v-col>
-        <v-col cols="auto">
-            <FriendList></FriendList>
-        </v-col>
     </v-row>
 </template>
 
 <script>
 import ChatList from "./chat-list";
 import ChatContent from "./content.vue";
-import FriendList from "./friend-list";
 
 import { mapState } from "vuex";
 export default {
-    components: { ChatList, ChatContent, FriendList },
+    components: { ChatList, ChatContent },
     computed: {
         ...mapState({
             activatedChat: state => state.chats.active,
         }),
     },
     created() {
-        if (this.$route.query._status == "temp") {
-            this.$nextTick(() => {
-                this.$router.updateQuery({});
-            });
-        }
+        // if (this.$route.query._status == "temp") {
+        //     this.$nextTick(() => {
+        //         this.$router.updateQuery({});
+        //     });
+        // }
     },
 };
 </script>

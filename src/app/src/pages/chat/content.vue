@@ -1,76 +1,98 @@
 <template>
-    <div class="chat-box fill-height">
-        <v-sheet
-            class="overflow-y-auto message-sheet no-border-radius"
-            v-chat-scroll="{ always: false, smooth: true }"
-        >
-            <!-- MineMessage -->
-            <v-slide-y-transition group>
-                <template v-for="(msg, index) in messages">
-                    <MyMessage
-                        v-if="msg._isMe == true"
-                        :key="msg.id"
-                        :index="index"
-                        :message="msg"
-                        class="mt-5"
-                        @delete="onDeleteMyMessage"
-                    ></MyMessage>
-                    <YourMessage
-                        v-else
-                        :user="destUser"
-                        :key="msg.id"
-                        :index="index"
-                        :message="msg"
-                        class="mt-5"
-                        @react="onReact"
-                        @dereact="onDereact"
-                        @reply="onReply"
-                    ></YourMessage>
-                </template>
-            </v-slide-y-transition>
-        </v-sheet>
-
-        <!-- Input -->
-        <v-list
-            height="48"
-            v-show="activatedChat"
-            class="py-0 no-border-radius"
-        >
-            <v-list-item class="px-0 px-2">
-                <EmojiButton @select="onSelectEmoji"></EmojiButton>
-                <v-text-field
-                    flat
-                    class="no-border-radius"
-                    v-model="newMessage"
-                    hide-details
-                    solo
-                    clearable
-                    @keyup.esc="onClearMessage"
-                    @keyup.enter="onSendMessage"
-                    clear-icon="mdi-close"
-                ></v-text-field>
-                <v-btn
-                    icon
-                    class="send-btn"
-                    :disabled="!newMessage"
-                    @click="onSendMessage"
-                >
-                    <v-icon>mdi-send</v-icon>
-                </v-btn>
+    <div>
+        <v-sheet height="60" class="pa-0 header no-border-radius">
+            <v-list-item class="px-4 ma-0">
+                <Avatar
+                    :user-name="destUser.fullName"
+                    :src="destUser.avatar"
+                    :size="30"
+                    class="ml-2"
+                ></Avatar>
+                <!-- User name -->
+                <v-list-item-title
+                    class="title ml-3"
+                    v-text="destUser.fullName"
+                ></v-list-item-title>
             </v-list-item>
-        </v-list>
+        </v-sheet>
+        <v-row class="fill-height chat-box " no-gutters>
+            <v-col>
+                <v-sheet
+                    class="overflow-y-auto message-sheet no-border-radius"
+                    v-chat-scroll="{ always: false, smooth: true }"
+                >
+                    <!-- MineMessage -->
+                    <v-slide-y-transition group>
+                        <template v-for="(msg, index) in messages">
+                            <MyMessage
+                                v-if="msg._isMe == true"
+                                :key="msg.id"
+                                :index="index"
+                                :message="msg"
+                                class="mt-5"
+                                @delete="onDeleteMyMessage"
+                            ></MyMessage>
+                            <YourMessage
+                                v-else
+                                :user="destUser"
+                                :key="msg.id"
+                                :index="index"
+                                :message="msg"
+                                class="mt-5"
+                                @react="onReact"
+                                @dereact="onDereact"
+                                @reply="onReply"
+                            ></YourMessage>
+                        </template>
+                    </v-slide-y-transition>
+                </v-sheet>
+
+                <v-list
+                    height="48"
+                    v-show="activatedChat"
+                    class="py-0 no-border-radius"
+                >
+                    <v-list-item class="px-0 px-2">
+                        <EmojiButton @select="onSelectEmoji"></EmojiButton>
+                        <v-text-field
+                            flat
+                            class="no-border-radius"
+                            v-model="newMessage"
+                            hide-details
+                            solo
+                            clearable
+                            @keyup.esc="onClearMessage"
+                            @keyup.enter="onSendMessage"
+                            clear-icon="mdi-close"
+                        ></v-text-field>
+                        <v-btn
+                            icon
+                            class="send-btn"
+                            :disabled="!newMessage"
+                            @click="onSendMessage"
+                        >
+                            <v-icon>mdi-send</v-icon>
+                        </v-btn>
+                    </v-list-item>
+                </v-list>
+            </v-col>
+            <v-col cols="auto"> <FriendList></FriendList></v-col>
+        </v-row>
     </div>
 </template>
 
 <script>
 import { fillHeight } from "../../utils/layout.js";
 import EmojiButton from "../../components/emoji-button";
+import FriendList from "./friend-list";
+
 import MyMessage from "./my-message";
 import YourMessage from "./your-message";
+import Avatar from "../../components/avatar";
 
 import { mapState } from "vuex";
 export default {
-    components: { EmojiButton, MyMessage, YourMessage },
+    components: { FriendList, EmojiButton, MyMessage, YourMessage, Avatar },
     data() {
         return {
             theme: this.$vuetify.theme,
@@ -153,6 +175,16 @@ export default {
 </script>
 
 <style lang="css" scoped>
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+    -webkit-box-flex: 1;
+    flex: 1 1 100%;
+}
+
+/* Messages */
 .chat-box >>> .message-sheet {
     background: rgb(243, 242, 241);
 }

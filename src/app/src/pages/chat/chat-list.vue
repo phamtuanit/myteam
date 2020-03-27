@@ -6,7 +6,7 @@
         id="chat-list"
     >
         <!-- Search -->
-        <v-list dense dark class="pb-0">
+        <v-list dense dark class="pb-2">
             <v-list-item class="px-3 mt-1">
                 <v-text-field
                     v-model="searchText"
