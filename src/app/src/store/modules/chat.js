@@ -238,7 +238,7 @@ const moduleState = {
         async activeTmpChat({ commit }, user) {
             const me = this.state.users.me;
             const convInfo = {
-                id: new Date().getTime(),
+                _id: new Date().getTime(),
                 channel: false,
                 subscribers: [user, me],
                 messages: [],
@@ -274,7 +274,12 @@ const moduleState = {
             }
         },
         async sendMessage({ commit, state }, { chatId, body }) {
-            let chat = state.all.find(i => i.id == chatId);
+            if (!chatId) {
+                console.warn("chatId is required.");
+                return;
+            }
+
+            let chat = state.all.find(i => (i.id || i._id) == chatId);
             if (chat && chat._isTemp == true) {
                 // Create conversation first
                 const user = chat.subscribers[0];
@@ -286,6 +291,8 @@ const moduleState = {
                 };
                 const newConv = (await convService.create(convInfo)).data;
                 newConv.subscribers = [me, user];
+                delete chat._isTemp;
+                delete chat._id;
                 Object.assign(chat, newConv);
             }
 
@@ -295,7 +302,7 @@ const moduleState = {
                     message: res.data,
                 };
                 commit("addMessage", payload);
-                commit("setActivate", chat);
+                // commit("setActivate", chat);
                 return res.data;
             });
         },

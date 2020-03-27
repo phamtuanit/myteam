@@ -93,17 +93,16 @@ export default {
             }
             return {};
         },
-        chatId() {
-            return this.activatedChat ? this.activatedChat.id : -1;
-        },
     },
     watch: {
         activatedChat() {
+            this.chatId = this.activatedChat._id || this.activatedChat.id;
             this.messages = this.activatedChat.messages;
         },
     },
     created() {
         if (this.activatedChat) {
+            this.chatId = this.activatedChat._id || this.activatedChat.id;
             this.messages = this.activatedChat.messages;
         }
     },
@@ -120,31 +119,20 @@ export default {
             }
         },
         onSendMessage() {
-            if (this.status == "temp") {
-                // Create new conversation first
-                this.$store
-                    .dispatch("chats/createChat", this.friendId)
-                    .then(conv => {
-                        this.chatId = conv.id;
-                        this.status = null;
-                        this.onSendMessage();
-                    })
-                    .catch(console.error);
-            } else {
-                // Send message
-                const msg = {
-                    chatId: this.chatId,
-                    body: {
-                        content: this.newMessage,
-                    },
-                };
-                this.$store
-                    .dispatch("chats/sendMessage", msg)
-                    .then(() => {
-                        this.newMessage = "";
-                    })
-                    .catch(console.error);
-            }
+            this.chatId = this.activatedChat._id || this.activatedChat.id;
+            // Send message
+            const msg = {
+                chatId: this.chatId,
+                body: {
+                    content: this.newMessage,
+                },
+            };
+            this.$store
+                .dispatch("chats/sendMessage", msg)
+                .then(() => {
+                    this.newMessage = "";
+                })
+                .catch(console.error);
         },
         onDeleteMyMessage(message) {
             this.$store
@@ -159,9 +147,7 @@ export default {
         onDereact(type, message) {
             this.onReact(type, message, false);
         },
-        onReply(message) {
-
-        }
+        onReply(message) {},
     },
 };
 </script>

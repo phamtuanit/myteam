@@ -28,16 +28,16 @@
 
             <!-- Chat list -->
             <v-list-item-group v-model="activatedChat" mandatory>
-                <v-slide-y-transition group>
+                <!-- <v-slide-y-transition group> -->
                     <v-list-item
                         v-for="chat in chatList"
-                        :key="chat.id"
+                        :key="chat.id || chat._id"
                         :value="chat"
                         @click="onSelect"
                     >
                         <Conversation :conversation="chat" />
                     </v-list-item>
-                </v-slide-y-transition>
+                <!-- </v-slide-y-transition> -->
             </v-list-item-group>
         </v-list>
     </v-sheet>
