@@ -23,7 +23,7 @@
             <!-- Reacted Emoji -->
             <ReactionEmoji
                 :message="message"
-                class="px-4 mt-1 reactions-emojis"
+                class="px-4 reactions-emojis"
                 @change="onClearReaction"
             ></ReactionEmoji>
 
@@ -142,7 +142,7 @@ export default {
 .message-item >>> .reactions-wrapper {
     visibility: hidden;
     position: absolute;
-    left: 30px;
+    left: -10px;
     bottom: -15px;
 }
 

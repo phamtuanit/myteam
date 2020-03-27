@@ -1,5 +1,6 @@
 <template>
     <div class="reactions-wrapper">
+        <v-spacer></v-spacer>
         <v-card class="reactions-panel py-1 px-1" elevation="1">
             <v-icon
                 v-for="reaction in reactions"

@@ -12,7 +12,7 @@
                         :key="msg.id"
                         :index="index"
                         :message="msg"
-                        class="mt-4"
+                        class="mt-5"
                         @delete="onDeleteMyMessage"
                     ></MyMessage>
                     <YourMessage
@@ -21,7 +21,7 @@
                         :key="msg.id"
                         :index="index"
                         :message="msg"
-                        class="mt-4"
+                        class="mt-5"
                         @react="onReact"
                         @dereact="onDereact"
                         @reply="onReply"

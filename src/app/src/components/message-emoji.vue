@@ -2,32 +2,23 @@
     <v-scale-transition v-if="emojis.length > 0">
         <div class="reaction-emoji">
             <div class="emoji-panel px-1" :class="{ left: left }">
-                <v-scale-transition group>
-                    <template v-for="reaction in emojis">
-                        <v-icon
-                            size="18"
-                            class="mx-1"
-                            :key="reaction.type + '-icon'"
-                            :class="{ 'my-reaction': reaction.mine == true }"
-                            :color="reaction.color"
-                            v-text="'mdi-' + reaction.icon"
-                            @click="
-                                reaction.mine == true
-                                    ? onReaction(reaction)
-                                    : ''
-                            "
-                        ></v-icon>
-                        <small
-                            class="mr-1"
-                            :key="reaction.type + '-count'"
-                            v-show="reaction.reactors.length > 1"
-                            v-text="reaction.reactors.length"
-                        ></small>
-                    </template>
-                </v-scale-transition>
+                <template v-for="reaction in emojis">
+                    <v-icon
+                        size="18"
+                        class="mr-1"
+                        :key="reaction.type + '-icon'"
+                        :class="{ 'my-reaction': reaction.mine == true }"
+                        :color="reaction.color"
+                        v-text="'mdi-' + reaction.icon"
+                        @click="
+                            reaction.mine == true ? onReaction(reaction) : ''
+                        "
+                    ></v-icon>
+                </template>
+                <small v-text="emojis.length"></small>
             </div>
         </div>
-    </v-scale-transition >
+    </v-scale-transition>
 </template>
 
 <script>
@@ -104,13 +95,18 @@ export default {
 <style scoped>
 .reaction-emoji {
     position: relative;
-    height: 10px;
+    height: 0px;
+}
+
+.emoji-panel.v-card {
+    border-radius: 14px;
 }
 
 .reaction-emoji .emoji-panel {
+    z-index: 99;
     position: absolute;
-    bottom: -2px;
-    right: 0;
+    bottom: -15px;
+    right: 5px;
     left: unset;
 }
 
