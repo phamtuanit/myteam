@@ -372,7 +372,7 @@ const moduleState = {
                                 return false;
                             });
 
-                            if (existingConv._isTemp == true) {
+                            if (existingConv && existingConv._isTemp == true) {
                                 existingConv.id = chatId;
                                 delete existingConv._id;
                                 delete existingConv._isTemp;

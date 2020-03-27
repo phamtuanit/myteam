@@ -210,10 +210,6 @@ export default {
 }
 
 /* Message aligment */
-.message-sheet >>> div.your-message:first-of-type {
-    margin-top: 25px !important;
-}
-
 .message-sheet >>> .your-message + .your-message,
 .my-message + .my-message {
     margin-top: 18px !important;
