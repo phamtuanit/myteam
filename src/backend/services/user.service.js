@@ -133,7 +133,7 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
@@ -143,6 +143,7 @@ module.exports = {
         dbCollection.collection.createIndex({
             firstName: "text",
             lastNme: "text",
+            fullName: "text",
             mail: "text",
             phone: "text",
         });
@@ -151,5 +152,5 @@ module.exports = {
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {},
+    stopped() { },
 };
