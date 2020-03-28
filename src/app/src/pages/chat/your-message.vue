@@ -1,62 +1,82 @@
 <template>
-    <v-list-item class="px-2 message-item your-message" :data-msg-index="index">
-        <v-list-item-avatar class="ma-0">
-            <UserAvatar :user="user" online-effect />
-        </v-list-item-avatar>
-        <!-- Message -->
-        <div class="message-content">
-            <v-card
-                flat
-                class="message-card py-1 ml-1"
-                :disabled="!isAvailable"
-            >
-                <div class="py-1 px-4 card-header">
-                    <span class="subtitle-2 mr-2" v-text="fullName"></span>
-                    <span class="caption" v-text="time"></span>
-                    <v-spacer></v-spacer>
-                    <v-icon
-                        v-if="!isAvailable"
-                        small
-                        color="red lighten-1"
-                        class="ml-2"
-                        v-text="warnIcon"
-                    ></v-icon>
-                    <!-- Reacted Emoji -->
-                    <ReactionEmoji
-                        :message="message"
-                        class="ml-2"
-                        @change="onClearReaction"
-                    ></ReactionEmoji>
-                </div>
-                <v-card-text
-                    class="message-content py-0 px-4"
-                    v-html="message.body.content"
-                >
-                </v-card-text>
-            </v-card>
-
-            <div class="message-content__bottom">
-                <v-spacer></v-spacer>
-
-                <div class="custom-align">
-                    <!-- Reactions -->
-                    <Reaction
-                        @react="onReact"
-                        :selected="reactedType"
-                        v-if="isAvailable"
-                    />
-                </div>
-            </div>
+  <v-list-item
+    class="px-2 message-item your-message"
+    :data-msg-index="index"
+  >
+    <v-list-item-avatar class="ma-0">
+      <UserAvatar
+        :user="user"
+        online-effect
+      />
+    </v-list-item-avatar>
+    <!-- Message -->
+    <div class="message-content">
+      <v-card
+        flat
+        class="message-card py-1 ml-1"
+        :disabled="!isAvailable"
+      >
+        <div class="py-1 px-4 card-header selection-disabled">
+          <span
+            class="subtitle-2 mr-2"
+            v-text="fullName"
+          ></span>
+          <span
+            class="caption"
+            v-text="time"
+          ></span>
+          <v-spacer></v-spacer>
+          <v-icon
+            v-if="!isAvailable"
+            small
+            color="red lighten-1"
+            class="ml-2"
+            v-text="warnIcon"
+          ></v-icon>
+          <!-- Reacted Emoji -->
+          <ReactionEmoji
+            :message="message"
+            class="ml-2"
+            @change="onClearReaction"
+          ></ReactionEmoji>
         </div>
+        <v-card-text
+          class="message-content py-0 px-4"
+          v-html="message.body.content"
+        >
+        </v-card-text>
+      </v-card>
 
-        <!-- Actions -->
-        <div class="message-actions ml-1" v-if="isAvailable">
-            <v-btn icon small class="mx-auto" @click="onReply">
-                <v-icon small>mdi-reply</v-icon>
-            </v-btn>
-        </div>
+      <div class="message-content__bottom">
         <v-spacer></v-spacer>
-    </v-list-item>
+
+        <div class="custom-align">
+          <!-- Reactions -->
+          <Reaction
+            @react="onReact"
+            :selected="reactedType"
+            v-if="isAvailable"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div
+      class="message-actions ml-1"
+      v-if="isAvailable"
+    >
+      <v-btn
+        icon
+        small
+        class="mx-auto"
+        @click="onReply"
+      >
+        <v-icon small>mdi-reply</v-icon>
+      </v-btn>
+    </div>
+    <v-spacer></v-spacer>
+  </v-list-item>
 </template>
 
 <script>

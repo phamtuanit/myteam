@@ -1,41 +1,59 @@
 <template>
-    <v-list-item
-        class="px-2 message-item my-message"
-        :class="{ 'message-error': !isAvailable }"
+  <v-list-item
+    class="px-2 message-item my-message"
+    :class="{ 'message-error': !isAvailable }"
+  >
+    <v-spacer></v-spacer>
+    <!-- Actions -->
+    <div
+      class="message-actions mr-1"
+      v-if="isAvailable"
     >
-        <v-spacer></v-spacer>
-        <!-- Actions -->
-        <div class="message-actions mr-1" v-if="isAvailable">
-            <v-btn icon small class="mx-auto" @click="onDeleteMessage">
-                <v-icon small>mdi-delete</v-icon>
-            </v-btn>
-        </div>
-        <v-list-item-avatar v-else>
-            <!-- Empty space -->
-        </v-list-item-avatar>
+      <v-btn
+        icon
+        small
+        class="mx-auto"
+        @click="onDeleteMessage"
+      >
+        <v-icon small>mdi-delete</v-icon>
+      </v-btn>
+    </div>
+    <v-list-item-avatar v-else>
+      <!-- Empty space -->
+    </v-list-item-avatar>
 
-        <!-- Content -->
-        <v-card flat class="mr-1 message-card py-1" :disabled="!isAvailable">
-            <div class="py-1 px-4 card-header">
-                <span class="caption" v-text="time"></span>
-                <v-spacer></v-spacer>
-                <v-icon
-                    v-if="!isAvailable"
-                    small
-                    color="red lighten-1"
-                    class="ml-2"
-                    v-text="warnIcon"
-                ></v-icon>
-                <!-- Reacted Emoji -->
-                <ReactionEmoji
-                    :message="message"
-                    class="ml-2"
-                ></ReactionEmoji>
-            </div>
-            <v-card-text class="py-0 px-4" v-html="message.body.content">
-            </v-card-text>
-        </v-card>
-    </v-list-item>
+    <!-- Content -->
+    <v-card
+      flat
+      class="mr-1 message-card py-1"
+      :disabled="!isAvailable"
+    >
+      <div class="py-1 px-4 card-header selection-disabled">
+        <span
+          class="caption"
+          v-text="time"
+        ></span>
+        <v-spacer></v-spacer>
+        <v-icon
+          v-if="!isAvailable"
+          small
+          color="red lighten-1"
+          class="ml-2"
+          v-text="warnIcon"
+        ></v-icon>
+        <!-- Reacted Emoji -->
+        <ReactionEmoji
+          :message="message"
+          class="ml-2"
+        ></ReactionEmoji>
+      </div>
+      <v-card-text
+        class="py-0 px-4"
+        v-html="message.body.content"
+      >
+      </v-card-text>
+    </v-card>
+  </v-list-item>
 </template>
 
 <script>
