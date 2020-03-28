@@ -1,6 +1,6 @@
 const authConf = require("../conf/auth.json");
 
-const service = function(logger) {
+const service = function (logger) {
     this.logger = logger || console;
 };
 
@@ -9,7 +9,7 @@ service.prototype = {
         this.logger.info("Close LDAP connection.");
     },
     verify() {
-        return Promise.resolve(authConf.debug.user);
+        return Promise.resolve(authConf.debug.users[0]);
     },
 };
 
