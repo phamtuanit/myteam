@@ -1,6 +1,6 @@
 <template>
   <v-sheet
-    width="300px"
+    width="280px"
     class="pa-0 fill-height no-border-radius"
     dark
     id="chat-list"
@@ -31,31 +31,37 @@
     <v-list
       two-line
       dark
+      height="200"
       class="py-0 px-0"
     >
-      <v-subheader class="pl-3 pr-2">Conversations</v-subheader>
-
-      <!-- Chat list -->
-      <v-list-item-group
-        v-model="activatedChat"
-        mandatory
+      <v-subheader class="pl-3 pr-2 selection-disabled">Conversations</v-subheader>
+      <v-layout
+        class="conversation-list"
+        style="overflow-y: auto;"
       >
-        <!-- <v-slide-y-transition group> -->
-        <v-list-item
-          v-for="chat in chatList"
-          :key="chat.id || chat._id"
-          :value="chat"
-          @click="onSelect(chat)"
+        <!-- Chat list -->
+        <v-list-item-group
+          v-model="activatedChat"
+          mandatory
         >
-          <Conversation :conversation="chat" />
-        </v-list-item>
-        <!-- </v-slide-y-transition> -->
-      </v-list-item-group>
+          <!-- <v-slide-y-transition group> -->
+          <v-list-item
+            v-for="chat in chatList"
+            :key="chat.id || chat._id"
+            :value="chat"
+            @click="onSelect(chat)"
+          >
+            <Conversation :conversation="chat" />
+          </v-list-item>
+          <!-- </v-slide-y-transition> -->
+        </v-list-item-group>
+      </v-layout>
     </v-list>
   </v-sheet>
 </template>
 
 <script>
+import { fillHeight } from "../../utils/layout.js";
 import { mapState } from "vuex";
 import UserAvatar from "../../components/user-avatar.vue";
 import Conversation from "../../components/conversation-item.vue";
@@ -121,6 +127,7 @@ export default {
         }
     },
     mounted() {
+        fillHeight("conversation-list", 0, this.$el);
         this.searchLocker = Promise.resolve();
 
         // Update url query
@@ -182,5 +189,9 @@ export default {
 
 #chat-list >>> .v-btn {
     border-color: rgba(255, 255, 255, 0.16);
+}
+
+.v-item-group.v-list-item-group {
+    width: 100%;
 }
 </style>

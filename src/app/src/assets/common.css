@@ -42,11 +42,22 @@ body::-webkit-scrollbar {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-div.no-border-radius {
-  border-radius: 0;
-}
-
 /* Force wrap */
 .v-card__text {
   word-break: break-word;
+}
+
+/* Minimize height */
+div.v-subheader {
+  height: 40px;
+}
+
+/* Utilitise */
+.no-border-radius {
+  border-radius: 0 !important;
+}
+.selection-disabled {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }

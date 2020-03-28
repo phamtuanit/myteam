@@ -36,38 +36,47 @@
         :indeterminate="true"
       ></v-progress-linear>
 
-      <!-- List -->
-      <v-slide-y-transition group>
-        <template v-for="user in friendList">
-          <v-list-item
-            :key="user.id"
-            v-if="!user._isMe"
-            @click="onAddChat(user)"
-          >
-            <UserAvatar
-              :user-name="me.fullName"
-              :user="user"
-              online-effect
-            />
+      <v-layout
+        class="friend-list"
+        style="overflow-y: auto;"
+      >
+        <!-- List -->
+        <v-slide-y-transition
+          group
+          tag="div"
+        >
+          <template v-for="user in friendList">
+            <v-list-item
+              :key="user.id"
+              v-if="!user._isMe"
+              @click="onAddChat(user)"
+            >
+              <UserAvatar
+                :user-name="me.fullName"
+                :user="user"
+                online-effect
+              />
 
-            <v-list-item-content class="py-2 pl-3 pr-2">
-              <v-list-item-title
-                class="body-2"
-                v-text="getDisplayName(user)"
-              ></v-list-item-title>
-              <v-list-item-subtitle
-                v-if="user.phone"
-                class="caption"
-              >&#128222; {{user.phone}}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-        </template>
-      </v-slide-y-transition>
+              <v-list-item-content class="py-2 pl-3 pr-2">
+                <v-list-item-title
+                  class="body-2"
+                  v-text="getDisplayName(user)"
+                ></v-list-item-title>
+                <v-list-item-subtitle
+                  v-if="user.phone"
+                  class="caption"
+                >&#128222; {{user.phone}}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+        </v-slide-y-transition>
+      </v-layout>
     </v-list>
   </v-sheet>
 </template>
 
 <script>
+import { fillHeight } from "../../utils/layout.js";
 import { mapState } from "vuex";
 import UserAvatar from "../../components/user-avatar.vue";
 export default {
@@ -91,6 +100,7 @@ export default {
         },
     },
     mounted() {
+        fillHeight("friend-list", 0, this.$el);
         this.searchLocker = Promise.resolve();
         this.friendList = this.cachedUsers;
     },
@@ -163,5 +173,14 @@ export default {
 
 #friend-list >>> .v-text-field--rounded {
     border-radius: 20px;
+}
+
+/* Scroll */
+.friend-list > div {
+    width: 100%;
+}
+
+.v-list-item__content {
+    max-width: 218px;
 }
 </style>

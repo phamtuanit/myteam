@@ -1,22 +1,27 @@
 <template>
-    <div class="conversation-item pr-2" @click="onOpenConv" 
-        :class="{'has-new-message': hasNewMessage }">
-        <UserAvatar :user="targetUser" :infinity="hasNewMessage" />
+  <div
+    class="conversation-item"
+    @click="onOpenConv"
+    :class="{'has-new-message': hasNewMessage }"
+  >
+    <UserAvatar
+      :user="targetUser"
+      :infinity="hasNewMessage"
+    />
 
-        <v-list-item-content
-            class="py-2 pl-3 pr-2 content__text"
-        >
-            <v-list-item-title
-                class="subtitle-2 mb-0"
-                v-text="conversationName"
-            ></v-list-item-title>
-            <v-list-item-subtitle
-                class="caption"
-                :class="{'font-weight-bold': hasNewMessage }"
-                v-text="recentMessage"
-            ></v-list-item-subtitle>
-        </v-list-item-content>
-    </div>
+    <v-list-item-content class="py-1 px-2 content__text">
+      <v-list-item-title
+        class="subtitle-2 mb-0"
+        v-text="conversationName"
+      ></v-list-item-title>
+      <v-list-item-subtitle
+        v-if="recentMessage"
+        class="caption"
+        :class="{'font-weight-bold': hasNewMessage }"
+        v-text="recentMessage"
+      ></v-list-item-subtitle>
+    </v-list-item-content>
+  </div>
 </template>
 
 <script>
@@ -26,7 +31,7 @@ export default {
     props: ["conversation"],
     components: { UserAvatar },
     data: vm => ({
-        recentMessage: "...",
+        recentMessage: "",
         messages: vm.conversation.messages,
         hasNewMessage: true,
     }),
@@ -117,12 +122,12 @@ export default {
         },
         onOpenConv() {
             if (this.conversation.messages) {
-                this.$store.dispatch(
-                    "chats/watchAllMessage",
-                    this.conversation.id
-                ).then(conv => {
-                    this.hasNewMessage = conv != null && conv != undefined;
-                }).catch(console.error);
+                this.$store
+                    .dispatch("chats/watchAllMessage", this.conversation.id)
+                    .then(conv => {
+                        this.hasNewMessage = conv != null && conv != undefined;
+                    })
+                    .catch(console.error);
             }
         },
     },
@@ -148,11 +153,11 @@ export default {
     animation: opacity 0.2s linear;
     content: "";
     position: absolute;
-    background-color: #FFEA00;
+    background-color: #ffea00;
     width: 3px;
     left: -16px;
-    bottom: -3px;
-    top: -3px;
+    bottom: -7px;
+    top: -7px;
 }
 
 @keyframes opacity {
@@ -165,6 +170,6 @@ export default {
 }
 
 .content__text {
-    max-width: 250px;
+    max-width: 218px;
 }
 </style>
