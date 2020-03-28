@@ -98,20 +98,27 @@ module.exports = {
                 let convInfo = await ctx.call("v1.conversations.getConversationById", {
                     id: conversation,
                 });
-    
-                if (convInfo) {
-                    if (!to || typeof to.user != "string") {
-                        const error = "'to.user' is required incase you want to create new conversation.";
-                        this.logger.warn(error, to);
-                        throw new Errors.MoleculerClientError(error)
-                    }
 
-                    const conv = {
-                        subscribers: [user.id, to.user],
-                        channel: false
-                    }
-                    convInfo = await ctx.call("v1.conversations.createConversation", conv);
+                if (!convInfo) {
+                    throw new Errors.MoleculerClientError(
+                        "The conversation could not be found.",
+                        404
+                    );
                 }
+
+                // if (!convInfo) {
+                //     if (!to || typeof to.user != "string") {
+                //         const error = "'to.user' is required incase you want to create new conversation.";
+                //         this.logger.warn(error, to);
+                //         throw new Errors.MoleculerClientError(error)
+                //     }
+
+                //     const conv = {
+                //         subscribers: [user.id, to.user],
+                //         channel: false
+                //     }
+                //     convInfo = await ctx.call("v1.conversations.createConversation", conv);
+                // }
 
                 const newMessage = this.processMessage(message, true);
                 return await this.storeMessage(newMessage, ctx, convInfo);
@@ -699,15 +706,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {},
+    stopped() { },
 };
