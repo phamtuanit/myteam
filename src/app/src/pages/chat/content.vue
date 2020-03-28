@@ -1,84 +1,125 @@
 <template>
-    <div class="fill-height">
-        <v-sheet height="60" class="pa-0 header no-border-radius border-xb">
-            <v-list-item class="px-4 ma-0" v-if="activatedChat">
-                <Avatar
-                    :user-name="destUser.fullName"
-                    :src="destUser.avatar"
-                    :size="30"
-                    class="ml-2"
-                ></Avatar>
-                <!-- User name -->
-                <v-list-item-title
-                    class="title ml-3"
-                    v-text="destUser.fullName"
-                ></v-list-item-title>
-            </v-list-item>
-        </v-sheet>
-        <v-row class="chat-box" no-gutters>
-            <v-col>
-                <v-sheet
-                    class="overflow-y-auto message-sheet no-border-radius"
-                    v-chat-scroll="{ always: false, smooth: true }"
-                >
-                    <!-- MineMessage -->
-                    <v-slide-y-transition group>
-                        <template v-for="(msg, index) in messages">
-                            <MyMessage
-                                v-if="msg._isMe == true"
-                                :key="msg.id"
-                                :index="index"
-                                :message="msg"
-                                class="mt-5"
-                                @delete="onDeleteMyMessage"
-                            ></MyMessage>
-                            <YourMessage
-                                v-else
-                                :user="destUser"
-                                :key="msg.id"
-                                :index="index"
-                                :message="msg"
-                                class="mt-5"
-                                @react="onReact"
-                                @dereact="onDereact"
-                                @reply="onReply"
-                            ></YourMessage>
-                        </template>
-                    </v-slide-y-transition>
-                </v-sheet>
+  <div class="fill-height">
+    <v-row
+      class="chat-box"
+      no-gutters
+    >
+      <!-- Main content -->
+      <v-col>
+        <!-- Header -->
+        <v-sheet
+          height="60"
+          class="pa-0 header no-border-radius border-xb"
+        >
+          <!-- User info -->
+          <v-list-item
+            class="px-4 ma-0"
+            v-if="activatedChat"
+          >
+            <Avatar
+              :user-name="destUser.fullName"
+              :src="destUser.avatar"
+              :size="30"
+              class="ml-2"
+            ></Avatar>
+            <!-- User name -->
+            <v-list-item-title
+              class="title ml-3"
+              v-text="destUser.fullName"
+            ></v-list-item-title>
 
-                <v-list
-                    height="48"
-                    v-show="activatedChat"
-                    class="py-0 no-border-radius"
+            <v-spacer></v-spacer>
+            <!-- Friends list -->
+            <v-tooltip left>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  v-on="on"
+                  icon
+                  @click="showFrienfList = !showFrienfList"
                 >
-                    <v-list-item class="px-0 px-2">
-                        <EmojiButton @select="onSelectEmoji"></EmojiButton>
-                        <v-text-field
-                            flat
-                            class="no-border-radius"
-                            v-model="newMessage"
-                            hide-details
-                            solo
-                            clearable
-                            @keyup.esc="onClearMessage"
-                            @keyup.enter="onSendMessage"
-                            clear-icon="mdi-close"
-                        ></v-text-field>
-                        <v-btn
-                            icon
-                            class="send-btn"
-                            :disabled="!newMessage"
-                            @click="onSendMessage"
-                        >
-                            <v-icon>mdi-send</v-icon>
-                        </v-btn>
-                    </v-list-item>
-                </v-list>
-            </v-col>
-            <v-col cols="auto"> <FriendList></FriendList></v-col>
-        </v-row>
-    </div>
+                  <v-icon
+                    :color="showFrienfList ? 'orange' : ''"
+                    v-text="showFrienfList ? 'mdi-account-supervisor' : 'mdi-account-search'"
+                  ></v-icon>
+                </v-btn>
+              </template>
+              <span>Friend list</span>
+            </v-tooltip>
+          </v-list-item>
+        </v-sheet>
+
+        <!-- Content -->
+        <v-sheet
+          class="overflow-y-auto message-sheet no-border-radius"
+          v-chat-scroll="{ always: false, smooth: true }"
+        >
+          <!-- MineMessage -->
+          <v-slide-y-transition group>
+            <template v-for="(msg, index) in messages">
+              <MyMessage
+                v-if="msg._isMe == true"
+                :key="msg.id"
+                :index="index"
+                :message="msg"
+                class="mt-5"
+                @delete="onDeleteMyMessage"
+              ></MyMessage>
+              <YourMessage
+                v-else
+                :user="destUser"
+                :key="msg.id"
+                :index="index"
+                :message="msg"
+                class="mt-5"
+                @react="onReact"
+                @dereact="onDereact"
+                @reply="onReply"
+              ></YourMessage>
+            </template>
+          </v-slide-y-transition>
+        </v-sheet>
+
+        <!-- Input box -->
+        <v-list
+          height="48"
+          v-show="activatedChat"
+          class="py-0 no-border-radius"
+        >
+          <v-list-item class="px-0 px-2">
+            <EmojiButton @select="onSelectEmoji"></EmojiButton>
+            <v-text-field
+              flat
+              class="no-border-radius"
+              v-model="newMessage"
+              hide-details
+              solo
+              clearable
+              @keyup.esc="onClearMessage"
+              @keyup.enter="onSendMessage"
+              clear-icon="mdi-close"
+            ></v-text-field>
+            <v-btn
+              icon
+              class="send-btn"
+              :disabled="!newMessage"
+              @click="onSendMessage"
+            >
+              <v-icon>mdi-send</v-icon>
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </v-col>
+      <!-- Frieng list -->
+      <v-expand-x-transition>
+        <v-col
+          cols="auto"
+          v-if="showFrienfList || !activatedChat"
+        >
+          <FriendList></FriendList>
+        </v-col>
+      </v-expand-x-transition>
+    </v-row>
+  </div>
 </template>
 
 <script>
@@ -98,6 +139,7 @@ export default {
             theme: this.$vuetify.theme,
             newMessage: "",
             messages: [],
+            showFrienfList: true,
         };
     },
     computed: {

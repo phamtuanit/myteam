@@ -1,64 +1,70 @@
 <template>
-    <v-sheet
-        id="friend-list"
-        width="250px"
-        class="pa-0 fill-height no-border-radius"
+  <v-sheet
+    id="friend-list"
+    width="250px"
+    class="pa-0 fill-height no-border-radius"
+  >
+    <!-- Search -->
+    <v-list
+      dense
+      class="pb-0"
     >
-        <!-- Search -->
-        <v-list dense class="pb-0">
-            <v-list-item class="px-3 mt-1">
-                <v-text-field
-                    v-model="searchText"
-                    prepend-inner-icon="mdi-magnify"
-                    label="Search"
-                    flat
-                    solo-inverted
-                    rounded
-                    hide-details
-                    clearable
-                    clear-icon="mdi-close"
-                ></v-text-field>
-            </v-list-item>
-        </v-list>
+      <v-list-item class="px-3 mt-1">
+        <v-text-field
+          v-model="searchText"
+          prepend-inner-icon="mdi-magnify"
+          label="Search"
+          flat
+          solo-inverted
+          rounded
+          hide-details
+          clearable
+          clear-icon="mdi-close"
+          @keyup.esc="searchText = ''"
+        ></v-text-field>
+      </v-list-item>
+    </v-list>
 
-        <!-- Friends -->
-        <v-list two-line class="py-0 px-0">
-            <v-subheader class="pl-3 pr-2">Friends</v-subheader>
+    <!-- Friends -->
+    <v-list
+      two-line
+      class="mt-2 py-0 px-0"
+    >
 
-            <v-progress-linear
-                :active="loading"
-                :indeterminate="true"
-            ></v-progress-linear>
+      <v-progress-linear
+        :active="loading"
+        :indeterminate="true"
+      ></v-progress-linear>
 
-            <!-- List -->
-            <v-slide-y-transition group>
-                <template v-for="user in friendList">
-                    <v-list-item
-                        :key="user.id"
-                        v-if="!user._isMe"
-                        @click="onAddChat(user)"
-                    >
-                        <UserAvatar
-                            :user-name="me.fullName"
-                            :user="user"
-                            online-effect
-                        />
+      <!-- List -->
+      <v-slide-y-transition group>
+        <template v-for="user in friendList">
+          <v-list-item
+            :key="user.id"
+            v-if="!user._isMe"
+            @click="onAddChat(user)"
+          >
+            <UserAvatar
+              :user-name="me.fullName"
+              :user="user"
+              online-effect
+            />
 
-                        <v-list-item-content class="py-2 pl-3 pr-2">
-                            <v-list-item-title
-                                class="body-2"
-                                v-text="getDisplayName(user)"
-                            ></v-list-item-title>
-                            <v-list-item-subtitle
-                                class="caption"
-                                v-text="user.mail"
-                            ></v-list-item-subtitle>
-                        </v-list-item-content>
-                    </v-list-item>
-                </template>
-            </v-slide-y-transition>
-        </v-list>
-    </v-sheet>
+            <v-list-item-content class="py-2 pl-3 pr-2">
+              <v-list-item-title
+                class="body-2"
+                v-text="getDisplayName(user)"
+              ></v-list-item-title>
+              <v-list-item-subtitle
+                v-if="user.phone"
+                class="caption"
+              >&#128222; {{user.phone}}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
+      </v-slide-y-transition>
+    </v-list>
+  </v-sheet>
 </template>
 
 <script>
