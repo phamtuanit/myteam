@@ -1,46 +1,58 @@
 <template>
-    <v-sheet
-        width="300px"
-        class="pa-0 fill-height no-border-radius"
-        dark
-        id="chat-list"
+  <v-sheet
+    width="300px"
+    class="pa-0 fill-height no-border-radius"
+    dark
+    id="chat-list"
+  >
+    <!-- Search -->
+    <v-list
+      dense
+      dark
+      class="pb-2"
     >
-        <!-- Search -->
-        <v-list dense dark class="pb-2">
-            <v-list-item class="px-3 mt-1">
-                <v-text-field
-                    v-model="searchText"
-                    prepend-inner-icon="mdi-magnify"
-                    label="Search"
-                    flat
-                    solo-inverted
-                    rounded
-                    hide-details
-                    clearable
-                    clear-icon="mdi-close"
-                ></v-text-field>
-            </v-list-item>
-        </v-list>
+      <v-list-item class="px-3 mt-1">
+        <v-text-field
+          v-model="searchText"
+          prepend-inner-icon="mdi-magnify"
+          label="Search"
+          flat
+          solo-inverted
+          rounded
+          hide-details
+          clearable
+          clear-icon="mdi-close"
+          @keyup.esc="searchText = ''"
+        ></v-text-field>
+      </v-list-item>
+    </v-list>
 
-        <!-- List -->
-        <v-list two-line dark class="py-0 px-0">
-            <v-subheader class="pl-3 pr-2">Conversations</v-subheader>
+    <!-- List -->
+    <v-list
+      two-line
+      dark
+      class="py-0 px-0"
+    >
+      <v-subheader class="pl-3 pr-2">Conversations</v-subheader>
 
-            <!-- Chat list -->
-            <v-list-item-group v-model="activatedChat" mandatory>
-                <!-- <v-slide-y-transition group> -->
-                <v-list-item
-                    v-for="chat in chatList"
-                    :key="chat.id || chat._id"
-                    :value="chat"
-                    @click="onSelect(chat)"
-                >
-                    <Conversation :conversation="chat" />
-                </v-list-item>
-                <!-- </v-slide-y-transition> -->
-            </v-list-item-group>
-        </v-list>
-    </v-sheet>
+      <!-- Chat list -->
+      <v-list-item-group
+        v-model="activatedChat"
+        mandatory
+      >
+        <!-- <v-slide-y-transition group> -->
+        <v-list-item
+          v-for="chat in chatList"
+          :key="chat.id || chat._id"
+          :value="chat"
+          @click="onSelect(chat)"
+        >
+          <Conversation :conversation="chat" />
+        </v-list-item>
+        <!-- </v-slide-y-transition> -->
+      </v-list-item-group>
+    </v-list>
+  </v-sheet>
 </template>
 
 <script>
