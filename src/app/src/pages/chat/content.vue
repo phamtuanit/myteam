@@ -8,8 +8,8 @@
       <v-col>
         <!-- Header -->
         <v-sheet
-          height="60"
-          class="pa-0 header no-border-radius border-xb"
+          height="57"
+          class="pa-0 border border-xb center-y no-border-radius"
         >
           <!-- User info -->
           <v-list-item
@@ -217,27 +217,6 @@ export default {
 </script>
 
 <style lang="css" scoped>
-/* Header */
-.header {
-    display: flex;
-    align-items: center;
-    -webkit-box-align: center;
-    -webkit-box-flex: 1;
-    flex: 1 1 100%;
-}
-
-.v-sheet.border-xb {
-    border-bottom: 1px solid;
-}
-
-.theme--light.border-xb {
-    border-color: rgba(0, 0, 0, 0.12);
-}
-
-.theme--dark.border-xb {
-    border-color: rgba(255, 255, 255, 0.12) !important;
-}
-
 /* Messages */
 .chat-box >>> .message-sheet {
     background: rgb(243, 242, 241);

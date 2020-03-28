@@ -11,11 +11,12 @@
       dark
       class="pb-2"
     >
-      <v-list-item class="px-3 mt-1">
+      <v-list-item class="px-3">
         <v-text-field
           v-model="searchText"
           prepend-inner-icon="mdi-magnify"
           label="Search"
+          name="search-chat"
           flat
           solo-inverted
           rounded

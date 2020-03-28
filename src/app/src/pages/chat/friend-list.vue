@@ -1,20 +1,20 @@
 <template>
-  <v-sheet
+  <div
     id="friend-list"
-    width="250px"
-    class="pa-0 fill-height no-border-radius"
+    class="pa-0 fill-height"
   >
     <!-- Search -->
-    <v-list
-      dense
-      class="pb-0"
+    <v-sheet
+      height="57"
+      class="pa-0 center-y no-border-radius border border-xb"
     >
-      <v-list-item class="px-3 mt-1">
+      <v-list-item class="px-3">
         <v-text-field
           v-model="searchText"
           prepend-inner-icon="mdi-magnify"
           label="Search"
           flat
+          name="search-friend"
           solo-inverted
           rounded
           hide-details
@@ -23,12 +23,12 @@
           @keyup.esc="searchText = ''"
         ></v-text-field>
       </v-list-item>
-    </v-list>
+    </v-sheet>
 
     <!-- Friends -->
     <v-list
       two-line
-      class="mt-2 py-0 px-0"
+      class="py-0 px-0"
     >
 
       <v-progress-linear
@@ -37,7 +37,7 @@
       ></v-progress-linear>
 
       <v-layout
-        class="friend-list"
+        class="friend-list-layout"
         style="overflow-y: auto;"
       >
         <!-- List -->
@@ -72,7 +72,7 @@
         </v-slide-y-transition>
       </v-layout>
     </v-list>
-  </v-sheet>
+  </div>
 </template>
 
 <script>
@@ -163,6 +163,10 @@ export default {
 </script>
 
 <style scoped>
+#friend-list {
+    width: 250px;
+}
+
 #friend-list >>> .v-text-field.v-text-field--solo .v-input__control {
     min-height: 40px !important;
 }
@@ -176,7 +180,7 @@ export default {
 }
 
 /* Scroll */
-.friend-list > div {
+.friend-list-layout > div {
     width: 100%;
 }
 
