@@ -57,6 +57,11 @@ module.exports = {
                     "POST login": "v1.auth.login",
                     "POST renew-token": "v1.auth.refreshToken",
                     "POST verify-token": "v1.auth.verifyToken",
+					"~node/health": "$node.health",
+					"~node/actions": "$node.actions",
+					"~node/list": "$node.list",
+					"~node/services": "$node.services",
+					"~node/options": "$node.options"
                 },
 
                 // Use bodyparser module
