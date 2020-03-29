@@ -11,7 +11,7 @@ module.exports = function httpRequestSetup() {
             return auth.getToken().then(token => {
                 config.headers.Authorization = token;
                 return config;
-            });
+            }).catch(console.error);
         }
         return Promise.resolve(config);
     }, function (err) {

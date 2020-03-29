@@ -112,6 +112,10 @@ export default {
                     switch (currentState) {
                         case "authentication":
                             // Incase could not authenticate
+                            if (err.message == "Network Error") {
+                                this.redirect({ name: "system-error" });
+                                return;
+                            }
                             this.redirect({ name: "login" });
                             break;
 

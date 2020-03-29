@@ -78,11 +78,11 @@ class Socket {
                     token: token
                 }
             });
-    
+
             this.registerEvents();
             this.io.connect();
             return this;
-        });
+        }).catch(console.error);
     }
     /**
      * Register subscriber to inner socket

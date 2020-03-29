@@ -20,6 +20,7 @@ Service.prototype = {
             }
         } catch (error) {
             console.error(error);
+            throw error;
         }
         return null;
     },
@@ -32,6 +33,7 @@ Service.prototype = {
             }
         } catch (error) {
             console.error(error);
+            throw error;
         }
         return null;
     },
