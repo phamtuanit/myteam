@@ -6,9 +6,9 @@
     <!-- Search -->
     <v-sheet
       height="57"
-      class="pa-0 center-y no-border-radius border border-xb"
+      class="pa-0 center-y no-border-radius"
     >
-      <v-list-item class="px-3">
+      <div class="px-3">
         <v-text-field
           v-model="searchText"
           prepend-inner-icon="mdi-magnify"
@@ -22,8 +22,9 @@
           clear-icon="mdi-close"
           @keyup.esc="searchText = ''"
         ></v-text-field>
-      </v-list-item>
+      </div>
     </v-sheet>
+    <v-divider></v-divider>
 
     <!-- Friends -->
     <v-list
