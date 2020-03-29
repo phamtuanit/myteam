@@ -149,7 +149,7 @@ module.exports = {
             const userId = socket.handshake.user.id;
             if (userId) {
                 const event = `message-queue.${userId}.message.confirmed`;
-                this.broker.emit(event, info, ["messages"]);
+                this.broker.emit(event, info, ["messages-queue"]);
             }
         },
     },

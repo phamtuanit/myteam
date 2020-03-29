@@ -18,19 +18,6 @@ module.exports = {
      * Events
      */
     events: {
-        // message-queue.[userId].message.confirmed
-        async "message-queue.*.message.confirmed"(payload, sender, event, ctx) {
-            const [constVar, userId] = event.split(".");
-
-            const queueId = `msg-queue-${userId}`;
-            const dbCollection = await this.getDBCollection(queueId);
-
-            const msg = await dbCollection.findOne({ id: payload.id });
-
-            if (msg) {
-                return await dbCollection.removeById(msg._id);
-            }
-        },
     },
 
     actions: {
@@ -79,7 +66,7 @@ module.exports = {
                 },
             },
             async handler(ctx) {
-                const { conversation, body, to } = ctx.params;
+                const { conversation, body } = ctx.params;
                 const { user } = ctx.meta;
 
                 const message = {
@@ -105,20 +92,6 @@ module.exports = {
                         404
                     );
                 }
-
-                // if (!convInfo) {
-                //     if (!to || typeof to.user != "string") {
-                //         const error = "'to.user' is required incase you want to create new conversation.";
-                //         this.logger.warn(error, to);
-                //         throw new Errors.MoleculerClientError(error)
-                //     }
-
-                //     const conv = {
-                //         subscribers: [user.id, to.user],
-                //         channel: false
-                //     }
-                //     convInfo = await ctx.call("v1.conversations.createConversation", conv);
-                // }
 
                 const newMessage = this.processMessage(message, true);
                 return await this.storeMessage(newMessage, ctx, convInfo);
@@ -204,6 +177,7 @@ module.exports = {
                 // 2. Delete record
                 message.deleted = new Date();
                 await dbCollection.removeById(message._id);
+                cleanDbMark(message);
 
                 // 3. Store information to message queue
                 if (convInfo.subscribers && convInfo.subscribers.length > 0) {
@@ -226,20 +200,10 @@ module.exports = {
                         }
 
                         // Store information to message queue
-                        const queueId = `msg-queue-${userId}`;
-                        this.getDBCollection(queueId)
-                            .then(collection => {
-                                collection
-                                    .insert(cleanDbMark(msgQueue))
-                                    .catch(this.logger.error);
-                            })
-                            .catch(this.logger.error);
-
-                        // Emit event to live user
-                        const eventName = `message-queue.${userId}.message.removed`;
-                        this.broker
-                            .emit(eventName, cleanDbMark(msgQueue))
-                            .catch(this.logger.error);
+                        ctx.call("v1.messages-queue.pushToQueue", {
+                            userId: userId,
+                            message: msgQueue
+                        }).catch(this.logger.error);
                     }
                 }
 
@@ -248,7 +212,7 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${conversationId}.message.removed`;
-                this.broker.emit(eventName, message);
+                this.broker.emit(eventName, message).catch(this.logger.error);
 
                 return message;
             },
@@ -407,18 +371,10 @@ module.exports = {
 
                         try {
                             // Save new information to DB of corresponding user cache
-                            const queueId = `msg-queue-${subscriberId}`;
-                            const msgQueueCollection = await this.getDBCollection(
-                                queueId
-                            );
-                            await msgQueueCollection.insert(
-                                cleanDbMark(msgQueue)
-                            );
-
-                            const eventName = `message-queue.${subscriberId}.message.reacted`;
-                            this.broker
-                                .emit(eventName, msgQueue)
-                                .catch(this.logger.error);
+                            await ctx.call("v1.messages-queue.pushToQueue", {
+                                userId: subscriberId,
+                                message: msgQueue
+                            });
                         } catch (error) {
                             this.logger.warn(
                                 "Could not save message to queue.",
@@ -430,7 +386,7 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${conversationId}.message.updated.reacted`;
-                this.broker.emit(eventName, result);
+                this.broker.emit(eventName, result).catch(this.logger.error);
 
                 return result;
             },
@@ -570,11 +526,11 @@ module.exports = {
 
                     try {
                         // 2.1 Save new information to DB of corresponding user cache
-                        const queueId = `msg-queue-${userId}`;
-                        const msgQueueCollection = await this.getDBCollection(
-                            queueId
-                        );
-                        await msgQueueCollection.insert(cleanDbMark(msgQueue));
+
+                        await ctx.call("v1.messages-queue.pushToQueue", {
+                            userId: userId,
+                            message: msgQueue
+                        });
                     } catch (error) {
                         this.logger.warn(
                             "Could not save message to queue.",
@@ -582,31 +538,11 @@ module.exports = {
                         );
                     }
                 }
-
-                // 3. Send information to WS
-                for (
-                    let index = 0;
-                    index < convInfo.subscribers.length;
-                    index++
-                ) {
-                    const userId = convInfo.subscribers[index];
-                    if (userId == message.from.issuer) {
-                        // Ignore issuer from subscribers
-                        continue;
-                    }
-
-                    // Send information to live-user directly
-                    // If user confirm that they received a message, then the message wil be removed in DB
-                    const eventName = `message-queue.${userId}.message.updated`;
-                    this.broker
-                        .emit(eventName, msgQueue)
-                        .catch(this.logger.error);
-                }
             }
 
             // Broadcast message
             const eventName = `conversation.${conversationId}.message.updated`;
-            this.broker.emit(eventName, updatedEntity);
+            this.broker.emit(eventName, updatedEntity).catch(this.logger.error);
 
             return updatedEntity;
         },
@@ -645,6 +581,7 @@ module.exports = {
             // Insert one more record
             const entity = dbCollection.insert(message);
             cleanDbMark(entity);
+            cleanDbMark(message);
 
             if (convInfo.subscribers && convInfo.subscribers.length > 0) {
                 // 2. Save information to user queue and send message to WS
@@ -661,11 +598,10 @@ module.exports = {
 
                     try {
                         // 2.1 Save new information to DB of corresponding user cache
-                        const queueId = `msg-queue-${userId}`;
-                        const msgQueueCollection = await this.getDBCollection(
-                            queueId
-                        );
-                        await msgQueueCollection.insert(cleanDbMark(msgQueue));
+                        await ctx.call("v1.messages-queue.pushToQueue", {
+                            userId: userId,
+                            message: msgQueue
+                        });
                     } catch (error) {
                         this.logger.warn(
                             "Could not save message to queue.",
@@ -673,31 +609,11 @@ module.exports = {
                         );
                     }
                 }
-
-                // 3. Send message to WS
-                for (
-                    let index = 0;
-                    index < convInfo.subscribers.length;
-                    index++
-                ) {
-                    const userId = convInfo.subscribers[index];
-                    if (userId == message.from.issuer) {
-                        // Ignore issuer from subscribers
-                        continue;
-                    }
-
-                    // Send information to live-user directly
-                    // If user confirm that they received a message, then the message wil be removed in DB
-                    const eventName = `message-queue.${userId}.message.created`;
-                    this.broker
-                        .emit(eventName, msgQueue)
-                        .catch(this.logger.error);
-                }
             }
 
             // Broadcast message
             const eventName = `conversation.${conversationId}.message.created`;
-            this.broker.emit(eventName, entity);
+            this.broker.emit(eventName, entity).catch(this.logger.error);
 
             return entity;
         },
