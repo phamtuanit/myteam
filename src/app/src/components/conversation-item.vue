@@ -33,7 +33,7 @@ export default {
     data: vm => ({
         recentMessage: "",
         messages: vm.conversation.messages,
-        hasNewMessage: true,
+        unreadMessage: vm.conversation.meta.unreadMessage,
     }),
     computed: {
         ...mapState({
@@ -72,16 +72,17 @@ export default {
             // Dummy data
             return {};
         },
+        hasNewMessage() {
+            return this.unreadMessage.length > 0;
+        },
     },
     watch: {
         messages() {
             this.updateRecentMessage();
-            this.checkNewMessage();
         },
     },
     mounted() {
         this.updateRecentMessage();
-        this.checkNewMessage();
     },
     methods: {
         updateRecentMessage() {
@@ -111,17 +112,8 @@ export default {
                 this.conversation.messages.length - 1
             ];
         },
-        checkNewMessage() {
-            if (this.conversation.id == this.activatedChat.id) {
-                this.hasNewMessage = false;
-                return;
-            }
-
-            const recentMsg = this.getRecentMessage();
-            this.hasNewMessage = recentMsg ? !recentMsg.seen : false;
-        },
         onOpenConv() {
-            if (this.conversation.messages) {
+            if (this.conversation.meta.unreadMessage.length > 0) {
                 this.$store
                     .dispatch("chats/watchAllMessage", this.conversation.id)
                     .then(conv => {

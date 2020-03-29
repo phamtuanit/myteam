@@ -45,6 +45,9 @@ const store = new Vuex.Store({
         setAppState(state, appState) {
             state.appState = appState;
         },
+        setMessageQueue(state, queue) {
+            state.messageQueue = queue;
+        },
     },
     actions: {
         async setTheme({ commit }, theme) {
@@ -58,7 +61,7 @@ const store = new Vuex.Store({
 
             const task = appStateMap[state];
             if (task && typeof task == "function") {
-                return task(commit, this);
+                return task.bind(this)(commit, this);
             }
             return Promise.resolve();
         },

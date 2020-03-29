@@ -11,7 +11,7 @@
       dark
       class="pb-2"
     >
-      <v-list-item class="px-3">
+      <div class="px-3">
         <v-text-field
           v-model="searchText"
           prepend-inner-icon="mdi-magnify"
@@ -25,7 +25,7 @@
           clear-icon="mdi-close"
           @keyup.esc="searchText = ''"
         ></v-text-field>
-      </v-list-item>
+      </div>
     </v-list>
 
     <!-- List -->
@@ -106,6 +106,7 @@ export default {
         },
     },
     created() {
+        this.eventBus = window.IoC.get("bus");
         if (this.$route.query._status == "temp") {
             this.$router.updateQuery({});
         } else if (this.$route.query._id) {

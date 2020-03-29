@@ -9,7 +9,7 @@
         <!-- Header -->
         <v-sheet
           height="57"
-          class="pa-0 border border-xb center-y no-border-radius"
+          class="pa-0 center-y no-border-radius"
         >
           <!-- User info -->
           <v-list-item
@@ -35,6 +35,7 @@
                 <v-btn
                   v-on="on"
                   icon
+                  :style="showFrienfList ? 'opacity: 1;' : 'opacity: 0.6;'"
                   @click="showFrienfList = !showFrienfList"
                 >
                   <v-icon
@@ -47,6 +48,7 @@
             </v-tooltip>
           </v-list-item>
         </v-sheet>
+        <v-divider></v-divider>
 
         <!-- Content -->
         <v-sheet
@@ -96,6 +98,7 @@
               clearable
               @keyup.esc="onClearMessage"
               @keyup.enter="onSendMessage"
+              @focus="onRead"
               clear-icon="mdi-close"
             ></v-text-field>
             <v-btn
@@ -212,6 +215,14 @@ export default {
             this.onReact(type, message, false);
         },
         onReply(message) {},
+        onRead() {
+            const conv = this.activatedChat;
+            if (conv && conv.meta.unreadMessage.length > 0) {
+                this.$store
+                    .dispatch("chats/watchAllMessage", conv.id)
+                    .catch(console.error);
+            }
+        },
     },
 };
 </script>

@@ -3,7 +3,7 @@ const Service = function service() {
     this.name = "conversations/";
 };
 
-Service.prototype.getAllByUser = function (userName) {
+Service.prototype.getByUser = function (userName) {
     if (typeof userName == "string" && userName) {
         return Axios.get(this.name + `?user=${userName}`);
     }

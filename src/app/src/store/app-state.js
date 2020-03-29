@@ -1,6 +1,6 @@
 const config = require("../conf/system.json");
-const baseServerAddr =
-    config.env == "production" ? window.location.origin : config.server.address;
+const baseServerAddr = config.env == "production" ? window.location.origin : config.server.address;
+const messageQueueSvr = new (require("../services/message-queue.service.js").default)();
 
 module.exports = {
     startup(commit, store) {
@@ -82,13 +82,21 @@ module.exports = {
                 const socket = new Socket(baseServerAddr, "/chat-io");
                 window.IoC.register("socket", socket);
                 socket.connect().then(() => {
-                    commit("setAppState", "modules-user");
+                    commit("setAppState", "pull-message-queue");
                     resolve();
                 }).catch(reject);
             } catch (error) {
                 reject(error);
             }
         });
+    },
+    async "pull-message-queue"(commit) {
+        console.info("Pull all messages in queue.");
+        const me = this.state.users.me;
+        const messages = (await messageQueueSvr.getAll(me.id)).data;
+
+        commit("setMessageQueue", messages);
+        commit("setAppState", "modules-user");
     },
     "modules-user"(commit, store) {
         return new Promise((resolve, reject) => {
@@ -153,6 +161,7 @@ module.exports = {
     end(commit) {
         commit("setAppState", "finished");
         commit("setInitialization", true);
+        commit("setMessageQueue", []);
         console.info("Setting up application successfully");
     }
 };
