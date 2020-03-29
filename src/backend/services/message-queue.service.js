@@ -21,14 +21,19 @@ module.exports = {
         // message-queue.[userId].message.confirmed
         async "message-queue.*.message.confirmed"(payload, sender, event, ctx) {
             const [constVar, userId] = event.split(".");
-
             const queueId = `msg-queue-${userId}`;
-            const dbCollection = await this.getDBCollection(queueId);
+            try {
+                const dbCollection = await this.getDBCollection(queueId);
 
-            const msg = await dbCollection.findOne({ id: payload.id });
-
-            if (msg) {
-                return await dbCollection.removeById(msg._id).then(cleanDbMark);
+                const filter = {
+                    id: {
+                        $lte: payload.id
+                    }
+                };
+                return await dbCollection.removeMany(filter);
+            } catch (error) {
+                this.logger.error("Could not store message to queue.", error);
+                throw error;
             }
         },
     },
@@ -45,17 +50,23 @@ module.exports = {
             },
             async handler(ctx) {
                 const { userId, id: lastMessageId } = ctx.params;
-                const cmp = "$" + ctx.params.cmp;
 
-                const queueId = `msg-queue-${userId}`;
-                const dbCollection = await this.getDBCollection(queueId);
+                try {
+                    const cmp = "$" + ctx.params.cmp;
 
-                const filter = { id: {} };
-                filter.id[cmp] = lastMessageId || new Date().getTime();
-                return await dbCollection.removeMany(filter);
+                    const queueId = `msg-queue-${userId}`;
+                    const dbCollection = await this.getDBCollection(queueId);
+
+                    const filter = { id: {} };
+                    filter.id[cmp] = lastMessageId || new Date().getTime();
+                    return await dbCollection.removeMany(filter);
+                } catch (error) {
+                    this.logger.error("Could not store message to queue.", error);
+                    throw error;
+                }
             },
         },
-        pullMessage: {
+        pullMessageById: {
             auth: true,
             roles: [1],
             rest: "GET /:userId/messages/:id",
@@ -73,7 +84,7 @@ module.exports = {
                 return await dbCollection.findOne(filter).then(cleanDbMark);
             },
         },
-        pullQueue: {
+        pullMessages: {
             auth: true,
             roles: [1],
             rest: "GET /:userId/messages",
@@ -88,7 +99,7 @@ module.exports = {
                 return await dbCollection.find({}).then(cleanDbMark);
             },
         },
-        pushToQueue: {
+        pushMessageToQueue: {
             auth: true,
             roles: [1],
             rest: "POST /:userId/messages",
@@ -112,17 +123,22 @@ module.exports = {
             async handler(ctx) {
                 const { userId, message } = ctx.params;
 
-                const queueId = `msg-queue-${userId}`;
-                const dbCollection = await this.getDBCollection(queueId);
-                const res = await dbCollection.insert(message).then(cleanDbMark);
+                try {
+                    const queueId = `msg-queue-${userId}`;
+                    const dbCollection = await this.getDBCollection(queueId);
+                    const res = await dbCollection.insert(message).then(cleanDbMark);
 
-                // Emit event to live user
-                const eventName = `message-queue.${userId}.message.${message.action}`;
-                this.broker
-                    .emit(eventName, cleanDbMark(message))
-                    .catch(this.logger.error);
+                    // Emit event to live user
+                    const eventName = `message-queue.${userId}.message.${message.action}`;
+                    this.broker
+                        .emit(eventName, cleanDbMark(message))
+                        .catch(this.logger.error);
 
-                return res;
+                    return res;
+                } catch (error) {
+                    this.logger.error("Could not store message to queue.", error);
+                    throw error;
+                }
             },
         },
     },

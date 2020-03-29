@@ -200,10 +200,15 @@ module.exports = {
                         }
 
                         // Store information to message queue
-                        ctx.call("v1.messages-queue.pushToQueue", {
+                        ctx.call("v1.messages-queue.pushMessageToQueue", {
                             userId: userId,
                             message: msgQueue
-                        }).catch(this.logger.error);
+                        }).catch(error => {
+                            this.logger.warn(
+                                "Could not save message to queue.",
+                                msgQueue, error
+                            );
+                        })
                     }
                 }
 
@@ -369,18 +374,16 @@ module.exports = {
                             continue;
                         }
 
-                        try {
-                            // Save new information to DB of corresponding user cache
-                            await ctx.call("v1.messages-queue.pushToQueue", {
-                                userId: subscriberId,
-                                message: msgQueue
-                            });
-                        } catch (error) {
+                        // Save new information to DB of corresponding user cache
+                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                            userId: subscriberId,
+                            message: msgQueue
+                        }).catch(error => {
                             this.logger.warn(
                                 "Could not save message to queue.",
-                                msgQueue
+                                msgQueue, error
                             );
-                        }
+                        })
                     }
                 }
 
@@ -524,19 +527,16 @@ module.exports = {
                         continue;
                     }
 
-                    try {
-                        // 2.1 Save new information to DB of corresponding user cache
-
-                        await ctx.call("v1.messages-queue.pushToQueue", {
-                            userId: userId,
-                            message: msgQueue
-                        });
-                    } catch (error) {
+                    // 2.1 Save new information to DB of corresponding user cache
+                    ctx.call("v1.messages-queue.pushMessageToQueue", {
+                        userId: userId,
+                        message: msgQueue
+                    }).catch(error => {
                         this.logger.warn(
                             "Could not save message to queue.",
-                            msgQueue
+                            msgQueue, error
                         );
-                    }
+                    })
                 }
             }
 
@@ -596,18 +596,15 @@ module.exports = {
                         continue;
                     }
 
-                    try {
-                        // 2.1 Save new information to DB of corresponding user cache
-                        await ctx.call("v1.messages-queue.pushToQueue", {
-                            userId: userId,
-                            message: msgQueue
-                        });
-                    } catch (error) {
+                    // 2.1 Save new information to DB of corresponding user cache
+                    ctx.call("v1.messages-queue.pushMessageToQueue", {
+                        userId: userId,
+                        message: msgQueue
+                    }).catch(error => {
                         this.logger.warn(
-                            "Could not save message to queue.",
-                            msgQueue
+                            "Could not save message to queue.", msgQueue, error
                         );
-                    }
+                    })
                 }
             }
 
