@@ -56,15 +56,9 @@ module.exports = {
                 // query by given user
                 if (user) {
                     const users = user.split(",");
-                    if (users.length > 0) {
-                        filter.query.id = {
-                            $in: users,
-                        };
-                    } else {
-                        filter.query.id = {
-                            $in: user,
-                        };
-                    }
+                    filter.query.id = {
+                        $in: users,
+                    };
                 }
 
                 // Text search
