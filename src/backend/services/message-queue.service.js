@@ -40,16 +40,18 @@ module.exports = {
     },
 
     actions: {
-        cleanQueue: {
+        confirmMessage: {
             auth: true,
             roles: [1],
             rest: "PUT /:userId/messages",
             params: {
                 userId: "string",
-                id: "string"
+                id: { type: "string", optional: true },
+                payloadId: { type: "string", optional: true }
             },
             async handler(ctx) {
                 const { userId, id } = ctx.params;
+                const payloadId = ctx.params["payload-id"] || ctx.params.payloadId;
 
                 this.verifyUser(ctx, userId);
 
@@ -57,16 +59,28 @@ module.exports = {
 
                 if (id) {
                     let ids = id.split(",");
-                    ids = ids.map(parseInt);
+                    ids = ids.map(s => new Number(s).valueOf());
                     filter.id = {
                         $in: ids,
                     };
                 }
 
+                if (payloadId) {
+                    let payloadIds = payloadId.split(",");
+                    payloadIds = payloadIds.map(s => new Number(s).valueOf());
+                    filter["payload.id"] = {
+                        $in: payloadIds,
+                    };
+                }
+
+                if (!id && !payloadId) {
+                    throw new Errors.MoleculerClientError("id or payload id is required.", 400);
+                }
+
                 try {
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
-                    // return await dbCollection.removeMany(filter);
+                    return await dbCollection.removeMany(filter);
                 } catch (error) {
                     this.logger.error("Could not store message to queue.", error);
                     throw error;
