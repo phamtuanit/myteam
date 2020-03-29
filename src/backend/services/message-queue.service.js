@@ -21,8 +21,9 @@ module.exports = {
         // message-queue.[userId].message.confirmed
         async "message-queue.*.message.confirmed"(payload, sender, event, ctx) {
             const [constVar, userId] = event.split(".");
-            const queueId = `msg-queue-${userId}`;
+
             try {
+                const queueId = `msg-queue-${userId}`;
                 const dbCollection = await this.getDBCollection(queueId);
 
                 const filter = {
@@ -42,24 +43,30 @@ module.exports = {
         cleanQueue: {
             auth: true,
             roles: [1],
-            rest: "DELETE /:userId/messages/:id",
+            rest: "PUT /:userId/messages",
             params: {
                 userId: "string",
-                id: { type: "number", convert: true },
-                cmp: { type: "string", optional: true, convert: true, default: "lte" },
+                id: "string"
             },
             async handler(ctx) {
-                const { userId, id: lastMessageId } = ctx.params;
+                const { userId, id } = ctx.params;
+
+                this.verifyUser(ctx, userId);
+
+                const filter = {};
+
+                if (id) {
+                    let ids = id.split(",");
+                    ids = ids.map(parseInt);
+                    filter.id = {
+                        $in: ids,
+                    };
+                }
 
                 try {
-                    const cmp = "$" + ctx.params.cmp;
-
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
-
-                    const filter = { id: {} };
-                    filter.id[cmp] = lastMessageId || new Date().getTime();
-                    return await dbCollection.removeMany(filter);
+                    // return await dbCollection.removeMany(filter);
                 } catch (error) {
                     this.logger.error("Could not store message to queue.", error);
                     throw error;
@@ -77,6 +84,8 @@ module.exports = {
             async handler(ctx) {
                 const { userId, id } = ctx.params;
 
+                this.verifyUser(ctx, userId);
+
                 const queueId = `msg-queue-${userId}`;
                 const dbCollection = await this.getDBCollection(queueId);
 
@@ -93,6 +102,8 @@ module.exports = {
             },
             async handler(ctx) {
                 const { userId } = ctx.params;
+
+                this.verifyUser(ctx, userId);
 
                 const queueId = `msg-queue-${userId}`;
                 const dbCollection = await this.getDBCollection(queueId);
@@ -123,6 +134,8 @@ module.exports = {
             async handler(ctx) {
                 const { userId, message } = ctx.params;
 
+                this.verifyUser(ctx, userId);
+
                 try {
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
@@ -147,6 +160,12 @@ module.exports = {
      * Methods
      */
     methods: {
+        verifyUser(ctx, userId) {
+            const { user } = ctx.meta;
+            if (user.id != userId) {
+                throw new Errors.MoleculerClientError("It is not your queue.", 401);
+            }
+        }
     },
 
     /**
