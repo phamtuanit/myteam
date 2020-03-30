@@ -1,128 +1,121 @@
 <template>
-  <div class="fill-height">
-    <v-row
-      class="chat-box"
-      no-gutters
+    <div :id="`conversation-content-${conversation.id || conversation._id}`"
     >
-      <!-- Main content -->
-      <v-col @click="onRead">
-        <!-- Header -->
-        <v-sheet
-          height="57"
-          class="pa-0 center-y no-border-radius"
-        >
-          <!-- User info -->
-          <v-list-item
-            class="px-4 ma-0"
-            v-if="activatedChat"
-          >
-            <Avatar
-              :user-name="destUser.fullName"
-              :src="destUser.avatar"
-              :size="30"
-              class="ml-2"
-            ></Avatar>
-            <!-- User name -->
-            <v-list-item-title
-              class="title ml-3"
-              v-text="destUser.fullName"
-            ></v-list-item-title>
+        <v-row class="chat-box" no-gutters>
+            <!-- Main content -->
+            <v-col @click="onRead">
+                <!-- Header -->
+                <v-sheet height="57" class="pa-0 center-y no-border-radius">
+                    <!-- User info -->
+                    <v-list-item class="px-4 ma-0">
+                        <Avatar
+                            :user-name="destUser.fullName"
+                            :src="destUser.avatar"
+                            :size="30"
+                            class="ml-2"
+                        ></Avatar>
+                        <!-- User name -->
+                        <v-list-item-title
+                            class="title ml-3"
+                            v-text="destUser.fullName"
+                        ></v-list-item-title>
 
-            <v-spacer></v-spacer>
-            <!-- Friends list -->
-            <v-tooltip left>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  v-on="on"
-                  icon
-                  :style="showFrienfList ? 'opacity: 1;' : 'opacity: 0.6;'"
-                  @click="showFrienfList = !showFrienfList"
+                        <v-spacer></v-spacer>
+                        <!-- Friends list -->
+                        <v-tooltip left>
+                            <template v-slot:activator="{ on }">
+                                <v-btn
+                                    v-on="on"
+                                    icon
+                                    :style="
+                                        showFrienfList
+                                            ? 'opacity: 1;'
+                                            : 'opacity: 0.6;'
+                                    "
+                                    @click="showFrienfList = !showFrienfList"
+                                >
+                                    <v-icon
+                                        :color="showFrienfList ? 'orange' : ''"
+                                        v-text="
+                                            showFrienfList
+                                                ? 'mdi-account-supervisor'
+                                                : 'mdi-account-search'
+                                        "
+                                    ></v-icon>
+                                </v-btn>
+                            </template>
+                            <span>Friend list</span>
+                        </v-tooltip>
+                    </v-list-item>
+                </v-sheet>
+                <v-divider></v-divider>
+
+                <!-- Content -->
+                <v-sheet
+                    class="overflow-y-auto message-sheet no-border-radius"
+                    v-chat-scroll="{ always: false, smooth: true }"
                 >
-                  <v-icon
-                    :color="showFrienfList ? 'orange' : ''"
-                    v-text="showFrienfList ? 'mdi-account-supervisor' : 'mdi-account-search'"
-                  ></v-icon>
-                </v-btn>
-              </template>
-              <span>Friend list</span>
-            </v-tooltip>
-          </v-list-item>
-        </v-sheet>
-        <v-divider></v-divider>
+                    <!-- MineMessage -->
+                    <v-slide-y-transition group>
+                        <template v-for="(msg, index) in messages">
+                            <MyMessage
+                                v-if="msg._isMe == true"
+                                :key="msg.id"
+                                :index="index"
+                                :message="msg"
+                                class="mt-5"
+                                @delete="onDeleteMyMessage"
+                            ></MyMessage>
+                            <YourMessage
+                                v-else
+                                :user="destUser"
+                                :key="msg.id"
+                                :index="index"
+                                :message="msg"
+                                class="mt-5"
+                                @react="onReact"
+                                @dereact="onDereact"
+                                @reply="onReply"
+                            ></YourMessage>
+                        </template>
+                    </v-slide-y-transition>
+                </v-sheet>
 
-        <!-- Content -->
-        <v-sheet
-          class="overflow-y-auto message-sheet no-border-radius"
-          v-chat-scroll="{ always: false, smooth: true }"
-        >
-          <!-- MineMessage -->
-          <v-slide-y-transition group>
-            <template v-for="(msg, index) in messages">
-              <MyMessage
-                v-if="msg._isMe == true"
-                :key="msg.id"
-                :index="index"
-                :message="msg"
-                class="mt-5"
-                @delete="onDeleteMyMessage"
-              ></MyMessage>
-              <YourMessage
-                v-else
-                :user="destUser"
-                :key="msg.id"
-                :index="index"
-                :message="msg"
-                class="mt-5"
-                @react="onReact"
-                @dereact="onDereact"
-                @reply="onReply"
-              ></YourMessage>
-            </template>
-          </v-slide-y-transition>
-        </v-sheet>
-
-        <!-- Input box -->
-        <v-list
-          height="48"
-          v-show="activatedChat"
-          class="py-0 no-border-radius"
-        >
-          <v-list-item class="px-0 px-2">
-            <EmojiButton @select="onSelectEmoji"></EmojiButton>
-            <v-text-field
-              flat
-              class="no-border-radius"
-              v-model="newMessage"
-              hide-details
-              solo
-              clearable
-              @keyup.esc="onClearMessage"
-              @keyup.enter="onSendMessage"
-              @focus="onRead"
-              clear-icon="mdi-close"
-            ></v-text-field>
-            <v-btn
-              icon
-              class="send-btn"
-              :disabled="!newMessage"
-              @click="onSendMessage"
-            >
-              <v-icon>mdi-send</v-icon>
-            </v-btn>
-          </v-list-item>
-        </v-list>
-      </v-col>
-      <!-- Frieng list -->
-      <v-expand-x-transition>
-        <v-col
-          cols="auto"
-          v-if="showFrienfList || !activatedChat"
-        >
-          <FriendList></FriendList>
-        </v-col>
-      </v-expand-x-transition>
-    </v-row>
-  </div>
+                <!-- Input box -->
+                <v-list height="48" class="py-0 no-border-radius">
+                    <v-list-item class="px-0 px-2">
+                        <EmojiButton @select="onSelectEmoji"></EmojiButton>
+                        <v-text-field
+                            flat
+                            class="no-border-radius"
+                            v-model="newMessage"
+                            hide-details
+                            solo
+                            clearable
+                            @keyup.esc="onClearMessage"
+                            @keyup.enter="onSendMessage"
+                            @focus="onRead"
+                            clear-icon="mdi-close"
+                        ></v-text-field>
+                        <v-btn
+                            icon
+                            class="send-btn"
+                            :disabled="!newMessage"
+                            @click="onSendMessage"
+                        >
+                            <v-icon>mdi-send</v-icon>
+                        </v-btn>
+                    </v-list-item>
+                </v-list>
+            </v-col>
+            <!-- Frieng list -->
+            <v-expand-x-transition>
+                <v-col cols="auto" v-if="showFrienfList">
+                    <FriendList></FriendList>
+                </v-col>
+            </v-expand-x-transition>
+        </v-row>
+    </div>
 </template>
 
 <script>
@@ -137,21 +130,20 @@ import Avatar from "../../components/avatar";
 import { mapState } from "vuex";
 export default {
     components: { FriendList, EmojiButton, MyMessage, YourMessage, Avatar },
-    data() {
+    props: {
+        conversation: Object,
+    },
+    data(vm) {
         return {
             theme: this.$vuetify.theme,
             newMessage: "",
-            messages: [],
             showFrienfList: true,
         };
     },
     computed: {
-        ...mapState({
-            activatedChat: state => state.chats.active,
-        }),
         destUser() {
-            if (this.activatedChat) {
-                const subscribers = this.activatedChat.subscribers.filter(
+            if (this.conversation) {
+                const subscribers = this.conversation.subscribers.filter(
                     user => !user._isMe
                 );
                 if (subscribers.length > 0) {
@@ -160,21 +152,24 @@ export default {
             }
             return {};
         },
-    },
-    watch: {
-        activatedChat() {
-            this.chatId = this.activatedChat._id || this.activatedChat.id;
-            this.messages = this.activatedChat.messages;
+        messages() {
+            return this.conversation.messages || [];
         },
     },
     created() {
-        if (this.activatedChat) {
-            this.chatId = this.activatedChat._id || this.activatedChat.id;
-            this.messages = this.activatedChat.messages;
-        }
+        this.chatId = this.conversation._id || this.conversation.id;
+    },
+    activated() {
+        setTimeout(() => {
+            // Waiting for component fully mounted
+            fillHeight("message-sheet", 48, this.$el);
+        }, 100);
     },
     mounted() {
-        fillHeight("message-sheet", 48, this.$el);
+        setTimeout(() => {
+            // Waiting for component fully mounted
+            fillHeight("message-sheet", 48, this.$el);
+        }, 100);
     },
     methods: {
         onClearMessage() {
@@ -186,7 +181,7 @@ export default {
             }
         },
         onSendMessage() {
-            this.chatId = this.activatedChat._id || this.activatedChat.id;
+            this.chatId = this.conversation._id || this.conversation.id;
             // Send message
             const msg = {
                 chatId: this.chatId,
@@ -216,7 +211,7 @@ export default {
         },
         onReply(message) {},
         onRead() {
-            const conv = this.activatedChat;
+            const conv = this.conversation;
             if (conv && conv.meta.unreadMessage.length > 0) {
                 this.$store
                     .dispatch("chats/watchAllMessage", conv.id)
