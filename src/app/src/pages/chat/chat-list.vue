@@ -25,11 +25,11 @@
         </v-list>
 
         <!-- List -->
-        <v-list two-line dark height="200" class="py-0 px-0">
+        <v-list two-line dark class="py-0 px-0">
             <v-subheader class="pl-3 pr-2 selection-disabled"
                 >Conversations</v-subheader
             >
-            <v-layout class="conversation-list" style="overflow-y: auto;">
+            <div class="conversation-list" style="overflow-y: auto;">
                 <!-- Chat list -->
                 <v-list-item-group v-model="activatedChat" mandatory>
                     <!-- <v-slide-y-transition group> -->
@@ -43,7 +43,7 @@
                     </v-list-item>
                     <!-- </v-slide-y-transition> -->
                 </v-list-item-group>
-            </v-layout>
+            </div>
         </v-list>
     </v-sheet>
 </template>
@@ -121,22 +121,20 @@ export default {
 
         // Update url query
         if (!this.$route.query._id && this.activatedChat) {
+            const currentId = this.activatedChat.id || this.activatedChat._id;
             const newQuery = { ...this.$route.query };
-            newQuery._id = this.activatedChat.id;
+            newQuery._id = currentId;
             this.$router.updateQuery(newQuery);
         }
     },
     methods: {
         onSelect(chat) {
-            if (
-                this.activatedChat.id == chat.id ||
-                this.activatedChat._id == chat._id
-            ) {
+            if ( (chat.id && this.activatedChat.id == chat.id) || this.activatedChat._id == chat._id) {
                 return;
             }
 
             // Incase user re-open existing chat
-            this.$store.dispatch("chats/activeChat", chat.id);
+            this.$store.dispatch("chats/activeChat", chat.id || chat._id);
         },
         updateUrlQuery() {
             if (this.activatedChat) {

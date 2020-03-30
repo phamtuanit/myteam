@@ -1,6 +1,5 @@
 <template>
-    <div :id="`conversation-content-${conversation.id || conversation._id}`"
-    >
+    <div>
         <v-row class="chat-box" no-gutters>
             <!-- Main content -->
             <v-col @click="onRead">
@@ -108,12 +107,6 @@
                     </v-list-item>
                 </v-list>
             </v-col>
-            <!-- Frieng list -->
-            <v-expand-x-transition>
-                <v-col cols="auto" v-if="showFrienfList">
-                    <FriendList></FriendList>
-                </v-col>
-            </v-expand-x-transition>
         </v-row>
     </div>
 </template>
@@ -127,13 +120,12 @@ import MyMessage from "./my-message";
 import YourMessage from "./your-message";
 import Avatar from "../../components/avatar";
 
-import { mapState } from "vuex";
 export default {
     components: { FriendList, EmojiButton, MyMessage, YourMessage, Avatar },
     props: {
         conversation: Object,
     },
-    data(vm) {
+    data() {
         return {
             theme: this.$vuetify.theme,
             newMessage: "",
@@ -156,7 +148,13 @@ export default {
             return this.conversation.messages || [];
         },
     },
+    watch: {
+        showFrienfList(val) {
+            this.$emit("show-friend-list", val);
+        },
+    },
     created() {
+        this.bus = window.IoC.get("bus");
         this.chatId = this.conversation._id || this.conversation.id;
     },
     mounted() {
@@ -216,11 +214,7 @@ export default {
 <style lang="css" scoped>
 /* Messages */
 .chat-box >>> .message-sheet {
-    background: rgb(243, 242, 241);
-}
-
-.chat-box >>> .message-sheet.theme--dark {
-    background: #121212;
+    background: transparent;
 }
 
 .chat-box >>> .theme--light.v-btn.v-btn--icon {

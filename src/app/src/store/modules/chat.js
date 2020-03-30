@@ -3,7 +3,7 @@ const convService = new (require("../../services/conversation.service").default)
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
 let eventBus = null;
 
-function pushInfirmation(count) {
+function pushInformation(count) {
     if (count <= 0) {
         return;
     }
@@ -21,7 +21,7 @@ function informNewMessage(message) {
         return;
     }
 
-    pushInfirmation(1);
+    pushInformation(1);
 }
 
 const moduleState = {
@@ -52,6 +52,7 @@ const moduleState = {
             if (!chat.messages) {
                 chat.messages = [];
             }
+
             if (!chat.meta) {
                 chat.meta = {
                     unreadMessage: [],
@@ -279,21 +280,23 @@ const moduleState = {
                 id: null,
                 channel: false,
                 subscribers: [user, me],
+                meta: {
+                    unreadMessage: [],
+                },
                 messages: [],
-                recent: null,
                 _id: new Date().getTime(),
                 _isTemp: true,
             };
-            commit("setActivate", convInfo);
             commit("addChat", convInfo);
+            commit("setActivate", convInfo);
             return convInfo;
         },
         activeChat({ commit, state }, id) {
-            if (state.active && state.active.id == id) {
+            if (state.active && (state.active.id && state.active.id == id)) {
                 return state.active;
             }
 
-            const chat = state.all.find(i => i.id == id);
+            const chat = state.all.find(i => (i.id || i._id) == id);
             if (chat) {
                 commit("setActivate", chat);
                 return chat;

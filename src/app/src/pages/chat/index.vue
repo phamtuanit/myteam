@@ -1,68 +1,105 @@
 <template>
-    <v-row class="fill-height" no-gutters>
+    <v-row class="fill-height couple-conversation" no-gutters>
+        <!-- Conversation list -->
         <v-col cols="auto">
             <ChatList></ChatList>
         </v-col>
         <v-col>
-            <v-tabs-items v-model="activatedConv" class="conversation-group">
+            <!-- Fake header -->
+            <div v-if="!currentConvId">
+                <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
+                <v-divider></v-divider>
+            </div>
+
+            <!-- Conversation content -->
+            <v-tabs-items v-model="currentConvId" class="conversation-group">
                 <v-tab-item
                     v-for="conv in conversations"
-                    :key="conv.id || conv._id"
-                    :value="conv.id || conv._id"
+                    :key="conv.id"
+                    :value="conv.id"
                     :transition="false"
                     :reverse-transition="false"
                 >
-                    <ChatContent :conversation="conv"></ChatContent>
+                    <ChatContent
+                        :conversation="conv.value"
+                        @show-friend-list="
+                            displayFriendList = !displayFriendList
+                        "
+                    ></ChatContent>
                 </v-tab-item>
             </v-tabs-items>
         </v-col>
+
+        <!-- Friend list -->
+        <v-expand-x-transition>
+            <v-col cols="auto" v-if="displayFriendList">
+                <FriendList></FriendList>
+            </v-col>
+        </v-expand-x-transition>
     </v-row>
 </template>
 
 <script>
 import ChatList from "./chat-list";
 import ChatContent from "./content.vue";
+import FriendList from "./friend-list";
 
 import { fillHeight } from "../../utils/layout.js";
 import { mapState } from "vuex";
 export default {
-    components: { ChatList, ChatContent },
+    components: { ChatList, ChatContent, FriendList },
     data() {
         return {
-            activatedConv: null,
+            displayFriendList: true,
+            currentConvId: null,
             conversations: [],
         };
     },
     computed: {
         ...mapState({
-            activatedChat: state => state.chats.active,
+            activatedConv: state => state.chats.active,
         }),
     },
     watch: {
-        activatedChat() {
-            if (this.activatedChat) {
-                const activatedConvId =
-                    this.activatedChat.id || this.activatedChat._id;
-                const existingConv = this.conversations.find(
-                    con => (con.id || con._id) == activatedConvId
-                );
-                if (existingConv) {
-                    this.activatedConv = existingConv.id || existingConv._id;
-                } else {
-                    this.conversations.push(this.activatedChat);
-                    this.activatedConv = activatedConvId;
-                }
-            } else {
-                this.activatedConv = null;
-            }
+        activatedConv() {
+            this.updateData();
         },
     },
-    created() {},
+    created() {
+        this.updateData();
+    },
     mounted() {
-        fillHeight("conversation-group", 0, this.$el);
+        fillHeight("conversation-group", 1, this.$el);
+    },
+    methods: {
+        updateData() {
+            if (this.activatedConv) {
+                const convId = this.activatedConv.id || this.activatedConv._id;
+                let existingConv = this.conversations.find(
+                    con => (con.value.id || con.value._id) == convId
+                );
+
+                if (!existingConv) {
+                    existingConv = {
+                        id: new Date().getTime(),
+                        value: this.activatedConv,
+                    };
+                    this.conversations.push(existingConv);
+                }
+
+                this.currentConvId = existingConv.id;
+            }
+        },
     },
 };
 </script>
 
-<style>
+<style scoped>
+.couple-conversation >>> .conversation-group {
+    background: rgb(243, 242, 241);
+}
+
+.couple-conversation >>> .conversation-group.theme--dark {
+    background: #121212;
+}
 </style>

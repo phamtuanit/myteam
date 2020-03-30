@@ -1,79 +1,65 @@
 <template>
-  <div
-    id="friend-list"
-    class="pa-0 fill-height"
-  >
-    <!-- Search -->
-    <v-sheet
-      height="57"
-      class="pa-0 center-y no-border-radius"
-    >
-      <div class="px-3">
-        <v-text-field
-          v-model="searchText"
-          prepend-inner-icon="mdi-magnify"
-          label="Friend"
-          flat
-          name="search-friend"
-          solo-inverted
-          rounded
-          hide-details
-          clearable
-          clear-icon="mdi-close"
-          @keyup.esc="searchText = ''"
-        ></v-text-field>
-      </div>
-    </v-sheet>
-    <v-divider></v-divider>
+    <div id="friend-list" class="pa-0 fill-height">
+        <!-- Search -->
+        <v-sheet height="57" class="pa-0 center-y no-border-radius">
+            <div class="px-3">
+                <v-text-field
+                    v-model="searchText"
+                    prepend-inner-icon="mdi-magnify"
+                    label="Friend"
+                    flat
+                    name="search-friend"
+                    solo-inverted
+                    rounded
+                    hide-details
+                    clearable
+                    clear-icon="mdi-close"
+                    @keyup.esc="searchText = ''"
+                ></v-text-field>
+            </div>
+        </v-sheet>
+        <v-divider></v-divider>
 
-    <!-- Friends -->
-    <v-list
-      two-line
-      class="py-0 px-0"
-    >
+        <!-- Friends -->
+        <v-list two-line class="py-0 px-0">
+            <v-progress-linear
+                :active="loading"
+                :indeterminate="true"
+            ></v-progress-linear>
 
-      <v-progress-linear
-        :active="loading"
-        :indeterminate="true"
-      ></v-progress-linear>
+            <v-layout class="friend-list-layout" style="overflow-y: auto;">
+                <!-- List -->
+                <v-slide-y-transition group tag="div">
+                    <template v-for="user in friendList">
+                        <v-list-item
+                            :key="user.id"
+                            v-if="!user._isMe"
+                            @click="onAddChat(user)"
+                        >
+                            <UserAvatar
+                                :user-name="user.fullName"
+                                :user="user"
+                                online-effect
+                            />
 
-      <v-layout
-        class="friend-list-layout"
-        style="overflow-y: auto;"
-      >
-        <!-- List -->
-        <v-slide-y-transition
-          group
-          tag="div"
-        >
-          <template v-for="user in friendList">
-            <v-list-item
-              :key="user.id"
-              v-if="!user._isMe"
-              @click="onAddChat(user)"
-            >
-              <UserAvatar
-                :user-name="me.fullName"
-                :user="user"
-                online-effect
-              />
-
-              <v-list-item-content class="py-2 pl-3 pr-2">
-                <v-list-item-title
-                  class="body-2"
-                  v-text="getDisplayName(user)"
-                ></v-list-item-title>
-                <v-list-item-subtitle
-                  v-if="user.phone"
-                  class="caption"
-                >&#128222; {{user.phone}}</v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-        </v-slide-y-transition>
-      </v-layout>
-    </v-list>
-  </div>
+                            <v-list-item-content class="py-2 pl-3 pr-2">
+                                <v-list-item-title
+                                    class="body-2"
+                                    v-text="getDisplayName(user)"
+                                ></v-list-item-title>
+                                <v-list-item-subtitle
+                                    v-if="user.phone"
+                                    class="caption"
+                                    >&#128222;
+                                    {{ user.phone }}</v-list-item-subtitle
+                                >
+                            </v-list-item-content>
+                        </v-list-item>
+                    </template>
+                </v-slide-y-transition>
+            </v-layout>
+        </v-list>
+    </div>
 </template>
 
 <script>
@@ -91,7 +77,6 @@ export default {
     },
     computed: {
         ...mapState({
-            me: state => state.users.me,
             cachedUsers: state => state.users.all,
         }),
     },
