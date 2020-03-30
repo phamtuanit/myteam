@@ -101,7 +101,7 @@ export default {
         },
     },
     mounted() {
-        fillHeight("friend-list", 0, this.$el);
+        fillHeight("friend-list-layout", 0, this.$el);
         this.searchLocker = Promise.resolve();
         this.friendList = this.cachedUsers;
     },
