@@ -12,7 +12,7 @@
         <v-text-field
           v-model="searchText"
           prepend-inner-icon="mdi-magnify"
-          label="Search"
+          label="Friend"
           flat
           name="search-friend"
           solo-inverted

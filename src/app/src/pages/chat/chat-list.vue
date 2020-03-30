@@ -15,7 +15,7 @@
         <v-text-field
           v-model="searchText"
           prepend-inner-icon="mdi-magnify"
-          label="Search"
+          label="Conversation"
           name="search-chat"
           flat
           solo-inverted
