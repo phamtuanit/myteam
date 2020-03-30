@@ -12,7 +12,7 @@ Service.prototype.get = function(convId, filter = {}) {
             return null;
         });
 
-        queries.unshift(`?conversation=${convId}`);
+        queries.unshift(`?conversation=${convId}&limit=50`);
         const queryStr = queries.join("&");
         console.info(`Getting message in [${convId}]`);
         return Axios.get(this.name + queryStr);
