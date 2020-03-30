@@ -159,17 +159,8 @@ export default {
     created() {
         this.chatId = this.conversation._id || this.conversation.id;
     },
-    activated() {
-        setTimeout(() => {
-            // Waiting for component fully mounted
-            fillHeight("message-sheet", 48, this.$el);
-        }, 100);
-    },
     mounted() {
-        setTimeout(() => {
-            // Waiting for component fully mounted
-            fillHeight("message-sheet", 48, this.$el);
-        }, 100);
+        setTimeout(fillHeight.bind(this, "message-sheet", 48, this.$el), 400);
     },
     methods: {
         onClearMessage() {

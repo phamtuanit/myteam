@@ -9,7 +9,8 @@
                     v-for="conv in conversations"
                     :key="conv.id || conv._id"
                     :value="conv.id || conv._id"
-                    transition="fade-transition"
+                    :transition="false"
+                    :reverse-transition="false"
                 >
                     <ChatContent :conversation="conv"></ChatContent>
                 </v-tab-item>
