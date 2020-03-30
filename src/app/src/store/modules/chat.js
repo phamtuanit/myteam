@@ -55,7 +55,7 @@ const moduleState = {
             if (!chat.meta) {
                 chat.meta = {
                     unreadMessage: [],
-                }
+                };
             }
             state.all.push(chat);
         },
@@ -69,8 +69,8 @@ const moduleState = {
             if (!message || typeof chatId != "number") {
                 return;
             }
-            const chat = state.all.find(c => c.id == chatId);
-            if (chat) {
+            const conv = state.all.find(c => c.id == chatId);
+            if (conv) {
                 message.status = null;
 
                 // Incase has chat in cache
@@ -79,15 +79,23 @@ const moduleState = {
                     message._isMe = message.from.issuer == me.id;
                 }
 
-                if (!chat.messages) {
-                    chat.messages = [message];
+                const pushToUnread = function (message) {
+                    if (!message._isMe) {
+                        conv.meta.unreadMessage.push(message);
+                    }
+                }
+
+                if (!conv.messages) {
+                    conv.messages = [message];
+                    pushToUnread(message);
                     informNewMessage(message);
                 } else {
-                    const foundMessage = chat.messages.find(
+                    const foundMessage = conv.messages.find(
                         i => i.id == message.id
                     );
                     if (!foundMessage) {
-                        chat.messages.push(message);
+                        conv.messages.push(message);
+                        pushToUnread(message);
                         informNewMessage(message);
                     } else {
                         Object.assign(foundMessage, message);
@@ -189,7 +197,10 @@ const moduleState = {
                     const conv = convList[index];
 
                     // Load conversation content
-                    const content = await this.dispatch("chats/getConversationContent", conv.id);
+                    const content = await this.dispatch(
+                        "chats/getConversationContent",
+                        conv.id
+                    );
                     conv.meta = {
                         unreadMessage: [],
                     };
@@ -218,9 +229,13 @@ const moduleState = {
                             {
                                 const conv = convList.find(c => c.id == convId);
                                 if (conv) {
-                                    const existingMsg = conv.messages.find(m => m.id == msgId);
+                                    const existingMsg = conv.messages.find(
+                                        m => m.id == msgId
+                                    );
                                     if (existingMsg) {
-                                        conv.meta.unreadMessage.push(existingMsg);
+                                        conv.meta.unreadMessage.push(
+                                            existingMsg
+                                        );
                                     } else {
                                         confirmedMsqIds.push(message.id);
                                     }
@@ -375,19 +390,26 @@ const moduleState = {
                     case "created":
                         if (!data.payload || !data.payload) {
                             break;
-                        }
-
-                        {
+                        } else {
                             const existingConv = state.all.find(conv => {
                                 if (conv.id == chatId) {
                                     return true;
                                 }
 
                                 if (conv.channel == false) {
-                                    if (conv.subscribers && conv.subscribers.length == 2) {
-                                        const matchedSub = conv.subscribers.filter(sub => {
-                                            return sub.id == me.id || sub.id == message.from.issuer;
-                                        });
+                                    if (
+                                        conv.subscribers &&
+                                        conv.subscribers.length == 2
+                                    ) {
+                                        const matchedSub = conv.subscribers.filter(
+                                            sub => {
+                                                return (
+                                                    sub.id == me.id ||
+                                                    sub.id ==
+                                                        message.from.issuer
+                                                );
+                                            }
+                                        );
 
                                         return matchedSub.length == 2;
                                     }
@@ -395,6 +417,7 @@ const moduleState = {
                                 return false;
                             });
 
+                            // Change temp conversation to rea;
                             if (existingConv && existingConv._isTemp == true) {
                                 existingConv.id = chatId;
                                 delete existingConv._id;
@@ -402,7 +425,10 @@ const moduleState = {
                             }
 
                             if (existingConv) {
-                                commit("addMessage", { chatId: existingConv.id, message });
+                                commit("addMessage", {
+                                    chatId: existingConv.id,
+                                    message,
+                                });
                             } else {
                                 // Incase no chat in cache.
                                 this.dispatch("chats/loadChat", chatId)
@@ -484,7 +510,10 @@ const moduleState = {
                 const me = rootState.users.me;
                 const msgIds = conv.meta.unreadMessage.map(m => m.id);
                 // Send request to server to delete unread-message
-                const deletedCount = await messageQueueSvr.confirmPayload(me.id, msgIds);
+                const deletedCount = await messageQueueSvr.confirmPayload(
+                    me.id,
+                    msgIds
+                );
 
                 commit("watchAllMessage", convId);
                 return deletedCount;

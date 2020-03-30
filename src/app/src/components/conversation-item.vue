@@ -116,9 +116,6 @@ export default {
             if (this.conversation.meta.unreadMessage.length > 0) {
                 this.$store
                     .dispatch("chats/watchAllMessage", this.conversation.id)
-                    .then(conv => {
-                        this.hasNewMessage = conv != null && conv != undefined;
-                    })
                     .catch(console.error);
             }
         },

@@ -148,8 +148,6 @@ module.exports = {
             async handler(ctx) {
                 const { userId, message } = ctx.params;
 
-                this.verifyUser(ctx, userId);
-
                 try {
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
