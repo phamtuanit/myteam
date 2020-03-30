@@ -120,11 +120,13 @@ const moduleState = {
         findUser({ commit }, text) {
             return service.search(text).then(res => {
                 const users = res.data;
+                
                 const meId = this.state.users.me.id;
-                const me = users.find(u => u.id == meId);
-                if (me) {
-                    me._isMe = true;
-                }
+                const meList = users.filter(u => u.id == meId);
+
+                meList.forEach(u => {
+                    u._isMe = true;
+                });
 
                 if (users.length > 0) {
                     commit("cache", users);
