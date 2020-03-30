@@ -5,7 +5,7 @@
       no-gutters
     >
       <!-- Main content -->
-      <v-col>
+      <v-col @click="onRead">
         <!-- Header -->
         <v-sheet
           height="57"
