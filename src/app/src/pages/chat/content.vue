@@ -1,7 +1,7 @@
 <template>
     <div class="chat-box d-flex flex-column">
         <!-- Header -->
-        <v-sheet min-height="57" height="57" class="pa-0 center-y no-border-radius flex-grow-0">
+        <v-sheet height="57" class="pa-0 center-y no-border-radius flex-grow-0">
             <!-- User info -->
             <v-list-item class="px-4 ma-0">
                 <Avatar

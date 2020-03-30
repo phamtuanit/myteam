@@ -1,10 +1,10 @@
 <template>
-    <v-row class="fill-height couple-conversation" no-gutters>
+    <div class="fill-width fill-height d-flex couple-conversation" :class="{'theme--dark': $vuetify.theme.isDark}"  no-gutters>
         <!-- Conversation list -->
-        <v-col cols="auto">
-            <ChatList></ChatList>
-        </v-col>
-        <v-col class="d-flex flex-column">
+        <ChatList></ChatList>
+        
+            <!-- Conversation content container -->
+        <div class="flex-grow-1">
             <!-- Fake header -->
             <div v-if="!currentConvId">
                 <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
@@ -12,7 +12,7 @@
             </div>
 
             <!-- Conversation content -->
-            <v-tabs-items v-model="currentConvId" class="conversation-group flex-grow-1">
+            <v-tabs-items v-model="currentConvId" class="conversation-group flex-grow-1 transparent">
                 <v-tab-item
                     v-for="conv in conversations"
                     :key="conv.id"
@@ -28,15 +28,13 @@
                     ></ChatContent>
                 </v-tab-item>
             </v-tabs-items>
-        </v-col>
+        </div>
 
         <!-- Friend list -->
         <v-expand-x-transition>
-            <v-col cols="auto" v-if="displayFriendList">
-                <FriendList></FriendList>
-            </v-col>
+            <FriendList v-if="displayFriendList"></FriendList>
         </v-expand-x-transition>
-    </v-row>
+    </div>
 </template>
 
 <script>
@@ -92,11 +90,11 @@ export default {
 </script>
 
 <style scoped>
-.couple-conversation >>> .conversation-group {
+.couple-conversation {
     background: rgb(243, 242, 241);
 }
 
-.couple-conversation >>> .conversation-group.theme--dark {
+.couple-conversation.theme--dark {
     background: #121212;
 }
 </style>

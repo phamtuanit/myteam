@@ -40,6 +40,10 @@ body::-webkit-scrollbar {
     -moz-user-select: none;
 }
 
+.fill-width {
+  width: 100%;
+}
+
 /* Border */
 .border-yl {
     border-left: 1px solid !important;
