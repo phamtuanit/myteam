@@ -1,5 +1,5 @@
 body::-webkit-scrollbar {
-  width: 0px;
+    width: 0px;
 }
 
 *::-webkit-scrollbar {
@@ -25,32 +25,36 @@ body::-webkit-scrollbar {
     background-color: rgba(167, 167, 167, 1);
 }
 
-/* Utilitise */
+/* Utilities */
+.overflow-y-auto {
+    overflow-y: auto !important;
+}
+
 .no-border-radius {
-  border-radius: 0px !important;
+    border-radius: 0px !important;
 }
 
 .selection-disabled {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
 /* Border */
 .border-yl {
-  border-left: 1px solid !important;
+    border-left: 1px solid !important;
 }
 
 .border-yr {
-  border-right: 1px solid !important;
+    border-right: 1px solid !important;
 }
 
 .theme--light.border {
-  border-color: rgba(0, 0, 0, 0.12) !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
 }
 
 .theme--dark.border {
-  border-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 .border-xb {
@@ -59,12 +63,12 @@ body::-webkit-scrollbar {
 
 /* Force wrap */
 .v-card__text {
-  word-break: break-word;
+    word-break: break-word;
 }
 
 /* Minimize height */
 div.v-subheader {
-  height: 40px;
+    height: 40px;
 }
 
 /* Header */

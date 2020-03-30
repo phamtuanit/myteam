@@ -1,5 +1,5 @@
 <template>
-    <div id="friend-list" class="pa-0 fill-height">
+    <div id="friend-list" class="pa-0 fill-height d-flex flex-column">
         <!-- Search -->
         <v-sheet height="57" class="pa-0 center-y no-border-radius">
             <div class="px-3">
@@ -21,13 +21,13 @@
         <v-divider></v-divider>
 
         <!-- Friends -->
-        <v-list two-line class="py-0 px-0">
+        <v-list two-line class="py-0 px-0 flex-grow-1 d-flex flex-column">
             <v-progress-linear
                 :active="loading"
                 :indeterminate="true"
             ></v-progress-linear>
 
-            <v-layout class="friend-list-layout" style="overflow-y: auto;">
+            <v-layout class="friend-list-layout overflow-y-auto">
                 <!-- List -->
                 <v-slide-y-transition group tag="div">
                     <template v-for="user in friendList">

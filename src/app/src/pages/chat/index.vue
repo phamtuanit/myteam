@@ -4,7 +4,7 @@
         <v-col cols="auto">
             <ChatList></ChatList>
         </v-col>
-        <v-col>
+        <v-col class="d-flex flex-column">
             <!-- Fake header -->
             <div v-if="!currentConvId">
                 <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
@@ -12,7 +12,7 @@
             </div>
 
             <!-- Conversation content -->
-            <v-tabs-items v-model="currentConvId" class="conversation-group">
+            <v-tabs-items v-model="currentConvId" class="conversation-group flex-grow-1">
                 <v-tab-item
                     v-for="conv in conversations"
                     :key="conv.id"
@@ -67,9 +67,6 @@ export default {
     },
     created() {
         this.updateData();
-    },
-    mounted() {
-        fillHeight("conversation-group", 1, this.$el);
     },
     methods: {
         updateData() {

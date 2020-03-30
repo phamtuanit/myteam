@@ -1,7 +1,7 @@
 <template>
     <v-sheet
         width="280px"
-        class="pa-0 fill-height no-border-radius"
+        class="pa-0 fill-height no-border-radius d-flex flex-column"
         dark
         id="chat-list"
     >
@@ -25,25 +25,25 @@
         </v-list>
 
         <!-- List -->
-        <v-list two-line dark class="py-0 px-0">
+        <v-list two-line dark class="py-0 px-0 flex-grow-1 d-flex flex-column">
             <v-subheader class="pl-3 pr-2 selection-disabled"
                 >Conversations</v-subheader
             >
-            <div class="conversation-list" style="overflow-y: auto;">
-                <!-- Chat list -->
-                <v-list-item-group v-model="activatedChat" mandatory>
-                    <!-- <v-slide-y-transition group> -->
-                    <v-list-item
-                        v-for="chat in chatList"
-                        :key="chat.id || chat._id"
-                        :value="chat"
-                        @click="onSelect(chat)"
-                    >
-                        <Conversation :conversation="chat" />
-                    </v-list-item>
-                    <!-- </v-slide-y-transition> -->
-                </v-list-item-group>
-            </div>
+            <!-- Chat list -->
+            <v-list-item-group
+                v-model="activatedChat"
+                mandatory
+                class="conversation-list flex-grow-1 overflow-y-auto"
+            >
+                <v-list-item
+                    v-for="chat in chatList"
+                    :key="chat.id || chat._id"
+                    :value="chat"
+                    @click="onSelect(chat)"
+                >
+                    <Conversation :conversation="chat" />
+                </v-list-item>
+            </v-list-item-group>
         </v-list>
     </v-sheet>
 </template>
