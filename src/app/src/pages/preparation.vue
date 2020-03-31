@@ -1,6 +1,6 @@
 <template>
   <v-container
-    class="fill-height"
+    class="fill-height bg-1"
     fluid
     id="preparation-screen"
   >
@@ -9,14 +9,6 @@
       justify="center"
       class="mx-auto"
     >
-      <!-- <div class="sk-chase">
-        <div class="sk-chase-dot"></div>
-        <div class="sk-chase-dot"></div>
-        <div class="sk-chase-dot"></div>
-        <div class="sk-chase-dot"></div>
-        <div class="sk-chase-dot"></div>
-        <div class="sk-chase-dot"></div>
-      </div> -->
       <div class="cssload-dots">
         <div class="cssload-dot"></div>
         <div class="cssload-dot"></div>
@@ -146,9 +138,6 @@ export default {
 </script>
 
 <style scoped>
-#preparation-screen {
-    background-color: var(--primary-color);
-}
 </style>
 
 <style>

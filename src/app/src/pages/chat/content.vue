@@ -23,13 +23,10 @@
                         <v-btn
                             v-on="on"
                             icon
-                            :style="
-                                showFrienfList ? 'opacity: 1;' : 'opacity: 0.6;'
-                            "
+                            :style="showFrienfList ? 'opacity: 1;' : 'opacity: 0.6;'"
                             @click="showFrienfList = !showFrienfList"
                         >
                             <v-icon
-                                :color="showFrienfList ? 'orange' : ''"
                                 v-text="
                                     showFrienfList
                                         ? 'mdi-account-supervisor'
@@ -210,10 +207,6 @@ export default {
 /* Messages */
 .chat-box >>> .message-sheet {
     background: transparent;
-}
-
-.chat-box >>> .theme--light.v-btn.v-btn--icon {
-    color: var(--primary-color-2);
 }
 
 /* Message aligment */

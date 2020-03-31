@@ -2,11 +2,10 @@
     <v-sheet
         width="280px"
         class="pa-0 fill-height no-border-radius d-flex flex-column"
-        dark
         id="chat-list"
     >
-        <!-- Search -->
-        <v-list dense dark class="pb-2">
+        <v-sheet height="57" class="pa-0 center-y no-border-radius">
+            <!-- Search -->
             <div class="px-3">
                 <v-text-field
                     v-model="searchText"
@@ -22,10 +21,11 @@
                     @keyup.esc="searchText = ''"
                 ></v-text-field>
             </div>
-        </v-list>
+        </v-sheet>
+        <v-divider></v-divider>
 
         <!-- List -->
-        <v-list two-line dark class="py-0 px-0 flex-grow-1 d-flex flex-column">
+        <v-list two-line class="py-0 px-0 flex-grow-1 d-flex flex-column">
             <v-subheader class="pl-3 pr-2 selection-disabled"
                 >Conversations</v-subheader
             >
@@ -53,8 +53,9 @@ import { fillHeight } from "../../utils/layout.js";
 import { mapState } from "vuex";
 import UserAvatar from "../../components/user-avatar.vue";
 import Conversation from "../../components/conversation-item.vue";
+import Logo from "../../components/app-logo";
 export default {
-    components: { UserAvatar, Conversation },
+    components: { UserAvatar, Conversation, Logo },
     data() {
         return {
             searchText: null,
@@ -129,7 +130,10 @@ export default {
     },
     methods: {
         onSelect(chat) {
-            if ( (chat.id && this.activatedChat.id == chat.id) || this.activatedChat._id == chat._id) {
+            if (
+                (chat.id && this.activatedChat.id == chat.id) ||
+                this.activatedChat._id == chat._id
+            ) {
                 return;
             }
 
@@ -157,11 +161,6 @@ export default {
 </script>
 
 <style scoped>
-#chat-list,
-.v-list {
-    background-color: var(--primary-color-2) !important;
-}
-
 #chat-list >>> .v-text-field.v-text-field--solo .v-input__control {
     min-height: 40px !important;
 }
@@ -172,10 +171,6 @@ export default {
 
 #chat-list >>> .v-text-field--rounded {
     border-radius: 20px;
-}
-
-#chat-list >>> .v-btn {
-    border-color: rgba(255, 255, 255, 0.16);
 }
 
 .v-item-group.v-list-item-group {

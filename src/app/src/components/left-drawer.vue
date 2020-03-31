@@ -5,7 +5,7 @@
     dark
     app
     mini-variant-width="60"
-    class="left-drawer"
+    class="left-drawer bg-1"
   >
     <!-- Self Avatar -->
     <v-list-item class="px-0 mt-2 mb-1 mx-auto">
@@ -196,7 +196,4 @@ export default {
 </script>
 
 <style scoped>
-.left-drawer {
-    background-color: var(--primary-color) !important;
-}
 </style>

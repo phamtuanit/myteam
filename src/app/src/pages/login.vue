@@ -1,5 +1,5 @@
 <template>
-    <v-container class="fill-height" fluid id="login-screen">
+    <v-container class="fill-height bg-1" fluid id="login-screen">
         <div align="center" justify="center" class="mx-auto">
             <v-card :loading="loading" max-width="400" light class="pb-2">
                 <v-img height="200" src="@/assets/images/mountain.jpg">
@@ -46,7 +46,7 @@
                         text
                         @click="login"
                         :disabled="loading"
-                        class="btn-login"
+                        class="btn-login color-1"
                         >Login</v-btn
                     >
                 </v-card-actions>
@@ -98,11 +98,4 @@ export default {
 </script>
 
 <style scoped>
-#login-screen {
-    background-color: var(--primary-color);
-}
-
-#login-screen >>> .btn-login {
-    color: var(--primary-color);
-}
 </style>

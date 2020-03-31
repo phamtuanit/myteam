@@ -3,3 +3,19 @@
     --primary-color-2: #043752;
     --primary-color--text: #ffd700;
 }
+
+.bg-1 {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-2 {
+    background-color: var(--primary-color-2) !important;
+}
+
+.color-1 {
+    color: var(--primary-color) !important;
+}
+
+.color-2 {
+    color: var(--primary-color-2) !important;
+}
