@@ -31,12 +31,11 @@
             >
             <!-- Chat list -->
             <v-list-item-group
-                v-model="activatedChat"
-                mandatory
+                v-model="activatedConv"
                 class="conversation-list flex-grow-1 overflow-y-auto"
             >
                 <v-list-item
-                    v-for="chat in chatList"
+                    v-for="chat in convList"
                     :key="chat.id || chat._id"
                     :value="chat"
                     @click="onSelect(chat)"
@@ -59,13 +58,15 @@ export default {
     data() {
         return {
             searchText: null,
+            convList: [],
         };
     },
     computed: {
         ...mapState({
-            chatList: state => state.chats.all,
+            allConv: state => state.chats.all,
+            currentConv: state => state.chats.active,
         }),
-        activatedChat: {
+        activatedConv: {
             get() {
                 return this.$store.state.chats.active;
             },
@@ -81,20 +82,21 @@ export default {
     },
     watch: {
         searchText() {
-            if (this.displayMode == "friend") {
-                this.searchLocker.then(this.searchFriend);
-            }
+            this.searchLocker.then(this.searchConversation);
         },
-        "activatedChat.id"() {
+        "activatedConv.id"() {
             // To support change tmp conversation to real
             this.updateUrlQuery();
         },
-        activatedChat() {
+        activatedConv() {
             this.updateUrlQuery();
         },
     },
     created() {
-        this.eventBus = window.IoC.get("bus");
+        this.convList = this.allConv;
+        this.searchLocker = Promise.resolve();
+
+        // Update route
         if (this.$route.query._status == "temp") {
             this.$router.updateQuery({});
         } else if (this.$route.query._id) {
@@ -118,11 +120,10 @@ export default {
     },
     mounted() {
         fillHeight("conversation-list", 0, this.$el);
-        this.searchLocker = Promise.resolve();
 
         // Update url query
-        if (!this.$route.query._id && this.activatedChat) {
-            const currentId = this.activatedChat.id || this.activatedChat._id;
+        if (!this.$route.query._id && this.activatedConv) {
+            const currentId = this.activatedConv.id || this.activatedConv._id;
             const newQuery = { ...this.$route.query };
             newQuery._id = currentId;
             this.$router.updateQuery(newQuery);
@@ -130,23 +131,25 @@ export default {
     },
     methods: {
         onSelect(chat) {
-            if (
-                (chat.id && this.activatedChat.id == chat.id) ||
-                this.activatedChat._id == chat._id
-            ) {
-                return;
+            if (this.activatedConv) {
+                if (
+                    (chat.id && this.activatedConv.id == chat.id) ||
+                    this.activatedConv._id == chat._id
+                ) {
+                    return;
+                }
             }
 
             // Incase user re-open existing chat
             this.$store.dispatch("chats/activeChat", chat.id || chat._id);
         },
         updateUrlQuery() {
-            if (this.activatedChat) {
-                const convId = this.activatedChat.id || this.activatedChat._id;
+            if (this.activatedConv) {
+                const convId = this.activatedConv.id || this.activatedConv._id;
                 if (convId != this.$route.query._id) {
                     const newQuery = { ...this.$route.query };
                     delete newQuery._status;
-                    if (this.activatedChat._isTemp == true) {
+                    if (this.activatedConv._isTemp == true) {
                         newQuery._status = "temp";
                     }
                     newQuery._id = convId;
@@ -155,6 +158,23 @@ export default {
             } else {
                 this.$router.updateQuery({});
             }
+        },
+        searchConversation() {
+            if (!this.searchText) {
+                this.searchLocker = Promise.resolve();
+                this.convList = this.allConv;
+                return;
+            }
+
+            // Request searching
+            this.searchLocker = new Promise(resolve => {
+                const list = this.allConv.filter(conv =>
+                    conv.name.toLowerCase().includes(this.searchText.toLowerCase())
+                );
+                resolve(list);
+            }).then(list => {
+                this.convList = list;
+            });
         },
     },
 };

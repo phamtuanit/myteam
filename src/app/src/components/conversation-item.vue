@@ -12,7 +12,7 @@
     <v-list-item-content class="py-1 px-2 content__text">
       <v-list-item-title
         class="subtitle-2 mb-0"
-        v-text="conversationName"
+        v-text="conversation.name"
       ></v-list-item-title>
       <v-list-item-subtitle
         v-if="recentMessage"
@@ -39,20 +39,6 @@ export default {
         ...mapState({
             activatedChat: state => state.chats.active,
         }),
-        conversationName() {
-            if (this.conversation.name) {
-                return this.conversation.name;
-            }
-
-            const friends = this.conversation.subscribers
-                .filter(user => !user._isMe)
-                .map(user => {
-                    return (
-                        user.fullName || user.firstName + ", " + user.lastName
-                    );
-                });
-            return friends.join(", ");
-        },
         enableOnlineEffect() {
             return (
                 this.activatedChat &&

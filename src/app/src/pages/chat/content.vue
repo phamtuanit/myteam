@@ -5,7 +5,7 @@
             <!-- User info -->
             <v-list-item class="px-4 ma-0">
                 <Avatar
-                    :user-name="destUser.fullName"
+                    :user-name="conversation.name"
                     :src="destUser.avatar"
                     :size="30"
                     class="ml-2"
@@ -13,7 +13,7 @@
                 <!-- User name -->
                 <v-list-item-title
                     class="title ml-3"
-                    v-text="destUser.fullName"
+                    v-text="conversation.name"
                 ></v-list-item-title>
 
                 <v-spacer></v-spacer>

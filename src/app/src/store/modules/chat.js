@@ -42,23 +42,32 @@ const moduleState = {
         setAll(state, chat) {
             state.all = chat;
         },
-        setActivate(state, chat) {
-            if (!chat) {
+        setActivate(state, conv) {
+            if (!conv) {
                 return;
             }
-            state.active = chat;
+            state.active = conv;
         },
-        addChat(state, chat) {
-            if (!chat.messages) {
-                chat.messages = [];
+        addChat(state, conv) {
+            if (!conv.messages) {
+                conv.messages = [];
             }
 
-            if (!chat.meta) {
-                chat.meta = {
+            if (!conv.meta) {
+                conv.meta = {
                     unreadMessage: [],
                 };
             }
-            state.all.push(chat);
+
+            // Update conversation name
+            if (!conv.name) {
+                const friends = conv.subscribers.filter(user => !user._isMe);
+                if (friends.length > 0) {
+                    conv.name = friends[0].fullName;
+                }
+            }
+
+            state.all.push(conv);
         },
         removeChat(state, convId) {
             const index = state.all.findIndex(i => i.id == convId);
@@ -80,11 +89,11 @@ const moduleState = {
                     message._isMe = message.from.issuer == me.id;
                 }
 
-                const pushToUnread = function (message) {
+                const pushToUnread = function(message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessage.push(message);
                     }
-                }
+                };
 
                 if (!conv.messages) {
                     conv.messages = [message];
@@ -186,6 +195,16 @@ const moduleState = {
                             conv.subscribers
                         );
                         conv.subscribers = users;
+
+                        // Update conversation name
+                        if (!conv.name) {
+                            const friends = conv.subscribers.filter(
+                                user => !user._isMe
+                            );
+                            if (friends.length > 0) {
+                                conv.name = friends[0].fullName;
+                            }
+                        }
                     }
                 }
             }
@@ -292,7 +311,7 @@ const moduleState = {
             return convInfo;
         },
         activeChat({ commit, state }, id) {
-            if (state.active && (state.active.id && state.active.id == id)) {
+            if (state.active && state.active.id && state.active.id == id) {
                 return state.active;
             }
 
