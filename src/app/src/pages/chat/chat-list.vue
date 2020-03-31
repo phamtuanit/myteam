@@ -59,6 +59,7 @@ export default {
         return {
             searchText: null,
             convList: [],
+            activatedConv: null,
         };
     },
     computed: {
@@ -66,40 +67,36 @@ export default {
             allConv: state => state.chats.all,
             currentConv: state => state.chats.active,
         }),
-        activatedConv: {
-            get() {
-                return this.$store.state.chats.active;
-            },
-            set(val) {
-                if (val) {
-                    return this.$store.dispatch(
-                        "chats/activeChat",
-                        val.id || val._id
-                    );
-                }
-            },
-        },
     },
     watch: {
         searchText() {
             this.searchLocker.then(this.searchConversation);
         },
-        "activatedConv.id"() {
+        "currentConv.id"() {
             // To support change tmp conversation to real
             this.updateUrlQuery();
         },
-        activatedConv() {
+        currentConv() {
+            this.activatedConv = this.currentConv;
             this.updateUrlQuery();
+        },
+        activatedConv(val) {
+            if (val && val != this.currentConv) {
+                this.$store.dispatch("chats/activeChat", val.id || val._id);
+            }
         },
     },
     created() {
+        // Init data
         this.convList = this.allConv;
+        this.activatedConv = this.currentConv;
         this.searchLocker = Promise.resolve();
 
         // Update route
         if (this.$route.query._status == "temp") {
             this.$router.updateQuery({});
         } else if (this.$route.query._id) {
+            // Load the last conversation
             return this.$store
                 .dispatch("chats/activeChat", this.$route.query._id)
                 .then(chat => {
@@ -116,6 +113,9 @@ export default {
                     delete newQuery._id;
                     this.$router.updateQuery(newQuery);
                 });
+        } else if (this.allConv.length > 0 && !this.activatedConv) {
+            // Set default conversation
+            this.activatedConv = this.allConv[0];
         }
     },
     mounted() {
@@ -163,13 +163,16 @@ export default {
             if (!this.searchText) {
                 this.searchLocker = Promise.resolve();
                 this.convList = this.allConv;
+                this.activatedConv = this.currentConv;
                 return;
             }
 
             // Request searching
             this.searchLocker = new Promise(resolve => {
                 const list = this.allConv.filter(conv =>
-                    conv.name.toLowerCase().includes(this.searchText.toLowerCase())
+                    conv.name
+                        .toLowerCase()
+                        .includes(this.searchText.toLowerCase())
                 );
                 resolve(list);
             }).then(list => {
