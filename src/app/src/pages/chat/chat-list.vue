@@ -83,6 +83,11 @@ export default {
         activatedConv(val) {
             if (val && val != this.currentConv) {
                 this.$store.dispatch("chats/activeChat", val.id || val._id);
+            } else if (!this.activatedConv) {
+                this.$nextTick(() => {
+                    // Fix bug cannot activate the last conv after changing conv.id (conv._id)
+                    this.activatedConv = this.convList.find(i => i.id == this.currentConv.id);
+                });
             }
         },
     },
@@ -155,7 +160,7 @@ export default {
                     newQuery._id = convId;
                     this.$router.updateQuery(newQuery);
                 }
-            } else {
+            } else if (this.$route.query._id) {
                 this.$router.updateQuery({});
             }
         },
