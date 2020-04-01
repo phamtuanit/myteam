@@ -1,7 +1,7 @@
 <template>
     <div id="friend-list" class="pa-0 fill-height d-flex flex-column">
         <!-- Search -->
-        <v-sheet height="57" class="pa-0 center-y no-border-radius">
+        <v-sheet height="57" width="250" class="pa-0 center-y no-border-radius">
             <div class="px-3">
                 <v-text-field
                     v-model="searchText"
