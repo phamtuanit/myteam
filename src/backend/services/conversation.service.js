@@ -81,7 +81,6 @@ module.exports = {
                     type: "boolean",
                     optional: true,
                     convert: true,
-                    default: false,
                 },
             },
             handler(ctx) {
@@ -95,10 +94,12 @@ module.exports = {
                     limit,
                     offset,
                     sort: sort || ["-id"],
-                    query: {
-                        channel,
-                    },
+                    query: {},
                 };
+
+                if (typeof channel == "boolean") {
+                    filter.query.channel = channel;
+                }
 
                 if (user) {
                     const users = user.split(",");
