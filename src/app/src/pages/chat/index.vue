@@ -42,7 +42,6 @@ import ChatList from "./chat-list";
 import ChatContent from "./content.vue";
 import FriendList from "./friend-list";
 
-import { fillHeight } from "../../utils/layout.js";
 import { mapState } from "vuex";
 export default {
     components: { ChatList, ChatContent, FriendList },
@@ -55,7 +54,7 @@ export default {
     },
     computed: {
         ...mapState({
-            activatedConv: state => state.chats.active,
+            activatedConv: state => state.conversations.chat.active,
         }),
     },
     watch: {

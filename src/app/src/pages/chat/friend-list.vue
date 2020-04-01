@@ -92,7 +92,7 @@ export default {
     },
     methods: {
         onAddChat(selectedUser) {
-            const existingChat = this.$store.state.chats.all.find(chat => {
+            const existingChat = this.$store.state.conversations.chat.all.find(chat => {
                 if (chat.subscribers && chat.subscribers.length == 2) {
                     const matchedSub = chat.subscribers.filter(sub => {
                         return sub._isMe == true || sub.id == selectedUser.id;
@@ -106,14 +106,14 @@ export default {
             if (existingChat) {
                 // Active exsiting chat
                 this.$store
-                    .dispatch("chats/activeChat", existingChat.id)
+                    .dispatch("conversations/activeChat", existingChat.id)
                     .catch(console.error);
                 return;
             }
 
             // Create new conversation first
             this.$store
-                .dispatch("chats/activeTmpChat", selectedUser)
+                .dispatch("conversations/activeTmpChat", selectedUser)
                 .catch(console.error);
         },
         searchFriend() {

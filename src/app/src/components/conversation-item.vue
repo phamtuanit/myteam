@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import UserAvatar from "./user-avatar.vue";
 export default {
     props: ["conversation"],
@@ -36,16 +35,6 @@ export default {
         unreadMessage: vm.conversation.meta.unreadMessage,
     }),
     computed: {
-        ...mapState({
-            activatedChat: state => state.chats.active,
-        }),
-        enableOnlineEffect() {
-            return (
-                this.activatedChat &&
-                this.activatedChat.id == this.conversation.id &&
-                this.targetUser.status == "on"
-            );
-        },
         targetUser() {
             if (this.conversation) {
                 const friends = this.conversation.subscribers.filter(
@@ -101,7 +90,7 @@ export default {
         onOpenConv() {
             if (this.conversation.meta.unreadMessage.length > 0) {
                 this.$store
-                    .dispatch("chats/watchAllMessage", this.conversation.id)
+                    .dispatch("conversations/watchAllMessage", this.conversation.id)
                     .catch(console.error);
             }
         },

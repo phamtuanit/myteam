@@ -104,7 +104,7 @@ module.exports = {
             try {
                 store.dispatch("users/initialize")
                     .then(() => {
-                        commit("setAppState", "modules-chat");
+                        commit("setAppState", "modules-conversation");
                         resolve();
                     })
                     .catch(reject);
@@ -113,26 +113,11 @@ module.exports = {
             }
         });
     },
-    "modules-chat"(commit, store) {
+    "modules-conversation"(commit, store) {
         return new Promise((resolve, reject) => {
             console.info("Setting up: chat module");
             try {
-                store.dispatch("chats/initialize")
-                    .then(() => {
-                        commit("setAppState", "modules-channel");
-                        resolve();
-                    })
-                    .catch(reject);
-            } catch (err) {
-                reject(err);
-            }
-        });
-    },
-    "modules-channel"(commit, store) {
-        return new Promise((resolve, reject) => {
-            console.info("Setting up: chat module");
-            try {
-                store.dispatch("channels/initialize")
+                store.dispatch("conversations/initialize")
                     .then(() => {
                         commit("setAppState", "resolve-users");
                         resolve();
@@ -143,6 +128,21 @@ module.exports = {
             }
         });
     },
+    // "modules-channel"(commit, store) {
+    //     return new Promise((resolve, reject) => {
+    //         console.info("Setting up: chat module");
+    //         try {
+    //             store.dispatch("channels/initialize")
+    //                 .then(() => {
+    //                     commit("setAppState", "resolve-users");
+    //                     resolve();
+    //                 })
+    //                 .catch(reject);
+    //         } catch (err) {
+    //             reject(err);
+    //         }
+    //     });
+    // },
     "resolve-users"(commit, store) {
         return new Promise((resolve, reject) => {
             console.info("Setting up: chat module");

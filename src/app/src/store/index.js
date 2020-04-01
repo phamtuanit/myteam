@@ -1,8 +1,9 @@
 const Vuex = require("vuex");
 const Vue = require("vue").default;
 const createLogger = require("vuex/dist/logger");
-const chatModule = require("./modules/chat");
-const channelModule = require("./modules/channel");
+const chatModule = require("./modules/chat.js");
+const conversationModule = require("./modules/conversation.js");
+const channelModule = require("./modules/group.js");
 const userModule = require("./modules/user");
 
 // Setup IoC
@@ -70,9 +71,8 @@ const store = new Vuex.Store({
         startup() { },
     },
     modules: {
-        chats: chatModule,
-        channels: channelModule,
-        users: userModule
+        users: userModule,
+        conversations: conversationModule
     },
 });
 

@@ -154,16 +154,31 @@ export default {
             }
         },
         onSendMessage() {
-            this.chatId = this.conversation._id || this.conversation.id;
+            if (this.conversation._isTemp == true) {
+                // Create chat first
+                const convInfo = {
+                    _id: this.conversation._id,
+                    subscribers: this.conversation.subscribers.map(u => u.id)
+                }
+
+                return this.$store
+                .dispatch("conversations/createConversation", convInfo)
+                .then(() => {
+                    this.onSendMessage();
+                })
+                .catch(console.error);
+            }
+
+            this.chatId = this.conversation.id;
             // Send message
             const msg = {
-                chatId: this.chatId,
+                convId: this.chatId,
                 body: {
                     content: this.newMessage,
                 },
             };
             this.$store
-                .dispatch("chats/sendMessage", msg)
+                .dispatch("conversations/sendMessage", msg)
                 .then(() => {
                     this.newMessage = "";
                 })
@@ -171,12 +186,12 @@ export default {
         },
         onDeleteMyMessage(message) {
             this.$store
-                .dispatch("chats/deleteMessage", message)
+                .dispatch("conversations/deleteMessage", message)
                 .catch(console.error);
         },
         onReact(type, message, status = true) {
             this.$store
-                .dispatch("chats/reactMessage", { type, message, status })
+                .dispatch("conversations/reactMessage", { type, message, status })
                 .catch(console.error);
         },
         onDereact(type, message) {
@@ -187,7 +202,7 @@ export default {
             const conv = this.conversation;
             if (conv && conv.meta.unreadMessage.length > 0) {
                 this.$store
-                    .dispatch("chats/watchAllMessage", conv.id)
+                    .dispatch("conversations/watchAllMessage", conv.id)
                     .catch(console.error);
             }
         },

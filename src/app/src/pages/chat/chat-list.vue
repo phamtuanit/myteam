@@ -64,8 +64,8 @@ export default {
     },
     computed: {
         ...mapState({
-            allConv: state => state.chats.all,
-            currentConv: state => state.chats.active,
+            allConv: state => state.conversations.chat.all,
+            currentConv: state => state.conversations.chat.active,
         }),
     },
     watch: {
@@ -82,7 +82,7 @@ export default {
         },
         activatedConv(val) {
             if (val && val != this.currentConv) {
-                this.$store.dispatch("chats/activeChat", val.id || val._id);
+                this.$store.dispatch("conversations/activeChat", val.id || val._id);
             } else if (!this.activatedConv) {
                 this.$nextTick(() => {
                     // Fix bug cannot activate the last conv after changing conv.id (conv._id)
@@ -103,7 +103,7 @@ export default {
         } else if (this.$route.query._id) {
             // Load the last conversation
             return this.$store
-                .dispatch("chats/activeChat", this.$route.query._id)
+                .dispatch("conversations/activeChat", this.$route.query._id)
                 .then(chat => {
                     if (!chat) {
                         const newQuery = { ...this.$route.query };
@@ -146,7 +146,7 @@ export default {
             }
 
             // Incase user re-open existing chat
-            this.$store.dispatch("chats/activeChat", chat.id || chat._id);
+            this.$store.dispatch("conversations/activeChat", chat.id || chat._id);
         },
         updateUrlQuery() {
             if (this.activatedConv) {
