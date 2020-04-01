@@ -61,6 +61,7 @@ export default {
     width: 140px;
     height: 26px;
     position: relative;
+    z-index: 1;
 }
 
 .reactions-panel .v-icon {

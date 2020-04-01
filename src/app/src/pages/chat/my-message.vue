@@ -134,11 +134,12 @@ export default {
 .message-card.v-card::before {
     position: absolute;
     content: " ";
+    border-radius: 4px;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
     z-index: 0;
-    background-color: rgba(25, 118, 210, 0.08);
+    background-color: rgba(73, 159, 245, 0.2);
 }
 </style>

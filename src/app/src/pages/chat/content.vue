@@ -1,7 +1,7 @@
 <template>
     <div class="chat-box d-flex flex-column">
         <!-- Header -->
-        <v-sheet height="57" class="pa-0 center-y no-border-radius flex-grow-0">
+        <v-sheet height="57" min-height="57" class="pa-0 center-y no-border-radius flex-grow-0">
             <!-- User info -->
             <v-list-item class="px-4 ma-0">
                 <Avatar
@@ -195,8 +195,6 @@ export default {
 };
 </script>
 
-<style lang="css"></style>
-
 <style lang="css" scoped>
 .chat-box {
     height: 100vh;
@@ -210,7 +208,7 @@ export default {
 /* Message aligment */
 .message-sheet >>> .your-message + .your-message,
 .my-message + .my-message {
-    margin-top: 18px !important;
+    margin-top: 12px !important;
 }
 
 .message-sheet >>> div.message-item:last-child {
