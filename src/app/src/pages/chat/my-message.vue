@@ -59,7 +59,7 @@
 <script>
 import ReactionEmoji from "../../components/message-emoji.vue";
 export default {
-    props: ["index", "message"],
+    props: ["message"],
     components: { ReactionEmoji },
     data() {
         return {

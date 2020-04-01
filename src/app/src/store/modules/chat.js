@@ -392,21 +392,24 @@ const moduleState = {
             const socket = window.IoC.get("socket");
             socket.on("message", (act, data) => {
                 const message = data.payload;
-                // Send confirm message
-                socket.emit("confirm", {
-                    status: "confirmed",
-                    id: data.id,
-                    type: data.type,
-                    action: act,
-                    payload: {
-                        id: message.id,
-                        from: message.from,
-                        to: message.to,
-                    },
-                });
-
                 const chatId = message.to.conversation;
                 const me = this.state.users.me;
+
+                    // Send confirm message
+                const confirmMsg = function confirm() {
+                    socket.emit("confirm", {
+                        status: "confirmed",
+                        id: data.id,
+                        type: data.type,
+                        action: act,
+                        payload: {
+                            id: message.id,
+                            from: message.from,
+                            to: message.to,
+                        },
+                    });
+                };
+
                 // Handle event
                 switch (act) {
                     case "created":
@@ -469,9 +472,11 @@ const moduleState = {
                     case "reacted":
                     case "updated":
                         commit("updateMessage", { chatId, message });
+                        confirmMsg();
                         break;
                     case "removed":
                         commit("removeMessage", { chatId, message });
+                        confirmMsg();
                         break;
 
                     default:

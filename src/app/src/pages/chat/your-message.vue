@@ -1,7 +1,6 @@
 <template>
   <v-list-item
     class="px-2 message-item your-message"
-    :data-msg-index="index"
   >
     <v-list-item-avatar class="ma-0">
       <UserAvatar
@@ -86,7 +85,7 @@ import Reaction from "../../components/message-reaction.vue";
 
 import { mapState } from "vuex";
 export default {
-    props: ["index", "message", "user"],
+    props: ["message", "user"],
     components: { UserAvatar, ReactionEmoji, Reaction },
     data() {
         return {

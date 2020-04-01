@@ -1,27 +1,27 @@
 <template>
-  <div
-    class="conversation-item"
-    @click="onOpenConv"
-    :class="{'has-new-message': hasNewMessage }"
-  >
-    <UserAvatar
-      :user="targetUser"
-      :infinity="hasNewMessage"
-    />
+    <div
+        class="conversation-item"
+        @click="onOpenConv"
+        :class="{
+            'has-new-message': hasNewMessage,
+            'theme--dark': $vuetify.theme.isDark,
+        }"
+    >
+        <UserAvatar :user="targetUser" :infinity="hasNewMessage" />
 
-    <v-list-item-content class="py-1 px-2 content__text">
-      <v-list-item-title
-        class="subtitle-2 mb-0"
-        v-text="conversation.name"
-      ></v-list-item-title>
-      <v-list-item-subtitle
-        v-if="recentMessage"
-        class="caption"
-        :class="{'font-weight-bold': hasNewMessage }"
-        v-text="recentMessage"
-      ></v-list-item-subtitle>
-    </v-list-item-content>
-  </div>
+        <v-list-item-content class="py-1 px-2 content__text">
+            <v-list-item-title
+                class="subtitle-2 mb-0"
+                v-text="conversation.name"
+            ></v-list-item-title>
+            <v-list-item-subtitle
+                v-if="recentMessage"
+                class="caption"
+                :class="{ 'font-weight-bold': hasNewMessage }"
+                v-text="recentMessage"
+            ></v-list-item-subtitle>
+        </v-list-item-content>
+    </div>
 </template>
 
 <script>
@@ -128,11 +128,19 @@ export default {
     animation: opacity 0.2s linear;
     content: "";
     position: absolute;
-    background-color: #ffea00;
+    background-color: var(--primary-color-2);
     width: 3px;
     left: -16px;
     bottom: -7px;
     top: -7px;
+}
+
+.has-new-message::after {
+    background-color: var(--primary-color-2);
+}
+
+.theme--dark.has-new-message::after {
+    background-color: var(--primary-color--text);
 }
 
 @keyframes opacity {

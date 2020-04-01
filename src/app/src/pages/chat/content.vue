@@ -45,14 +45,14 @@
         <v-sheet
             class="flex-grow-1 overflow-y-auto message-sheet no-border-radius"
             v-chat-scroll="{ always: false, smooth: true }"
+            @click="onRead"
         >
             <!-- MineMessage -->
             <v-slide-y-transition group>
-                <template v-for="(msg, index) in messages">
+                <template v-for="msg in messages">
                     <MyMessage
                         v-if="msg._isMe == true"
                         :key="msg.id"
-                        :index="index"
                         :message="msg"
                         class="mt-5"
                         @delete="onDeleteMyMessage"
@@ -61,7 +61,6 @@
                         v-else
                         :user="destUser"
                         :key="msg.id"
-                        :index="index"
                         :message="msg"
                         class="mt-5"
                         @react="onReact"
@@ -119,6 +118,7 @@ export default {
             theme: this.$vuetify.theme,
             newMessage: "",
             showFrienfList: true,
+            messages: []
         };
     },
     computed: {
@@ -133,9 +133,6 @@ export default {
             }
             return {};
         },
-        messages() {
-            return this.conversation.messages || [];
-        },
     },
     watch: {
         showFrienfList(val) {
@@ -145,6 +142,7 @@ export default {
     created() {
         this.bus = window.IoC.get("bus");
         this.chatId = this.conversation._id || this.conversation.id;
+        this.messages = this.conversation.messages;
     },
     methods: {
         onClearMessage() {
