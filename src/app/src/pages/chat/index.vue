@@ -1,7 +1,7 @@
 <template>
     <div class="fill-width fill-height d-flex couple-conversation" :class="{'theme--dark': $vuetify.theme.isDark}"  no-gutters>
         <!-- Conversation list -->
-        <ChatList></ChatList>
+        <ChatList :list="allConv" :activated="activatedConv"></ChatList>
         
             <!-- Conversation content container -->
         <div class="flex-grow-1">
@@ -54,6 +54,7 @@ export default {
     },
     computed: {
         ...mapState({
+            allConv: state => state.conversations.chat.all,
             activatedConv: state => state.conversations.chat.active,
         }),
     },

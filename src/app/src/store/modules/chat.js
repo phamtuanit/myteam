@@ -26,10 +26,6 @@ function informNewMessage(message) {
 
 const moduleState = {
     namespaced: true,
-    getters: {
-        getAllChat: state => state.all,
-        getChat: state => id => state.all.find(i => i.id == id),
-    },
     state: {
         all: [],
         active: null,
@@ -178,7 +174,7 @@ const moduleState = {
             eventBus = window.IoC.get("bus");
 
             // Setup Socket
-            await this.dispatch("chats/setupSocket");
+            await this.dispatch("conversations/setupSocket");
 
             const { commit, rootState } = ctx;
             const me = rootState.users.me;
@@ -218,7 +214,7 @@ const moduleState = {
 
                     // Load conversation content
                     const content = await this.dispatch(
-                        "chats/getConversationContent",
+                        "conversations/getConversationContent",
                         conv.id
                     );
                     conv.meta = {
@@ -456,7 +452,7 @@ const moduleState = {
                                 });
                             } else {
                                 // Incase no chat in cache.
-                                this.dispatch("chats/loadChat", chatId)
+                                this.dispatch("conversations/loadChat", chatId)
                                     .then(chat => {
                                         if (chat) {
                                             commit("addMessage", {

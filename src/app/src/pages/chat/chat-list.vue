@@ -49,12 +49,14 @@
 
 <script>
 import { fillHeight } from "../../utils/layout.js";
-import { mapState } from "vuex";
 import UserAvatar from "../../components/user-avatar.vue";
 import Conversation from "../../components/conversation-item.vue";
-import Logo from "../../components/app-logo";
 export default {
-    components: { UserAvatar, Conversation, Logo },
+    props: {
+        list: Array,
+        activated: Object
+    },
+    components: { UserAvatar, Conversation },
     data() {
         return {
             searchText: null,
@@ -62,39 +64,33 @@ export default {
             activatedConv: null,
         };
     },
-    computed: {
-        ...mapState({
-            allConv: state => state.conversations.chat.all,
-            currentConv: state => state.conversations.chat.active,
-        }),
-    },
     watch: {
         searchText() {
             this.searchLocker.then(this.searchConversation);
         },
-        "currentConv.id"() {
+        "activated.id"() {
             // To support change tmp conversation to real
             this.updateUrlQuery();
         },
-        currentConv() {
-            this.activatedConv = this.currentConv;
+        activated() {
+            this.activatedConv = this.activated;
             this.updateUrlQuery();
         },
         activatedConv(val) {
-            if (val && val != this.currentConv) {
+            if (val && val != this.activated) {
                 this.$store.dispatch("conversations/activeChat", val.id || val._id);
             } else if (!this.activatedConv) {
                 this.$nextTick(() => {
                     // Fix bug cannot activate the last conv after changing conv.id (conv._id)
-                    this.activatedConv = this.convList.find(i => i.id == this.currentConv.id);
+                    this.activatedConv = this.convList.find(i => i.id == this.activated.id);
                 });
             }
         },
     },
     created() {
         // Init data
-        this.convList = this.allConv;
-        this.activatedConv = this.currentConv;
+        this.convList = this.list;
+        this.activatedConv = this.activated;
         this.searchLocker = Promise.resolve();
 
         // Update route
@@ -118,9 +114,9 @@ export default {
                     delete newQuery._id;
                     this.$router.updateQuery(newQuery);
                 });
-        } else if (this.allConv.length > 0 && !this.activatedConv) {
+        } else if (this.list.length > 0 && !this.activatedConv) {
             // Set default conversation
-            this.activatedConv = this.allConv[0];
+            this.activatedConv = this.list[0];
         }
     },
     mounted() {
@@ -167,14 +163,14 @@ export default {
         searchConversation() {
             if (!this.searchText) {
                 this.searchLocker = Promise.resolve();
-                this.convList = this.allConv;
-                this.activatedConv = this.currentConv;
+                this.convList = this.list;
+                this.activatedConv = this.activated;
                 return;
             }
 
             // Request searching
             this.searchLocker = new Promise(resolve => {
-                const list = this.allConv.filter(conv =>
+                const list = this.list.filter(conv =>
                     conv.name
                         .toLowerCase()
                         .includes(this.searchText.toLowerCase())

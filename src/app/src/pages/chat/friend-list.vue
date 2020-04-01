@@ -106,7 +106,7 @@ export default {
             if (existingChat) {
                 // Active exsiting chat
                 this.$store
-                    .dispatch("conversations/activeChat", existingChat.id)
+                    .dispatch("conversations/activeChat", existingChat.id || existingChat._id)
                     .catch(console.error);
                 return;
             }
