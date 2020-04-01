@@ -4,23 +4,25 @@
         class="pa-0 fill-height no-border-radius d-flex flex-column"
         id="chat-list"
     >
-        <v-sheet height="57" class="pa-0 center-y no-border-radius">
+        <v-sheet height="57" class="pa-0 center-y no-border-radius px-3">
             <!-- Search -->
-            <div class="px-3">
-                <v-text-field
-                    v-model="searchText"
-                    prepend-inner-icon="mdi-magnify"
-                    label="Conversation"
-                    name="search-conversation"
-                    flat
-                    solo-inverted
-                    rounded
-                    hide-details
-                    clearable
-                    clear-icon="mdi-close"
-                    @keyup.esc="searchText = ''"
-                ></v-text-field>
-            </div>
+            <v-text-field
+                v-model="searchText"
+                prepend-inner-icon="mdi-magnify"
+                label="Conversation"
+                name="search-conversation"
+                flat
+                solo
+                hide-details
+                clearable
+                clear-icon="mdi-close"
+                @keyup.esc="searchText = ''"
+            ></v-text-field>
+
+            <!-- Add btn -->
+            <v-btn v-if="allowAdd" icon class="ml-1" rounded>
+                <v-icon>mdi-plus</v-icon>
+            </v-btn>
         </v-sheet>
         <v-divider></v-divider>
 
@@ -54,7 +56,11 @@ import Conversation from "../../components/conversation-item.vue";
 export default {
     props: {
         list: Array,
-        activated: Object
+        activated: Object,
+        allowAdd: {
+            type: Boolean,
+            default: false
+        }
     },
     components: { UserAvatar, Conversation },
     data() {
@@ -78,11 +84,16 @@ export default {
         },
         activatedConv(val) {
             if (val && val != this.activated) {
-                this.$store.dispatch("conversations/activeChat", val.id || val._id);
+                this.$store.dispatch(
+                    "conversations/activeChat",
+                    val.id || val._id
+                );
             } else if (!this.activatedConv) {
                 this.$nextTick(() => {
                     // Fix bug cannot activate the last conv after changing conv.id (conv._id)
-                    this.activatedConv = this.convList.find(i => i.id == this.activated.id);
+                    this.activatedConv = this.convList.find(
+                        i => i.id == this.activated.id
+                    );
                 });
             }
         },
@@ -142,7 +153,10 @@ export default {
             }
 
             // Incase user re-open existing chat
-            this.$store.dispatch("conversations/activeChat", chat.id || chat._id);
+            this.$store.dispatch(
+                "conversations/activeChat",
+                chat.id || chat._id
+            );
         },
         updateUrlQuery() {
             if (this.activatedConv) {
@@ -185,16 +199,13 @@ export default {
 </script>
 
 <style scoped>
-#chat-list >>> .v-text-field.v-text-field--solo .v-input__control {
-    min-height: 40px !important;
+#chat-list >>> .v-text-field--solo .v-input__control {
+    min-height: 36px !important;
+    border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-#chat-list >>> .v-text-field--rounded > .v-input__control > .v-input__slot {
-    padding: 0 16px;
-}
-
-#chat-list >>> .v-text-field--rounded {
-    border-radius: 20px;
+#chat-list >>> .theme--dark.v-text-field--solo .v-input__control {
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .v-item-group.v-list-item-group {

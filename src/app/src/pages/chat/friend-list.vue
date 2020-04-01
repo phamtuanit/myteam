@@ -1,22 +1,23 @@
 <template>
     <div id="friend-list" class="pa-0 fill-height d-flex flex-column">
         <!-- Search -->
-        <v-sheet height="57" width="250" class="pa-0 center-y no-border-radius">
-            <div class="px-3">
-                <v-text-field
-                    v-model="searchText"
-                    prepend-inner-icon="mdi-magnify"
-                    label="Friend"
-                    flat
-                    name="search-friend"
-                    solo-inverted
-                    rounded
-                    hide-details
-                    clearable
-                    clear-icon="mdi-close"
-                    @keyup.esc="searchText = ''"
-                ></v-text-field>
-            </div>
+        <v-sheet
+            height="57"
+            width="250"
+            class="pa-0 center-y no-border-radius px-3"
+        >
+            <v-text-field
+                v-model="searchText"
+                prepend-inner-icon="mdi-magnify"
+                label="Friend"
+                flat
+                name="search-friend"
+                solo
+                hide-details
+                clearable
+                clear-icon="mdi-close"
+                @keyup.esc="searchText = ''"
+            ></v-text-field>
         </v-sheet>
         <v-divider></v-divider>
 
@@ -92,21 +93,28 @@ export default {
     },
     methods: {
         onAddChat(selectedUser) {
-            const existingChat = this.$store.state.conversations.chat.all.find(chat => {
-                if (chat.subscribers && chat.subscribers.length == 2) {
-                    const matchedSub = chat.subscribers.filter(sub => {
-                        return sub._isMe == true || sub.id == selectedUser.id;
-                    });
+            const existingChat = this.$store.state.conversations.chat.all.find(
+                chat => {
+                    if (chat.subscribers && chat.subscribers.length == 2) {
+                        const matchedSub = chat.subscribers.filter(sub => {
+                            return (
+                                sub._isMe == true || sub.id == selectedUser.id
+                            );
+                        });
 
-                    return matchedSub.length == 2;
+                        return matchedSub.length == 2;
+                    }
+                    return false;
                 }
-                return false;
-            });
+            );
 
             if (existingChat) {
                 // Active exsiting chat
                 this.$store
-                    .dispatch("conversations/activeChat", existingChat.id || existingChat._id)
+                    .dispatch(
+                        "conversations/activeChat",
+                        existingChat.id || existingChat._id
+                    )
                     .catch(console.error);
                 return;
             }
@@ -154,15 +162,12 @@ export default {
 }
 
 #friend-list >>> .v-text-field.v-text-field--solo .v-input__control {
-    min-height: 40px !important;
+    min-height: 36px !important;
+    border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-#friend-list >>> .v-text-field--rounded > .v-input__control > .v-input__slot {
-    padding: 0 16px;
-}
-
-#friend-list >>> .v-text-field--rounded {
-    border-radius: 20px;
+#friend-list >>> .theme--dark.v-text-field--solo .v-input__control {
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Scroll */
