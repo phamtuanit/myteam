@@ -18,19 +18,22 @@
                 clear-icon="mdi-close"
                 @keyup.esc="searchText = ''"
             ></v-text-field>
-
-            <!-- Add btn -->
-            <v-btn v-if="allowAdd" icon class="ml-1" rounded>
-                <v-icon>mdi-plus</v-icon>
-            </v-btn>
         </v-sheet>
         <v-divider></v-divider>
 
-        <!-- List -->
-        <v-list two-line class="py-0 px-0 flex-grow-1 d-flex flex-column">
+        <div class="px-0 py-1 ma-0 center-y justify-sm-space-between">
             <v-subheader class="pl-3 pr-2 selection-disabled"
                 >Conversations</v-subheader
             >
+
+            <!-- Add btn -->
+            <v-btn v-if="allowAdd" icon class="ml-1 mr-2" rounded>
+                <v-icon>mdi-plus</v-icon>
+            </v-btn>
+        </div>
+
+        <!-- List -->
+        <v-list two-line class="py-0 px-0 flex-grow-1 d-flex flex-column">
             <!-- Chat list -->
             <v-list-item-group
                 v-model="activatedConv"
@@ -59,8 +62,8 @@ export default {
         activated: Object,
         allowAdd: {
             type: Boolean,
-            default: false
-        }
+            default: false,
+        },
     },
     components: { UserAvatar, Conversation },
     data() {

@@ -1,9 +1,7 @@
 const Vuex = require("vuex");
 const Vue = require("vue").default;
 const createLogger = require("vuex/dist/logger");
-const chatModule = require("./modules/chat.js");
 const conversationModule = require("./modules/conversation.js");
-const channelModule = require("./modules/group.js");
 const userModule = require("./modules/user");
 
 // Setup IoC

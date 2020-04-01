@@ -1,18 +1,23 @@
 <template>
-    <div class="fill-width fill-height d-flex channel-conversation" :class="{'theme--dark': $vuetify.theme.isDark}"  no-gutters>
+    <div
+        class="fill-width fill-height d-flex channel-conversation"
+        :class="{ 'theme--dark': $vuetify.theme.isDark }"
+        no-gutters
+    >
         <!-- Conversation list -->
-        <ChatList :list="allConv" :activated="activatedConv"></ChatList>
-        
-            <!-- Conversation content container -->
-        <div class="flex-grow-1">
-            <!-- Fake header -->
-            <div v-if="!currentConvId">
-                <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
-                <v-divider></v-divider>
-            </div>
+        <ChatList :list="allConv" :activated="activatedConv" :allow-add="true" @add="onAddConv"></ChatList>
+
+        <!-- Conversation content container -->
+        <div class="flex-grow-1 d-flex flex-column">
+            <!-- Header -->
+            <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
+            <v-divider></v-divider>
 
             <!-- Conversation content -->
-            <v-tabs-items v-model="currentConvId" class="conversation-group flex-grow-1 transparent">
+            <v-tabs-items
+                v-model="currentConvId"
+                class="conversation-group flex-grow-1 transparent"
+            >
                 <v-tab-item
                     v-for="conv in conversations"
                     :key="conv.id"
@@ -60,6 +65,9 @@ export default {
         this.updateData();
     },
     methods: {
+        onAddConv() {
+
+        },
         updateData() {
             if (this.activatedConv) {
                 const convId = this.activatedConv.id || this.activatedConv._id;
