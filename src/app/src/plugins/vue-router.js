@@ -29,6 +29,11 @@ export default function init(store) {
                         path: "chat",
                         component: () => import("../pages/chat/index.vue"),
                     },
+                    {
+                        name: "app-channel",
+                        path: "channel",
+                        component: () => import("../pages/channel/index.vue"),
+                    },
                 ],
             },
             {

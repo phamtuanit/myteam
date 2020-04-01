@@ -1,5 +1,5 @@
 <template>
-    <div class="fill-width fill-height d-flex couple-conversation" :class="{'theme--dark': $vuetify.theme.isDark}"  no-gutters>
+    <div class="fill-width fill-height d-flex channel-conversation" :class="{'theme--dark': $vuetify.theme.isDark}"  no-gutters>
         <!-- Conversation list -->
         <ChatList :list="allConv" :activated="activatedConv"></ChatList>
         
@@ -20,31 +20,24 @@
                     :transition="false"
                     :reverse-transition="false"
                 >
-                    <ChatContent
+                    <!-- <ChatContent
                         :conversation="conv.value"
                         @show-friend-list="
                             displayFriendList = !displayFriendList
                         "
-                    ></ChatContent>
+                    ></ChatContent> -->
                 </v-tab-item>
             </v-tabs-items>
         </div>
-
-        <!-- Friend list -->
-        <v-expand-x-transition>
-            <FriendList v-if="displayFriendList"></FriendList>
-        </v-expand-x-transition>
     </div>
 </template>
 
 <script>
 import ChatList from "../shared/chat-list";
-import ChatContent from "./content.vue";
-import FriendList from "./friend-list";
 
 import { mapState } from "vuex";
 export default {
-    components: { ChatList, ChatContent, FriendList },
+    components: { ChatList },
     data() {
         return {
             displayFriendList: true,
@@ -54,8 +47,8 @@ export default {
     },
     computed: {
         ...mapState({
-            allConv: state => state.conversations.chat.all,
-            activatedConv: state => state.conversations.chat.active,
+            allConv: state => state.conversations.channel.all,
+            activatedConv: state => state.conversations.channel.active,
         }),
     },
     watch: {
@@ -90,11 +83,11 @@ export default {
 </script>
 
 <style scoped>
-.couple-conversation {
+.channel-conversation {
     background: rgb(243, 242, 241);
 }
 
-.couple-conversation.theme--dark {
+.channel-conversation.theme--dark {
     background: #121212;
 }
 </style>
