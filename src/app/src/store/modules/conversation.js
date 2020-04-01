@@ -57,15 +57,6 @@ const moduleState = {
                 return;
             }
 
-            const currentConv =
-                conv.channel == true
-                    ? state.channel.active
-                    : state.chat.active;
-            if ( currentConv && (currentConv.id == conv.id || (currentConv._id && currentConv._id == conv._id))
-            ) {
-                return;
-            }
-
             if (conv.channel == true) {
                 state.channel.active = conv;
             } else {
@@ -382,6 +373,14 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => (c.id || c._id) == convId);
             if (conv) {
+                const currentConv = conv.channel == true ? state.channel.active : state.chat.active;
+                if (currentConv) {
+                    if (currentConv.id == conv.id || (currentConv._id && currentConv._id == conv._id)) {
+                        // Already activated
+                        return;
+                    }
+                }
+                
                 commit("setActivate", conv);
                 return conv;
             }
@@ -412,21 +411,6 @@ const moduleState = {
                 console.warn("The conversation doesn't exist");
                 return;
             }
-            // if (conv._isTemp == true) {
-            //     // Create conversation first
-            //     const user = conv.subscribers[0];
-            //     const me = this.state.users.me;
-
-            //     const convInfo = {
-            //         channel: false,
-            //         subscribers: [me.id, user.id],
-            //     };
-            //     const newConv = (await convService.create(convInfo)).data;
-            //     newConv.subscribers = [me, user];
-            //     delete conv._isTemp;
-            //     delete conv._id;
-            //     Object.assign(conv, newConv);
-            // }
 
             return await messageService.create(conv.id, body).then(res => {
                 const payload = {
@@ -434,7 +418,6 @@ const moduleState = {
                     message: res.data,
                 };
                 commit("addMessage", payload);
-                // commit("setActivate", chat);
                 return res.data;
             });
         },
