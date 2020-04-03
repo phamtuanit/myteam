@@ -315,7 +315,10 @@ const moduleState = {
             commit("setModuleState", "initialized");
         },
         async createConversation({ commit, state }, convInfo) {
-            const invalid = !convInfo || !convInfo.subscribers || convInfo.subscribers.length <= 0;
+            const invalid =
+                !convInfo ||
+                !convInfo.subscribers ||
+                convInfo.subscribers.length <= 0;
             if (invalid) {
                 console.warn("The input data is invalid");
                 return;
@@ -373,14 +376,20 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => (c.id || c._id) == convId);
             if (conv) {
-                const currentConv = conv.channel == true ? state.channel.active : state.chat.active;
+                const currentConv =
+                    conv.channel == true
+                        ? state.channel.active
+                        : state.chat.active;
                 if (currentConv) {
-                    if (currentConv.id == conv.id || (currentConv._id && currentConv._id == conv._id)) {
+                    if (
+                        currentConv.id == conv.id ||
+                        (currentConv._id && currentConv._id == conv._id)
+                    ) {
                         // Already activated
                         return;
                     }
                 }
-                
+
                 commit("setActivate", conv);
                 return conv;
             }
@@ -470,30 +479,33 @@ const moduleState = {
                         if (!data.payload || !data.payload) {
                             break;
                         } else {
-                            const existingConv = state.all.find(conv => {
-                                if (conv.id == convId) {
-                                    return true;
-                                }
-
-                                if (conv.channel == false) {
-                                    if (
-                                        conv.subscribers &&
-                                        conv.subscribers.length == 2
-                                    ) {
-                                        const matchedSub = conv.subscribers.filter(
-                                            sub => {
-                                                return (
-                                                    sub.id == me.id ||
-                                                    sub.id == message.from.issuer
-                                                );
-                                            }
-                                        );
-
-                                        return matchedSub.length == 2;
+                            const existingConv = state.channel.all
+                                .concat(state.chat.all)
+                                .find(conv => {
+                                    if (conv.id == convId) {
+                                        return true;
                                     }
-                                }
-                                return false;
-                            });
+
+                                    if (conv.channel == false) {
+                                        if (
+                                            conv.subscribers &&
+                                            conv.subscribers.length == 2
+                                        ) {
+                                            const matchedSub = conv.subscribers.filter(
+                                                sub => {
+                                                    return (
+                                                        sub.id == me.id ||
+                                                        sub.id ==
+                                                            message.from.issuer
+                                                    );
+                                                }
+                                            );
+
+                                            return matchedSub.length == 2;
+                                        }
+                                    }
+                                    return false;
+                                });
 
                             // Change temp conversation to rea;
                             if (existingConv && existingConv._isTemp == true) {
