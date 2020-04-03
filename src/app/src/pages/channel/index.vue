@@ -5,13 +5,20 @@
         no-gutters
     >
         <!-- Conversation list -->
-        <ChatList :list="allConv" :activated="activatedConv" :allow-add="true" @add="onAddConv"></ChatList>
+        <ChatList
+            :list="allConv"
+            :activated="activatedConv"
+            :allow-add="true"
+            @add="onAddConv"
+        ></ChatList>
 
         <!-- Conversation content container -->
         <div class="flex-grow-1 d-flex flex-column">
-            <!-- Header -->
-            <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
-            <v-divider></v-divider>
+            <!-- Fake header -->
+            <div v-if="!currentConvId">
+                <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
+                <v-divider></v-divider>
+            </div>
 
             <!-- Conversation content -->
             <v-tabs-items
@@ -25,12 +32,7 @@
                     :transition="false"
                     :reverse-transition="false"
                 >
-                    <!-- <ChatContent
-                        :conversation="conv.value"
-                        @show-friend-list="
-                            displayFriendList = !displayFriendList
-                        "
-                    ></ChatContent> -->
+                    <ChatContent :conversation="conv.value"></ChatContent>
                 </v-tab-item>
             </v-tabs-items>
         </div>
@@ -39,10 +41,11 @@
 
 <script>
 import ChatList from "../shared/chat-list";
+import ChatContent from "./content.vue";
 
 import { mapState } from "vuex";
 export default {
-    components: { ChatList },
+    components: { ChatList, ChatContent },
     data() {
         return {
             displayFriendList: true,
@@ -65,9 +68,7 @@ export default {
         this.updateData();
     },
     methods: {
-        onAddConv() {
-
-        },
+        onAddConv() {},
         updateData() {
             if (this.activatedConv) {
                 const convId = this.activatedConv.id || this.activatedConv._id;
