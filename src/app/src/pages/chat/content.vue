@@ -43,7 +43,7 @@
 
         <!-- Content -->
         <v-sheet
-            class="flex-grow-1 overflow-y-auto message-sheet no-border-radius"
+            class="flex-grow-1 overflow-y-auto message-sheet no-border-radius transparent"
             v-chat-scroll="{ always: false, smooth: true }"
             @click="onRead"
         >
@@ -213,11 +213,6 @@ export default {
 <style lang="css" scoped>
 .chat-box {
     height: 100vh;
-}
-
-/* Messages */
-.chat-box >>> .message-sheet {
-    background: transparent;
 }
 
 /* Message aligment */
