@@ -12,16 +12,19 @@
         ></v-sheet>
 
         <!-- Input -->
-        <v-sheet height="60" class="no-border-radius"
-        ></v-sheet>
+        <v-sheet class="transparent mx-4 my-2">
+            <Editor></Editor>
+        </v-sheet>
     </div>
 </template>
 
 <script>
+import Editor from "../../components/editor.vue";
 export default {
     props: {
         conversation: Object,
     },
+    components: { Editor },
     methods: {
         onRead() {
             const conv = this.conversation;
@@ -34,8 +37,6 @@ export default {
     },
 };
 </script>
-
-
 
 <style lang="css" scoped>
 .conversation-content {

@@ -13,6 +13,10 @@
   },
   "main": "background.js",
   "dependencies": {
+    "@ckeditor/ckeditor5-block-quote": "^18.0.0",
+    "@ckeditor/ckeditor5-build-classic": "^18.0.0",
+    "@ckeditor/ckeditor5-code-block": "^18.0.0",
+    "@ckeditor/ckeditor5-vue": "^1.0.1",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "emoji-mart-vue-fast": "^7.0.0",

@@ -1,13 +1,34 @@
 <template>
-  
+    <v-sheet min-height="60" class="text-editor-container">
+        <ckeditor
+            :editor="editor"
+            v-model="value"
+            :config="editorConfig"
+        ></ckeditor>
+        <!-- <div id="editor"></div> -->
+    </v-sheet>
 </template>
 
 <script>
-export default {
+import CKEditor from "@ckeditor/ckeditor5-vue";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
-}
+export default {
+    components: {
+        // Use the <ckeditor> component in this view.
+        ckeditor: CKEditor.component,
+    },
+    data() {
+        return {
+            editor: ClassicEditor,
+            value: "<p>Content of the editor.</p>",
+            editorConfig: {
+            },
+        };
+    },
+    created() {
+    }
+};
 </script>
 
-<style>
-
-</style>
+<style></style>
