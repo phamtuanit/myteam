@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import Editor from "../../components/editor.vue";
+import Editor from "../../components/editor/index.vue";
 export default {
     props: {
         conversation: Object,

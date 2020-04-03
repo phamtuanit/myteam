@@ -1,7 +1,7 @@
 {
-    "env": "debug",
+    "env": "prd",
     "server": {
-        "address": "http://localhost:8081",
+        "address": "http://192.168.106.52:8081",
         "api": "/api/v1/"
     }
 }

@@ -5,13 +5,12 @@
             v-model="value"
             :config="editorConfig"
         ></ckeditor>
-        <!-- <div id="editor"></div> -->
     </v-sheet>
 </template>
 
 <script>
 import CKEditor from "@ckeditor/ckeditor5-vue";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "./editor.js";
 
 export default {
     components: {
@@ -26,8 +25,7 @@ export default {
             },
         };
     },
-    created() {
-    }
+    created() {},
 };
 </script>
 
