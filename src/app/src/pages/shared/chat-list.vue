@@ -1,6 +1,6 @@
 <template>
     <v-sheet
-        width="280px"
+        width="280px" min-width="280px"
         class="pa-0 fill-height no-border-radius d-flex flex-column"
         id="chat-list"
     >
