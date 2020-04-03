@@ -29,4 +29,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.ck.ck-editor__main>.ck-editor__editable {
+    max-height: 200px;
+}
+</style>
