@@ -1,6 +1,6 @@
 <template>
   <v-menu
-    top
+    :left="true"
     offset-y
     v-model="showEmojiPicker"
     :eager="true"
@@ -9,8 +9,12 @@
     :close-on-content-click="false"
   >
     <template v-slot:activator="{ on }">
-      <v-btn icon v-on="on">
-        <v-icon>mdi-emoticon-happy-outline</v-icon>
+      <v-btn
+        icon
+        :small="small"
+        v-on="on"
+      >
+        <v-icon :small="small">mdi-emoticon-happy-outline</v-icon>
       </v-btn>
     </template>
 
@@ -31,27 +35,33 @@ import { Picker, EmojiIndex } from "emoji-mart-vue-fast";
 import emojiData from "emoji-mart-vue-fast/data/twitter.json";
 import "emoji-mart-vue-fast/css/emoji-mart.css";
 const emojiIndex = new EmojiIndex(emojiData, {
-  exclude: ["flags", "symbols"]
+    exclude: ["flags", "symbols"],
 });
 export default {
-  components: { Picker },
-  data() {
-    return {
-      emojiData: emojiIndex,
-      showEmojiPicker: false
-    };
-  },
-  methods: {
-    onSelectEmoji(emoji) {
-      this.$emit("select", emoji);
-    }
-  }
+    props: {
+        small: {
+            type: Boolean,
+            default: false,
+        },
+    },
+    components: { Picker },
+    data() {
+        return {
+            emojiData: emojiIndex,
+            showEmojiPicker: false,
+        };
+    },
+    methods: {
+        onSelectEmoji(emoji) {
+            this.$emit("select", emoji);
+        },
+    },
 };
 </script>
 
 
 <style lang="css">
 .emoji-type-image.emoji-set-twitter {
-  background-image: url("../assets/emoji/twitter-emoji-32.png");
+    background-image: url("../assets/emoji/twitter-emoji-32.png");
 }
 </style>

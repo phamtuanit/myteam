@@ -1,0 +1,97 @@
+/* Don't allow focus and box-shadow */
+.ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused {
+    border: 1px solid var(--ck-color-base-border);
+    -webkit-box-shadow: initial;
+    box-shadow: initial;
+}
+
+/* Buttons */
+.ck {
+    --ck-color-text: rgba(0, 0, 0, 0.7);
+    --ck-ui-component-min-height: 20px;
+    --ck-color-base-border: transparent;
+    --ck-color-base-background: transparent;
+    --ck-color-toolbar-border: transparent;
+    --ck-color-toolbar-background: #fff;
+}
+
+.ck.ck-toolbar .ck.ck-toolbar__separator {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.theme-dark .ck.ck-toolbar .ck.ck-toolbar__separator {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.ck .ck-editor__editable_inline {
+    max-height: 50vh;
+}
+
+.ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+    border-bottom: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.12);
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+.theme-dark .ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-dark .ck {
+    --ck-color-text: #FFF;
+    
+    /* Topbar */
+    --ck-color-toolbar-background: #1E1E1E;
+    --ck-color-toolbar-border: transparent;
+    --ck-color-button-on-background: rgba(255, 255, 255, 0.301);
+    --ck-color-button-default-hover-background: rgba(255, 255, 255, 0.301);
+
+    /* Topbar menu */
+    --ck-color-dropdown-panel-background: #1E1E1E;
+    --ck-color-dropdown-panel-border: rgba(255, 255, 255, 0.12);
+    --ck-color-list-background: transparent;
+    --ck-color-list-button-on-background: rgba(255, 255, 255, 0.75);
+    --ck-color-list-button-hover-background:  rgba(255, 255, 255, 0.3);
+    --ck-color-list-button-on-background-focus: rgba(255, 255, 255, 0.5);
+    --ck-color-split-button-hover-background: rgba(255, 255, 255, 0.3);
+
+    /* Content */
+    --ck-color-base-text: #FFFFFF;
+    --ck-color-base-border: transparent 
+}
+
+.ck-content code {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.theme-dark .ck-content code {
+    color: rgba(255, 255, 255, 0.884);
+}
+
+/* Code block */
+.ck-content pre {
+    padding: 8px 48px 8px 8px;
+}
+
+.ck.ck-editor__editable pre[data-language]:after {
+    right: 0;
+    line-height: 14px;
+    font-size: 9px;
+}
+
+.theme-dark .ck-content pre {
+    background: rgba(255, 255, 255, 0.205);
+}
+
+.ck-content pre code::before {
+    content: "";
+}
+
+/* Custom CSS */
+.ck.ck-toolbar.ck-toolbar_grouping.ck-editor__top-hide {
+    display: none;
+}

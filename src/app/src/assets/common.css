@@ -81,3 +81,8 @@ div.v-subheader {
     align-items: center;
     -webkit-box-align: center;
 }
+
+/* Override */
+.v-application p {
+    margin-bottom: 8px;
+}

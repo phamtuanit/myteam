@@ -1,30 +1,31 @@
 <template>
-    <div class="conversation-content pa-0 ma-0 d-flex flex-column">
-        <!-- Header -->
-        <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
-        <v-divider></v-divider>
+  <div class="conversation-content pa-0 ma-0 d-flex flex-column">
+    <!-- Header -->
+    <v-sheet
+      height="57"
+      class="pa-0 no-border-radius"
+    ></v-sheet>
+    <v-divider></v-divider>
 
-        <!-- Content -->
-        <v-sheet
-            class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent"
-            v-chat-scroll="{ always: false, smooth: true }"
-            @click="onRead"
-        ></v-sheet>
+    <!-- Content -->
+    <v-sheet
+      class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent"
+      v-chat-scroll="{ always: false, smooth: true }"
+      @click="onRead"
+    ></v-sheet>
 
-        <!-- Input -->
-        <v-sheet class="transparent mx-4 my-2">
-            <Editor></Editor>
-        </v-sheet>
-    </div>
+    <!-- Input -->
+    <ChatEditor class="mx-4 my-2"></ChatEditor>
+  </div>
 </template>
 
 <script>
-import Editor from "../../components/editor/index.vue";
+import ChatEditor from "../../components/editor/chat-editor.vue";
 export default {
     props: {
         conversation: Object,
     },
-    components: { Editor },
+    components: { ChatEditor },
     methods: {
         onRead() {
             const conv = this.conversation;
