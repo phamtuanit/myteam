@@ -20,38 +20,36 @@
 
     <!-- Menus -->
     <v-list>
-      <v-list-item-group mandatory>
-        <template v-for="menu in menus">
-          <v-list-item
-            :key="menu.key"
-            :value="menu"
-            :input-value="menu == activatedMenu"
-            class="px-0 my-0 pb-3 pt-4"
-            @click="onActivateMenu(menu)"
+      <template v-for="menu in menus">
+        <v-list-item
+          :key="menu.key"
+          :value="menu"
+          :input-value="menu.key == activatedMenu.key"
+          class="px-0 my-0 pb-3 pt-4"
+          @click="onActivateMenu(menu)"
+        >
+          <v-badge
+            :value="menu.inform && menu.inform.count > 0"
+            :key="menu.key + 'badge'"
+            overlap
+            color="red darken-3"
+            light
+            :dot="menu.inform && menu.inform.count > 99"
+            :content="menu.inform.count"
           >
-            <v-badge
-              :value="menu.inform && menu.inform.count > 0"
-              :key="menu.key + 'badge'"
-              overlap
-              color="red darken-3"
-              light
-              :dot="menu.inform && menu.inform.count > 99"
-              :content="menu.inform.count"
-            >
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-icon
-                    color="white"
-                    v-on="on"
-                    class="mx-auto pa-1"
-                  >mdi-{{ menu.icon }}</v-icon>
-                </template>
-                <span>{{ menu.name }}</span>
-              </v-tooltip>
-            </v-badge>
-          </v-list-item>
-        </template>
-      </v-list-item-group>
+            <v-tooltip right>
+              <template v-slot:activator="{ on }">
+                <v-icon
+                  color="white"
+                  v-on="on"
+                  class="mx-auto pa-1"
+                >mdi-{{ menu.icon }}</v-icon>
+              </template>
+              <span>{{ menu.name }}</span>
+            </v-tooltip>
+          </v-badge>
+        </v-list-item>
+      </template>
     </v-list>
 
     <!-- Dark mode -->
