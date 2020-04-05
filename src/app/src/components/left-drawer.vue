@@ -24,7 +24,7 @@
         <v-list-item
           :key="menu.key"
           :value="menu"
-          :input-value="menu.key == activatedMenu.key"
+          :input-value="menu == activatedMenu"
           class="px-0 my-0 pb-3 pt-4"
           @click="onActivateMenu(menu)"
         >
