@@ -29,7 +29,7 @@ import UserAvatar from "./user-avatar.vue";
 export default {
     props: ["conversation"],
     components: { UserAvatar },
-    data: vm => ({
+    data: (vm) => ({
         recentMessage: "",
         messages: vm.conversation.messages,
         unreadMessage: vm.conversation.meta.unreadMessage,
@@ -38,7 +38,7 @@ export default {
         targetUser() {
             if (this.conversation) {
                 const friends = this.conversation.subscribers.filter(
-                    user => !user._isMe
+                    (user) => !user._isMe
                 );
                 if (friends.length > 0) {
                     return friends[0];
@@ -67,7 +67,12 @@ export default {
                 const msgType = recentMsg.body.type || "html";
                 switch (msgType) {
                     case "html":
-                        this.recentMessage = recentMsg.body.content;
+                        {
+                            const html = recentMsg.body.content;
+                            const el = document.createElement("div");
+                            el.innerHTML = html;
+                            this.recentMessage = el.innerText;
+                        }
                         break;
 
                     default:
@@ -90,7 +95,10 @@ export default {
         onOpenConv() {
             if (this.conversation.meta.unreadMessage.length > 0) {
                 this.$store
-                    .dispatch("conversations/watchAllMessage", this.conversation.id)
+                    .dispatch(
+                        "conversations/watchAllMessage",
+                        this.conversation.id
+                    )
                     .catch(console.error);
             }
         },

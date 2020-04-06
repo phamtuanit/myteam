@@ -2,10 +2,10 @@
     <div class="chat-editor d-flex flex-column">
         <v-sheet
             class="chat-editor__container"
-            :class="{ 'theme-dark': $vuetify.theme.isDark }"
+            :class="{ 'theme-dark': $vuetify.theme.isDark, 'chat-editor-expanded': showToolBar }"
         >
             <Editor
-                v-model="value"
+                v-model="internalValue"
                 :show-tool-bar="showToolBar"
                 @ready="onEditorReady"
             />
@@ -56,7 +56,13 @@ export default {
         return {
             classEditor: ClassicEditor,
             showToolBar: false,
+            internalValue: this.value,
         };
+    },
+    watch: {
+        internalValue() {
+            this.$emit("input", this.internalValue);
+        }
     },
     methods: {
         onSelectEmoji(emoji) {
@@ -68,11 +74,11 @@ export default {
             this.editorInstance = editorInstance;
             // Register Enter command
             this.editorInstance.keystrokes.set("Enter", (data, cancel) => {
-                this.$emit("enter", data, cancel);
+                this.$emit("enter", this.internalValue, data, cancel);
             });
         },
         onSend() {
-            this.$emit("send", this.value);
+            this.$emit("send", this.internalValue);
         },
         writeText(text) {
             const editor = this.editorInstance;
@@ -92,5 +98,9 @@ export default {
 
 .chat-editor__container .ck.ck-editor__editable_inline > :last-child {
     margin-bottom: 12px;
+}
+
+.chat-editor-expanded .ck .ck-editor__editable_inline {
+    height: 30vh;
 }
 </style>

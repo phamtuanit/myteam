@@ -2,7 +2,7 @@
   <ckeditor
     v-if="showEditor"
     :editor="editor"
-    v-model="value"
+    v-model="internalValue"
     :config="editorConfig"
     ref="editor"
     @ready="onEditorReady"
@@ -15,6 +15,10 @@ import ClassicEditor from "./ck-editor.js";
 
 export default {
     props: {
+        value: {
+            type: String,
+            default: "",
+        },
         showToolBar: {
             type: Boolean,
             default: true,
@@ -40,14 +44,17 @@ export default {
         return {
             showEditor: false,
             editor: this.classEditor,
-            value: "<p>Content of the editor.</p>",
+            internalValue: this.value,
             editorConfig: {},
         };
     },
     watch: {
-        showToolBar(val) {
+        showToolBar() {
             this.updateTopbar();
         },
+        internalValue() {
+            this.$emit("input", this.internalValue);
+        }
     },
     created() {},
     mounted() {
@@ -66,17 +73,9 @@ export default {
                 toolbar.classList.add("ck-editor__top-hide");
             }
         },
-        setupEditor() {
-            const editable = this.editorInstance.ui.view.editable.element;
-            // ui.view.editable.editableElement.style.height = '300px';
-            if (this.height > 0) {
-                // editable.
-            }
-        },
         onEditorReady() {
             this.editorInstance = this.$refs.editor.instance;
             this.updateTopbar();
-            this.setupEditor();
             this.$emit("ready", this.editorInstance);
         },
     },

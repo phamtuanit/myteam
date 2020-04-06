@@ -1,22 +1,23 @@
 <template>
-  <div class="conversation-content pa-0 ma-0 d-flex flex-column">
-    <!-- Header -->
-    <v-sheet
-      height="57"
-      class="pa-0 no-border-radius"
-    ></v-sheet>
-    <v-divider></v-divider>
+    <div class="conversation-content pa-0 ma-0 d-flex flex-column">
+        <!-- Header -->
+        <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
+        <v-divider></v-divider>
 
-    <!-- Content -->
-    <v-sheet
-      class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent"
-      v-chat-scroll="{ always: false, smooth: true }"
-      @click="onRead"
-    ></v-sheet>
+        <!-- Content -->
+        <v-sheet
+            class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent"
+            v-chat-scroll="{ always: false, smooth: true }"
+            @click="onRead"
+        ></v-sheet>
 
-    <!-- Input -->
-    <ChatEditor class="mx-4 my-2"></ChatEditor>
-  </div>
+        <!-- Input -->
+        <ChatEditor
+            class="mx-4 my-2"
+            @enter="onSend"
+            @send="onSend"
+        ></ChatEditor>
+    </div>
 </template>
 
 <script>
@@ -34,6 +35,26 @@ export default {
                     .dispatch("conversations/watchAllMessage", conv.id)
                     .catch(console.error);
             }
+        },
+        onSend(html) {
+            if (!html) {
+                return;
+            }
+            
+            const convId = this.conversation.id;
+            // Send message
+            const msg = {
+                convId: convId,
+                body: {
+                    content: html,
+                },
+            };
+            this.$store
+                .dispatch("conversations/sendMessage", msg)
+                .then(() => {
+                    this.newMessage = "";
+                })
+                .catch(console.error);
         },
     },
 };
