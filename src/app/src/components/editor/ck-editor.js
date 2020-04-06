@@ -20,20 +20,32 @@ import FontBackgroundColor from "@ckeditor/ckeditor5-font/src/fontbackgroundcolo
 import FontColor from "@ckeditor/ckeditor5-font/src/fontcolor.js";
 import Indent from "@ckeditor/ckeditor5-indent/src/indent.js";
 // import TodoList from "@ckeditor/ckeditor5-list/src/todolist";
-// import IndentBlock from "@ckeditor/ckeditor5-indent/src/indentblock.js";
+import IndentBlock from "@ckeditor/ckeditor5-indent/src/indentblock.js";
 // import Mention from "@ckeditor/ckeditor5-mention/src/mention.js";
 import Strikethrough from "@ckeditor/ckeditor5-basic-styles/src/strikethrough.js";
 import Underline from "@ckeditor/ckeditor5-basic-styles/src/underline.js";
 // import SpecialCharactersEssentials from "@ckeditor/ckeditor5-special-characters/src/specialcharactersessentials.js";
 // import SpecialCharacters from "@ckeditor/ckeditor5-special-characters/src/specialcharacters.js";
-import Essentials from "@ckeditor/ckeditor5-essentials/src/essentials.js";
+// import Essentials from "@ckeditor/ckeditor5-essentials/src/essentials.js";
 import Paragraph from "@ckeditor/ckeditor5-paragraph/src/paragraph.js";
 import TextTransformation from "@ckeditor/ckeditor5-typing/src/texttransformation";
+
+// Essentials plugin
+import Clipboard from '@ckeditor/ckeditor5-clipboard/src/clipboard';
+import Enter from '@ckeditor/ckeditor5-enter/src/enter';
+import ShiftEnter from '@ckeditor/ckeditor5-enter/src/shiftenter';
+import Typing from '@ckeditor/ckeditor5-typing/src/typing';
+import Undo from '@ckeditor/ckeditor5-undo/src/undo';
 
 export default class Editor extends ClassicEditor { }
 
 // Plugins to include in the build.
 Editor.builtinPlugins = [
+    Clipboard,
+    Enter,
+    ShiftEnter,
+    Typing,
+    Undo,
     BlockQuote,
     Bold,
     Italic,
@@ -49,13 +61,13 @@ Editor.builtinPlugins = [
     FontColor,
     Indent,
     // TodoList,
-    // IndentBlock,
+    IndentBlock,
     // Mention,
     Strikethrough,
     Underline,
     // SpecialCharactersEssentials,
     // SpecialCharacters,
-    Essentials,
+    // Essentials,
     Paragraph,
     TextTransformation,
 ];
@@ -77,8 +89,8 @@ ClassicEditor.defaultConfig = {
             "fontColor",
             "|",
             "blockQuote",
-            // "indent",
-            // "outdent",
+            "indent",
+            "outdent",
             // "specialCharacters",
             // "|",
             "code",

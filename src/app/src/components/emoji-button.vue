@@ -1,6 +1,6 @@
 <template>
   <v-menu
-    :left="true"
+    top
     offset-y
     v-model="showEmojiPicker"
     :eager="true"
@@ -51,6 +51,14 @@ export default {
             showEmojiPicker: false,
         };
     },
+    mounted() {
+      document.addEventListener("keyup", (e) => {
+          console.log(e);
+          if (e.keyCode === 27 && this.showEmojiPicker == true) {
+              this.showEmojiPicker = false;
+          }
+      });
+    },
     methods: {
         onSelectEmoji(emoji) {
             this.$emit("select", emoji);
@@ -63,5 +71,9 @@ export default {
 <style lang="css">
 .emoji-type-image.emoji-set-twitter {
     background-image: url("../assets/emoji/twitter-emoji-32.png");
+}
+
+.emoji-mart-category .emoji-mart-emoji > span {
+  cursor: pointer;
 }
 </style>
