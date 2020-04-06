@@ -4,7 +4,7 @@
     mini-variant
     dark
     app
-    mini-variant-width="70"
+    mini-variant-width="65"
     class="left-drawer bg-1"
   >
     <!-- Self Avatar -->
@@ -25,7 +25,7 @@
           :key="menu.key"
           :value="menu"
           :input-value="menu == activatedMenu"
-          class="px-0 my-0 pb-3 pt-4"
+          class="px-0 my-0 pb-3 pt-3"
           @click="onActivateMenu(menu)"
         >
           <v-badge
