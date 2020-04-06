@@ -92,7 +92,13 @@ export default {
             this.editorInstance = editorInstance;
             // Register Enter command
             this.editorInstance.keystrokes.set("Enter", (data, cancel) => {
-                this.$emit("enter", this.internalValue, data, cancel);
+                cancel();
+                this.$emit(
+                    "enter",
+                    this.editorInstance.getData(),
+                    data,
+                    cancel
+                );
             });
         },
         onSend() {

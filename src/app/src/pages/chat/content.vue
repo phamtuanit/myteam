@@ -128,6 +128,10 @@ export default {
     },
     methods: {
         onSendMessage() {
+            if (!this.newMessage) {
+                return;
+            }
+
             if (this.conversation._isTemp == true) {
                 // Create chat first
                 const convInfo = {
