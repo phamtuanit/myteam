@@ -78,31 +78,6 @@
             @enter="onSendMessage"
             @send="onSendMessage"
         ></ChatEditor>
-        <!-- <v-list height="48" class="py-0 flex-grow-0 no-border-radius">
-            <v-list-item class="px-0 px-2">
-                <EmojiButton @select="onSelectEmoji"></EmojiButton>
-                <v-text-field
-                    flat
-                    class="no-border-radius"
-                    v-model="newMessage"
-                    hide-details
-                    solo
-                    clearable
-                    @keyup.esc="onClearMessage"
-                    @keyup.enter="onSendMessage"
-                    @focus="onRead"
-                    clear-icon="mdi-close"
-                ></v-text-field>
-                <v-btn
-                    icon
-                    class="send-btn"
-                    :disabled="!newMessage"
-                    @click="onSendMessage"
-                >
-                    <v-icon>mdi-send</v-icon>
-                </v-btn>
-            </v-list-item>
-        </v-list> -->
     </div>
 </template>
 
@@ -152,14 +127,6 @@ export default {
         this.messages = this.conversation.messages;
     },
     methods: {
-        onClearMessage() {
-            this.newMessage = "";
-        },
-        onSelectEmoji(emoji) {
-            if (emoji.native) {
-                this.newMessage += emoji.native;
-            }
-        },
         onSendMessage() {
             if (this.conversation._isTemp == true) {
                 // Create chat first
@@ -199,6 +166,9 @@ export default {
         onReact(type, message, status = true) {
             this.$store
                 .dispatch("conversations/reactMessage", { type, message, status })
+                .then(msg => {
+                    message.reactions = msg.reactions;
+                })
                 .catch(console.error);
         },
         onDereact(type, message) {

@@ -4,6 +4,7 @@
         <v-sheet
             height="57"
             width="250"
+            min-width="250"
             class="pa-0 center-y no-border-radius px-3"
         >
             <v-text-field

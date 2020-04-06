@@ -6,14 +6,27 @@
 
         <!-- Content -->
         <v-sheet
-            class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent"
+            class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent mb-2"
             v-chat-scroll="{ always: false, smooth: true }"
             @click="onRead"
-        ></v-sheet>
+        >
+            <!-- MineMessage -->
+            <v-slide-y-transition group>
+                <Message
+                    v-for="msg in messages"
+                    :key="msg.id"
+                    :message="msg"
+                    class="mt-3"
+                    @react="onReact"
+                    @dereact="onDereact"
+                ></Message>
+            </v-slide-y-transition>
+        </v-sheet>
 
         <!-- Input -->
         <ChatEditor
-            class="mx-4 my-2"
+            class="channel__input my-2"
+            v-model="newMessage"
             @enter="onSend"
             @send="onSend"
         ></ChatEditor>
@@ -22,11 +35,21 @@
 
 <script>
 import ChatEditor from "../../components/editor/chat-editor.vue";
+import Message from "./message.vue";
 export default {
     props: {
         conversation: Object,
     },
-    components: { ChatEditor },
+    components: { ChatEditor, Message },
+    data() {
+        return {
+            newMessage: "",
+            messages: [],
+        };
+    },
+    created() {
+        this.messages = this.conversation.messages;
+    },
     methods: {
         onRead() {
             const conv = this.conversation;
@@ -40,7 +63,7 @@ export default {
             if (!html) {
                 return;
             }
-            
+
             const convId = this.conversation.id;
             // Send message
             const msg = {
@@ -56,6 +79,21 @@ export default {
                 })
                 .catch(console.error);
         },
+        onReact(type, message, status = true) {
+            this.$store
+                .dispatch("conversations/reactMessage", {
+                    type,
+                    message,
+                    status,
+                })
+                .then(msg => {
+                    message.reactions = msg.reactions;
+                })
+                .catch(console.error);
+        },
+        onDereact(type, message) {
+            this.onReact(type, message, false);
+        },
     },
 };
 </script>
@@ -65,8 +103,8 @@ export default {
     height: 100vh;
 }
 
-/* Messages */
-/* .conversation-content >>> .message-sheet {
-    background: transparent;
-} */
+.channel__input {
+    margin-left: 60px;
+    margin-right: 58px;
+}
 </style>
