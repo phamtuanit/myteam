@@ -16,7 +16,7 @@
                     v-for="msg in messages"
                     :key="msg.id"
                     :message="msg"
-                    class="mt-3"
+                    class="mt-2"
                     @react="onReact"
                     @dereact="onDereact"
                 ></Message>

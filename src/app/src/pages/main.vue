@@ -15,7 +15,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 #main-layout >>> .v-navigation-drawer .v-navigation-drawer__border {
     background-color: transparent !important;
