@@ -127,8 +127,8 @@ export default {
         this.messages = this.conversation.messages;
     },
     methods: {
-        onSendMessage() {
-            if (!this.newMessage) {
+        onSendMessage(html) {
+            if (!html) {
                 return;
             }
 
@@ -152,7 +152,7 @@ export default {
             const msg = {
                 convId: this.chatId,
                 body: {
-                    content: this.newMessage,
+                    content: html,
                 },
             };
             this.$store
