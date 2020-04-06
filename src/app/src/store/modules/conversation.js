@@ -162,7 +162,7 @@ const moduleState = {
             if (conv) {
                 const existingMsg = conv.messages.find(i => i.id == message.id);
                 if (existingMsg) {
-                    Object.assign(existingMsg.body, message.body);
+                    Object.assign(existingMsg, message);
                 }
             }
         },
@@ -590,6 +590,7 @@ const moduleState = {
                                 reactions: newMsg.reactions,
                             },
                         });
+                        return newMsg;
                     });
             } else {
                 console.warn(

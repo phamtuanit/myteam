@@ -27,33 +27,23 @@ export default {
     props: {
         message: Object,
     },
+    data() {
+        return {
+            emojis: [],
+        };
+    },
     computed: {
         ...mapState({
-            me: state => state.users.me,
+            me: (state) => state.users.me,
         }),
-        emojis() {
-            if (!this.message.reactions || this.message.reactions.length <= 0) {
-                return [];
-            }
-
-            const emojis = {};
-            this.message.reactions.forEach(reaction => {
-                const style = this.getReactionStyle(reaction.type);
-                if (!emojis[reaction.type]) {
-                    emojis[reaction.type] = {
-                        mine: this.me.id == reaction.user,
-                        type: reaction.type,
-                        ...style,
-                        reactors: [reaction.user],
-                    };
-                } else {
-                    emojis[reaction.type].reactors.push(reaction.user);
-                    emojis[reaction.type].mine |= reaction.user;
-                }
-            });
-
-            return Object.values(emojis);
+    },
+    watch: {
+        "message.reactions"() {
+            this.emojis = this.getEmojis();
         },
+    },
+    created() {
+        this.emojis = this.getEmojis();
     },
     methods: {
         getReactionStyle(type) {
@@ -86,6 +76,29 @@ export default {
         },
         onReaction(reaction) {
             this.$emit("change", reaction.type);
+        },
+        getEmojis() {
+            if (!this.message.reactions || this.message.reactions.length <= 0) {
+                return [];
+            }
+
+            const emojis = {};
+            this.message.reactions.forEach((reaction) => {
+                const style = this.getReactionStyle(reaction.type);
+                if (!emojis[reaction.type]) {
+                    emojis[reaction.type] = {
+                        mine: this.me.id == reaction.user,
+                        type: reaction.type,
+                        ...style,
+                        reactors: [reaction.user],
+                    };
+                } else {
+                    emojis[reaction.type].reactors.push(reaction.user);
+                    emojis[reaction.type].mine |= reaction.user;
+                }
+            });
+
+            return Object.values(emojis);
         },
     },
 };
