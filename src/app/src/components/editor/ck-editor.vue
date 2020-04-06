@@ -54,7 +54,12 @@ export default {
         },
         internalValue() {
             this.$emit("input", this.internalValue);
-        }
+        },
+        value(val) {
+            if (this.internalValue !== val) {
+                this.internalValue = val;
+            }
+        },
     },
     created() {},
     mounted() {

@@ -72,7 +72,13 @@
         </v-sheet>
 
         <!-- Input box -->
-        <v-list height="48" class="py-0 flex-grow-0 no-border-radius">
+        <ChatEditor
+            class="mx-4 my-2"
+            v-model="newMessage"
+            @enter="onSendMessage"
+            @send="onSendMessage"
+        ></ChatEditor>
+        <!-- <v-list height="48" class="py-0 flex-grow-0 no-border-radius">
             <v-list-item class="px-0 px-2">
                 <EmojiButton @select="onSelectEmoji"></EmojiButton>
                 <v-text-field
@@ -96,7 +102,7 @@
                     <v-icon>mdi-send</v-icon>
                 </v-btn>
             </v-list-item>
-        </v-list>
+        </v-list> -->
     </div>
 </template>
 
@@ -107,9 +113,10 @@ import FriendList from "./friend-list";
 import MyMessage from "./my-message";
 import YourMessage from "./your-message";
 import Avatar from "../../components/avatar";
+import ChatEditor from "../../components/editor/chat-editor.vue";
 
 export default {
-    components: { FriendList, EmojiButton, MyMessage, YourMessage, Avatar },
+    components: { FriendList, EmojiButton, MyMessage, YourMessage, Avatar, ChatEditor },
     props: {
         conversation: Object,
     },

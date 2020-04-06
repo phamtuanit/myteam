@@ -2,7 +2,10 @@
     <div class="chat-editor d-flex flex-column">
         <v-sheet
             class="chat-editor__container"
-            :class="{ 'theme-dark': $vuetify.theme.isDark, 'chat-editor-expanded': showToolBar }"
+            :class="{
+                'theme-dark': $vuetify.theme.isDark,
+                'chat-editor-expanded': showToolBar,
+            }"
         >
             <Editor
                 v-model="internalValue"
@@ -62,7 +65,22 @@ export default {
     watch: {
         internalValue() {
             this.$emit("input", this.internalValue);
-        }
+        },
+        showToolBar(val) {
+            if (val == true) {
+                const editable = this.editorInstance.ui.view.editable;
+                editable.element.focus();
+            }
+        },
+        value(val) {
+            if (this.internalValue !== val) {
+                this.internalValue = val;
+
+                if (!val) {
+                    this.showToolBar = false;
+                }
+            }
+        },
     },
     methods: {
         onSelectEmoji(emoji) {
