@@ -1,8 +1,4 @@
-export const fillHeight = function (
-    element,
-    marginBottom,
-    parentElement
-) {
+export const fillHeight = function (element, marginBottom, parentElement) {
     let targetEls = [];
     if (typeof element === "string") {
         targetEls = Array.from(parentElement.getElementsByClassName(element));
@@ -16,7 +12,7 @@ export const fillHeight = function (
 
     if (targetEls.length > 0) {
         let result = [];
-        targetEls.forEach(targetEl => {
+        targetEls.forEach((targetEl) => {
             const targetRect = targetEl.getBoundingClientRect();
             let calHeight = targetRect.top + marginBottom;
             targetEl.style.height = `calc(100vh - ${calHeight}px)`;
@@ -27,4 +23,21 @@ export const fillHeight = function (
         }
         return result.length > 0 ? result[0] : undefined;
     }
+};
+
+export const scrollToBottom = (className, parent, smooth, force) => {
+    parent.getElementsByClassName(className).forEach((el) => {
+        if (!force && !el.scrollTop == 0) {
+            return;
+        }
+
+        if (typeof el.scroll === "function") {
+            el.scroll({
+                top: el.scrollHeight,
+                behavior: smooth ? "smooth" : "instant",
+            });
+        } else {
+            el.scrollTop = el.scrollHeight;
+        }
+    });
 };
