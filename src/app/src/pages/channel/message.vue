@@ -47,6 +47,7 @@ import UserAvatar from "../../components/user-avatar.vue";
 import ReactionEmoji from "../../components/message-emoji.vue";
 import Reaction from "../../components/message-reaction.vue";
 
+import { mapState } from "vuex";
 export default {
     components: { UserAvatar, ReactionEmoji, Reaction },
     props: {
@@ -59,8 +60,22 @@ export default {
             user: {
                 fullName: "Unknow",
             },
-            reactedType: null,
         };
+    },
+    computed: {
+        ...mapState({
+            me: (state) => state.users.me,
+        }),
+        reactedType() {
+            if (!this.message || !this.message.reactions) {
+                return "";
+            }
+
+            const lastReaction = this.message.reactions.find(
+                (r) => r.user == this.me.id
+            );
+            return lastReaction ? lastReaction.type : "";
+        },
     },
     created() {
         if (this.message.from.issuer) {
@@ -107,6 +122,7 @@ export default {
 .message-item__content-footer >>> .reactions-panel {
     position: absolute;
     visibility: hidden;
+    opacity: 0.3;
     bottom: 0;
     top: 0;
     right: 30px;
@@ -115,6 +131,7 @@ export default {
 .message-item__content:hover >>> .reactions-panel {
     transition: all 0.2s ease-in;
     visibility: visible;
+    opacity: 1;
     right: 16px;
 }
 </style>
