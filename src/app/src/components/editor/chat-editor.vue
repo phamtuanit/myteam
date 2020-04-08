@@ -93,12 +93,21 @@ export default {
             // Register Enter command
             this.editorInstance.keystrokes.set("Enter", (data, cancel) => {
                 cancel();
-                this.$emit(
-                    "enter",
-                    this.editorInstance.getData(),
-                    data,
-                    cancel
-                );
+
+                const currVal =this.editorInstance.getData();
+                if (currVal !== this.value) {
+                    // Incase user type fast
+                    return;
+                }
+
+                setTimeout(() => {
+                    this.$emit(
+                        "enter",
+                        currVal,
+                        data,
+                        cancel
+                    );
+                }, 0);
             });
         },
         onSend() {
