@@ -1,7 +1,7 @@
 <template>
     <div class="fill-width fill-height d-flex couple-conversation" :class="{'theme--dark': $vuetify.theme.isDark}"  no-gutters>
         <!-- Conversation list -->
-        <ChatList :list="allConv" :activated="activatedConv"></ChatList>
+        <ChatList :list="allConv" :activated-item="activatedConv"></ChatList>
         
             <!-- Conversation content container -->
         <div class="flex-grow-1">
@@ -44,6 +44,7 @@ import FriendList from "./friend-list";
 
 import { mapState } from "vuex";
 export default {
+    name: "chat-main",
     components: { ChatList, ChatContent, FriendList },
     data() {
         return {
@@ -54,8 +55,8 @@ export default {
     },
     computed: {
         ...mapState({
-            allConv: state => state.conversations.chat.all,
-            activatedConv: state => state.conversations.chat.active,
+            allConv: (state) => state.conversations.chat.all,
+            activatedConv: (state) => state.conversations.chat.active,
         }),
     },
     watch: {
@@ -66,12 +67,23 @@ export default {
     created() {
         this.updateData();
     },
+    activated() {
+        console.log("---> activated", this.$attrs["data-route-name"], this.$attrs["data-is-active"]);
+        this.$children.forEach((ch) => {
+            if (typeof ch.activate === "function") {
+                ch.activate();
+            }
+        });
+    },
+    deactivated() {
+        console.log("<--- deactivated", this.$attrs["data-route-name"]);
+    },
     methods: {
         updateData() {
             if (this.activatedConv) {
                 const convId = this.activatedConv.id || this.activatedConv._id;
                 let existingConv = this.conversations.find(
-                    con => (con.value.id || con.value._id) == convId
+                    (con) => (con.value.id || con.value._id) == convId
                 );
 
                 if (!existingConv) {

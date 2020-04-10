@@ -1,7 +1,11 @@
 <template>
     <div class="chat-box d-flex flex-column">
         <!-- Header -->
-        <v-sheet height="57" min-height="57" class="pa-0 center-y no-border-radius flex-grow-0">
+        <v-sheet
+            height="57"
+            min-height="57"
+            class="pa-0 center-y no-border-radius flex-grow-0"
+        >
             <!-- User info -->
             <v-list-item class="px-4 ma-0">
                 <Avatar
@@ -23,7 +27,9 @@
                         <v-btn
                             v-on="on"
                             icon
-                            :style="showFrienfList ? 'opacity: 1;' : 'opacity: 0.6;'"
+                            :style="
+                                showFrienfList ? 'opacity: 1;' : 'opacity: 0.6;'
+                            "
                             @click="showFrienfList = !showFrienfList"
                         >
                             <v-icon
@@ -91,23 +97,30 @@ import Avatar from "../../components/avatar";
 import ChatEditor from "../../components/editor/chat-editor.vue";
 
 export default {
-    components: { FriendList, EmojiButton, MyMessage, YourMessage, Avatar, ChatEditor },
+    components: {
+        FriendList,
+        EmojiButton,
+        MyMessage,
+        YourMessage,
+        Avatar,
+        ChatEditor,
+    },
     props: {
         conversation: Object,
     },
     data() {
         return {
             theme: this.$vuetify.theme,
-            newMessage: "",
+            newMessage: null,
             showFrienfList: true,
-            messages: []
+            messages: [],
         };
     },
     computed: {
         destUser() {
             if (this.conversation) {
                 const subscribers = this.conversation.subscribers.filter(
-                    user => !user._isMe
+                    (user) => !user._isMe
                 );
                 if (subscribers.length > 0) {
                     return subscribers[0];
@@ -136,15 +149,15 @@ export default {
                 // Create chat first
                 const convInfo = {
                     _id: this.conversation._id,
-                    subscribers: this.conversation.subscribers.map(u => u.id)
-                }
+                    subscribers: this.conversation.subscribers.map((u) => u.id),
+                };
 
                 return this.$store
-                .dispatch("conversations/createConversation", convInfo)
-                .then(() => {
-                    this.onSendMessage();
-                })
-                .catch(console.error);
+                    .dispatch("conversations/createConversation", convInfo)
+                    .then(() => {
+                        this.onSendMessage();
+                    })
+                    .catch(console.error);
             }
 
             this.chatId = this.conversation.id;
@@ -158,7 +171,9 @@ export default {
             this.$store
                 .dispatch("conversations/sendMessage", msg)
                 .then(() => {
+                    console.log("Reset msg - B: ", this.newMessage);
                     this.newMessage = "";
+                    console.log("Reset msg - A: ", this.newMessage);
                 })
                 .catch(console.error);
         },
@@ -169,8 +184,12 @@ export default {
         },
         onReact(type, message, status = true) {
             this.$store
-                .dispatch("conversations/reactMessage", { type, message, status })
-                .then(msg => {
+                .dispatch("conversations/reactMessage", {
+                    type,
+                    message,
+                    status,
+                })
+                .then((msg) => {
                     message.reactions = msg.reactions;
                 })
                 .catch(console.error);
