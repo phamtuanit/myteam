@@ -1,6 +1,7 @@
 <template>
     <v-sheet
-        width="280px" min-width="280px"
+        width="280px"
+        min-width="280px"
         class="pa-0 fill-height no-border-radius d-flex flex-column"
         id="chat-list"
     >
@@ -59,7 +60,7 @@ import Conversation from "../../components/conversation-item.vue";
 export default {
     props: {
         list: Array,
-        activated: Object,
+        activatedItem: Object,
         allowAdd: {
             type: Boolean,
             default: false,
@@ -77,16 +78,16 @@ export default {
         searchText() {
             this.searchLocker.then(this.searchConversation);
         },
-        "activated.id"() {
+        "activatedItem.id"() {
             // To support change tmp conversation to real
             this.updateUrlQuery();
         },
-        activated() {
-            this.activatedConv = this.activated;
+        activatedItem() {
+            this.activatedConv = this.activatedItem;
             this.updateUrlQuery();
         },
         activatedConv(val) {
-            if (val && val != this.activated) {
+            if (val && val != this.activatedItem) {
                 this.$store.dispatch(
                     "conversations/activeChat",
                     val.id || val._id
@@ -95,7 +96,7 @@ export default {
                 this.$nextTick(() => {
                     // Fix bug cannot activate the last conv after changing conv.id (conv._id)
                     this.activatedConv = this.convList.find(
-                        i => i.id == this.activated.id
+                        (i) => i.id == this.activatedItem.id
                     );
                 });
             }
@@ -104,29 +105,24 @@ export default {
     created() {
         // Init data
         this.convList = this.list;
-        this.activatedConv = this.activated;
+        this.activatedConv = this.activatedItem;
         this.searchLocker = Promise.resolve();
 
         // Update route
-        if (this.$route.query._status == "temp") {
+        if (this.$route.query._status === "temp") {
             this.$router.updateQuery({});
         } else if (this.$route.query._id) {
             // Load the last conversation
             return this.$store
                 .dispatch("conversations/activeChat", this.$route.query._id)
-                .then(chat => {
+                .then((chat) => {
                     if (!chat) {
-                        const newQuery = { ...this.$route.query };
-                        delete newQuery._status;
-                        delete newQuery._id;
-                        this.$router.updateQuery(newQuery);
+                        this.$router.updateQuery({});
                     }
                 })
-                .catch(err => {
+                .catch((err) => {
                     console.error(err);
-                    const newQuery = { ...this.$route.query };
-                    delete newQuery._id;
-                    this.$router.updateQuery(newQuery);
+                    this.$router.updateQuery({});
                 });
         } else if (this.list.length > 0 && !this.activatedConv) {
             // Set default conversation
@@ -135,14 +131,7 @@ export default {
     },
     mounted() {
         fillHeight("conversation-list", 0, this.$el);
-
-        // Update url query
-        if (!this.$route.query._id && this.activatedConv) {
-            const currentId = this.activatedConv.id || this.activatedConv._id;
-            const newQuery = { ...this.$route.query };
-            newQuery._id = currentId;
-            this.$router.updateQuery(newQuery);
-        }
+        this.updateUrlQuery();
     },
     methods: {
         onSelect(chat) {
@@ -181,21 +170,36 @@ export default {
             if (!this.searchText) {
                 this.searchLocker = Promise.resolve();
                 this.convList = this.list;
-                this.activatedConv = this.activated;
+                this.activatedConv = this.activatedItem;
                 return;
             }
 
             // Request searching
-            this.searchLocker = new Promise(resolve => {
-                const list = this.list.filter(conv =>
+            this.searchLocker = new Promise((resolve) => {
+                const list = this.list.filter((conv) =>
                     conv.name
                         .toLowerCase()
                         .includes(this.searchText.toLowerCase())
                 );
                 resolve(list);
-            }).then(list => {
+            }).then((list) => {
                 this.convList = list;
             });
+        },
+        activate() {
+            console.log("---> activated chat-list");
+            setTimeout(this.updateUrlQuery, 10);
+            // if (this.activated) {
+            //     const convId = this.activated.id || this.activated._id;
+            //     if (convId !== this.$route.query._id) {
+            //         const newQuery = { ...this.$route.query };
+            //         newQuery._id = convId;
+            //         this.$router.push(newQuery);
+            //     }
+            // }
+        },
+        activated() {
+            console.log("---> activated chat-list", this.$el);
         },
     },
 };
