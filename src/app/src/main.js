@@ -12,13 +12,16 @@ const VueRouter = require("vue-router").default;
 Vue.use(VueRouter);
 const router = require("./plugins/vue-router").default(store);
 
+import VueRouterMultiView from "vue-router-multi-view";
+Vue.use(VueRouterMultiView);
+
 Vue.config.productionTip = false;
 new Vue({
     vuetify,
     router: router,
     store,
     data: () => ({}),
-    render: h => h(App),
+    render: (h) => h(App),
     created() {
         if (this.$route.name !== "preparation") {
             this.$router.push({ name: "preparation" });
