@@ -7,7 +7,7 @@
         <!-- Conversation list -->
         <ChatList
             :list="allConv"
-            :activated="activatedConv"
+            :activated-item="activatedConv"
             :allow-add="true"
             @add="onAddConv"
         ></ChatList>
@@ -16,7 +16,7 @@
         <div class="flex-grow-1 d-flex flex-column">
             <!-- Fake header -->
             <div v-if="!currentConvId">
-                <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
+                <v-sheet height="57" min-height="57" class="pa-0 no-border-radius"></v-sheet>
                 <v-divider></v-divider>
             </div>
 
@@ -45,6 +45,7 @@ import ChatContent from "./content.vue";
 
 import { mapState } from "vuex";
 export default {
+    name: "channel-main",
     components: { ChatList, ChatContent },
     data() {
         return {
@@ -55,8 +56,8 @@ export default {
     },
     computed: {
         ...mapState({
-            allConv: state => state.conversations.channel.all,
-            activatedConv: state => state.conversations.channel.active,
+            allConv: (state) => state.conversations.channel.all,
+            activatedConv: (state) => state.conversations.channel.active,
         }),
     },
     watch: {
@@ -67,13 +68,24 @@ export default {
     created() {
         this.updateData();
     },
+    activated() {
+        console.log("---> activated", this.$attrs["data-route-name"], this.$attrs["data-is-active"]);
+        this.$children.forEach((ch) => {
+            if (typeof ch.activate === "function") {
+                ch.activate();
+            }
+        });
+    },
+    deactivated() {
+        console.log("<--- deactivated", this.$attrs["data-route-name"]);
+    },
     methods: {
         onAddConv() {},
         updateData() {
             if (this.activatedConv) {
                 const convId = this.activatedConv.id || this.activatedConv._id;
                 let existingConv = this.conversations.find(
-                    con => (con.value.id || con.value._id) == convId
+                    (con) => (con.value.id || con.value._id) == convId
                 );
 
                 if (!existingConv) {
