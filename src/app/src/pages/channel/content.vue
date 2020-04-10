@@ -1,7 +1,7 @@
 <template>
     <div class="conversation-content pa-0 ma-0 d-flex flex-column">
         <!-- Header -->
-        <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
+        <v-sheet height="57" min-height="57" class="pa-0 no-border-radius"></v-sheet>
         <v-divider></v-divider>
 
         <!-- Content -->
@@ -43,7 +43,7 @@ export default {
     components: { ChatEditor, Message },
     data() {
         return {
-            newMessage: "",
+            newMessage: null,
             messages: [],
         };
     },
