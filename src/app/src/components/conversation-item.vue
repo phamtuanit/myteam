@@ -1,27 +1,40 @@
 <template>
-    <div
+    <v-list-item
+        :value="conversation"
         class="conversation-item"
         @click="onOpenConv"
         :class="{
+            'channel-conversation': conversation.channel == true,
             'has-new-message': hasNewMessage,
             'theme--dark': $vuetify.theme.isDark,
         }"
     >
-        <UserAvatar :user="targetUser" :infinity="hasNewMessage" />
+        <template v-if="!conversation.channel">
+            <UserAvatar :user="targetUser" :infinity="hasNewMessage" />
 
-        <v-list-item-content class="py-1 px-2 content__text">
+            <v-list-item-content class="py-1 px-2 content__text">
+                <v-list-item-title
+                    class="subtitle-2 mb-0"
+                    v-text="conversation.name"
+                ></v-list-item-title>
+                <v-list-item-subtitle
+                    v-if="recentMessage"
+                    class="caption"
+                    :class="{ 'font-weight-bold': hasNewMessage }"
+                    v-text="recentMessage"
+                ></v-list-item-subtitle>
+            </v-list-item-content>
+        </template>
+        <template v-else>
             <v-list-item-title
-                class="subtitle-2 mb-0"
-                v-text="conversation.name"
-            ></v-list-item-title>
-            <v-list-item-subtitle
-                v-if="recentMessage"
-                class="caption"
+                class="subtitle-2 my-0 content__text"
                 :class="{ 'font-weight-bold': hasNewMessage }"
-                v-text="recentMessage"
-            ></v-list-item-subtitle>
-        </v-list-item-content>
-    </div>
+            >
+                <v-icon size="18">mdi-pound</v-icon>
+                <span class="ml-1" v-text="conversation.name"></span>
+            </v-list-item-title>
+        </template>
+    </v-list-item>
 </template>
 
 <script>
@@ -29,7 +42,7 @@ import UserAvatar from "./user-avatar.vue";
 export default {
     props: ["conversation"],
     components: { UserAvatar },
-    data: (vm) => ({
+    data: vm => ({
         recentMessage: "",
         messages: vm.conversation.messages,
         unreadMessage: vm.conversation.meta.unreadMessage,
@@ -38,7 +51,7 @@ export default {
         targetUser() {
             if (this.conversation) {
                 const friends = this.conversation.subscribers.filter(
-                    (user) => !user._isMe
+                    user => !user._isMe
                 );
                 if (friends.length > 0) {
                     return friends[0];
@@ -117,19 +130,38 @@ export default {
     outline: none;
 }
 
+.conversation-item.v-list-item {
+    min-height: 54px;
+    color: inherit;
+}
+
+.conversation-item.v-list-item.channel-conversation {
+    min-height: 40px;
+}
+
 .has-new-message {
     position: relative;
 }
 
 .has-new-message::after {
+    animation: all 0.2s linear;
     animation: opacity 0.2s linear;
     content: "";
     position: absolute;
     background-color: var(--primary-color-2);
     width: 3px;
-    left: -16px;
-    bottom: -7px;
-    top: -7px;
+    left: 0px;
+    bottom: -0;
+    top: -0;
+}
+
+@keyframes opacity {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .has-new-message::after {
@@ -140,12 +172,31 @@ export default {
     background-color: var(--primary-color--text);
 }
 
-@keyframes opacity {
+.content__text {
+    opacity: 0.7;
+}
+
+div:not(.has-new-message).content__text {
+    opacity: 1;
+}
+
+.has-new-message >>> .v-icon {
+    animation: blink 1s linear infinite;
+    color: inherit;
+}
+
+@keyframes blink {
     0% {
-        opacity: 0;
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
     }
     100% {
-        opacity: 1;
+        opacity: 0.6;
+        transform: scale(1);
     }
 }
 

@@ -40,14 +40,12 @@
                 v-model="activatedConv"
                 class="conversation-list flex-grow-1 overflow-y-auto"
             >
-                <v-list-item
+                <Conversation
+                    :conversation="chat"
                     v-for="chat in convList"
                     :key="chat.id || chat._id"
-                    :value="chat"
                     @click="onSelect(chat)"
-                >
-                    <Conversation :conversation="chat" />
-                </v-list-item>
+                />
             </v-list-item-group>
         </v-list>
     </v-sheet>
@@ -96,7 +94,7 @@ export default {
                 this.$nextTick(() => {
                     // Fix bug cannot activate the last conv after changing conv.id (conv._id)
                     this.activatedConv = this.convList.find(
-                        (i) => i.id == this.activatedItem.id
+                        i => i.id == this.activatedItem.id
                     );
                 });
             }
@@ -115,12 +113,12 @@ export default {
             // Load the last conversation
             return this.$store
                 .dispatch("conversations/activeChat", this.$route.query._id)
-                .then((chat) => {
+                .then(chat => {
                     if (!chat) {
                         this.$router.updateQuery({});
                     }
                 })
-                .catch((err) => {
+                .catch(err => {
                     console.error(err);
                     this.$router.updateQuery({});
                 });
@@ -175,14 +173,14 @@ export default {
             }
 
             // Request searching
-            this.searchLocker = new Promise((resolve) => {
-                const list = this.list.filter((conv) =>
+            this.searchLocker = new Promise(resolve => {
+                const list = this.list.filter(conv =>
                     conv.name
                         .toLowerCase()
                         .includes(this.searchText.toLowerCase())
                 );
                 resolve(list);
-            }).then((list) => {
+            }).then(list => {
                 this.convList = list;
             });
         },
