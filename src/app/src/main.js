@@ -12,9 +12,6 @@ const VueRouter = require("vue-router").default;
 Vue.use(VueRouter);
 const router = require("./plugins/vue-router").default(store);
 
-import VueRouterMultiView from "vue-router-multi-view";
-Vue.use(VueRouterMultiView);
-
 Vue.config.productionTip = false;
 new Vue({
     vuetify,

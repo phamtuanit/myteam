@@ -1,18 +1,31 @@
 <template>
-    <div class="fill-width fill-height d-flex couple-conversation" :class="{'theme--dark': $vuetify.theme.isDark}"  no-gutters>
+    <div
+        class="fill-height d-flex couple-conversation"
+        :class="{'theme--dark': $vuetify.theme.isDark}"
+        no-gutters
+    >
         <!-- Conversation list -->
-        <ChatList :list="allConv" :activated-item="activatedConv"></ChatList>
-        
-            <!-- Conversation content container -->
+        <ChatList
+            :list="allConv"
+            :activated-item="activatedConv"
+        ></ChatList>
+
+        <!-- Conversation content container -->
         <div class="flex-grow-1">
             <!-- Fake header -->
             <div v-if="!currentConvId">
-                <v-sheet height="57" class="pa-0 no-border-radius"></v-sheet>
+                <v-sheet
+                    height="57"
+                    class="pa-0 no-border-radius"
+                ></v-sheet>
                 <v-divider></v-divider>
             </div>
 
             <!-- Conversation content -->
-            <v-tabs-items v-model="currentConvId" class="conversation-group flex-grow-1 transparent">
+            <v-tabs-items
+                v-model="currentConvId"
+                class="conversation-group flex-grow-1 transparent"
+            >
                 <v-tab-item
                     v-for="conv in conversations"
                     :key="conv.id"
@@ -55,8 +68,8 @@ export default {
     },
     computed: {
         ...mapState({
-            allConv: (state) => state.conversations.chat.all,
-            activatedConv: (state) => state.conversations.chat.active,
+            allConv: state => state.conversations.chat.all,
+            activatedConv: state => state.conversations.chat.active,
         }),
     },
     watch: {
@@ -68,22 +81,22 @@ export default {
         this.updateData();
     },
     activated() {
-        console.log("---> activated", this.$attrs["data-route-name"], this.$attrs["data-is-active"]);
-        this.$children.forEach((ch) => {
+        console.log("---> activated", this.$options.name);
+        this.$children.forEach(ch => {
             if (typeof ch.activate === "function") {
                 ch.activate();
             }
         });
     },
     deactivated() {
-        console.log("<--- deactivated", this.$attrs["data-route-name"]);
+        console.log("<--- deactivated", this.$options.name);
     },
     methods: {
         updateData() {
             if (this.activatedConv) {
                 const convId = this.activatedConv.id || this.activatedConv._id;
                 let existingConv = this.conversations.find(
-                    (con) => (con.value.id || con.value._id) == convId
+                    con => (con.value.id || con.value._id) == convId
                 );
 
                 if (!existingConv) {

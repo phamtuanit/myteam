@@ -32,13 +32,11 @@
                             "
                             @click="showFrienfList = !showFrienfList"
                         >
-                            <v-icon
-                                v-text="
+                            <v-icon v-text="
                                     showFrienfList
                                         ? 'mdi-account-supervisor'
                                         : 'mdi-account-search'
-                                "
-                            ></v-icon>
+                                "></v-icon>
                         </v-btn>
                     </template>
                     <span>Friend list</span>
@@ -79,7 +77,7 @@
 
         <!-- Input box -->
         <ChatEditor
-            class="mx-4 my-2"
+            class="mx-3 my-2"
             v-model="newMessage"
             @enter="onSendMessage"
             @send="onSendMessage"
@@ -120,7 +118,7 @@ export default {
         destUser() {
             if (this.conversation) {
                 const subscribers = this.conversation.subscribers.filter(
-                    (user) => !user._isMe
+                    user => !user._isMe
                 );
                 if (subscribers.length > 0) {
                     return subscribers[0];
@@ -149,7 +147,7 @@ export default {
                 // Create chat first
                 const convInfo = {
                     _id: this.conversation._id,
-                    subscribers: this.conversation.subscribers.map((u) => u.id),
+                    subscribers: this.conversation.subscribers.map(u => u.id),
                 };
 
                 return this.$store
@@ -189,7 +187,7 @@ export default {
                     message,
                     status,
                 })
-                .then((msg) => {
+                .then(msg => {
                     message.reactions = msg.reactions;
                 })
                 .catch(console.error);
