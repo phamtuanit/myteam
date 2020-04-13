@@ -1,12 +1,12 @@
 <template>
-  <ckeditor
-    v-if="showEditor"
-    :editor="editor"
-    v-model="internalValue"
-    :config="editorConfig"
-    ref="editor"
-    @ready="onEditorReady"
-  ></ckeditor>
+    <ckeditor
+        v-if="showEditor"
+        :editor="editor"
+        v-model="internalValue"
+        :config="editorConfig"
+        ref="editor"
+        @ready="onEditorReady"
+    ></ckeditor>
 </template>
 
 <script>
@@ -22,14 +22,6 @@ export default {
         showToolBar: {
             type: Boolean,
             default: true,
-        },
-        height: {
-            type: Number,
-            default: -1,
-        },
-        maxHeight: {
-            type: Number,
-            default: -1,
         },
         classEditor: {
             type: Function,
@@ -61,12 +53,11 @@ export default {
             }
         },
     },
-    created() {},
     mounted() {
         setTimeout(() => {
             // Display editor
             this.showEditor = true;
-        }, 50);
+        }, 10);
     },
     methods: {
         updateTopbar() {

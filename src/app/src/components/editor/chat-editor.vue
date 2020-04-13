@@ -18,14 +18,18 @@
             <!-- Start -->
             <div class="d-flex flex-align-start">
                 <EmojiButton @select="onSelectEmoji"></EmojiButton>
-                <v-btn icon @click="showToolBar = !showToolBar">
-                    <v-icon :color="showToolBar ? 'orange' : ''"
-                        >mdi-format-letter-case-upper</v-icon
-                    >
+                <v-btn
+                    icon
+                    @click="showToolBar = !showToolBar"
+                >
+                    <v-icon :color="showToolBar ? 'orange' : ''">mdi-format-letter-case-upper</v-icon>
                 </v-btn>
             </div>
             <!-- End -->
-            <v-btn icon @click="onSend">
+            <v-btn
+                icon
+                @click="onSend"
+            >
                 <v-icon>mdi-send</v-icon>
             </v-btn>
         </v-sheet>
@@ -40,7 +44,7 @@ import Editor from "./ck-editor.vue";
 import ClassicEditor from "./ck-editor.js";
 // Remove Entr plugin
 const enterIndex = ClassicEditor.builtinPlugins.findIndex(
-    (i) => i.pluginName == "Enter"
+    i => i.pluginName == "Enter"
 );
 
 if (enterIndex >= 0) {
@@ -94,19 +98,14 @@ export default {
             this.editorInstance.keystrokes.set("Enter", (data, cancel) => {
                 cancel();
 
-                const currVal =this.editorInstance.getData();
+                const currVal = this.editorInstance.getData();
                 if (currVal !== this.value) {
                     // Incase user type fast
                     return;
                 }
 
                 setTimeout(() => {
-                    this.$emit(
-                        "enter",
-                        currVal,
-                        data,
-                        cancel
-                    );
+                    this.$emit("enter", currVal, data, cancel);
                 }, 0);
             });
         },
@@ -115,7 +114,7 @@ export default {
         },
         writeText(text) {
             const editor = this.editorInstance;
-            editor.model.change((writer) => {
+            editor.model.change(writer => {
                 const insertPosition = editor.model.document.selection.getLastPosition();
                 writer.insertText(text, insertPosition);
             });
@@ -126,11 +125,11 @@ export default {
 
 <style>
 .chat-editor__container .ck.ck-editor__editable_inline > :first-child {
-    margin-top: 12px;
+    margin-top: 6px;
 }
 
 .chat-editor__container .ck.ck-editor__editable_inline > :last-child {
-    margin-bottom: 12px;
+    margin-bottom: 6px;
 }
 
 .chat-editor-expanded .ck .ck-editor__editable_inline {

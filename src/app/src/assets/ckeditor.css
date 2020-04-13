@@ -43,6 +43,10 @@
     border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
+.ck .ck-toolbar__items .ck-button {
+    opacity: 0.8;
+}
+
 .theme-dark .ck {
     --ck-color-text: rgba(255, 255, 255, 0.7);
     
