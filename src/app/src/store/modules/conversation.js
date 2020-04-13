@@ -3,12 +3,12 @@ const convService = new (require("../../services/conversation.service").default)
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
 let eventBus = null;
 
-function pushInformation(count) {
+function pushInformation(count, sender) {
     if (count <= 0) {
         return;
     }
     const payload = {
-        sender: "app-chat",
+        sender,
         inform: {
             count: count,
         },
@@ -16,12 +16,13 @@ function pushInformation(count) {
     eventBus.emit("drawer.inform", payload);
 }
 
-function informNewMessage(message) {
+function informNewMessage(message, conv) {
     if (message._isMe == true) {
         return;
     }
 
-    pushInformation(1);
+    const sender = conv.channel == true ? "app-channel" : "app-chat";
+    pushInformation(1, sender);
 }
 
 const moduleState = {
@@ -123,7 +124,7 @@ const moduleState = {
                 if (!conv.messages) {
                     conv.messages = [message];
                     pushToUnread(message);
-                    informNewMessage(message);
+                    informNewMessage(message, conv);
                 } else {
                     const foundMessage = conv.messages.find(
                         i => i.id == message.id
@@ -131,7 +132,7 @@ const moduleState = {
                     if (!foundMessage) {
                         conv.messages.push(message);
                         pushToUnread(message);
-                        informNewMessage(message);
+                        informNewMessage(message, conv);
                     } else {
                         Object.assign(foundMessage, message);
                     }
