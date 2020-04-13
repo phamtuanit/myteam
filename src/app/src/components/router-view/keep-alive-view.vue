@@ -85,12 +85,6 @@ export default {
                 fillPropsInData(component, data, route, configProps);
             }
 
-            data.directives || (data.directives = []);
-            data.directives.push({
-                name: "show",
-                value: true,
-            });
-
             // create view
             const currentView = h(component, data, children);
             viewCache[routeName] = { vnode: currentView };
@@ -118,13 +112,16 @@ export default {
                             handler.call(vm);
                         });
                     }
+                    // Update component state - using by DevTool
                     vm._inactive = key !== routeName;
+                }
 
-                    if (vm._inactive == true) {
+                if (vm._inactive == true) {
+                    if (!vm.$el.classList.contains("hidden")) {
                         vm.$el.classList.add("hidden");
-                    } else {
-                        vm.$el.classList.remove("hidden");
                     }
+                } else {
+                    vm.$el.classList.remove("hidden");
                 }
             }
 
