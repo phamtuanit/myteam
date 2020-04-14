@@ -58,7 +58,7 @@
                         v-if="msg._isMe == true"
                         :key="msg.id"
                         :message="msg"
-                        class="mt-5"
+                        :class="{'has-reacted': msg.reactions && msg.reactions.length > 0}"
                         @delete="onDeleteMyMessage"
                     ></MyMessage>
                     <YourMessage
@@ -66,7 +66,6 @@
                         :user="destUser"
                         :key="msg.id"
                         :message="msg"
-                        class="mt-5"
                         :class="{'has-reacted': msg.reactions && msg.reactions.length > 0}"
                         @react="onReact"
                         @dereact="onDereact"
@@ -215,31 +214,31 @@ export default {
 }
 
 /* Message aligment */
-.message-sheet >>> .message-card__header {
+.message-sheet >>> .message-item .message-card__header {
     display: none;
 }
 
-.message-sheet >>> .my-message + .your-message .message-card__header {
+.message-sheet >>> .my-message + .your-message .message-card__header, .message-sheet >>> .your-message + .my-message .message-card__header {
     display: flex;
 }
 
-.message-sheet >>> .your-message.has-reacted .message-card__header {
+.message-sheet >>> .message-item.has-reacted .message-card__header {
     display: flex;
 }
 
 .message-sheet >>> .your-message + .your-message.has-reacted .user-name {
     display: none;
+}                      
+
+.message-sheet >>> .your-message + .my-message {
+    margin-top: 16px;
 }
 
-.message-sheet >>> .your-message + .your-message {
-    margin-top: 0 !important;
+.message-sheet >>> .my-message + .your-message {
+    margin-top: 16px;
 }
 
-.message-sheet >>> .my-message + .my-message {
-    margin-top: 0 !important;
-}
-
-.message-sheet >>> div.message-item:last-child {
+.message-sheet >>> div.your-message:last-child {
     margin-bottom: 20px !important;
 }
 

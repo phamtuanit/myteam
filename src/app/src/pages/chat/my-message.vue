@@ -1,59 +1,52 @@
 <template>
-  <v-list-item
-    class="px-2 message-item my-message"
-    :class="{ 'message-error': !isAvailable }"
-  >
-    <v-spacer></v-spacer>
-    <!-- Actions -->
-    <div
-      class="message-actions mr-1"
-      v-if="isAvailable"
+    <v-list-item
+        class="px-2 message-item my-message"
+        :class="{ 'message-error': !isAvailable }"
     >
-      <v-btn
-        icon
-        small
-        class="mx-auto"
-        @click="onDeleteMessage"
-      >
-        <v-icon small>mdi-delete</v-icon>
-      </v-btn>
-    </div>
-    <v-list-item-avatar v-else>
-      <!-- Empty space -->
-    </v-list-item-avatar>
-
-    <!-- Content -->
-    <v-card
-      flat
-      class="mr-1 message-card py-1"
-      :disabled="!isAvailable"
-    >
-      <div class="py-1 px-4 card-header selection-disabled">
-        <span
-          class="caption"
-          v-text="time"
-        ></span>
         <v-spacer></v-spacer>
-        <v-icon
-          v-if="!isAvailable"
-          small
-          color="red lighten-1"
-          class="ml-2"
-          v-text="warnIcon"
-        ></v-icon>
-        <!-- Reacted Emoji -->
-        <ReactionEmoji
-          :message="message"
-          class="ml-2"
-        ></ReactionEmoji>
-      </div>
-      <v-card-text
-        class="py-0 px-4"
-        v-html="message.body.content"
-      >
-      </v-card-text>
-    </v-card>
-  </v-list-item>
+        <!-- Actions -->
+        <div class="message-actions mr-1" v-if="isAvailable">
+            <v-btn icon small class="mx-auto" @click="onDeleteMessage">
+                <v-icon small>mdi-delete</v-icon>
+            </v-btn>
+        </div>
+        <div style="min-width: 40px;" v-else>
+            <!-- Empty space -->
+        </div>
+
+        <!-- Content -->
+        <div class="message-content">
+            <v-card
+                flat
+                class="mr-1 message-card py-2 px-3"
+                :disabled="!isAvailable"
+            >
+                <!-- Header -->
+                <div class="message-card__header selection-disabled">
+                    <span class="caption" v-text="time"></span>
+                    <v-spacer></v-spacer>
+                    <v-icon
+                        v-if="!isAvailable"
+                        small
+                        color="red lighten-1"
+                        class="ml-2"
+                        v-text="warnIcon"
+                    ></v-icon>
+                    <!-- Reacted Emoji -->
+                    <ReactionEmoji
+                        :message="message"
+                        class="ml-2"
+                    ></ReactionEmoji>
+                </div>
+                <!-- Body -->
+                <v-card-text
+                    class="message-card_text pa-0 mt-1"
+                    v-html="message.body.content"
+                >
+                </v-card-text>
+            </v-card>
+        </div>
+    </v-list-item>
 </template>
 
 <script>
@@ -113,7 +106,12 @@ export default {
 </script>
 
 <style scoped>
-.card-header {
+.message-content {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.message-card__header {
     position: relative;
     display: flex;
     align-items: center;
