@@ -1,6 +1,6 @@
 <template>
     <v-list-item class="px-2 message-item your-message">
-        <v-list-item-avatar class="my-0 ml-3 mr-0">
+        <v-list-item-avatar class="my-0 ml-2 mr-0">
             <UserAvatar :user="user" online-effect />
         </v-list-item-avatar>
 

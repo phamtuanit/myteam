@@ -32,11 +32,13 @@
                             "
                             @click="showFrienfList = !showFrienfList"
                         >
-                            <v-icon v-text="
+                            <v-icon
+                                v-text="
                                     showFrienfList
                                         ? 'mdi-account-supervisor'
                                         : 'mdi-account-search'
-                                "></v-icon>
+                                "
+                            ></v-icon>
                         </v-btn>
                     </template>
                     <span>Friend list</span>
@@ -49,6 +51,7 @@
         <v-sheet
             class="flex-grow-1 overflow-y-auto message-sheet no-border-radius transparent"
             v-chat-scroll="{ always: false, smooth: true }"
+            ref="messageSheet"
             @click="onRead"
         >
             <!-- MineMessage -->
@@ -58,7 +61,10 @@
                         v-if="msg._isMe == true"
                         :key="msg.id"
                         :message="msg"
-                        :class="{'has-reacted': msg.reactions && msg.reactions.length > 0}"
+                        :class="{
+                            'has-reacted':
+                                msg.reactions && msg.reactions.length > 0,
+                        }"
                         @delete="onDeleteMyMessage"
                     ></MyMessage>
                     <YourMessage
@@ -66,7 +72,10 @@
                         :user="destUser"
                         :key="msg.id"
                         :message="msg"
-                        :class="{'has-reacted': msg.reactions && msg.reactions.length > 0}"
+                        :class="{
+                            'has-reacted':
+                                msg.reactions && msg.reactions.length > 0,
+                        }"
                         @react="onReact"
                         @dereact="onDereact"
                         @reply="onReply"
@@ -77,10 +86,11 @@
 
         <!-- Input box -->
         <ChatEditor
-            class="mx-3 my-2"
+            class="chat-editor my-2"
             v-model="newMessage"
             @enter="onSendMessage"
             @send="onSendMessage"
+            @ready="onChatEditorReady"
         ></ChatEditor>
     </div>
 </template>
@@ -138,6 +148,10 @@ export default {
         this.messages = this.conversation.messages;
     },
     methods: {
+        onChatEditorReady() {
+            const msgSheetEl = this.$refs.messageSheet.$el;
+            msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
+        },
         onSendMessage(html) {
             if (!html) {
                 return;
@@ -214,11 +228,16 @@ export default {
 }
 
 /* Message aligment */
-.message-sheet >>> .message-item .message-card__header {
+.message-sheet >>> .message-item:first-of-type {
+    margin-top: 8px;
+}
+
+.message-sheet >>> .message-item:not(:first-of-type) .message-card__header {
     display: none;
 }
 
-.message-sheet >>> .my-message + .your-message .message-card__header, .message-sheet >>> .your-message + .my-message .message-card__header {
+.message-sheet >>> .my-message + .your-message .message-card__header,
+.message-sheet >>> .your-message + .my-message .message-card__header {
     display: flex;
 }
 
@@ -228,7 +247,7 @@ export default {
 
 .message-sheet >>> .your-message + .your-message.has-reacted .user-name {
     display: none;
-}                      
+}
 
 .message-sheet >>> .your-message + .my-message {
     margin-top: 16px;
@@ -272,5 +291,10 @@ export default {
 
 .chat-box >>> .message-content p:last-child {
     margin-bottom: 2px;
+}
+
+.chat-box >>> .chat-editor {
+    margin-left: 60px;
+    margin-right: 14px;
 }
 </style>

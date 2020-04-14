@@ -73,15 +73,11 @@ export default {
         this.updateData();
     },
     activated() {
-        console.log("---> activated", this.$options.name);
         this.$children.forEach(ch => {
             if (typeof ch.activate === "function") {
                 ch.activate();
             }
         });
-    },
-    deactivated() {
-        console.log("<--- deactivated", this.$options.name);
     },
     methods: {
         onAddConv() {},

@@ -9,6 +9,7 @@
             class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent mb-2"
             v-chat-scroll="{ always: false, smooth: true }"
             @click="onRead"
+            ref="messageSheet"
         >
             <!-- MineMessage -->
             <v-slide-y-transition group>
@@ -29,6 +30,7 @@
             v-model="newMessage"
             @enter="onSend"
             @send="onSend"
+            @ready="onChatEditorReady"
         ></ChatEditor>
     </div>
 </template>
@@ -51,6 +53,10 @@ export default {
         this.messages = this.conversation.messages;
     },
     methods: {
+        onChatEditorReady() {
+            const msgSheetEl = this.$refs.messageSheet.$el;
+            msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
+        },
         onRead() {
             const conv = this.conversation;
             if (conv && conv.meta.unreadMessage.length > 0) {
@@ -106,5 +112,9 @@ export default {
 .channel__input {
     margin-left: 60px;
     margin-right: 58px;
+}
+
+.conversation-content >>> .channel-message-item:last-of-type {
+    margin-bottom: 10px;
 }
 </style>

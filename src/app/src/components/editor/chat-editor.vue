@@ -108,6 +108,8 @@ export default {
                     this.$emit("enter", currVal, data, cancel);
                 }, 0);
             });
+
+            this.$emit("ready");
         },
         onSend() {
             this.$emit("send", this.internalValue);

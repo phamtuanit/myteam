@@ -8,7 +8,7 @@
         <!-- content -->
         <div class="message-item__content d-flex flex-column flex-grow-1">
             <!-- Message -->
-            <v-card min-height="100" elevation="0" class="flex-grow-1 pa-2">
+            <v-card elevation="0" class="flex-grow-1 px-3 py-2">
                 <div class="message-item__content-header center-y">
                     <!-- User info -->
                     <span class="subtitle-2 mr-2" v-text="user.fullName"></span>
@@ -133,5 +133,9 @@ export default {
     visibility: visible;
     opacity: 1;
     right: 16px;
+}
+
+.channel-message-item >>> .message-item__content-text > p:last-child {
+    margin-bottom: 2px;
 }
 </style>
