@@ -80,5 +80,10 @@ export default {
 
 <style lang="css">
 @import "../../assets/ckeditor.css";
+
+.ck.ck-content.ck-editor__editable {
+    overflow-wrap: break-word;
+    word-break: break-all;
+}
 </style>
 
