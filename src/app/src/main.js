@@ -2,11 +2,11 @@ import Vue from "vue";
 import App from "./App.vue";
 import vuetify from "./plugins/vuetify";
 
-import VueChatScroll from "vue-chat-scroll";
-Vue.use(VueChatScroll);
-
 const store = require("./store/index");
 window.IoC.register("store", store);
+
+import VueScroll from "./utils/directives/index.js";
+Vue.use(VueScroll);
 
 const VueRouter = require("vue-router").default;
 Vue.use(VueRouter);
