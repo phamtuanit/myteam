@@ -1,81 +1,66 @@
 <template>
-  <v-list-item
-    class="px-2 message-item your-message"
-  >
-    <v-list-item-avatar class="ma-0">
-      <UserAvatar
-        :user="user"
-        online-effect
-      />
-    </v-list-item-avatar>
-    <!-- Message -->
-    <div class="message-content">
-      <v-card
-        flat
-        class="message-card py-1 ml-1"
-        :disabled="!isAvailable"
-      >
-        <div class="py-1 px-4 card-header selection-disabled">
-          <span
-            class="subtitle-2 mr-2"
-            v-text="fullName"
-          ></span>
-          <span
-            class="caption"
-            v-text="time"
-          ></span>
-          <v-spacer></v-spacer>
-          <v-icon
-            v-if="!isAvailable"
-            small
-            color="red lighten-1"
-            class="ml-2"
-            v-text="warnIcon"
-          ></v-icon>
-          <!-- Reacted Emoji -->
-          <ReactionEmoji
-            :message="message"
-            class="ml-2"
-            @change="onClearReaction"
-          ></ReactionEmoji>
-        </div>
-        <v-card-text
-          class="message-content py-0 px-4"
-          v-html="message.body.content"
-        >
-        </v-card-text>
-      </v-card>
+    <v-list-item class="px-2 message-item your-message">
+        <v-list-item-avatar class="my-0 ml-3 mr-0">
+            <UserAvatar :user="user" online-effect />
+        </v-list-item-avatar>
 
-      <div class="message-content__bottom">
+        <!-- Message -->
+        <div class="message-content">
+            <v-card flat class="message-card ml-1 py-2 px-3" :disabled="!isAvailable">
+                <!-- Header -->
+                <div class="message-card__header selection-disabled">
+                    <span
+                        class="subtitle-2 mr-2 user-name"
+                        v-text="fullName"
+                    ></span>
+                    <span class="caption" v-text="time"></span>
+                    <v-spacer></v-spacer>
+                    <v-icon
+                        v-if="!isAvailable"
+                        small
+                        color="red lighten-1"
+                        class="ml-2"
+                        v-text="warnIcon"
+                    ></v-icon>
+                    <!-- Reacted Emoji -->
+                    <ReactionEmoji
+                        :message="message"
+                        class="ml-2"
+                        @change="onClearReaction"
+                    ></ReactionEmoji>
+                </div>
+
+                <!-- Body -->
+                <v-card-text
+                    class="message-card_text pa-0 mt-1"
+                    v-html="message.body.content"
+                >
+                </v-card-text>
+            </v-card>
+
+            <div class="message-content__bottom">
+                <v-spacer></v-spacer>
+
+                <div class="custom-align">
+                    <!-- Reactions -->
+                    <Reaction
+                        @react="onReact"
+                        :selected="reactedType"
+                        v-if="isAvailable"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="message-actions ml-2" v-if="isAvailable">
+            <v-btn icon small class="mx-auto" @click="onReply">
+                <v-icon small>mdi-reply</v-icon>
+            </v-btn>
+        </div>
         <v-spacer></v-spacer>
-
-        <div class="custom-align">
-          <!-- Reactions -->
-          <Reaction
-            @react="onReact"
-            :selected="reactedType"
-            v-if="isAvailable"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div
-      class="message-actions ml-1"
-      v-if="isAvailable"
-    >
-      <v-btn
-        icon
-        small
-        class="mx-auto"
-        @click="onReply"
-      >
-        <v-icon small>mdi-reply</v-icon>
-      </v-btn>
-    </div>
-    <v-spacer></v-spacer>
-  </v-list-item>
+        <div style="min-width: 40px;"></div>
+    </v-list-item>
 </template>
 
 <script>
@@ -185,8 +170,13 @@ export default {
     top: -10px;
 }
 
+.message-content {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
 /* Card header */
-.card-header {
+.message-card__header {
     position: relative;
     display: flex;
     align-items: center;
@@ -205,12 +195,12 @@ export default {
     visibility: hidden;
     bottom: 0;
     top: 0;
-    right: 30px;
+    right: -10px;
 }
 
 .message-content:hover >>> .reactions-panel {
     transition: all 0.2s ease-in;
     visibility: visible;
-    right: 16px;
+    right: -30px;
 }
 </style>

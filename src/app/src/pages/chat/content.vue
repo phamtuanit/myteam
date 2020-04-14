@@ -67,6 +67,7 @@
                         :key="msg.id"
                         :message="msg"
                         class="mt-5"
+                        :class="{'has-reacted': msg.reactions && msg.reactions.length > 0}"
                         @react="onReact"
                         @dereact="onDereact"
                         @reply="onReply"
@@ -214,13 +215,32 @@ export default {
 }
 
 /* Message aligment */
-.message-sheet >>> .your-message + .your-message,
-.my-message + .my-message {
-    margin-top: 12px !important;
+.message-sheet >>> .message-card__header {
+    display: none;
+}
+
+.message-sheet >>> .my-message + .your-message .message-card__header {
+    display: flex;
+}
+
+.message-sheet >>> .your-message.has-reacted .message-card__header {
+    display: flex;
+}
+
+.message-sheet >>> .your-message + .your-message.has-reacted .user-name {
+    display: none;
+}
+
+.message-sheet >>> .your-message + .your-message {
+    margin-top: 0 !important;
+}
+
+.message-sheet >>> .my-message + .my-message {
+    margin-top: 0 !important;
 }
 
 .message-sheet >>> div.message-item:last-child {
-    margin-bottom: 25px !important;
+    margin-bottom: 20px !important;
 }
 
 /* Message avatar */
@@ -249,5 +269,9 @@ export default {
 .message-sheet >>> .message-item:hover > .message-actions {
     opacity: 1;
     transition: all 0.2s ease-in;
+}
+
+.chat-box >>> .message-content p:last-child {
+    margin-bottom: 2px;
 }
 </style>
