@@ -1,7 +1,8 @@
 :root {
-    --primary-color: #022c43;
-    --primary-color-2: #043752;
-    --primary-color--text: #ffd700;
+    /* --primary-color: #022c43;
+    --primary-color-2: #043752; */
+    --primary-color: #e47f04;
+    --primary-color-2: #fb8c00;
 }
 
 .bg-1 {
@@ -14,8 +15,15 @@
 
 .color-1 {
     color: var(--primary-color) !important;
+    caret-color: var(--primary-color) !important;
 }
 
 .color-2 {
     color: var(--primary-color-2) !important;
+    caret-color: var(--primary-color-2) !important;
+}
+
+.color-2--text {
+    color: var(--primary-color-2) !important;
+    caret-color: var(--primary-color-2) !important;
 }
