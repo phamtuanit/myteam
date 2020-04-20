@@ -5,7 +5,10 @@
         class="pa-0 fill-height no-border-radius d-flex flex-column"
         id="chat-list"
     >
-        <v-sheet height="57" class="pa-0 center-y no-border-radius px-3">
+        <v-sheet
+            height="57"
+            class="pa-0 center-y no-border-radius px-3"
+        >
             <!-- Search -->
             <v-text-field
                 v-model="searchText"
@@ -17,24 +20,35 @@
                 hide-details
                 clearable
                 clear-icon="mdi-close"
+                color="color-2"
                 @keyup.esc="searchText = ''"
             ></v-text-field>
         </v-sheet>
         <v-divider></v-divider>
 
-        <div class="px-0 py-1 ma-0 center-y justify-sm-space-between">
-            <v-subheader class="pl-3 pr-2 selection-disabled"
-                >Conversations</v-subheader
-            >
+        <div class="pa-0 ma-0 center-y justify-sm-space-between">
+            <v-subheader class="pl-3 pr-2 selection-disabled">Conversations</v-subheader>
 
             <!-- Add btn -->
-            <v-btn v-if="allowAdd" icon class="ml-1 mr-2" rounded>
-                <v-icon>mdi-plus</v-icon>
+            <v-btn
+                v-show="allowAdd"
+                icon
+                fab
+                class="ml-1 mr-3"
+                rounded
+                height="26"
+                width="26"
+                @click="onAddConv"
+            >
+                <v-icon :size="20">mdi-plus</v-icon>
             </v-btn>
         </div>
 
         <!-- List -->
-        <v-list two-line class="py-0 px-0 flex-grow-1 d-flex flex-column">
+        <v-list
+            two-line
+            class="py-0 px-0 flex-grow-1 d-flex flex-column"
+        >
             <!-- Chat list -->
             <v-list-item-group
                 v-model="activatedConv"
@@ -131,6 +145,10 @@ export default {
         fillHeight("conversation-list", 0, this.$el);
         this.updateUrlQuery();
     },
+    activated() {
+        console.log("---> activated chat-list");
+        setTimeout(this.updateUrlQuery, 0);
+    },
     methods: {
         onSelect(chat) {
             if (this.activatedConv) {
@@ -147,6 +165,9 @@ export default {
                 "conversations/activeChat",
                 chat.id || chat._id
             );
+        },
+        onAddConv() {
+            this.$emit("add");
         },
         updateUrlQuery() {
             if (this.activatedConv) {
@@ -183,21 +204,6 @@ export default {
             }).then(list => {
                 this.convList = list;
             });
-        },
-        activate() {
-            console.log("---> activated chat-list");
-            setTimeout(this.updateUrlQuery, 10);
-            // if (this.activated) {
-            //     const convId = this.activated.id || this.activated._id;
-            //     if (convId !== this.$route.query._id) {
-            //         const newQuery = { ...this.$route.query };
-            //         newQuery._id = convId;
-            //         this.$router.push(newQuery);
-            //     }
-            // }
-        },
-        activated() {
-            console.log("---> activated chat-list", this.$el);
         },
     },
 };
