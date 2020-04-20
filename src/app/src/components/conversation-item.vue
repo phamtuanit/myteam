@@ -10,7 +10,10 @@
         }"
     >
         <template v-if="!conversation.channel">
-            <UserAvatar :user="targetUser" :infinity="hasNewMessage" />
+            <UserAvatar
+                :user="targetUser"
+                :infinity="hasNewMessage"
+            />
 
             <v-list-item-content class="py-1 px-2 content__text">
                 <v-list-item-title
@@ -31,7 +34,10 @@
                 :class="{ 'font-weight-bold': hasNewMessage }"
             >
                 <v-icon size="18">mdi-pound</v-icon>
-                <span class="ml-1" v-text="conversation.name"></span>
+                <span
+                    class="ml-1"
+                    v-text="conversation.name"
+                ></span>
             </v-list-item-title>
         </template>
     </v-list-item>
@@ -169,14 +175,20 @@ export default {
 }
 
 .theme--dark.has-new-message::after {
-    background-color: var(--primary-color--text);
+    background-color: #ffd700;
 }
 
 .content__text {
     opacity: 0.7;
 }
 
-div:not(.has-new-message).content__text {
+.has-new-message .content__text {
+    animation: all 0.2s linear;
+    opacity: 1;
+}
+
+.v-list-item.v-item--active .content__text {
+    animation: all 0.2s linear;
     opacity: 1;
 }
 

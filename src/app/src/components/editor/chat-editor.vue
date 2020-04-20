@@ -14,15 +14,21 @@
             />
         </v-sheet>
 
-        <v-sheet class="transparent d-flex justify-space-between mt-1">
+        <v-sheet class="transparent d-flex justify-space-between mt-1 chat-editor__actions">
             <!-- Start -->
             <div class="d-flex flex-align-start">
-                <EmojiButton @select="onSelectEmoji"></EmojiButton>
+                <EmojiButton
+                    size="18"
+                    @select="onSelectEmoji"
+                ></EmojiButton>
                 <v-btn
                     icon
                     @click="showToolBar = !showToolBar"
                 >
-                    <v-icon :color="showToolBar ? 'orange' : ''">mdi-format-letter-case-upper</v-icon>
+                    <v-icon
+                        size="18"
+                        :color="showToolBar ? 'orange' : ''"
+                    >mdi-format-letter-case-upper</v-icon>
                 </v-btn>
             </div>
             <!-- End -->
@@ -30,7 +36,7 @@
                 icon
                 @click="onSend"
             >
-                <v-icon>mdi-send</v-icon>
+                <v-icon size="18">mdi-send</v-icon>
             </v-btn>
         </v-sheet>
     </div>
@@ -136,5 +142,10 @@ export default {
 
 .chat-editor-expanded .ck .ck-editor__editable_inline {
     height: 30vh;
+}
+
+.chat-editor__actions .v-btn.v-size--default {
+    height: 30px;
+    width: 30px;
 }
 </style>

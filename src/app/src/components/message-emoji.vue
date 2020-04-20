@@ -1,10 +1,13 @@
 <template>
     <v-scale-transition>
         <div class="reaction-emoji">
-            <div class="emoji-panel px-1" v-show="emojis.length > 0">
+            <div
+                class="emoji-panel px-1"
+                v-show="emojis.length > 0"
+            >
                 <template v-for="reaction in emojis">
                     <v-icon
-                        size="18"
+                        size="16"
                         class="mr-1"
                         :key="reaction.type + '-icon'"
                         :class="{ 'my-reaction': reaction.mine == true }"
@@ -34,7 +37,7 @@ export default {
     },
     computed: {
         ...mapState({
-            me: (state) => state.users.me,
+            me: state => state.users.me,
         }),
     },
     watch: {
@@ -83,7 +86,7 @@ export default {
             }
 
             const emojis = {};
-            this.message.reactions.forEach((reaction) => {
+            this.message.reactions.forEach(reaction => {
                 const style = this.getReactionStyle(reaction.type);
                 if (!emojis[reaction.type]) {
                     emojis[reaction.type] = {

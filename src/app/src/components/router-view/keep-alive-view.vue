@@ -106,14 +106,29 @@ export default {
                     (hook == "activated" && vm._inactive == true) ||
                     (hook == "deactivated" && vm._inactive == false)
                 ) {
-                    const handlers = vm.$options[hook];
-                    if (handlers) {
-                        handlers.forEach(handler => {
-                            handler.call(vm);
-                        });
-                    }
                     // Update component state - using by DevTool
                     vm._inactive = key !== routeName;
+                    setTimeout(() => {
+                        const handlers = vm.$options[hook];
+                        if (handlers && handlers.length > 0) {
+                            handlers.forEach(handler => {
+                                handler.call(vm);
+                            });
+                        }
+                        // Activate children
+                        vm.$children.forEach(child => {
+                            if (
+                                child.$options &&
+                                child.$options[hook] &&
+                                child.$options[hook].length > 0
+                            ) {
+                                child.$options[hook].forEach(handler => {
+                                    typeof handler == "function" &&
+                                        handler.call(child);
+                                });
+                            }
+                        });
+                    }, 0);
                 }
 
                 if (vm._inactive == true) {

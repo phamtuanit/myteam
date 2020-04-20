@@ -9,8 +9,11 @@
         :close-on-content-click="false"
     >
         <template v-slot:activator="{ on }">
-            <v-btn icon :small="small" v-on="on">
-                <v-icon :small="small">mdi-emoticon-happy-outline</v-icon>
+            <v-btn
+                icon
+                v-on="on"
+            >
+                <v-icon :size="size">mdi-emoticon-happy-outline</v-icon>
             </v-btn>
         </template>
 
@@ -35,9 +38,9 @@ const emojiIndex = new EmojiIndex(emojiData, {
 });
 export default {
     props: {
-        small: {
-            type: Boolean,
-            default: false,
+        size: {
+            type: String,
+            default: "24",
         },
     },
     components: { Picker },
@@ -48,7 +51,7 @@ export default {
         };
     },
     mounted() {
-        document.addEventListener("keyup", (e) => {
+        document.addEventListener("keyup", e => {
             // Hansle ESC  key
             if (e.keyCode === 27 && this.showEmojiPicker == true) {
                 this.showEmojiPicker = false;
