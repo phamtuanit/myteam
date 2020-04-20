@@ -1,9 +1,5 @@
 <template>
     <div class="conversation-content pa-0 ma-0 d-flex flex-column">
-        <!-- Header -->
-        <v-sheet height="57" min-height="57" class="pa-0 no-border-radius"></v-sheet>
-        <v-divider></v-divider>
-
         <!-- Content -->
         <v-sheet
             class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent mb-2"
@@ -17,7 +13,7 @@
                     v-for="msg in messages"
                     :key="msg.id"
                     :message="msg"
-                    class="mt-2"
+                    class="mt-1"
                     @react="onReact"
                     @dereact="onDereact"
                 ></Message>
@@ -26,7 +22,7 @@
 
         <!-- Input -->
         <ChatEditor
-            class="channel__input my-2"
+            class="channel__input mt-2 mb-1"
             v-model="newMessage"
             @enter="onSend"
             @send="onSend"
@@ -106,7 +102,8 @@ export default {
 
 <style lang="css" scoped>
 .conversation-content {
-    height: 100vh;
+    height: calc(100vh - 58px);
+    width: 100%;
 }
 
 .channel__input {

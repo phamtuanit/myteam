@@ -80,13 +80,6 @@ export default {
     created() {
         this.updateData();
     },
-    activated() {
-        this.$children.forEach(ch => {
-            if (typeof ch.activate === "function") {
-                ch.activate();
-            }
-        });
-    },
     methods: {
         updateData() {
             if (this.activatedConv) {

@@ -9,20 +9,18 @@
             :list="allConv"
             :activated-item="activatedConv"
             :allow-add="true"
-            @add="onAddConv"
+            @add="onCreateConv"
         ></ChatList>
 
         <!-- Conversation content container -->
         <div class="flex-grow-1 d-flex flex-column">
-            <!-- Fake header -->
-            <div v-if="!currentConvId">
-                <v-sheet
-                    height="57"
-                    min-height="57"
-                    class="pa-0 no-border-radius"
-                ></v-sheet>
-                <v-divider></v-divider>
-            </div>
+            <!-- Header -->
+            <v-sheet
+                height="57"
+                min-height="57"
+                class="pa-0 no-border-radius"
+            ></v-sheet>
+            <v-divider></v-divider>
 
             <!-- Conversation content -->
             <v-tabs-items
@@ -40,19 +38,27 @@
                 </v-tab-item>
             </v-tabs-items>
         </div>
+
+        <AddChannel
+            v-model="isAdding"
+            @close="isAdding = false"
+            @submit="onAddConv"
+        ></AddChannel>
     </div>
 </template>
 
 <script>
 import ChatList from "../shared/chat-list";
 import ChatContent from "./content.vue";
+import AddChannel from "./add-channel.vue";
 
 import { mapState } from "vuex";
 export default {
     name: "channel-main",
-    components: { ChatList, ChatContent },
+    components: { ChatList, ChatContent, AddChannel },
     data() {
         return {
+            isAdding: false,
             displayFriendList: true,
             currentConvId: null,
             conversations: [],
@@ -72,15 +78,18 @@ export default {
     created() {
         this.updateData();
     },
-    activated() {
-        this.$children.forEach(ch => {
-            if (typeof ch.activate === "function") {
-                ch.activate();
-            }
-        });
-    },
     methods: {
-        onAddConv() {},
+        onCreateConv() {
+            this.isAdding = true;
+        },
+        onAddConv(convInfo) {
+            return this.$store
+                .dispatch("conversations/createConversation", convInfo)
+                .then(conv => {
+                    this.isAdding = false;
+                })
+                .catch(console.error);
+        },
         updateData() {
             if (this.activatedConv) {
                 const convId = this.activatedConv.id || this.activatedConv._id;

@@ -32,13 +32,11 @@
                             "
                             @click="showFrienfList = !showFrienfList"
                         >
-                            <v-icon
-                                v-text="
+                            <v-icon v-text="
                                     showFrienfList
                                         ? 'mdi-account-supervisor'
                                         : 'mdi-account-search'
-                                "
-                            ></v-icon>
+                                "></v-icon>
                         </v-btn>
                     </template>
                     <span>Friend list</span>
@@ -86,7 +84,7 @@
 
         <!-- Input box -->
         <ChatEditor
-            class="chat-editor my-2"
+            class="chat-editor mt-2 mb-1"
             v-model="newMessage"
             @enter="onSendMessage"
             @send="onSendMessage"

@@ -1,5 +1,8 @@
 <template>
-    <div id="friend-list" class="pa-0 fill-height d-flex flex-column">
+    <div
+        id="friend-list"
+        class="pa-0 fill-height d-flex flex-column"
+    >
         <!-- Search -->
         <v-sheet
             height="57"
@@ -17,13 +20,17 @@
                 hide-details
                 clearable
                 clear-icon="mdi-close"
+                color="color-2"
                 @keyup.esc="searchText = ''"
             ></v-text-field>
         </v-sheet>
         <v-divider></v-divider>
 
         <!-- Friends -->
-        <v-list two-line class="py-0 px-0 flex-grow-1 d-flex flex-column">
+        <v-list
+            two-line
+            class="py-0 px-0 flex-grow-1 d-flex flex-column"
+        >
             <v-progress-linear
                 :active="loading"
                 :indeterminate="true"
@@ -31,7 +38,10 @@
 
             <v-layout class="friend-list-layout overflow-y-auto">
                 <!-- List -->
-                <v-slide-y-transition group tag="div">
+                <v-slide-y-transition
+                    group
+                    tag="div"
+                >
                     <template v-for="user in friendList">
                         <v-list-item
                             :key="user.id"
@@ -52,9 +62,8 @@
                                 <v-list-item-subtitle
                                     v-if="user.phone"
                                     class="caption"
-                                    >&#128222;
-                                    {{ user.phone }}</v-list-item-subtitle
-                                >
+                                >&#128222;
+                                    {{ user.phone }}</v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
                     </template>
@@ -169,6 +178,10 @@ export default {
 
 #friend-list >>> .theme--dark.v-text-field--solo .v-input__control {
     border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+#friend-list >>> .v-list-item {
+    min-height: 50px;
 }
 
 /* Scroll */

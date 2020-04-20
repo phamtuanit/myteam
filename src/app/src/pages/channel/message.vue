@@ -2,16 +2,25 @@
     <v-sheet class="channel-message-item d-flex transparent mx-4">
         <div class="message-item__user pr-1">
             <v-list-item-avatar class="ma-0">
-                <UserAvatar :user="user" :online-effect="!user._isMe" />
+                <UserAvatar
+                    :user="user"
+                    :online-effect="!user._isMe"
+                />
             </v-list-item-avatar>
         </div>
         <!-- content -->
         <div class="message-item__content d-flex flex-column flex-grow-1">
             <!-- Message -->
-            <v-card elevation="0" class="flex-grow-1 px-3 py-2">
+            <v-card
+                elevation="0"
+                class="flex-grow-1 px-3 py-2"
+            >
                 <div class="message-item__content-header center-y">
                     <!-- User info -->
-                    <span class="subtitle-2 mr-2" v-text="user.fullName"></span>
+                    <span
+                        class="subtitle-2 mr-2"
+                        v-text="user.fullName"
+                    ></span>
                     <v-spacer></v-spacer>
 
                     <!-- Reacted Emoji -->
@@ -32,7 +41,10 @@
 
                 <div class="custom-align">
                     <!-- Reactions -->
-                    <Reaction @react="onReact" :selected="reactedType" />
+                    <Reaction
+                        @react="onReact"
+                        :selected="reactedType"
+                    />
                 </div>
             </div>
         </div>
@@ -64,7 +76,7 @@ export default {
     },
     computed: {
         ...mapState({
-            me: (state) => state.users.me,
+            me: state => state.users.me,
         }),
         reactedType() {
             if (!this.message || !this.message.reactions) {
@@ -72,7 +84,7 @@ export default {
             }
 
             const lastReaction = this.message.reactions.find(
-                (r) => r.user == this.me.id
+                r => r.user == this.me.id
             );
             return lastReaction ? lastReaction.type : "";
         },
@@ -81,7 +93,7 @@ export default {
         if (this.message.from.issuer) {
             this.$store
                 .dispatch("users/resolve", this.message.from.issuer)
-                .then((user) => {
+                .then(user => {
                     this.user = user;
                 })
                 .catch(console.error);
@@ -105,7 +117,7 @@ export default {
 
 .message-item__content-header {
     position: relative;
-    min-height: 30px;
+    min-height: 24px;
 }
 
 .theme--light .message-item__content .message-item__content-text {

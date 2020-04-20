@@ -5,12 +5,23 @@
     >
         <v-spacer></v-spacer>
         <!-- Actions -->
-        <div class="message-actions mr-1" v-if="isAvailable">
-            <v-btn icon small class="mx-auto" @click="onDeleteMessage">
+        <div
+            class="message-actions mr-1"
+            v-if="isAvailable"
+        >
+            <v-btn
+                icon
+                small
+                class="mx-auto"
+                @click="onDeleteMessage"
+            >
                 <v-icon small>mdi-delete</v-icon>
             </v-btn>
         </div>
-        <div style="min-width: 40px;" v-else>
+        <div
+            style="min-width: 40px;"
+            v-else
+        >
             <!-- Empty space -->
         </div>
 
@@ -18,12 +29,15 @@
         <div class="message-content">
             <v-card
                 flat
-                class="mr-1 message-card py-2 px-3"
+                class="mr-1 message-card py-1 px-3"
                 :disabled="!isAvailable"
             >
                 <!-- Header -->
-                <div class="message-card__header selection-disabled">
-                    <span class="caption" v-text="time"></span>
+                <div class="message-card__header selection-disabled mb-0">
+                    <span
+                        class="caption"
+                        v-text="time"
+                    ></span>
                     <v-spacer></v-spacer>
                     <v-icon
                         v-if="!isAvailable"
@@ -40,7 +54,7 @@
                 </div>
                 <!-- Body -->
                 <v-card-text
-                    class="message-card_text pa-0 mt-1"
+                    class="message-card_text pa-0 my-0"
                     v-html="message.body.content"
                 >
                 </v-card-text>
@@ -129,15 +143,12 @@ export default {
     position: relative;
 }
 
-.message-card.v-card::before {
-    position: absolute;
-    content: " ";
-    border-radius: 4px;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 0;
+.message-card.v-card {
     background-color: rgba(73, 159, 245, 0.2);
+    background: linear-gradient(rgba(73, 159, 245, 0.2));
+}
+
+.my-message.v-list-item {
+    min-height: 0px;
 }
 </style>
