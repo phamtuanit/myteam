@@ -1,5 +1,8 @@
 <template>
-    <v-content id="main-layout">
+    <v-content
+        id="main-layout"
+        class="main-view"
+    >
         <LeftDrawer></LeftDrawer>
         <RouterView :key="$route.name" />
     </v-content>
@@ -12,6 +15,10 @@ export default {
     components: { LeftDrawer, RouterView },
 };
 </script>
+
+<style lang="css">
+@import "../assets/hightlight.css";
+</style>
 
 <style scoped>
 #main-layout >>> .v-navigation-drawer .v-navigation-drawer__border {

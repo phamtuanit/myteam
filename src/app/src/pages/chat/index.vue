@@ -35,9 +35,8 @@
                 >
                     <ChatContent
                         :conversation="conv.value"
-                        @show-friend-list="
-                            displayFriendList = !displayFriendList
-                        "
+                        :friend-list="displayFriendList"
+                        @show-friend-list="displayFriendList = !displayFriendList"
                     ></ChatContent>
                 </v-tab-item>
             </v-tabs-items>

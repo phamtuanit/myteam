@@ -57,6 +57,7 @@
                             <v-list-item-content class="py-2 pl-3 pr-2">
                                 <v-list-item-title
                                     class="body-2"
+                                    style="font-size: 0.8rem !important;line-height: 1rem;"
                                     v-text="getDisplayName(user)"
                                 ></v-list-item-title>
                                 <v-list-item-subtitle
@@ -181,7 +182,7 @@ export default {
 }
 
 #friend-list >>> .v-list-item {
-    min-height: 50px;
+    min-height: 44px;
 }
 
 /* Scroll */

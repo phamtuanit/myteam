@@ -3,6 +3,7 @@
         class="px-2 message-item my-message"
         :class="{ 'message-error': !isAvailable }"
     >
+        <div style="min-width: 20px;"></div>
         <v-spacer></v-spacer>
         <!-- Actions -->
         <div
@@ -54,7 +55,7 @@
                 </div>
                 <!-- Body -->
                 <v-card-text
-                    class="message-card_text pa-0 my-0"
+                    class="message-card_text pa-0 my-0 hl"
                     v-html="message.body.content"
                 >
                 </v-card-text>
@@ -133,19 +134,27 @@ export default {
     -webkit-box-flex: 1;
 }
 
-.message-error >>> .message-card {
-    border-bottom-color: #ef5350c7;
-    border-bottom-width: 2px;
-    border-bottom-style: solid;
-}
-
 .message-card {
     position: relative;
 }
 
-.message-card.v-card {
-    background-color: rgba(73, 159, 245, 0.2);
-    background: linear-gradient(rgba(73, 159, 245, 0.2));
+.message-card::after {
+    content: "";
+    position: absolute;
+    background-color: #1e88e5;
+    width: 3px;
+    right: 0px;
+    bottom: 0;
+    top: 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.message-error .message-card::after {
+    background-color: red;
+}
+
+.message-card .message-card_text {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .my-message.v-list-item {

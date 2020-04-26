@@ -18,24 +18,27 @@
             <v-list-item-content class="py-1 px-2 content__text">
                 <v-list-item-title
                     class="subtitle-2 mb-0"
+                    style="font-size: 0.8rem !important;line-height: 1rem;"
                     v-text="conversation.name"
                 ></v-list-item-title>
                 <v-list-item-subtitle
-                    v-if="recentMessage"
+                    v-if="recentMessage || conversation._isTemp"
                     class="caption"
                     :class="{ 'font-weight-bold': hasNewMessage }"
-                    v-text="recentMessage"
+                    v-text="recentMessage || (conversation._isTemp == true && 'Draft')"
                 ></v-list-item-subtitle>
             </v-list-item-content>
         </template>
+        <!-- Conversation template -->
         <template v-else>
             <v-list-item-title
                 class="subtitle-2 my-0 content__text"
                 :class="{ 'font-weight-bold': hasNewMessage }"
             >
-                <v-icon size="18">mdi-pound</v-icon>
+                <v-icon size="15">mdi-pound</v-icon>
                 <span
                     class="ml-1"
+                    style="font-size: 0.8rem !important;"
                     v-text="conversation.name"
                 ></span>
             </v-list-item-title>
@@ -137,12 +140,12 @@ export default {
 }
 
 .conversation-item.v-list-item {
-    min-height: 54px;
+    min-height: 52px;
     color: inherit;
 }
 
 .conversation-item.v-list-item.channel-conversation {
-    min-height: 40px;
+    min-height: 36px;
 }
 
 .has-new-message {

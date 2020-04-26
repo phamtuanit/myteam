@@ -1,19 +1,29 @@
 <template>
     <v-list-item class="px-2 message-item your-message">
         <v-list-item-avatar class="my-0 ml-2 mr-0">
-            <UserAvatar :user="user" online-effect />
+            <UserAvatar
+                :user="user"
+                online-effect
+            />
         </v-list-item-avatar>
 
         <!-- Message -->
         <div class="message-content">
-            <v-card flat class="message-card ml-1 py-2 px-3" :disabled="!isAvailable">
+            <v-card
+                flat
+                class="message-card ml-1 py-2 px-3"
+                :disabled="!isAvailable"
+            >
                 <!-- Header -->
                 <div class="message-card__header selection-disabled">
                     <span
                         class="subtitle-2 mr-2 user-name"
                         v-text="fullName"
                     ></span>
-                    <span class="caption" v-text="time"></span>
+                    <span
+                        class="caption"
+                        v-text="time"
+                    ></span>
                     <v-spacer></v-spacer>
                     <v-icon
                         v-if="!isAvailable"
@@ -32,7 +42,7 @@
 
                 <!-- Body -->
                 <v-card-text
-                    class="message-card_text pa-0 mt-1"
+                    class="message-card_text pa-0 mt-1 hl"
                     v-html="message.body.content"
                 >
                 </v-card-text>
@@ -53,8 +63,16 @@
         </div>
 
         <!-- Actions -->
-        <div class="message-actions ml-2" v-if="isAvailable">
-            <v-btn icon small class="mx-auto" @click="onReply">
+        <div
+            class="message-actions ml-2"
+            v-if="isAvailable"
+        >
+            <v-btn
+                icon
+                small
+                class="mx-auto"
+                @click="onReply"
+            >
                 <v-icon small>mdi-reply</v-icon>
             </v-btn>
         </div>

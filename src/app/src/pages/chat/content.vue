@@ -27,13 +27,11 @@
                         <v-btn
                             v-on="on"
                             icon
-                            :style="
-                                showFrienfList ? 'opacity: 1;' : 'opacity: 0.6;'
-                            "
-                            @click="showFrienfList = !showFrienfList"
+                            :style="friendList ? 'opacity: 1;' : 'opacity: 0.6;'"
+                            @click="onShowFriendList"
                         >
                             <v-icon v-text="
-                                    showFrienfList
+                                    friendList
                                         ? 'mdi-account-supervisor'
                                         : 'mdi-account-search'
                                 "></v-icon>
@@ -112,13 +110,17 @@ export default {
         ChatEditor,
     },
     props: {
-        conversation: Object,
+        conversation: {
+            type: Object,
+        },
+        friendList: {
+            type: Boolean,
+        },
     },
     data() {
         return {
             theme: this.$vuetify.theme,
             newMessage: null,
-            showFrienfList: true,
             messages: [],
         };
     },
@@ -135,17 +137,15 @@ export default {
             return {};
         },
     },
-    watch: {
-        showFrienfList(val) {
-            this.$emit("show-friend-list", val);
-        },
-    },
     created() {
         this.bus = window.IoC.get("bus");
         this.chatId = this.conversation._id || this.conversation.id;
         this.messages = this.conversation.messages;
     },
     methods: {
+        onShowFriendList() {
+            this.$emit("show-friend-list", !this.friendList);
+        },
         onChatEditorReady() {
             const msgSheetEl = this.$refs.messageSheet.$el;
             msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
@@ -207,7 +207,9 @@ export default {
         onDereact(type, message) {
             this.onReact(type, message, false);
         },
-        onReply(message) {},
+        onReply(message) {
+            console.log("Reply: ", message);
+        },
         onRead() {
             const conv = this.conversation;
             if (conv && conv.meta.unreadMessage.length > 0) {
@@ -269,11 +271,6 @@ export default {
 
 .message-sheet >>> .my-message + .your-message .v-avatar {
     visibility: inherit;
-}
-
-/* Message text */
-.message-sheet >>> .theme--light.v-card > .v-card__text {
-    color: rgba(0, 0, 0, 0.8);
 }
 
 /* Message actions */
