@@ -1,6 +1,6 @@
 <template>
     <v-dialog
-        v-model="value"
+        v-model="display"
         persistent
         min-width="400"
         max-width="400"
@@ -13,7 +13,7 @@
                     color="white"
                     size="40"
                 >mdi-pound</v-icon>
-                <v-card-title class="ml-1 pa-0 flex-grow-1">Creating Channel</v-card-title>
+                <v-card-title class="ml-1 pa-0 flex-grow-1">Channel</v-card-title>
             </div>
 
             <!-- Content -->
@@ -112,9 +112,13 @@
 import { mapState } from "vuex";
 export default {
     props: {
-        value: {
+        display: {
             type: Boolean,
             default: false,
+        },
+        value: {
+            type: Object,
+            default: () => ({}),
         },
     },
     data() {
@@ -136,11 +140,17 @@ export default {
         searchStr() {
             this.searchLocker.then(this.search);
         },
-        value(value) {
-            if (value == true) {
-                this.searchStr = "";
-                this.channel = "";
-                this.selectedUsers = [];
+        display(value) {
+            if (value) {
+                if (!this.value.name) {
+                    this.searchStr = "";
+                    this.channel = "";
+                    this.selectedUsers = [];
+                } else {
+                    this.channel = this.value.name;
+                    this.isPrivate = this.value.private;
+                    this.selectedUsers = this.value.subscribers.map(i => i.id);
+                }
                 this.setUserList(this.cachedUsers);
             }
         },

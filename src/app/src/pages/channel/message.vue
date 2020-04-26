@@ -32,7 +32,7 @@
                 </div>
                 <v-divider class="mt-1"></v-divider>
                 <v-card-text
-                    class="message-item__content-text pa-0 mt-2"
+                    class="message-item__content-text pa-0 mt-2 hl"
                     v-html="message.body.content"
                 ></v-card-text>
             </v-card>
@@ -131,12 +131,16 @@ export default {
 }
 
 /* Reactions */
+.message-item__content-footer {
+    position: relative;
+    height: 6px;
+}
+
 .message-item__content-footer >>> .reactions-panel {
     position: absolute;
     visibility: hidden;
     opacity: 0.3;
-    bottom: 0;
-    top: 0;
+    bottom: 10px;
     right: 30px;
 }
 
@@ -147,7 +151,7 @@ export default {
     right: 16px;
 }
 
-.channel-message-item >>> .message-item__content-text > p:last-child {
+.channel-message-item >>> .message-item__content-text p:last-child {
     margin-bottom: 2px;
 }
 </style>

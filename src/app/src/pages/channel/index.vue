@@ -15,11 +15,7 @@
         <!-- Conversation content container -->
         <div class="flex-grow-1 d-flex flex-column">
             <!-- Header -->
-            <v-sheet
-                height="57"
-                min-height="57"
-                class="pa-0 no-border-radius"
-            ></v-sheet>
+            <Header :conversation="activatedConv"></Header>
             <v-divider></v-divider>
 
             <!-- Conversation content -->
@@ -39,23 +35,24 @@
             </v-tabs-items>
         </div>
 
-        <AddChannel
-            v-model="isAdding"
+        <ChannelSetting
+            :display="isAdding"
             @close="isAdding = false"
             @submit="onAddConv"
-        ></AddChannel>
+        ></ChannelSetting>
     </div>
 </template>
 
 <script>
 import ChatList from "../shared/chat-list";
 import ChatContent from "./content.vue";
-import AddChannel from "./add-channel.vue";
+import ChannelSetting from "./channel-setting.vue";
+import Header from "./header.vue";
 
 import { mapState } from "vuex";
 export default {
     name: "channel-main",
-    components: { ChatList, ChatContent, AddChannel },
+    components: { ChatList, ChatContent, ChannelSetting, Header },
     data() {
         return {
             isAdding: false,

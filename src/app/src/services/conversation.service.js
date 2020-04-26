@@ -22,7 +22,7 @@ Service.prototype.create = function (groupInfo) {
         if (groupInfo.subscribers.length <= 0) {
             return Promise.reject("[subscribers] is required for new conversation");
         }
-        return Axios.post(this.name, { group: groupInfo });
+        return Axios.post(this.name, { channel: groupInfo });
     }
     return Promise.reject("Data is invalid");
 };
@@ -33,7 +33,7 @@ Service.prototype.update = function (groupInfo) {
         if (groupInfo.subscribers.length <= 0) {
             return Promise.reject("[subscribers] is required for new conversation");
         }
-        return Axios.put(this.name + id, { group: groupInfo });
+        return Axios.put(this.name + id, { channel: groupInfo });
     }
     return Promise.reject("Data is invalid");
 };

@@ -115,7 +115,7 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
             if (conv) {
-                const pushToUnread = function(message) {
+                const pushToUnread = function (message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessage.push(message);
                     }
@@ -358,6 +358,43 @@ const moduleState = {
 
             return newConv;
         },
+        async updateConversation({ commit, state }, convInfo) {
+            const invalid =
+                !convInfo ||
+                !convInfo.subscribers ||
+                convInfo.subscribers.length <= 0;
+            if (invalid) {
+                console.warn("The input data is invalid");
+                return;
+            }
+
+            const entity = {
+                id: convInfo.id,
+                name: convInfo.name,
+                channel: convInfo.channel,
+                private: convInfo.private,
+                subscribers: convInfo.subscribers,
+            }
+
+            // Create new conversation
+            const latestEntity = (await convService.update(entity)).data;
+
+            const existingConv = state.channel.all
+                .concat(state.chat.all)
+                .find(i => i.id == latestEntity.id);
+
+            if (existingConv) {
+                // Get subscribers info
+                latestEntity.subscribers = await this.dispatch(
+                    "users/resolve",
+                    latestEntity.subscribers
+                );
+
+                Object.assign(existingConv, latestEntity);
+            }
+
+            return latestEntity;
+        },
         async activeTmpChat({ commit }, userInfo) {
             const me = this.state.users.me;
             const convInfo = {
@@ -497,7 +534,7 @@ const moduleState = {
                                                     return (
                                                         sub.id == me.id ||
                                                         sub.id ==
-                                                            message.from.issuer
+                                                        message.from.issuer
                                                     );
                                                 }
                                             );
