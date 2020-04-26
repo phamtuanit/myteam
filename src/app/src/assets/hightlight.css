@@ -1,0 +1,43 @@
+/* Colors */
+/* Light */
+.hl pre, .hl code {
+    background-color: hsla(0,0%,78%,.3);
+}
+
+.hl pre code {
+    background-color: unset;
+}
+
+
+/* Dark */
+.theme--dark .hl pre, .theme--dark .hl code {
+    color: #fff;
+}
+
+.always--dark .hl pre, .always--dark .hl code {
+    color: rgba(0, 0, 0, 0.87);
+    background-color: #fff;
+}
+
+/* Others */
+.hl pre {
+    border: 1px solid #c4c4c4;
+    padding: 8px 48px 8px 8px;
+    border-radius: 2px;
+}
+
+.hl code {
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    font-weight: 500;
+}
+
+.hl pre[data-language]:after {
+    right: 0;
+    line-height: 14px;
+    font-size: 9px;
+}
+
+.hl pre code::before {
+    content: "";
+}

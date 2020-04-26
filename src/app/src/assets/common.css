@@ -83,6 +83,6 @@ div.v-subheader {
 }
 
 /* Override */
-.v-application p {
+.v-application .main-view p {
     margin-bottom: 8px;
 }

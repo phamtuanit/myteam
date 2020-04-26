@@ -24,7 +24,7 @@
     background: rgba(0, 0, 0, 0.12);
 }
 
-.theme-dark .ck.ck-toolbar .ck.ck-toolbar__separator {
+.theme--dark .ck.ck-toolbar .ck.ck-toolbar__separator {
     background: rgba(255, 255, 255, 0.12);
 }
 
@@ -39,7 +39,7 @@
     border-bottom-style: solid;
 }
 
-.theme-dark .ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+.theme--dark .ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
     border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
@@ -47,7 +47,7 @@
     opacity: 0.8;
 }
 
-.theme-dark .ck {
+.theme--dark .ck {
     --ck-color-text: rgba(255, 255, 255, 0.7);
     
     /* Toolbar */
@@ -75,7 +75,7 @@
     -webkit-box-shadow: none;
 }
 
-.theme-dark .ck-content code {
+.theme--dark .ck-content code {
     color: rgba(255, 255, 255, 0.884);
 }
 
@@ -90,7 +90,7 @@
     font-size: 9px;
 }
 
-.theme-dark .ck-content pre {
+.theme--dark .ck-content pre {
     background: rgba(255, 255, 255, 0.205);
 }
 
