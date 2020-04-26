@@ -3,7 +3,7 @@
         <v-sheet
             class="chat-editor__container"
             :class="{
-                'theme-dark': $vuetify.theme.isDark,
+                'theme--dark': $vuetify.theme.isDark,
                 'chat-editor-expanded': showToolBar,
             }"
         >
