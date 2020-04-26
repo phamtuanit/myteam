@@ -22,30 +22,30 @@ module.exports = {
 
             if (typeof userId == "string") {
                 this.logger.debug(
-                    `Status of user ${userId} has been change.`,
+                    `Status of user ${userId} has been changed.`,
                     data
                 );
 
                 const socketDict = this.sockets[userId];
-                // Broadcast to all user
+                // Broadcast to all user except itself
                 if (status == "on") {
                     if (Object.keys(socketDict).length == 1) {
                         const socket = Object.values(socketDict)[0];
-                        socket.to("live").emit("live", status, data);
+                        socket.to("live").emit("live", status, data, event);
                     }
                 } else if (!socketDict || Object.keys(socketDict).length <= 0) {
-                    this.io.to("live").emit("live", status, data);
+                    this.io.to("live").emit("live", status, data, event);
                 }
             }
         },
-        // [nodeId].message-queue.[userId].message.created
+        // message-queue.[userId].message.created
         "message-queue.*.message.created|removed|reacted"(message, sender, event, ctx) {
             const [constVar, userId, resource, act] = event.split(".");
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
                 message.event = event;
                 // To private user room
-                this.io.to(userId).emit(resource, act, message);
+                this.io.to(userId).emit(resource, act, message, event);
             }
         },
         // conversation.[conversation].message.rejected.[create]
@@ -55,13 +55,23 @@ module.exports = {
 
             const socketDict = this.sockets[fromUser];
             if (socketDict && Object.keys(socketDict).length > 0) {
-                message.event = event;
                 message.error = message.error
                     ? message.error.message
                     : "Server unknown error";
                 // To private user room
-                this.io.to(fromUser).emit(resource, act, message);
+                this.io.to(fromUser).emit(resource, act, message, event);
             }
+        },
+        // conversation.[id].updated
+        "conversation.*.created|removed|updated"(message, sender, event, ctx) {
+            const [resource, convId, act] = event.split(".");
+            message.subscribers.forEach(userId => {
+                const socketDict = this.sockets[userId];
+                if (socketDict && Object.keys(socketDict).length > 0) {
+                    // To private user room
+                    this.io.to(userId).emit(resource, act, message, event);
+                }
+            });
         },
     },
 

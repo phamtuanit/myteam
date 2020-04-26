@@ -19,7 +19,7 @@ module.exports = {
             roles: [1],
             rest: "POST /",
             params: {
-                group: {
+                channel: {
                     type: "object",
                     props: {
                         name: { type: "string", optional: true },
@@ -34,22 +34,27 @@ module.exports = {
                 },
             },
             async handler(ctx) {
-                const { group } = ctx.params;
+                const { channel } = ctx.params;
                 // Get adapter
                 const dbCollection = await this.getDBCollection(
                     "conversations"
                 );
 
-                const newConvInfo = group;
+                const newConvInfo = channel;
                 newConvInfo.id = new Date().getTime();
 
-                const existingConv = await dbCollection.insert(newConvInfo);
+                const newConv = await dbCollection.insert(newConvInfo);
                 this.logger.info(
-                    "Could not insert conversation.",
-                    existingConv._id
+                    "Added new conversation.",
+                    newConv.id
                 );
-                cleanDbMark(existingConv);
-                return existingConv;
+
+                newConv = cleanDbMark(newConv);
+
+                // Broadcast message
+                const eventName = `conversation.${newConv.id}.created`;
+                this.broker.emit(eventName, newConv).catch(this.logger.error);
+                return newConv;
             },
         },
         getConversationById: {
@@ -123,6 +128,52 @@ module.exports = {
                 );
             },
         },
+        updateConversation: {
+            auth: true,
+            roles: [1],
+            rest: "PUT /:id",
+            params: {
+                channel: {
+                    type: "object",
+                    props: {
+                        name: { type: "string", optional: true },
+                        subscribers: { type: "array", empty: false },
+                        channel: {
+                            type: "boolean",
+                            optional: true,
+                            convert: true,
+                        },
+                    },
+                },
+            },
+            async handler(ctx) {
+                const { channel } = ctx.params;
+                // Get adapter
+                const dbCollection = await this.getDBCollection(
+                    "conversations"
+                );
+
+                const existingConv = await dbCollection.findOne({ id: channel.id });
+
+                if (!existingConv) {
+                    // The conversation not found
+                    this.logger.warn("The conversation could not be found.", channel.id);
+                    throw new Errors.MoleculerError("The conversation could not be found.", 404);
+                }
+
+                channel.updated = new Date();
+
+                const updatedEntity = await (dbCollection.updateById(
+                    existingConv._id,
+                    { $set: channel }
+                ).then(cleanDbMark));
+
+                // Broadcast message
+                const eventName = `conversation.${updatedEntity.id}.updated`;
+                this.broker.emit(eventName, updatedEntity).catch(this.logger.error);
+                return updatedEntity;
+            },
+        },
     },
 
     /**
@@ -133,15 +184,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {},
+    stopped() { },
 };
