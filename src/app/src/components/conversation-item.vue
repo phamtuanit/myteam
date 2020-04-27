@@ -24,6 +24,7 @@
                 <v-list-item-subtitle
                     v-if="recentMessage || conversation._isTemp"
                     class="caption"
+                    style="line-height: 0.8rem;"
                     :class="{ 'font-weight-bold': hasNewMessage }"
                     v-text="recentMessage || (conversation._isTemp == true && 'Draft')"
                 ></v-list-item-subtitle>
@@ -140,7 +141,7 @@ export default {
 }
 
 .conversation-item.v-list-item {
-    min-height: 52px;
+    min-height: 50px;
     color: inherit;
 }
 
@@ -174,11 +175,7 @@ export default {
 }
 
 .has-new-message::after {
-    background-color: var(--primary-color-2);
-}
-
-.theme--dark.has-new-message::after {
-    background-color: #ffd700;
+    background-color: #1e88e5;
 }
 
 .content__text {

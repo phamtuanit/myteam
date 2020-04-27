@@ -51,13 +51,14 @@
                             <UserAvatar
                                 :user-name="user.fullName"
                                 :user="user"
+                                :size="28"
                                 online-effect
                             />
 
                             <v-list-item-content class="py-2 pl-3 pr-2">
                                 <v-list-item-title
                                     class="body-2"
-                                    style="font-size: 0.8rem !important;line-height: 1rem;"
+                                    style="font-size: 0.8rem !important;line-height: 0.8rem;"
                                     v-text="getDisplayName(user)"
                                 ></v-list-item-title>
                                 <v-list-item-subtitle
@@ -182,7 +183,7 @@ export default {
 }
 
 #friend-list >>> .v-list-item {
-    min-height: 44px;
+    min-height: 40px;
 }
 
 /* Scroll */

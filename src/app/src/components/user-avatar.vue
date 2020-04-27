@@ -10,7 +10,7 @@
         <Avatar
             :user-name="user.fullName"
             :src="user.avatar"
-            :size="30"
+            :size="size"
             :animation="animation"
         ></Avatar>
     </v-badge>
@@ -23,6 +23,10 @@ export default {
         user: Object,
         onlineEffect: Boolean,
         infinity: Boolean,
+        size: {
+            type: Number,
+            default: 30,
+        },
     },
     components: { Avatar },
     data() {
@@ -32,7 +36,11 @@ export default {
     },
     watch: {
         isOnline(val) {
-            if (this.onlineEffect == true && this.infinity == false && val == true) {
+            if (
+                this.onlineEffect == true &&
+                this.infinity == false &&
+                val == true
+            ) {
                 this.enableAnimation = true;
                 setTimeout(() => {
                     this.enableAnimation = false;
@@ -45,7 +53,7 @@ export default {
             if (!val) {
                 this.enableAnimation = val;
             }
-        }
+        },
     },
     computed: {
         isOnline() {
@@ -53,7 +61,7 @@ export default {
         },
         animation() {
             return this.infinity == true || this.enableAnimation;
-        }
+        },
     },
 };
 </script>

@@ -154,6 +154,10 @@ export default {
 }
 
 .message-card .message-card_text {
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.theme--dark .message-card .message-card_text {
     color: rgba(255, 255, 255, 0.8);
 }
 
