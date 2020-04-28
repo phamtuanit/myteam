@@ -15,7 +15,7 @@
         <!-- Conversation content container -->
         <div class="flex-grow-1 d-flex flex-column">
             <!-- Header -->
-            <Header :conversation="activatedConv"></Header>
+            <Header :conversation="activatedConv || {}"></Header>
             <v-divider></v-divider>
 
             <!-- Conversation content -->

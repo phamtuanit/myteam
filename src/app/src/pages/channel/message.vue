@@ -1,5 +1,5 @@
 <template>
-    <v-sheet class="channel-message-item d-flex transparent mx-4">
+    <v-sheet class="channel-message-item d-flex transparent mx-4" :class="{'message-item--me': isMyMessage}" v-if="message.status != 'removed'">
         <div class="message-item__user pr-1">
             <v-list-item-avatar class="ma-0">
                 <UserAvatar
@@ -13,8 +13,9 @@
             <!-- Message -->
             <v-card
                 elevation="0"
-                class="flex-grow-1 px-3 py-2"
+                class="flex-grow-1 px-3 py-2 message-item__content-card"
             >
+                <!-- Header -->
                 <div class="message-item__content-header center-y">
                     <!-- User info -->
                     <span
@@ -29,8 +30,33 @@
                         class="ml-2"
                         @change="onClearReaction"
                     ></ReactionEmoji>
+
+                    <!-- Actions -->
+                    <div class="message-item__content-actions center-y" v-if="isMyMessage">
+                        <v-menu left>
+                            <template v-slot:activator="{ on }">
+                                <v-btn
+                                    icon
+                                    small
+                                    v-on="on"
+                                    class="mx-auto">
+                                    <v-icon small>mdi-dots-vertical</v-icon>
+                                </v-btn>
+                            </template>
+                            <v-list class="message-item_menu">
+                                <v-list-item @click="onDelete">
+                                    <v-list-item-title>Delete</v-list-item-title>
+                                </v-list-item>
+                                <v-list-item @click="onEdit">
+                                    <v-list-item-title>Edit</v-list-item-title>
+                                </v-list-item>
+                            </v-list>
+                        </v-menu>
+                    </div>
                 </div>
+                <!-- SEparator -->
                 <v-divider class="mt-1"></v-divider>
+                <!-- Content -->
                 <v-card-text
                     class="message-item__content-text pa-0 mt-2 hl"
                     v-html="message.body.content"
@@ -65,6 +91,7 @@ export default {
     props: {
         message: {
             type: Object,
+            default: () => ({})
         },
     },
     data() {
@@ -88,6 +115,9 @@ export default {
             );
             return lastReaction ? lastReaction.type : "";
         },
+        isMyMessage() {
+            return this.me.id === this.message.from.issuer;
+        }
     },
     created() {
         if (this.message.from.issuer) {
@@ -106,6 +136,12 @@ export default {
         onClearReaction(type) {
             this.$emit("dereact", type, this.message);
         },
+        onDelete() {
+            this.$emit("delete", this.message);
+        },
+        onEdit() {
+            this.$emit("edit", this.message);
+        }
     },
 };
 </script>
@@ -133,7 +169,7 @@ export default {
 /* Reactions */
 .message-item__content-footer {
     position: relative;
-    height: 6px;
+    height: 10px;
 }
 
 .message-item__content-footer >>> .reactions-panel {
@@ -153,5 +189,27 @@ export default {
 
 .channel-message-item >>> .message-item__content-text p:last-child {
     margin-bottom: 2px;
+}
+
+.message-item__content-card {
+    position: relative;
+}
+
+.message-item--me .message-item__content-card::after {
+    content: "";
+    position: absolute;
+    background-color: #1e88e5;
+    width: 3px;
+    right: 0px;
+    bottom: 0;
+    top: 0;
+    border-radius: 0 4px 4px 0;
+}
+</style>
+
+<style>
+.message-item_menu .v-list-item {
+    min-height: 38px;
+    min-width: 120px;
 }
 </style>

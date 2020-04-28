@@ -144,14 +144,15 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
             if (conv) {
-                const existingMsg = conv.messages.find(i => i.id == message.id);
-                if (existingMsg) {
-                    existingMsg.status = "removed";
+                const index = conv.messages.findIndex(i => i.id == message.id);
+                if (index >= 0) {
+                    const existingMsg = conv.messages[index];
 
                     const me = this.state.users.me;
-                    if (me.id != existingMsg.from.issuer) {
-                        existingMsg.body.content =
-                            "It has been removed by author";
+                    if (me.id === existingMsg.from.issuer) {
+                        existingMsg.status = "removed";
+                    } else {
+                        conv.messages.splice(index, 1);
                     }
                 }
             }
@@ -265,9 +266,11 @@ const moduleState = {
 
                     // Update message info
                     conv.messages.forEach(msg => {
+                        // Init required value
                         if (msg.from && msg.from.issuer == me.id) {
                             msg._isMe = true;
                         }
+                        msg.status = null;
                     });
                 }
 

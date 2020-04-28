@@ -16,6 +16,8 @@
                     class="mt-1"
                     @react="onReact"
                     @dereact="onDereact"
+                    @delete="onDeleteMessage"
+                    @edit="onEditMessage"
                 ></Message>
             </v-slide-y-transition>
         </v-sheet>
@@ -96,6 +98,14 @@ export default {
         onDereact(type, message) {
             this.onReact(type, message, false);
         },
+        onDeleteMessage(message) {
+            this.$store
+                .dispatch("conversations/deleteMessage", message)
+                .catch(console.error);
+        },
+        onEditMessage() {
+            
+        }
     },
 };
 </script>
