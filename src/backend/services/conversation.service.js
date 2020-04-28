@@ -46,11 +46,43 @@ module.exports = {
                 newConvInfo.creator = user.id;
                 newConvInfo.created = new Date();
 
-                const newConv = await (dbCollection.insert(newConvInfo).then(cleanDbMark));
-                this.logger.info(
-                    "Added new conversation.",
-                    newConv.id
-                );
+                const newConv = await dbCollection
+                    .insert(newConvInfo)
+                    .then(cleanDbMark);
+                this.logger.info("Added new conversation.", newConv.id);
+
+                // Inform all subscribers
+                const msgQueue = {
+                    id: new Date().getTime(),
+                    type: "conversation",
+                    action: "created",
+                    payload: newConv,
+                };
+                if (
+                    newConv.subscribers &&
+                    newConv.subscribers.length > 0
+                ) {
+                    // 2. Save information to user queue and send message to WS
+                    for (
+                        let index = 0;
+                        index < newConv.subscribers.length;
+                        index++
+                    ) {
+                        const subscriberId = newConv.subscribers[index];
+
+                        // 2.1 Save new information to DB of corresponding user cache
+                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                            userId: subscriberId,
+                            message: msgQueue,
+                        }).catch((error) => {
+                            this.logger.warn(
+                                "Could not save message to queue.",
+                                msgQueue,
+                                error
+                            );
+                        });
+                    }
+                }
 
                 // Broadcast message
                 const eventName = `conversation.${newConv.id}.created`;
@@ -68,7 +100,7 @@ module.exports = {
             handler(ctx) {
                 const { id } = ctx.params;
                 return this.getDBCollection("conversations").then(
-                    collection => {
+                    (collection) => {
                         return collection.findOne({ id }).then(cleanDbMark);
                     }
                 );
@@ -121,8 +153,8 @@ module.exports = {
                 }
 
                 return this.getDBCollection("conversations").then(
-                    collection => {
-                        return collection.find(filter).then(records => {
+                    (collection) => {
+                        return collection.find(filter).then((records) => {
                             return records.map(cleanDbMark);
                         });
                     }
@@ -134,7 +166,7 @@ module.exports = {
             roles: [1],
             rest: "PUT /:id",
             params: {
-                id: "number",
+                id: { type: "number", convert: true },
                 channel: {
                     type: "object",
                     props: {
@@ -155,25 +187,67 @@ module.exports = {
                     "conversations"
                 );
 
-                const existingConv = await dbCollection.findOne({ id: convId || channel.id });
+                const existingConv = await dbCollection.findOne({
+                    id: convId || channel.id,
+                });
 
                 if (!existingConv) {
                     // The conversation not found
-                    this.logger.warn("The conversation could not be found.", channel.id);
-                    throw new Errors.MoleculerError("The conversation could not be found.", 404);
+                    this.logger.warn(
+                        "The conversation could not be found.",
+                        channel.id
+                    );
+                    throw new Errors.MoleculerError(
+                        "The conversation could not be found.",
+                        404
+                    );
                 }
 
                 this.checkCreatorRole(ctx, existingConv);
                 channel.updated = new Date();
 
-                const updatedEntity = await (dbCollection.updateById(
-                    existingConv._id,
-                    { $set: channel }
-                ).then(cleanDbMark));
+                const updatedEntity = await dbCollection
+                    .updateById(existingConv._id, { $set: channel })
+                    .then(cleanDbMark);
+
+                // Inform all subscribers
+                const msgQueue = {
+                    id: new Date(channel.updated).getTime(),
+                    type: "conversation",
+                    action: "updated",
+                    payload: updatedEntity,
+                };
+                if (
+                    existingConv.subscribers &&
+                    existingConv.subscribers.length > 0
+                ) {
+                    // 2. Save information to user queue and send message to WS
+                    for (
+                        let index = 0;
+                        index < existingConv.subscribers.length;
+                        index++
+                    ) {
+                        const subscriberId = existingConv.subscribers[index];
+
+                        // 2.1 Save new information to DB of corresponding user cache
+                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                            userId: subscriberId,
+                            message: msgQueue,
+                        }).catch((error) => {
+                            this.logger.warn(
+                                "Could not save message to queue.",
+                                msgQueue,
+                                error
+                            );
+                        });
+                    }
+                }
 
                 // Broadcast message
                 const eventName = `conversation.${updatedEntity.id}.updated`;
-                this.broker.emit(eventName, updatedEntity).catch(this.logger.error);
+                this.broker
+                    .emit(eventName, updatedEntity)
+                    .catch(this.logger.error);
                 return updatedEntity;
             },
         },
@@ -182,7 +256,7 @@ module.exports = {
             roles: [1],
             rest: "DELETE /:id",
             params: {
-                id: "number",
+                id: { type: "number", convert: true },
             },
             async handler(ctx) {
                 const { id: convId } = ctx.params;
@@ -195,17 +269,58 @@ module.exports = {
                 const existingConv = await dbCollection.findOne({ id: convId });
                 if (!existingConv) {
                     // The conversation not found
-                    this.logger.warn("The conversation could not be found.", convId);
-                    throw new Errors.MoleculerError("The conversation could not be found.", 404);
+                    this.logger.warn(
+                        "The conversation could not be found.",
+                        convId
+                    );
+                    throw new Errors.MoleculerError(
+                        "The conversation could not be found.",
+                        404
+                    );
                 }
 
                 existingConv.deleted = new Date();
                 await dbCollection.removeById(existingConv._id);
                 cleanDbMark(existingConv);
 
+                // Inform all subscribers
+                const msgQueue = {
+                    id: new Date().getTime(),
+                    type: "conversation",
+                    action: "removed",
+                    payload: existingConv,
+                };
+                if (
+                    existingConv.subscribers &&
+                    existingConv.subscribers.length > 0
+                ) {
+                    // 2. Save information to user queue and send message to WS
+                    for (
+                        let index = 0;
+                        index < existingConv.subscribers.length;
+                        index++
+                    ) {
+                        const subscriberId = existingConv.subscribers[index];
+
+                        // 2.1 Save new information to DB of corresponding user cache
+                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                            userId: subscriberId,
+                            message: msgQueue,
+                        }).catch((error) => {
+                            this.logger.warn(
+                                "Could not save message to queue.",
+                                msgQueue,
+                                error
+                            );
+                        });
+                    }
+                }
+
                 // Broadcast message
                 const eventName = `conversation.${existingConv.id}.removed`;
-                this.broker.emit(eventName, existingConv).catch(this.logger.error);
+                this.broker
+                    .emit(eventName, existingConv)
+                    .catch(this.logger.error);
                 return existingConv;
             },
         },
@@ -218,24 +333,29 @@ module.exports = {
         checkCreatorRole(ctx, conv) {
             const { user } = ctx.meta;
             if (user.id !== conv.creator) {
-                this.logger.warn(`${user.id} are not admin of this channel ${conv.id}.`);
-                throw new Errors.MoleculerError("You are not admin of this channel.", 401);
+                this.logger.warn(
+                    `${user.id} are not admin of this channel ${conv.id}.`
+                );
+                throw new Errors.MoleculerError(
+                    "You are not admin of this channel.",
+                    401
+                );
             }
-        }
+        },
     },
 
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { },
+    stopped() {},
 };
