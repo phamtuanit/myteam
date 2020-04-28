@@ -146,7 +146,6 @@ export default {
         this.updateUrlQuery();
     },
     activated() {
-        console.log("---> activated chat-list");
         setTimeout(this.updateUrlQuery, 0);
     },
     methods: {
