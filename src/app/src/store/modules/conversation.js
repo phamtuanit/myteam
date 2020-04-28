@@ -67,8 +67,7 @@ function handleWSMessage(socket, state, commit, act, data) {
                                     sub => {
                                         return (
                                             sub.id == me.id ||
-                                            sub.id ==
-                                                message.from.issuer
+                                            sub.id == message.from.issuer
                                         );
                                     }
                                 );
@@ -93,7 +92,7 @@ function handleWSMessage(socket, state, commit, act, data) {
                     });
                 } else {
                     // Incase no chat in cache.
-                    this.dispatch("conversations/loadChat", convId)
+                    this.dispatch("conversations/loadConversation", convId)
                         .then(chat => {
                             if (chat) {
                                 commit("addMessage", {
@@ -138,13 +137,45 @@ function handleWSConversation(socket, state, commit, act, data) {
     };
     confirmMsgFn();
 
-    debugger
     const convId = payload.id;
+    const me = this.state.users.me;
     switch (act) {
         case "created":
+            this.dispatch("conversations/loadConversation", convId).catch(
+                console.error
+            );
+            break;
+        case "updated":
+            if (payload.subscribers.includes(me.id)) {
+                this.dispatch("conversations/loadConversation", convId).catch(
+                    console.error
+                );
+            } else {
+                commit("removeConv", convId);
+            }
             break;
         case "removed":
             commit("removeConv", convId);
+            break;
+        case "left":
+            {
+                if (!payload.subscribers.includes(me.id)) {
+                    commit("removeConv", convId);
+                } else {
+                    const existing = state.channel.all.concat(state.chat.all).find(
+                        con => con.id == convId
+                    );
+                    if (existing) {
+                        this.dispatch(
+                            "users/resolve",
+                            payload.subscribers
+                        ).then(subscribers => {
+                            payload.subscribers = subscribers;
+                            Object.assign(existing, payload);
+                        });
+                    }
+                }
+            }
             break;
     }
 }
@@ -188,7 +219,7 @@ const moduleState = {
                 state.chat.active = conv;
             }
         },
-        addChat(state, conv) {
+        addConversation(state, conv) {
             if (!conv.messages) {
                 conv.messages = [];
             }
@@ -489,7 +520,7 @@ const moduleState = {
                 delete conv._id;
             } else {
                 commit("setActivate", newConv);
-                commit("addChat", newConv);
+                commit("addConversation", newConv);
             }
 
             return newConv;
@@ -540,6 +571,18 @@ const moduleState = {
                 return await convService.delete(convId);
             }
         },
+        async leaveConversation({ state, commit }, convId) {
+            const existingConv = state.channel.all
+                .concat(state.chat.all)
+                .find(i => i.id === convId);
+
+            if (existingConv) {
+                const me = this.state.users.me;
+                const newConv = await convService.leave(convId, me.id);
+                commit("removeConv", convId);
+                return newConv;
+            }
+        },
         async activeTmpChat({ commit }, userInfo) {
             const me = this.state.users.me;
             const convInfo = {
@@ -550,7 +593,7 @@ const moduleState = {
                 _id: new Date().getTime(),
                 _isTemp: true,
             };
-            commit("addChat", convInfo);
+            commit("addConversation", convInfo);
             commit("setActivate", convInfo);
             return convInfo;
         },
@@ -577,7 +620,15 @@ const moduleState = {
                 return conv;
             }
         },
-        async loadChat({ commit }, convId) {
+        async loadConversation({ commit, state }, convId) {
+            const editingConv = state.channel.all
+                .concat(state.chat.all)
+                .find(c => (c.id || c._id) === convId);
+
+            if (editingConv) {
+                return editingConv;
+            }
+
             const conv = (await convService.getAllById(convId)).data;
             if (conv) {
                 const subscribers = await this.dispatch(
@@ -586,7 +637,7 @@ const moduleState = {
                 );
                 conv.subscribers = subscribers || [];
 
-                commit("addChat", conv);
+                commit("addConversation", conv);
                 return conv;
             }
         },
@@ -636,8 +687,14 @@ const moduleState = {
         },
         setupSocket({ commit, state }) {
             const socket = window.IoC.get("socket");
-            socket.on("message", handleWSMessage.bind(this, socket, state, commit));
-            socket.on("conversation", handleWSConversation.bind(this, socket, state, commit));
+            socket.on(
+                "message",
+                handleWSMessage.bind(this, socket, state, commit)
+            );
+            socket.on(
+                "conversation",
+                handleWSConversation.bind(this, socket, state, commit)
+            );
         },
         async reactMessage({ commit, state }, { type, message, status }) {
             const convId = message.to.conversation;

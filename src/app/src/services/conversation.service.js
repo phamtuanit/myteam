@@ -45,4 +45,11 @@ Service.prototype.delete = function (convId) {
     return Promise.reject("Data is invalid");
 };
 
+Service.prototype.leave = function (convId, userId) {
+    if (typeof convId == "number" && typeof userId == "string" && userId) {
+        return Axios.put(this.path + convId + "/leave?user=" + userId);
+    }
+    return Promise.reject("Data is invalid");
+};
+
 export default Service;
