@@ -33,7 +33,7 @@ module.exports = {
                 };
                 return await dbCollection.removeMany(filter);
             } catch (error) {
-                this.logger.error("Could not store message to queue.", error);
+                this.logger.error("Could not remove message.", error);
                 throw error;
             }
         },
@@ -82,7 +82,7 @@ module.exports = {
                     const dbCollection = await this.getDBCollection(queueId);
                     return await dbCollection.removeMany(filter);
                 } catch (error) {
-                    this.logger.error("Could not store message to queue.", error);
+                    this.logger.error("Could not remove message in queue.", error);
                     throw error;
                 }
             },
@@ -151,7 +151,7 @@ module.exports = {
                 try {
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
-                    const res = await dbCollection.insert(message).then(cleanDbMark);
+                    const res = await dbCollection.insert(cleanDbMark(message)).then(cleanDbMark);
 
                     // Emit event to live user
                     const eventName = `message-queue.${userId}.message.${message.action}`;

@@ -193,15 +193,11 @@ module.exports = {
                         index < convInfo.subscribers.length;
                         index++
                     ) {
-                        const userId = convInfo.subscribers[index];
-                        if (userId == message.from.issuer) {
-                            // Ignore issuer from subscribers
-                            continue;
-                        }
+                        const subscriberId = convInfo.subscribers[index];
 
                         // Store information to message queue
                         ctx.call("v1.messages-queue.pushMessageToQueue", {
-                            userId: userId,
+                            userId: subscriberId,
                             message: msgQueue
                         }).catch(error => {
                             this.logger.warn(
@@ -369,10 +365,6 @@ module.exports = {
                         index++
                     ) {
                         const subscriberId = convInfo.subscribers[index];
-                        if (subscriberId == user.id) {
-                            // Ignore reactor
-                            continue;
-                        }
 
                         // Save new information to DB of corresponding user cache
                         ctx.call("v1.messages-queue.pushMessageToQueue", {
@@ -521,15 +513,11 @@ module.exports = {
                     index < convInfo.subscribers.length;
                     index++
                 ) {
-                    const userId = convInfo.subscribers[index];
-                    if (userId == message.from.issuer) {
-                        // Ignore issuer from subscribers
-                        continue;
-                    }
+                    const subscriberId = convInfo.subscribers[index];
 
                     // 2.1 Save new information to DB of corresponding user cache
                     ctx.call("v1.messages-queue.pushMessageToQueue", {
-                        userId: userId,
+                        userId: subscriberId,
                         message: msgQueue
                     }).catch(error => {
                         this.logger.warn(
@@ -590,15 +578,11 @@ module.exports = {
                     index < convInfo.subscribers.length;
                     index++
                 ) {
-                    const userId = convInfo.subscribers[index];
-                    if (userId == message.from.issuer) {
-                        // Ignore issuer from subscribers
-                        continue;
-                    }
+                    const subscriberId = convInfo.subscribers[index];
 
                     // 2.1 Save new information to DB of corresponding user cache
                     ctx.call("v1.messages-queue.pushMessageToQueue", {
-                        userId: userId,
+                        userId: subscriberId,
                         message: msgQueue
                     }).catch(error => {
                         this.logger.warn(

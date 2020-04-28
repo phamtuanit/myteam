@@ -65,13 +65,15 @@ module.exports = {
         // conversation.[id].updated
         "conversation.*.created|removed|updated"(message, sender, event, ctx) {
             const [resource, convId, act] = event.split(".");
-            message.subscribers.forEach(userId => {
-                const socketDict = this.sockets[userId];
-                if (socketDict && Object.keys(socketDict).length > 0) {
-                    // To private user room
-                    this.io.to(userId).emit(resource, act, message, event);
-                }
-            });
+            if (message.subscribers) {
+                message.subscribers.forEach(userId => {
+                    const socketDict = this.sockets[userId];
+                    if (socketDict && Object.keys(socketDict).length > 0) {
+                        // To private user room
+                        this.io.to(userId).emit(resource, act, message, event);
+                    }
+                });
+            }
         },
     },
 
