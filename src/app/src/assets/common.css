@@ -86,3 +86,9 @@ div.v-subheader {
 .v-application .main-view p {
     margin-bottom: 8px;
 }
+
+/* Menus */
+.menus .v-list-item {
+    min-height: 38px;
+    min-width: 120px;
+}
