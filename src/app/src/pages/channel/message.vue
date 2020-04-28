@@ -1,5 +1,5 @@
 <template>
-    <v-sheet class="channel-message-item d-flex transparent mx-4" :class="{'message-item--me': isMyMessage}" v-if="message.status != 'removed'">
+    <v-sheet class="channel-message-item d-flex transparent mx-4" :class="{'message-item--me': isMyMessage, 'message-item--deleted': message.status == 'removed'}">
         <div class="message-item__user pr-1">
             <v-list-item-avatar class="ma-0">
                 <UserAvatar
@@ -14,6 +14,7 @@
             <v-card
                 elevation="0"
                 class="flex-grow-1 px-3 py-2 message-item__content-card"
+                :disabled="message.status == 'removed'"
             >
                 <!-- Header -->
                 <div class="message-item__content-header center-y">
@@ -62,7 +63,7 @@
                     v-html="message.body.content"
                 ></v-card-text>
             </v-card>
-            <div class="message-item__content-footer d-flex">
+            <div class="message-item__content-footer d-flex"  v-if="message.status != 'removed'">
                 <v-spacer></v-spacer>
 
                 <div class="custom-align">
@@ -204,6 +205,10 @@ export default {
     bottom: 0;
     top: 0;
     border-radius: 0 4px 4px 0;
+}
+
+.message-item--deleted .message-item__content-card::after {
+    background-color: red;
 }
 </style>
 
