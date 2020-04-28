@@ -2,7 +2,7 @@
     <v-scale-transition>
         <div class="reaction-emoji">
             <div
-                class="emoji-panel px-1"
+                class="emoji-panel px-1 center-y"
                 v-show="emojis.length > 0"
             >
                 <template v-for="reaction in emojis">
@@ -108,10 +108,6 @@ export default {
 </script>
 
 <style scoped>
-.reaction-emoji {
-    height: 24px;
-}
-
 .emoji-panel {
     display: flex;
     align-items: center;

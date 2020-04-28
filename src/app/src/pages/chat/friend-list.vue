@@ -51,21 +51,22 @@
                             <UserAvatar
                                 :user-name="user.fullName"
                                 :user="user"
-                                :size="28"
+                                :size="30"
                                 online-effect
                             />
 
                             <v-list-item-content class="py-2 pl-3 pr-2">
                                 <v-list-item-title
                                     class="body-2"
-                                    style="font-size: 0.8rem !important;line-height: 0.8rem;"
+                                    style="line-height: 1.1rem;"
                                     v-text="getDisplayName(user)"
                                 ></v-list-item-title>
                                 <v-list-item-subtitle
-                                    v-if="user.phone"
+                                    v-if="user.mail || user.phone"
                                     class="caption"
+                                    style="font-size: 0.7rem !important;line-height: 0.8rem;"
                                 >&#128222;
-                                    {{ user.phone }}</v-list-item-subtitle>
+                                    {{ user.mail || user.phone }}</v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
                     </template>
@@ -183,7 +184,7 @@ export default {
 }
 
 #friend-list >>> .v-list-item {
-    min-height: 40px;
+    min-height: 48px;
 }
 
 /* Scroll */

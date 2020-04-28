@@ -5,8 +5,9 @@
         class="pa-0 no-border-radius center-y px-3"
     >
 
+        <v-icon>mdi-pound</v-icon>
         <v-list-item-title
-            class="title"
+            class="title ml-1"
             v-text="conversation.name"
         ></v-list-item-title>
 
@@ -35,6 +36,7 @@ export default {
     props: {
         conversation: {
             type: Object,
+            default: () => ({})
         },
     },
     components: { ChannelSetting },

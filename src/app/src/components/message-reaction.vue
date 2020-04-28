@@ -73,6 +73,7 @@ export default {
     -webkit-box-align: center;
     align-items: center;
     border-radius: 5px;
+    z-index: 9;
 }
 
 .reactions-panel:hover .v-icon {

@@ -18,7 +18,6 @@
             <v-list-item-content class="py-1 px-2 content__text">
                 <v-list-item-title
                     class="subtitle-2 mb-0"
-                    style="font-size: 0.8rem !important;line-height: 1rem;"
                     v-text="conversation.name"
                 ></v-list-item-title>
                 <v-list-item-subtitle
@@ -39,7 +38,6 @@
                 <v-icon size="15">mdi-pound</v-icon>
                 <span
                     class="ml-1"
-                    style="font-size: 0.8rem !important;"
                     v-text="conversation.name"
                 ></span>
             </v-list-item-title>
