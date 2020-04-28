@@ -44,7 +44,7 @@
                                     <v-icon small>mdi-dots-vertical</v-icon>
                                 </v-btn>
                             </template>
-                            <v-list class="message-item_menu">
+                            <v-list class="menus">
                                 <v-list-item @click="onDelete">
                                     <v-list-item-title>Delete</v-list-item-title>
                                 </v-list-item>
@@ -209,12 +209,5 @@ export default {
 
 .message-item--deleted .message-item__content-card::after {
     background-color: red;
-}
-</style>
-
-<style>
-.message-item_menu .v-list-item {
-    min-height: 38px;
-    min-width: 120px;
 }
 </style>
