@@ -157,6 +157,9 @@ module.exports = {
                     const eventName = `message-queue.${userId}.message.${message.action}`;
                     this.broker
                         .emit(eventName, cleanDbMark(message))
+                        .then(() => {
+                            this.logger.info("Published message to user-queue.", queueId, message.id);
+                        })
                         .catch(this.logger.error);
 
                     return res;

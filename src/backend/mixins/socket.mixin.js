@@ -39,8 +39,9 @@ module.exports = {
             }
         },
         // message-queue.[userId].message.created
-        "message-queue.*.message.created|removed|reacted"(message, sender, event, ctx) {
+        "message-queue.*.message.*"(message, sender, event, ctx) {
             const [constVar, userId, resource, act] = event.split(".");
+            this.logger.info("Receiving a message from user-queue.", userId, event);
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
                 message.event = event;

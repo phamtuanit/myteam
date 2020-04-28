@@ -58,10 +58,7 @@ module.exports = {
                     action: "created",
                     payload: newConv,
                 };
-                if (
-                    newConv.subscribers &&
-                    newConv.subscribers.length > 0
-                ) {
+                if (newConv.subscribers && newConv.subscribers.length > 0) {
                     // 2. Save information to user queue and send message to WS
                     for (
                         let index = 0;
@@ -210,25 +207,19 @@ module.exports = {
                     .updateById(existingConv._id, { $set: channel })
                     .then(cleanDbMark);
 
-                // Inform all subscribers
-                const msgQueue = {
-                    id: new Date(channel.updated).getTime(),
-                    type: "conversation",
-                    action: "updated",
-                    payload: updatedEntity,
-                };
-                if (
-                    existingConv.subscribers &&
-                    existingConv.subscribers.length > 0
-                ) {
-                    // 2. Save information to user queue and send message to WS
-                    for (
-                        let index = 0;
-                        index < existingConv.subscribers.length;
-                        index++
-                    ) {
-                        const subscriberId = existingConv.subscribers[index];
+                const subscribers = new Set(
+                    existingConv.subscribers.concat(updatedEntity.subscribers)
+                );
+                if (subscribers.size > 0) {
+                    const msgQueue = {
+                        id: new Date(channel.updated).getTime(),
+                        type: "conversation",
+                        action: "updated",
+                        payload: updatedEntity,
+                    };
 
+                    // 2. Save information to user queue and send message to WS
+                    subscribers.forEach((subscriberId) => {
                         // 2.1 Save new information to DB of corresponding user cache
                         ctx.call("v1.messages-queue.pushMessageToQueue", {
                             userId: subscriberId,
@@ -240,7 +231,7 @@ module.exports = {
                                 error
                             );
                         });
-                    }
+                    });
                 }
 
                 // Broadcast message
@@ -249,6 +240,79 @@ module.exports = {
                     .emit(eventName, updatedEntity)
                     .catch(this.logger.error);
                 return updatedEntity;
+            },
+        },
+        leaveConversation: {
+            auth: true,
+            roles: [1],
+            rest: "PUT /:id/leave",
+            params: {
+                id: { type: "number", convert: true },
+                user: "string",
+            },
+            async handler(ctx) {
+                const { user: userId, id: convId } = ctx.params;
+                // Get adapter
+                const dbCollection = await this.getDBCollection(
+                    "conversations"
+                );
+
+                const existingConv = await dbCollection.findOne({
+                    id: convId,
+                });
+
+                if (!existingConv) {
+                    // The conversation not found
+                    this.logger.warn(
+                        "The conversation could not be found.",
+                        convId
+                    );
+                    return;
+                }
+
+                // Remove subscriber
+                const newEntity = await dbCollection.updateById(existingConv._id, {
+                    $pull: {
+                        subscribers: userId,
+                    },
+                });
+
+                cleanDbMark(existingConv);
+
+                const subscribers = new Set(
+                    existingConv.subscribers.concat(newEntity.subscribers)
+                );
+                if (subscribers.size > 0) {
+                    // Inform all subscribers
+                    const msgQueue = {
+                        id: new Date().getTime(),
+                        type: "conversation",
+                        action: "left",
+                        payload: newEntity,
+                    };
+                    
+                    // 2. Save information to user queue and send message to WS
+                    subscribers.forEach((subscriberId) => {
+                        // 2.1 Save new information to DB of corresponding user cache
+                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                            userId: subscriberId,
+                            message: msgQueue,
+                        }).catch((error) => {
+                            this.logger.warn(
+                                "Could not save message to queue.",
+                                msgQueue,
+                                error
+                            );
+                        });
+                    });
+                }
+
+                // Broadcast message
+                const eventName = `conversation.${existingConv.id}.updated`;
+                this.broker
+                    .emit(eventName, existingConv)
+                    .catch(this.logger.error);
+                return existingConv;
             },
         },
         deleteConversation: {
