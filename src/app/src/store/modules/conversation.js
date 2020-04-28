@@ -25,6 +25,130 @@ function informNewMessage(message, conv) {
     pushInformation(1, sender);
 }
 
+function handleWSMessage(socket, state, commit, act, data) {
+    const message = data.payload;
+    const convId = message.to.conversation;
+    const me = this.state.users.me;
+
+    // Send confirm message
+    const confirmMsgFn = function confirm() {
+        socket.emit("confirm", {
+            status: "confirmed",
+            id: data.id,
+            type: data.type,
+            action: act,
+            payload: {
+                id: message.id,
+                from: message.from,
+                to: message.to,
+            },
+        });
+    };
+
+    // Handle event
+    switch (act) {
+        case "created":
+            if (!data.payload || !data.payload) {
+                break;
+            } else {
+                const existingConv = state.channel.all
+                    .concat(state.chat.all)
+                    .find(conv => {
+                        if (conv.id == convId) {
+                            return true;
+                        }
+
+                        if (conv.channel == false) {
+                            if (
+                                conv.subscribers &&
+                                conv.subscribers.length == 2
+                            ) {
+                                const matchedSub = conv.subscribers.filter(
+                                    sub => {
+                                        return (
+                                            sub.id == me.id ||
+                                            sub.id ==
+                                                message.from.issuer
+                                        );
+                                    }
+                                );
+
+                                return matchedSub.length == 2;
+                            }
+                        }
+                        return false;
+                    });
+
+                // Change temp conversation to rea;
+                if (existingConv && existingConv._isTemp == true) {
+                    existingConv.id = convId;
+                    delete existingConv._id;
+                    delete existingConv._isTemp;
+                }
+
+                if (existingConv) {
+                    commit("addMessage", {
+                        convId: existingConv.id,
+                        message,
+                    });
+                } else {
+                    // Incase no chat in cache.
+                    this.dispatch("conversations/loadChat", convId)
+                        .then(chat => {
+                            if (chat) {
+                                commit("addMessage", {
+                                    convId,
+                                    message,
+                                });
+                            }
+                        })
+                        .catch(console.error);
+                }
+            }
+            break;
+        case "reacted":
+        case "updated":
+            commit("updateMessage", { convId, message });
+            confirmMsgFn();
+            break;
+        case "removed":
+            commit("removeMessage", { convId, message });
+            confirmMsgFn();
+            break;
+
+        default:
+            console.warn("Unsupported message.", data);
+            break;
+    }
+}
+
+function handleWSConversation(socket, state, commit, act, data) {
+    const payload = data.payload;
+    // Send confirm message
+    const confirmMsgFn = function confirm() {
+        socket.emit("confirm", {
+            status: "confirmed",
+            id: data.id,
+            type: data.type,
+            action: act,
+            payload: {
+                id: payload.id,
+            },
+        });
+    };
+    confirmMsgFn();
+
+    debugger
+    const convId = payload.id;
+    switch (act) {
+        case "created":
+            break;
+        case "removed":
+            commit("removeConv", convId);
+            break;
+    }
+}
+
 const moduleState = {
     namespaced: true,
     state: {
@@ -89,11 +213,20 @@ const moduleState = {
                 state.chat.all.push(conv);
             }
         },
-        removeChat(state, convId) {
+        removeConv(state, convId) {
             const convList = [state.channel.all, state.chat.all];
             convList.forEach(all => {
                 const index = all.findIndex(i => i.id == convId);
                 if (index >= 0) {
+                    const found = all[index];
+
+                    // Reset active state
+                    if (found == state.channel.active) {
+                        state.channel.active = null;
+                    } else if (found == state.chat.active) {
+                        state.chat.active = null;
+                    }
+
                     all.splice(index, 1);
                     return;
                 }
@@ -115,7 +248,7 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
             if (conv) {
-                const pushToUnread = function (message) {
+                const pushToUnread = function(message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessage.push(message);
                     }
@@ -377,7 +510,7 @@ const moduleState = {
                 channel: convInfo.channel,
                 private: convInfo.private,
                 subscribers: convInfo.subscribers,
-            }
+            };
 
             // Create new conversation
             const latestEntity = (await convService.update(entity)).data;
@@ -397,6 +530,15 @@ const moduleState = {
             }
 
             return latestEntity;
+        },
+        async deleteConversation({ state }, convId) {
+            const existingConv = state.channel.all
+                .concat(state.chat.all)
+                .find(i => i.id === convId);
+
+            if (existingConv) {
+                return await convService.delete(convId);
+            }
         },
         async activeTmpChat({ commit }, userInfo) {
             const me = this.state.users.me;
@@ -494,102 +636,8 @@ const moduleState = {
         },
         setupSocket({ commit, state }) {
             const socket = window.IoC.get("socket");
-            socket.on("message", (act, data) => {
-                const message = data.payload;
-                const convId = message.to.conversation;
-                const me = this.state.users.me;
-
-                // Send confirm message
-                const confirmMsg = function confirm() {
-                    socket.emit("confirm", {
-                        status: "confirmed",
-                        id: data.id,
-                        type: data.type,
-                        action: act,
-                        payload: {
-                            id: message.id,
-                            from: message.from,
-                            to: message.to,
-                        },
-                    });
-                };
-
-                // Handle event
-                switch (act) {
-                    case "created":
-                        if (!data.payload || !data.payload) {
-                            break;
-                        } else {
-                            const existingConv = state.channel.all
-                                .concat(state.chat.all)
-                                .find(conv => {
-                                    if (conv.id == convId) {
-                                        return true;
-                                    }
-
-                                    if (conv.channel == false) {
-                                        if (
-                                            conv.subscribers &&
-                                            conv.subscribers.length == 2
-                                        ) {
-                                            const matchedSub = conv.subscribers.filter(
-                                                sub => {
-                                                    return (
-                                                        sub.id == me.id ||
-                                                        sub.id ==
-                                                        message.from.issuer
-                                                    );
-                                                }
-                                            );
-
-                                            return matchedSub.length == 2;
-                                        }
-                                    }
-                                    return false;
-                                });
-
-                            // Change temp conversation to rea;
-                            if (existingConv && existingConv._isTemp == true) {
-                                existingConv.id = convId;
-                                delete existingConv._id;
-                                delete existingConv._isTemp;
-                            }
-
-                            if (existingConv) {
-                                commit("addMessage", {
-                                    convId: existingConv.id,
-                                    message,
-                                });
-                            } else {
-                                // Incase no chat in cache.
-                                this.dispatch("conversations/loadChat", convId)
-                                    .then(chat => {
-                                        if (chat) {
-                                            commit("addMessage", {
-                                                convId,
-                                                message,
-                                            });
-                                        }
-                                    })
-                                    .catch(console.error);
-                            }
-                        }
-                        break;
-                    case "reacted":
-                    case "updated":
-                        commit("updateMessage", { convId, message });
-                        confirmMsg();
-                        break;
-                    case "removed":
-                        commit("removeMessage", { convId, message });
-                        confirmMsg();
-                        break;
-
-                    default:
-                        console.warn("Unsupported message.", data);
-                        break;
-                }
-            });
+            socket.on("message", handleWSMessage.bind(this, socket, state, commit));
+            socket.on("conversation", handleWSConversation.bind(this, socket, state, commit));
         },
         async reactMessage({ commit, state }, { type, message, status }) {
             const convId = message.to.conversation;

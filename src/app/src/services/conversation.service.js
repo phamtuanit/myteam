@@ -1,18 +1,18 @@
 import Axios from "axios";
 const Service = function service() {
-    this.name = "conversations/";
+    this.path = "conversations/";
 };
 
 Service.prototype.getByUser = function (userName) {
     if (typeof userName == "string" && userName) {
-        return Axios.get(this.name + `?user=${userName}`);
+        return Axios.get(this.path + `?user=${userName}`);
     }
     return Promise.reject("Data is invalid");
 };
 
 Service.prototype.getAllById = function (id) {
     if (typeof id == "number") {
-        return Axios.get(this.name + id);
+        return Axios.get(this.path + id);
     }
     return Promise.reject("Data is invalid");
 };
@@ -22,7 +22,7 @@ Service.prototype.create = function (groupInfo) {
         if (groupInfo.subscribers.length <= 0) {
             return Promise.reject("[subscribers] is required for new conversation");
         }
-        return Axios.post(this.name, { channel: groupInfo });
+        return Axios.post(this.path, { channel: groupInfo });
     }
     return Promise.reject("Data is invalid");
 };
@@ -33,14 +33,14 @@ Service.prototype.update = function (groupInfo) {
         if (groupInfo.subscribers.length <= 0) {
             return Promise.reject("[subscribers] is required for new conversation");
         }
-        return Axios.put(this.name + id, { channel: groupInfo });
+        return Axios.put(this.path + id, { channel: groupInfo });
     }
     return Promise.reject("Data is invalid");
 };
 
 Service.prototype.delete = function (convId) {
     if (typeof convId == "number") {
-        return Axios.delete(this.name + convId);
+        return Axios.delete(this.path + convId);
     }
     return Promise.reject("Data is invalid");
 };

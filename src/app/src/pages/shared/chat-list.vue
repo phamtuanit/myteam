@@ -104,7 +104,7 @@ export default {
                     "conversations/activeChat",
                     val.id || val._id
                 );
-            } else if (!this.activatedConv) {
+            } else if (!this.activatedConv && this.activatedItem) {
                 this.$nextTick(() => {
                     // Fix bug cannot activate the last conv after changing conv.id (conv._id)
                     this.activatedConv = this.convList.find(
