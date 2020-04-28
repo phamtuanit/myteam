@@ -181,9 +181,7 @@ export default {
             this.$store
                 .dispatch("conversations/sendMessage", msg)
                 .then(() => {
-                    console.log("Reset msg - B: ", this.newMessage);
                     this.newMessage = "";
-                    console.log("Reset msg - A: ", this.newMessage);
                 })
                 .catch(console.error);
         },
