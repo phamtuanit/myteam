@@ -35,6 +35,7 @@ module.exports = {
             },
             async handler(ctx) {
                 const { channel } = ctx.params;
+                const { user } = ctx.meta;
                 // Get adapter
                 const dbCollection = await this.getDBCollection(
                     "conversations"
@@ -42,14 +43,14 @@ module.exports = {
 
                 const newConvInfo = channel;
                 newConvInfo.id = new Date().getTime();
+                newConvInfo.creator = user.id;
+                newConvInfo.created = new Date();
 
-                const newConv = await dbCollection.insert(newConvInfo);
+                const newConv = await (dbCollection.insert(newConvInfo).then(cleanDbMark));
                 this.logger.info(
                     "Added new conversation.",
                     newConv.id
                 );
-
-                newConv = cleanDbMark(newConv);
 
                 // Broadcast message
                 const eventName = `conversation.${newConv.id}.created`;
@@ -133,6 +134,7 @@ module.exports = {
             roles: [1],
             rest: "PUT /:id",
             params: {
+                id: "number",
                 channel: {
                     type: "object",
                     props: {
@@ -147,13 +149,13 @@ module.exports = {
                 },
             },
             async handler(ctx) {
-                const { channel } = ctx.params;
+                const { channel, id: convId } = ctx.params;
                 // Get adapter
                 const dbCollection = await this.getDBCollection(
                     "conversations"
                 );
 
-                const existingConv = await dbCollection.findOne({ id: channel.id });
+                const existingConv = await dbCollection.findOne({ id: convId || channel.id });
 
                 if (!existingConv) {
                     // The conversation not found
@@ -161,6 +163,7 @@ module.exports = {
                     throw new Errors.MoleculerError("The conversation could not be found.", 404);
                 }
 
+                this.checkCreatorRole(ctx, existingConv);
                 channel.updated = new Date();
 
                 const updatedEntity = await (dbCollection.updateById(
@@ -174,12 +177,52 @@ module.exports = {
                 return updatedEntity;
             },
         },
+        deleteConversation: {
+            auth: true,
+            roles: [1],
+            rest: "DELETE /:id",
+            params: {
+                id: "number",
+            },
+            async handler(ctx) {
+                const { id: convId } = ctx.params;
+                // Get adapter
+                const dbCollection = await this.getDBCollection(
+                    "conversations"
+                );
+
+                // Verify conversation
+                const existingConv = await dbCollection.findOne({ id: convId });
+                if (!existingConv) {
+                    // The conversation not found
+                    this.logger.warn("The conversation could not be found.", convId);
+                    throw new Errors.MoleculerError("The conversation could not be found.", 404);
+                }
+
+                existingConv.deleted = new Date();
+                await dbCollection.removeById(existingConv._id);
+                cleanDbMark(existingConv);
+
+                // Broadcast message
+                const eventName = `conversation.${existingConv.id}.removed`;
+                this.broker.emit(eventName, existingConv).catch(this.logger.error);
+                return existingConv;
+            },
+        },
     },
 
     /**
      * Methods
      */
-    methods: {},
+    methods: {
+        checkCreatorRole(ctx, conv) {
+            const { user } = ctx.meta;
+            if (user.id !== conv.creator) {
+                this.logger.warn(`${user.id} are not admin of this channel ${conv.id}.`);
+                throw new Errors.MoleculerError("You are not admin of this channel.", 401);
+            }
+        }
+    },
 
     /**
      * Service created lifecycle event handler

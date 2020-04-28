@@ -174,6 +174,9 @@ module.exports = {
                     return;
                 }
 
+                // Verify role
+                this.checkCreatorRole(ctx, message);
+
                 // 2. Delete record
                 message.deleted = new Date();
                 await dbCollection.removeById(message._id);
@@ -398,6 +401,13 @@ module.exports = {
         getHistoryCollectionName(conversation) {
             return `conv-history-${conversation}`;
         },
+        checkCreatorRole(ctx, message) {
+            const { user } = ctx.meta;
+            if (user.id !== message.from.issuer) {
+                this.logger.warn(`${user.id} are not creator of the message ${message.id}.`);
+                throw new Errors.MoleculerError("You are not allowed to update this message.", 401);
+            }
+        },
         async filterMessage(ctx) {
             const { conversation, history, id } = ctx.params;
             // Check conversation
@@ -465,6 +475,9 @@ module.exports = {
             // Get adapter
             const dbCollection = await this.getDBCollection(convCollId);
             const oldEntity = await dbCollection.findOne({ id: message.id });
+
+            // Verify role
+            this.checkCreatorRole(ctx, oldEntity);
 
             // 1. Verify existing message
             if (!oldEntity) {
