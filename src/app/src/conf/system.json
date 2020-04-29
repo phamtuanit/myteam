@@ -3,5 +3,8 @@
     "server": {
         "address": "http://localhost:8081",
         "api": "/api/v1/"
+    },
+    "media": {
+        "url": "http://localhost:8081/media/"
     }
 }
