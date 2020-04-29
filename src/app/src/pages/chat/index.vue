@@ -58,7 +58,6 @@ import { mapState } from "vuex";
 export default {
     name: "chat-main",
     components: { ChatList, ChatContent, FriendList },
-    inject: ["bus"],
     data() {
         return {
             displayFriendList: true,
