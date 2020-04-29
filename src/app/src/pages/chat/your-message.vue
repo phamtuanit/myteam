@@ -1,10 +1,7 @@
 <template>
     <v-list-item class="px-2 message-item your-message">
         <v-list-item-avatar class="my-0 ml-2 mr-0">
-            <UserAvatar
-                :user="user"
-                online-effect
-            />
+            <UserAvatar :user="user" online-effect />
         </v-list-item-avatar>
 
         <!-- Message -->
@@ -20,10 +17,7 @@
                         class="subtitle-2 mr-2 user-name"
                         v-text="fullName"
                     ></span>
-                    <span
-                        class="caption"
-                        v-text="time"
-                    ></span>
+                    <span class="caption" v-text="timeAgo"></span>
                     <v-spacer></v-spacer>
                     <v-icon
                         v-if="!isAvailable"
@@ -63,16 +57,8 @@
         </div>
 
         <!-- Actions -->
-        <div
-            class="message-actions ml-2"
-            v-if="isAvailable"
-        >
-            <v-btn
-                icon
-                small
-                class="mx-auto"
-                @click="onReply"
-            >
+        <div class="message-actions ml-2" v-if="isAvailable">
+            <v-btn icon small class="mx-auto" @click="onReply">
                 <v-icon small>mdi-reply</v-icon>
             </v-btn>
         </div>
@@ -87,11 +73,13 @@ import ReactionEmoji from "../../components/message-emoji.vue";
 import Reaction from "../../components/message-reaction.vue";
 
 import { mapState } from "vuex";
+import { toTimeAgo } from "../../utils/date.js";
 export default {
     props: ["message", "user"],
     components: { UserAvatar, ReactionEmoji, Reaction },
     data() {
         return {
+            timeAgo: null,
             messageStatus: null,
         };
     },
@@ -102,9 +90,6 @@ export default {
         fullName() {
             const nameArr = [this.user.firstName, this.user.lastName];
             return this.user.fullName || nameArr.join(", ");
-        },
-        time() {
-            return new Date(this.message.arrivalTime).toLocaleString();
         },
         isAvailable() {
             return !this.message.status;
@@ -147,6 +132,10 @@ export default {
         if (!("status" in this.message)) {
             this.$set(this.message, "status", null);
         }
+        this.timeAgo = toTimeAgo(this.message.arrivalTime);
+    },
+    updated() {
+        this.timeAgo = toTimeAgo(this.message.arrivalTime);
     },
     methods: {
         onReact(reaction) {

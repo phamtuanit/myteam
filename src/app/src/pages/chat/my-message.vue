@@ -6,23 +6,12 @@
         <div style="min-width: 20px;"></div>
         <v-spacer></v-spacer>
         <!-- Actions -->
-        <div
-            class="message-actions mr-1"
-            v-if="isAvailable"
-        >
-            <v-btn
-                icon
-                small
-                class="mx-auto"
-                @click="onDeleteMessage"
-            >
+        <div class="message-actions mr-1" v-if="isAvailable">
+            <v-btn icon small class="mx-auto" @click="onDeleteMessage">
                 <v-icon small>mdi-delete</v-icon>
             </v-btn>
         </div>
-        <div
-            style="min-width: 40px;"
-            v-else
-        >
+        <div style="min-width: 40px;" v-else>
             <!-- Empty space -->
         </div>
 
@@ -35,10 +24,7 @@
             >
                 <!-- Header -->
                 <div class="message-card__header selection-disabled mb-0">
-                    <span
-                        class="caption"
-                        v-text="time"
-                    ></span>
+                    <span class="caption" v-text="timeAgo"></span>
                     <v-spacer></v-spacer>
                     <v-icon
                         v-if="!isAvailable"
@@ -66,18 +52,17 @@
 
 <script>
 import ReactionEmoji from "../../components/message-emoji.vue";
+import { toTimeAgo } from "../../utils/date.js";
 export default {
     props: ["message"],
     components: { ReactionEmoji },
     data() {
         return {
+            timeAgo: null,
             messageStatus: null,
         };
     },
     computed: {
-        time() {
-            return new Date(this.message.arrivalTime).toLocaleString();
-        },
         isAvailable() {
             return !this.message.status;
         },
@@ -111,6 +96,10 @@ export default {
         if (!("status" in this.message)) {
             this.$set(this.message, "status", null);
         }
+        this.timeAgo = toTimeAgo(this.message.arrivalTime);
+    },
+    updated() {
+        this.timeAgo = toTimeAgo(this.message.arrivalTime);
     },
     methods: {
         onDeleteMessage() {
