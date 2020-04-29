@@ -230,7 +230,7 @@ const moduleState = {
                 };
             }
 
-            // Update conversation name
+            // Update conversation name (NOT channel)
             if (!conv.name) {
                 const friends = conv.subscribers.filter(user => !user._isMe);
                 if (friends.length > 0) {
@@ -243,6 +243,8 @@ const moduleState = {
             } else {
                 state.chat.all.push(conv);
             }
+
+            eventBus.emit("conversation", "added", conv);
         },
         removeConv(state, convId) {
             const convList = [state.channel.all, state.chat.all];
@@ -259,6 +261,7 @@ const moduleState = {
                     }
 
                     all.splice(index, 1);
+                    eventBus.emit("conversation", "removed", found);
                     return;
                 }
             });

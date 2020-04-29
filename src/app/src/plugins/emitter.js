@@ -20,8 +20,8 @@ class Emitter {
         return this;
     }
 
-    emit(evt, data) {
-        this.innerBus.$emit(evt, data);
+    emit() {
+        this.innerBus.$emit(...arguments);
         return this;
     }
 }

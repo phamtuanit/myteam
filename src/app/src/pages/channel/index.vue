@@ -74,6 +74,7 @@ export default {
     },
     created() {
         this.updateData();
+        this.registerEvents();
     },
     methods: {
         onCreateConv() {
@@ -103,6 +104,31 @@ export default {
                 }
 
                 this.currentConvId = existingConv.id;
+            }
+        },
+        registerEvents() {
+            const bus = window.IoC.get("bus");
+            bus.on("conversation", this.handleConvEvent);
+        },
+        handleConvEvent(act, conv) {
+            switch (act) {
+                case "removed":
+                    console.info(
+                        "A conversation has been deleted.",
+                        conv.name,
+                        conv.id
+                    );
+                    {
+                        const index = this.conversations.findIndex(
+                            c => c.value.id == conv.id
+                        );
+                        if (index >= 0) {
+                            this.conversations.splice(index, 1);
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         },
     },
