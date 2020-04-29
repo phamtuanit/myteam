@@ -31,18 +31,33 @@ import Paragraph from "@ckeditor/ckeditor5-paragraph/src/paragraph.js";
 import TextTransformation from "@ckeditor/ckeditor5-typing/src/texttransformation";
 
 // Essentials plugin
-import Clipboard from '@ckeditor/ckeditor5-clipboard/src/clipboard';
-import Enter from '@ckeditor/ckeditor5-enter/src/enter';
-import ShiftEnter from '@ckeditor/ckeditor5-enter/src/shiftenter';
-import Typing from '@ckeditor/ckeditor5-typing/src/typing';
-import Undo from '@ckeditor/ckeditor5-undo/src/undo';
+import Clipboard from "@ckeditor/ckeditor5-clipboard/src/clipboard";
+// import Enter from '@ckeditor/ckeditor5-enter/src/enter';
+import ShiftEnter from "@ckeditor/ckeditor5-enter/src/shiftenter";
+import Typing from "@ckeditor/ckeditor5-typing/src/typing";
+import Undo from "@ckeditor/ckeditor5-undo/src/undo";
 
-export default class Editor extends ClassicEditor { }
+// Images: https://ckeditor.com/docs/ckeditor5/latest/features/image.html
+import Image from '@ckeditor/ckeditor5-image/src/image';
+// import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
+import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
+import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
+import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
+import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter";
+import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
+
+export default class Editor extends ClassicEditor {}
 
 // Plugins to include in the build.
 Editor.builtinPlugins = [
+    Image,
+    // ImageToolbar,
+    ImageStyle,
+    ImageResize,
+    ImageUpload,
+    // SimpleUploadAdapter,
+    Base64UploadAdapter,
     Clipboard,
-    Enter,
     ShiftEnter,
     Typing,
     Undo,
@@ -84,13 +99,18 @@ ClassicEditor.defaultConfig = {
             "bulletedList",
             "numberedList",
             // "todoList",
+            "indent",
+            "outdent",
             "|",
+            "blockQuote",
             "fontBackgroundColor",
             "fontColor",
             "|",
-            "blockQuote",
-            "indent",
-            "outdent",
+            "imageUpload",
+            "imageStyle:alignLeft",
+            "imageStyle:full",
+            "imageStyle:alignRight",
+            "|",
             // "specialCharacters",
             // "|",
             "code",
@@ -124,5 +144,24 @@ ClassicEditor.defaultConfig = {
                 "quotesSecondaryPl",
             ],
         },
+    },
+    image: {
+        // You need to configure the image toolbar, too, so it uses the new style buttons.
+        toolbar: [
+            "imageStyle:alignLeft",
+            "imageStyle:full",
+            "imageStyle:alignRight",
+        ],
+
+        styles: [
+            // This option is equal to a situation where no style is applied.
+            "full",
+
+            // This represents an image aligned to the left.
+            "alignLeft",
+
+            // This represents an image aligned to the right.
+            "alignRight",
+        ],
     },
 };

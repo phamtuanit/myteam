@@ -33,11 +33,21 @@ export default {
         ckeditor: CKEditor.component,
     },
     data() {
+        this.config = require("../../conf/system.json");
         return {
+            fileRepository: null,
             showEditor: false,
             editor: this.classEditor,
             internalValue: this.value,
-            editorConfig: {},
+            editorConfig: {
+                simpleUpload: {
+                    // The URL that the images are uploaded to.
+                    uploadUrl: this.config.media.url,
+
+                    // Headers sent along with the XMLHttpRequest to the upload server.
+                    headers: {},
+                },
+            },
         };
     },
     watch: {
@@ -57,7 +67,20 @@ export default {
         setTimeout(() => {
             // Display editor
             this.showEditor = true;
-        }, 10);
+        }, 5);
+
+        this.auth = window.IoC.get("auth");
+
+        if (this.auth) {
+            this.auth
+                .getToken()
+                .then(token => {
+                    this.editorConfig.simpleUpload.headers[
+                        "Authorization"
+                    ] = token;
+                })
+                .catch(console.warn);
+        }
     },
     methods: {
         updateTopbar() {
@@ -73,6 +96,7 @@ export default {
             this.editorInstance = this.$refs.editor.instance;
             this.updateTopbar();
             this.$emit("ready", this.editorInstance);
+            // this.fileRepository = this.editorInstance.plugins.get( FileRepository );
         },
     },
 };
@@ -86,4 +110,3 @@ export default {
     word-break: break-all;
 }
 </style>
-
