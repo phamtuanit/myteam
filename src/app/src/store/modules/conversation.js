@@ -162,9 +162,9 @@ function handleWSConversation(socket, state, commit, act, data) {
                 if (!payload.subscribers.includes(me.id)) {
                     commit("removeConv", convId);
                 } else {
-                    const existing = state.channel.all.concat(state.chat.all).find(
-                        con => con.id == convId
-                    );
+                    const existing = state.channel.all
+                        .concat(state.chat.all)
+                        .find(con => con.id == convId);
                     if (existing) {
                         this.dispatch(
                             "users/resolve",
@@ -372,7 +372,7 @@ const moduleState = {
             const conv = state.channel.all
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
-            if (conv && conv.messages && conv.messages.length > 0) {
+            if (conv) {
                 conv.meta.unreadMessage.splice(0);
                 return conv;
             }
