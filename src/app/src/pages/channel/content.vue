@@ -64,6 +64,7 @@ export default {
             }
         },
         onSend(html) {
+            this.onRead();
             if (!html) {
                 return;
             }

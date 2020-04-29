@@ -151,6 +151,7 @@ export default {
             msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
         },
         onSendMessage(html) {
+            this.onRead();
             if (!html) {
                 return;
             }
