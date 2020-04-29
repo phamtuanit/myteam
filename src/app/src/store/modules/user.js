@@ -123,7 +123,7 @@ const moduleState = {
             }
 
             const [str, limit] = text.split("&");
-            if (str === "all") {
+            if (str === "#all") {
                 // Get all users
                 return service.getAll(limit).then(res => {
                     const users = res.data;
