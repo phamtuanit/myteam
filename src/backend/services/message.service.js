@@ -18,6 +18,20 @@ module.exports = {
      * Events
      */
     events: {
+        async "conversation.*.removed"(payload, sender, event, ctx) {
+            const [, convId, act] = event.split(".");
+            const convCollId = this.getHistoryCollectionName(convId);
+
+            if (act == "removed") {
+                const dbCollection = await this.getDBCollection(convCollId);
+                const collection = dbCollection.collection;
+                const count = await collection.countDocuments();
+                if (count > 0) {
+                    this.logger.info("Deleting DB collection", convCollId);
+                    return await collection.drop();
+                }
+            }
+        },
     },
 
     actions: {
@@ -82,9 +96,12 @@ module.exports = {
                     },
                 };
 
-                let convInfo = await ctx.call("v1.conversations.getConversationById", {
-                    id: conversation,
-                });
+                let convInfo = await ctx.call(
+                    "v1.conversations.getConversationById",
+                    {
+                        id: conversation,
+                    }
+                );
 
                 if (!convInfo) {
                     throw new Errors.MoleculerClientError(
@@ -201,13 +218,14 @@ module.exports = {
                         // Store information to message queue
                         ctx.call("v1.messages-queue.pushMessageToQueue", {
                             userId: subscriberId,
-                            message: msgQueue
-                        }).catch(error => {
+                            message: msgQueue,
+                        }).catch((error) => {
                             this.logger.warn(
                                 "Could not save message to queue.",
-                                msgQueue, error
+                                msgQueue,
+                                error
                             );
-                        })
+                        });
                     }
                 }
 
@@ -295,7 +313,7 @@ module.exports = {
                     return null;
                 } else {
                     const lastReaction = message.reactions.find(
-                        i => i.user == user.id
+                        (i) => i.user == user.id
                     );
 
                     if (status == true) {
@@ -356,7 +374,7 @@ module.exports = {
                         id: result.id,
                         reactions: result.reactions,
                         from: result.from,
-                        to: result.to
+                        to: result.to,
                     },
                 };
 
@@ -372,13 +390,14 @@ module.exports = {
                         // Save new information to DB of corresponding user cache
                         ctx.call("v1.messages-queue.pushMessageToQueue", {
                             userId: subscriberId,
-                            message: msgQueue
-                        }).catch(error => {
+                            message: msgQueue,
+                        }).catch((error) => {
                             this.logger.warn(
                                 "Could not save message to queue.",
-                                msgQueue, error
+                                msgQueue,
+                                error
                             );
-                        })
+                        });
                     }
                 }
 
@@ -404,16 +423,24 @@ module.exports = {
         checkCreatorRole(ctx, message) {
             const { user } = ctx.meta;
             if (user.id !== message.from.issuer) {
-                this.logger.warn(`${user.id} are not creator of the message ${message.id}.`);
-                throw new Errors.MoleculerError("You are not allowed to update this message.", 401);
+                this.logger.warn(
+                    `${user.id} are not creator of the message ${message.id}.`
+                );
+                throw new Errors.MoleculerError(
+                    "You are not allowed to update this message.",
+                    401
+                );
             }
         },
         async filterMessage(ctx) {
             const { conversation, history, id } = ctx.params;
             // Check conversation
-            let convInfo = await ctx.call("v1.conversations.getConversationById", {
-                id: conversation,
-            });
+            let convInfo = await ctx.call(
+                "v1.conversations.getConversationById",
+                {
+                    id: conversation,
+                }
+            );
 
             if (!convInfo) {
                 throw new Errors.MoleculerClientError(
@@ -444,7 +471,7 @@ module.exports = {
 
                     result = await dbCollection.find(filter);
                 }
-                return result.map(record => {
+                return result.map((record) => {
                     if (history != true) {
                         delete record.modification;
                     }
@@ -459,9 +486,12 @@ module.exports = {
             const conversationId = message.to.conversation;
 
             // Check conversation
-            let convInfo = await ctx.call("v1.conversations.getConversationById", {
-                id: conversationId,
-            });
+            let convInfo = await ctx.call(
+                "v1.conversations.getConversationById",
+                {
+                    id: conversationId,
+                }
+            );
 
             if (!convInfo) {
                 throw new Errors.MoleculerClientError(
@@ -531,13 +561,14 @@ module.exports = {
                     // 2.1 Save new information to DB of corresponding user cache
                     ctx.call("v1.messages-queue.pushMessageToQueue", {
                         userId: subscriberId,
-                        message: msgQueue
-                    }).catch(error => {
+                        message: msgQueue,
+                    }).catch((error) => {
                         this.logger.warn(
                             "Could not save message to queue.",
-                            msgQueue, error
+                            msgQueue,
+                            error
                         );
-                    })
+                    });
                 }
             }
 
@@ -556,9 +587,11 @@ module.exports = {
                 payload: message,
             };
 
-            let convInfo = convObj || (await ctx.call("v1.conversations.getConversationById", {
-                id: conversationId,
-            }));
+            let convInfo =
+                convObj ||
+                (await ctx.call("v1.conversations.getConversationById", {
+                    id: conversationId,
+                }));
 
             if (!convInfo) {
                 throw new Errors.MoleculerClientError(
@@ -596,12 +629,14 @@ module.exports = {
                     // 2.1 Save new information to DB of corresponding user cache
                     ctx.call("v1.messages-queue.pushMessageToQueue", {
                         userId: subscriberId,
-                        message: msgQueue
-                    }).catch(error => {
+                        message: msgQueue,
+                    }).catch((error) => {
                         this.logger.warn(
-                            "Could not save message to queue.", msgQueue, error
+                            "Could not save message to queue.",
+                            msgQueue,
+                            error
                         );
-                    })
+                    });
                 }
             }
 
@@ -616,15 +651,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { },
+    stopped() {},
 };
