@@ -89,18 +89,12 @@ import ReactionEmoji from "../../components/message-emoji.vue";
 import Reaction from "../../components/message-reaction.vue";
 
 import { mapState } from "vuex";
-import { toTimeAgo } from "../../utils/date.js";
+import mixin from "../../mixin/message.mix.js";
 export default {
     components: { UserAvatar, ReactionEmoji, Reaction },
-    props: {
-        message: {
-            type: Object,
-            default: () => ({}),
-        },
-    },
+    mixins: [mixin],
     data() {
         return {
-            timeAgo: null,
             user: {
                 fullName: "Unknow",
             },
@@ -133,11 +127,6 @@ export default {
                 })
                 .catch(console.error);
         }
-
-        this.timeAgo = toTimeAgo(this.message.arrivalTime);
-    },
-    updated() {
-        this.timeAgo = toTimeAgo(this.message.arrivalTime);
     },
     methods: {
         onReact(reaction) {
