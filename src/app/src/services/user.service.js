@@ -1,6 +1,6 @@
 import Axios from "axios";
 const Service = function service() {
-    this.name = "users/";
+    this.path = "users/";
 };
 
 Service.prototype.getByIds = function (userIds) {
@@ -9,13 +9,17 @@ Service.prototype.getByIds = function (userIds) {
             return Promise.resolve([]);
         }
         const query = userIds.join(",");
-        return Axios.get(this.name + `?user=${query}`);
+        return Axios.get(this.path + `?user=${query}`);
     }
     return Promise.reject("Data is invalid");
 };
 
 Service.prototype.search = function (text) {
-    return Axios.get(this.name + "?text=" + text);
+    return Axios.get(this.path + "?text=" + text);
+};
+
+Service.prototype.getAll = function (limit) {
+    return Axios.get(this.path + (limit ? `?limit=${limit}` : ""));
 };
 
 export default Service;

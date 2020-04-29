@@ -118,9 +118,33 @@ const moduleState = {
             }
         },
         findUser({ commit }, text) {
+            if (!text) {
+                return [];
+            }
+
+            const [str, limit] = text.split("&");
+            if (str === "all") {
+                // Get all users
+                return service.getAll(limit).then(res => {
+                    const users = res.data;
+                    const meId = this.state.users.me.id;
+                    const meList = users.filter(u => u.id == meId);
+
+                    meList.forEach(u => {
+                        u._isMe = true;
+                    });
+
+                    if (users.length > 0) {
+                        commit("cache", users);
+                    }
+
+                    return users;
+                });
+            }
+
             return service.search(text).then(res => {
                 const users = res.data;
-                
+
                 const meId = this.state.users.me.id;
                 const meList = users.filter(u => u.id == meId);
 
@@ -159,7 +183,7 @@ const moduleState = {
             state.all.forEach(user => {
                 if (user._isMe != true) {
                     user.status = status;
-                    commit("setStatus", { user, status })
+                    commit("setStatus", { user, status });
                 }
             });
         },

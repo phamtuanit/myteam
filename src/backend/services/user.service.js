@@ -44,14 +44,19 @@ module.exports = {
             params: {
                 user: { type: "string", optional: true },
                 text: { type: "string", optional: true },
+                limit: { type: "number", optional: true, convert: true, default: 20 },
             },
             async handler(ctx) {
-                const { user, text } = ctx.params;
+                const { user, text, limit } = ctx.params;
                 const dbCollection = await this.getDBCollection("users");
 
                 const filter = {
                     query: {},
                 };
+
+                if (limit > 0 && !text) {
+                    filter.limit = limit;
+                }
 
                 // query by given user
                 if (user) {
