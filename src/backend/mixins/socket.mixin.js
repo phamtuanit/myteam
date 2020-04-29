@@ -40,7 +40,7 @@ module.exports = {
         },
         // message-queue.[userId].message.created
         "message-queue.*.message.*"(message, sender, event, ctx) {
-            const [constVar, userId, resource, act] = event.split(".");
+            const [, userId, resource, act] = event.split(".");
             this.logger.info("Receiving a message from user-queue.", userId, event);
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
@@ -51,7 +51,7 @@ module.exports = {
         },
         // conversation.[conversation].message.rejected.[create]
         "conversation.*.message.rejected.*"(message, sender, event, ctx) {
-            const [constVar, convId, resource, act] = event.split(".");
+            const [, , resource, act] = event.split(".");
             const fromUser = message.payload.from.issuer;
 
             const socketDict = this.sockets[fromUser];

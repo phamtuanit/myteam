@@ -343,6 +343,7 @@ module.exports = {
                     );
                 }
 
+                // Delete tracking information
                 existingConv.deleted = new Date();
                 await dbCollection.removeById(existingConv._id);
                 cleanDbMark(existingConv);

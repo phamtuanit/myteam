@@ -20,7 +20,7 @@ module.exports = {
     events: {
         // message-queue.[userId].message.confirmed
         async "message-queue.*.message.confirmed"(payload, sender, event, ctx) {
-            const [constVar, userId] = event.split(".");
+            const [, userId] = event.split(".");
 
             try {
                 const queueId = `msg-queue-${userId}`;
