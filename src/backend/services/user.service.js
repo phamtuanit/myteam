@@ -54,7 +54,7 @@ module.exports = {
                     query: {},
                 };
 
-                if (limit > 0 && !text) {
+                if (limit >= 0 && !text) {
                     filter.limit = limit;
                 }
 
