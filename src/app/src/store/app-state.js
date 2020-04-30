@@ -1,5 +1,5 @@
 const config = require("../conf/system.json");
-const baseServerAddr = config.env == "production" ? window.location.origin : config.server.address;
+const baseServerAddr = config.env == "prd" ? window.location.origin : config.server.address;
 const messageQueueSvr = new (require("../services/message-queue.service.js").default)();
 
 module.exports = {
