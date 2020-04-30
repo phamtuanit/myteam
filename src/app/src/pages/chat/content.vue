@@ -152,8 +152,7 @@ export default {
             this.$emit("show-friend-list", !this.friendList);
         },
         onChatEditorReady() {
-            const msgSheetEl = this.$refs.messageSheet.$el;
-            msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
+            this.scrollToBottom();
         },
         onSendMessage(html) {
             this.onRead();
@@ -188,6 +187,7 @@ export default {
                 .dispatch("conversations/sendMessage", msg)
                 .then(() => {
                     this.newMessage = "";
+                    setTimeout(this.scrollToBottom, 10);
                 })
                 .catch(console.error);
         },
@@ -221,6 +221,10 @@ export default {
                     .dispatch("conversations/watchAllMessage", conv.id)
                     .catch(console.error);
             }
+        },
+        scrollToBottom() {
+            const msgSheetEl = this.$refs.messageSheet.$el;
+            msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
         },
     },
 };

@@ -53,8 +53,7 @@ export default {
     },
     methods: {
         onChatEditorReady() {
-            const msgSheetEl = this.$refs.messageSheet.$el;
-            msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
+            this.scrollToBottom();
         },
         onRead() {
             const conv = this.conversation;
@@ -82,6 +81,7 @@ export default {
                 .dispatch("conversations/sendMessage", msg)
                 .then(() => {
                     this.newMessage = "";
+                    setTimeout(this.scrollToBottom, 10);
                 })
                 .catch(console.error);
         },
@@ -105,9 +105,11 @@ export default {
                 .dispatch("conversations/deleteMessage", message)
                 .catch(console.error);
         },
-        onEditMessage() {
-            
-        }
+        onEditMessage() {},
+        scrollToBottom() {
+            const msgSheetEl = this.$refs.messageSheet.$el;
+            msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
+        },
     },
 };
 </script>
