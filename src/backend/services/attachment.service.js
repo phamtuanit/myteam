@@ -35,7 +35,9 @@ module.exports = {
             },
             handler(ctx) {
                 const now = new Date();
+                let fileType = "files";
                 if (ctx.meta.filename) {
+                    fileType = this.getFileType(ctx.meta.filename);
                     ctx.meta.filename = `${now.getTime()}__${
                         ctx.meta.filename
                     }`;
@@ -43,9 +45,9 @@ module.exports = {
 
                 // Prepare folder
                 const subDir = path.join(
+                    fileType,
                     ctx.params.sub,
-                    "" + hasCode(ctx.meta.user.id),
-                    "" + now.getFullYear()
+                    "" + hasCode(ctx.meta.user.id)
                 );
 
                 // Check folder
@@ -98,6 +100,10 @@ module.exports = {
     methods: {
         randomName() {
             return "unnamed_" + Date.now() + ".png";
+        },
+        getFileType(fileName) {
+            const mimeType = mime.lookup(fileName);
+            return mimeType.split("/")[0];
         },
     },
 };
