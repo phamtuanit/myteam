@@ -27,27 +27,22 @@ export default {
             type: Function,
             default: ClassicEditor,
         },
+        config: {
+            type: Object,
+            default: () => ({}),
+        },
     },
     components: {
         // Use the <ckeditor> component in this view.
         ckeditor: CKEditor.component,
     },
     data() {
-        this.config = require("../../conf/system.json");
+        const editorConfig = { ...this.config };
         return {
-            fileRepository: null,
             showEditor: false,
             editor: this.classEditor,
             internalValue: this.value,
-            editorConfig: {
-                simpleUpload: {
-                    // The URL that the images are uploaded to.
-                    uploadUrl: this.config.media.url,
-
-                    // Headers sent along with the XMLHttpRequest to the upload server.
-                    headers: {},
-                },
-            },
+            editorConfig: editorConfig,
         };
     },
     watch: {
@@ -63,24 +58,38 @@ export default {
             }
         },
     },
+    created() {
+        const simpleUpload = this.editorConfig.simpleUpload;
+        if (
+            simpleUpload &&
+            (!simpleUpload.headers || !simpleUpload.headers["Authorization"])
+        ) {
+            !simpleUpload.headers && (simpleUpload.headers = {});
+            this.auth = window.IoC.get("auth");
+            if (this.auth) {
+                this.auth
+                    .getToken()
+                    .then(token => {
+                        simpleUpload.headers["Authorization"] = token;
+                    })
+                    .catch(console.warn);
+            }
+        }
+
+        if (simpleUpload && !simpleUpload.uploadUrl) {
+            const config = require("../../conf/system.json");
+            simpleUpload.uploadUrl = config.attachment.url;
+
+            if (simpleUpload.id) {
+                 simpleUpload.uploadUrl += `?sub=${simpleUpload.id}`;
+            }
+        }
+    },
     mounted() {
         setTimeout(() => {
             // Display editor
             this.showEditor = true;
         }, 5);
-
-        this.auth = window.IoC.get("auth");
-
-        if (this.auth) {
-            this.auth
-                .getToken()
-                .then(token => {
-                    this.editorConfig.simpleUpload.headers[
-                        "Authorization"
-                    ] = token;
-                })
-                .catch(console.warn);
-        }
     },
     methods: {
         updateTopbar() {
@@ -96,7 +105,6 @@ export default {
             this.editorInstance = this.$refs.editor.instance;
             this.updateTopbar();
             this.$emit("ready", this.editorInstance);
-            // this.fileRepository = this.editorInstance.plugins.get( FileRepository );
         },
     },
 };

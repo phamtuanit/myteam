@@ -84,6 +84,7 @@
         <ChatEditor
             class="chat-editor mt-2 mb-1"
             v-model="newMessage"
+            :id="conversation.id"
             @enter="onSendMessage"
             @send="onSendMessage"
             @ready="onChatEditorReady"

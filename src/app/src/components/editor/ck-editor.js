@@ -44,7 +44,7 @@ import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter";
-import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
+// import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 
 export default class Editor extends ClassicEditor {}
 
@@ -55,8 +55,8 @@ Editor.builtinPlugins = [
     ImageStyle,
     ImageResize,
     ImageUpload,
-    // SimpleUploadAdapter,
-    Base64UploadAdapter,
+    SimpleUploadAdapter,
+    // Base64UploadAdapter,
     Clipboard,
     ShiftEnter,
     Typing,

@@ -26,6 +26,7 @@
         <ChatEditor
             class="channel__input mt-2 mb-1"
             v-model="newMessage"
+            :id="conversation.id"
             @enter="onSend"
             @send="onSend"
             @ready="onChatEditorReady"
