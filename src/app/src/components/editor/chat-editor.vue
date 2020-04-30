@@ -20,15 +20,23 @@
         >
             <!-- Start -->
             <div class="d-flex flex-align-start">
-                <EmojiButton size="18" @select="onSelectEmoji"></EmojiButton>
-                <v-btn icon @click="showToolBar = !showToolBar">
+                <EmojiButton
+                    size="18"
+                    v-model="emojiPopup"
+                    @select="onSelectEmoji"
+                ></EmojiButton>
+                <v-btn
+                    icon
+                    @click="showToolBar = !showToolBar"
+                    title="Format (ESC)"
+                >
                     <v-icon size="18" :color="showToolBar ? 'orange' : ''"
                         >mdi-format-letter-case-upper</v-icon
                     >
                 </v-btn>
             </div>
             <!-- End -->
-            <v-btn icon @click="onSend">
+            <v-btn icon @click="onSend" title="Send (Enter)">
                 <v-icon size="18">mdi-send</v-icon>
             </v-btn>
         </v-sheet>
@@ -59,6 +67,7 @@ export default {
             classEditor: ClassicEditor,
             showToolBar: false,
             internalValue: this.value,
+            emojiPopup: false,
             editorConfig: {
                 simpleUpload: {
                     id: this.id,
@@ -97,12 +106,27 @@ export default {
             this.editorInstance = editorInstance;
             this.changePluginStatus();
             // Register Enter command
-            this.editorInstance.keystrokes.set("Enter", (data, cancel) => {
+            this.editorInstance.keystrokes.set("enter", (data, cancel) => {
                 if (this.showToolBar != true) {
                     cancel();
                     this.trggerSendEvent();
                 }
             });
+
+            //  Show/die format tollbar
+            this.editorInstance.keystrokes.set("esc", (data, cancel) => {
+                cancel();
+                this.showToolBar = !this.showToolBar;
+            });
+
+            // Show emoji
+            this.editorInstance.keystrokes.set(
+                "Ctrl+Shift+S",
+                (data, cancel) => {
+                    cancel();
+                    this.emojiPopup = !this.emojiPopup;
+                }
+            );
 
             this.$emit("ready");
         },

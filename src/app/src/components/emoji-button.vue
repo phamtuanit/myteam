@@ -9,10 +9,7 @@
         :close-on-content-click="false"
     >
         <template v-slot:activator="{ on }">
-            <v-btn
-                icon
-                v-on="on"
-            >
+            <v-btn icon v-on="on" title="Ctrl+Shift+S">
                 <v-icon :size="size">mdi-emoticon-happy-outline</v-icon>
             </v-btn>
         </template>
@@ -42,6 +39,10 @@ export default {
             type: String,
             default: "24",
         },
+        value: {
+            type: Boolean,
+            default: false,
+        },
     },
     components: { Picker },
     data() {
@@ -49,6 +50,17 @@ export default {
             emojiData: emojiIndex,
             showEmojiPicker: false,
         };
+    },
+    watch: {
+        showEmojiPicker(val) {
+            this.$emit("input", val);
+        },
+        value(val) {
+            this.showEmojiPicker = val;
+        },
+    },
+    created() {
+        this.showEmojiPicker = this.value;
     },
     mounted() {
         document.addEventListener("keyup", e => {
