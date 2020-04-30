@@ -3,11 +3,20 @@
         class="px-2 message-item my-message"
         :class="{ 'message-error': !isAvailable }"
     >
-        <div style="min-width: 20px;"></div>
+        <div style="min-width: 8px;"></div>
         <v-spacer></v-spacer>
         <!-- Actions -->
-        <div class="message-actions d-flex justify-end mr-1" style="min-width: 40px;">
-            <v-btn icon small class="mx-auto" @click="onDeleteMessage" v-if="isAvailable">
+        <div
+            class="message-actions d-flex justify-end mr-1"
+            style="min-width: 40px;"
+        >
+            <v-btn
+                icon
+                small
+                class="mx-auto"
+                @click="onDeleteMessage"
+                v-if="isAvailable"
+            >
                 <v-icon small>mdi-delete</v-icon>
             </v-btn>
         </div>
@@ -21,7 +30,10 @@
             >
                 <!-- Header -->
                 <div class="message-card__header selection-disabled mb-0">
-                    <span class="caption" v-text="timeAgo"></span>
+                    <span
+                        class="caption"
+                        v-text="timeAgo"
+                    ></span>
                     <v-spacer></v-spacer>
                     <v-icon
                         v-if="!isAvailable"
