@@ -22,7 +22,7 @@ module.exports = {
         // Exposed IP
         ip: process.env.HOST || sysConf.gateway.host,
 
-        // Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
+        // Global Express middleware. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
         use: [],
 
         io: {
@@ -57,11 +57,11 @@ module.exports = {
                     "POST login": "v1.auth.login",
                     "POST renew-token": "v1.auth.refreshToken",
                     "POST verify-token": "v1.auth.verifyToken",
-					"~node/health": "$node.health",
-					"~node/actions": "$node.actions",
-					"~node/list": "$node.list",
-					"~node/services": "$node.services",
-					"~node/options": "$node.options"
+                    "~node/health": "$node.health",
+                    "~node/actions": "$node.actions",
+                    "~node/list": "$node.list",
+                    "~node/services": "$node.services",
+                    "~node/options": "$node.options",
                 },
 
                 // Use bodyparser module
@@ -73,6 +73,11 @@ module.exports = {
                 callOptions: {
                     timeout: 3000,
                 },
+
+                mappingPolicy: "restrict", // Available values: "all", "restrict"
+
+                // Enable/disable logging
+                logging: true,
 
                 onBeforeCall(ctx, route, req, res) {
                     // Set request headers to context meta
@@ -116,14 +121,6 @@ module.exports = {
 
                 aliases: {},
 
-                /**
-                 * Before call hook. You can check the request.
-                 * @param {Context} ctx
-                 * @param {Object} route
-                 * @param {IncomingRequest} req
-                 * @param {ServerResponse} res
-                 * @param {Object} data
-                 * */
                 onBeforeCall(ctx, route, req, res) {
                     // Set request headers to context meta
                     res.setHeader("x-handler", ctx.nodeID);
@@ -135,18 +132,6 @@ module.exports = {
                     }
                     ctx.meta.headers = { ...req.headers };
                 },
-
-                /**
-                 * After call hook. You can modify the data.
-                 * @param {Context} ctx
-                 * @param {Object} route
-                 * @param {IncomingRequest} req
-                 * @param {ServerResponse} res
-                 * @param {Object} data
-                 * */
-                // onAfterCall(ctx, route, req, res, data) {
-                // 	// Async function which return with Promise
-                // },
 
                 // Global CORS settings
                 cors: {
@@ -176,6 +161,75 @@ module.exports = {
 
                 // Enable/disable logging
                 logging: true,
+            },
+            {
+                path: "/upload",
+                authentication: sysConf.gateway.authentication,
+
+                cors: {
+                    origin: "*",
+                    methods: ["GET", "POST", "PUT", "DELETE"],
+                    allowedHeaders: "*",
+                    credentials: true,
+                    maxAge: null,
+                },
+
+                // You should disable body parsers
+                bodyParsers: {
+                    json: false,
+                    urlencoded: false,
+                },
+
+                aliases: {
+                    "GET /:id": "attachments.getFile",
+                    "POST /": "multipart:attachments.saveFile",
+                    "POST /multi/": {
+                        type: "multipart",
+                        // Action level busboy config
+                        busboyConfig: {
+                            limits: {
+                                files: 3,
+                            },
+                            onFilesLimit(busboy, alias, svc) {
+                                this.logger.info(
+                                    "Uploading file limit!",
+                                    busboy
+                                );
+                            },
+                        },
+                        action: "attachments.saveFiles",
+                    },
+                },
+
+                // Route level busboy config.
+                // More info: https://github.com/mscdex/busboy#busboy-methods
+                busboyConfig: {
+                    limits: { files: 1 },
+                },
+
+                mappingPolicy: "restrict", // Available values: "all", "restrict"
+
+                // Enable/disable logging
+                logging: true,
+
+                onBeforeCall(ctx, route, req, res) {
+                    // Set request headers to context meta
+                    res.setHeader("x-handler", ctx.nodeID);
+                    if (req.headers["authorization"]) {
+                        ctx.meta.token = req.headers["authorization"];
+                        if (ctx.meta.token.startsWith("Bearer ")) {
+                            ctx.meta.token = ctx.meta.token.slice(7);
+                        }
+                    }
+                    ctx.meta.headers = { ...req.headers };
+                },
+
+                onAfterCall(ctx, route, req, res, data) {
+                    if (Array.isArray(data) && data.length == 1) {
+                        return data[0];
+                    }
+                    return data;
+                },
             },
         ],
 
