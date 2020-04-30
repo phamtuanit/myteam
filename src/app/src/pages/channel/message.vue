@@ -22,7 +22,10 @@
                 <!-- Header -->
                 <div class="message-item__content-header center-y">
                     <!-- User info -->
-                    <span class="subtitle-2 mr-2" v-text="user._isMe ? 'Yours' : user.fullName"></span>
+                    <span
+                        class="subtitle-2 mr-2"
+                        v-text="user._isMe ? 'Yours' : user.fullName"
+                    ></span>
                     <span class="caption" v-text="timeAgo"></span>
                     <v-spacer></v-spacer>
 
@@ -207,5 +210,20 @@ export default {
 
 .message-item--deleted .message-item__content-card::after {
     background-color: red;
+}
+
+.message-item--deleted .message-item__content-actions {
+    display: none;
+}
+
+.channel-message-item >>> .message-item__content-text blockquote {
+    position: relative;
+    overflow: hidden;
+    padding-right: 1.5em;
+    padding-left: 1.5em;
+    margin-left: 0;
+    margin-right: 0;
+    font-style: italic;
+    border-left: 4px solid #ccc;
 }
 </style>

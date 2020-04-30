@@ -27,14 +27,18 @@
                         <v-btn
                             v-on="on"
                             icon
-                            :style="friendList ? 'opacity: 1;' : 'opacity: 0.6;'"
+                            :style="
+                                friendList ? 'opacity: 1;' : 'opacity: 0.6;'
+                            "
                             @click="onShowFriendList"
                         >
-                            <v-icon v-text="
+                            <v-icon
+                                v-text="
                                     friendList
                                         ? 'mdi-account-supervisor'
                                         : 'mdi-account-search'
-                                "></v-icon>
+                                "
+                            ></v-icon>
                         </v-btn>
                     </template>
                     <span>Friend list</span>
@@ -225,6 +229,18 @@ export default {
 <style lang="css" scoped>
 .chat-box {
     height: 100vh;
+}
+
+/* Message style */
+.message-sheet >>> .message-content blockquote {
+    position: relative;
+    overflow: hidden;
+    padding-right: 1.5em;
+    padding-left: 1.5em;
+    margin-left: 0;
+    margin-right: 0;
+    font-style: italic;
+    border-left: 4px solid #ccc;
 }
 
 /* Message aligment */
