@@ -92,3 +92,8 @@ div.v-subheader {
     min-height: 34px;
     min-width: 120px;
 }
+
+/* Image */
+figure img {
+    max-width: 100%;
+}
