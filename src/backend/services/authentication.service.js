@@ -72,7 +72,7 @@ module.exports = {
 
                     // Inform user login
                     const eventName = `user.login`;
-                    await this.broker.emit(eventName, user, ["users"]);
+                    await this.broker.broadcast(eventName, user, ["users"]);
                     return userToken;
                 } else {
                     throw new MoleculerClientError(
@@ -172,7 +172,7 @@ module.exports = {
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler

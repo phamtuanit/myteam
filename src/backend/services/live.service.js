@@ -74,7 +74,7 @@ module.exports = {
             if (this.livingUser[user.id].count == 1) {
                 // Inform to
                 const eventName = `user.${user.id}.status.on`;
-                this.broker.emit(eventName, {
+                this.broker.broadcast(eventName, {
                     user,
                     status: "on",
                 });
@@ -88,7 +88,7 @@ module.exports = {
                 if (this.livingUser[user.id].count == 0) {
                     delete this.livingUser[user.id];
                     const eventName = `user.${user.id}.status.off`;
-                    this.broker.emit(eventName, {
+                    this.broker.broadcast(eventName, {
                         user,
                         status: "off",
                     });
@@ -112,10 +112,10 @@ module.exports = {
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {},
+    stopped() { },
 };

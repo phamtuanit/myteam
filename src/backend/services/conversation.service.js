@@ -83,7 +83,7 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${newConv.id}.created`;
-                this.broker.emit(eventName, newConv).catch(this.logger.error);
+                this.broker.broadcast(eventName, newConv).catch(this.logger.error);
                 return newConv;
             },
         },
@@ -237,7 +237,7 @@ module.exports = {
                 // Broadcast message
                 const eventName = `conversation.${updatedEntity.id}.updated`;
                 this.broker
-                    .emit(eventName, updatedEntity)
+                    .broadcast(eventName, updatedEntity)
                     .catch(this.logger.error);
                 return updatedEntity;
             },
@@ -290,7 +290,7 @@ module.exports = {
                         action: "left",
                         payload: newEntity,
                     };
-                    
+
                     // 2. Save information to user queue and send message to WS
                     subscribers.forEach((subscriberId) => {
                         // 2.1 Save new information to DB of corresponding user cache
@@ -310,7 +310,7 @@ module.exports = {
                 // Broadcast message
                 const eventName = `conversation.${existingConv.id}.updated`;
                 this.broker
-                    .emit(eventName, existingConv)
+                    .broadcast(eventName, existingConv)
                     .catch(this.logger.error);
                 return existingConv;
             },
@@ -384,7 +384,7 @@ module.exports = {
                 // Broadcast message
                 const eventName = `conversation.${existingConv.id}.removed`;
                 this.broker
-                    .emit(eventName, existingConv)
+                    .broadcast(eventName, existingConv)
                     .catch(this.logger.error);
                 return existingConv;
             },
@@ -412,15 +412,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {},
+    stopped() { },
 };

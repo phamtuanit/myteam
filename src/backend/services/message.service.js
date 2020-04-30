@@ -234,7 +234,7 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${conversationId}.message.removed`;
-                this.broker.emit(eventName, message).catch(this.logger.error);
+                this.broker.broadcast(eventName, message).catch(this.logger.error);
 
                 return message;
             },
@@ -403,7 +403,7 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${conversationId}.message.updated.reacted`;
-                this.broker.emit(eventName, result).catch(this.logger.error);
+                this.broker.broadcast(eventName, result).catch(this.logger.error);
 
                 return result;
             },
@@ -574,7 +574,7 @@ module.exports = {
 
             // Broadcast message
             const eventName = `conversation.${conversationId}.message.updated`;
-            this.broker.emit(eventName, updatedEntity).catch(this.logger.error);
+            this.broker.broadcast(eventName, updatedEntity).catch(this.logger.error);
 
             return updatedEntity;
         },
@@ -642,7 +642,7 @@ module.exports = {
 
             // Broadcast message
             const eventName = `conversation.${conversationId}.message.created`;
-            this.broker.emit(eventName, entity).catch(this.logger.error);
+            this.broker.broadcast(eventName, entity).catch(this.logger.error);
 
             return entity;
         },
@@ -651,15 +651,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {},
+    stopped() { },
 };

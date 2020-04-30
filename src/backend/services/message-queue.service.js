@@ -156,7 +156,7 @@ module.exports = {
                     // Emit event to live user
                     const eventName = `message-queue.${userId}.message.${message.action}`;
                     this.broker
-                        .emit(eventName, cleanDbMark(message))
+                        .broadcast(eventName, cleanDbMark(message))
                         .then(() => {
                             this.logger.info("Published message to user-queue.", queueId, message.id);
                         })
