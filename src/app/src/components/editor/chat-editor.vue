@@ -41,14 +41,6 @@ import Editor from "./ck-editor.vue";
 
 // Editor
 import ClassicEditor from "./ck-editor.js";
-// Remove Entr plugin
-const enterIndex = ClassicEditor.builtinPlugins.findIndex(
-    i => i.pluginName == "Enter"
-);
-
-if (enterIndex >= 0) {
-    ClassicEditor.builtinPlugins.splice(enterIndex, 1);
-}
 
 export default {
     props: {
@@ -83,6 +75,7 @@ export default {
                 const editable = this.editorInstance.ui.view.editable;
                 editable.element.focus();
             }
+            this.changePluginStatus();
         },
         value(val) {
             if (this.internalValue !== val) {
@@ -102,19 +95,13 @@ export default {
         },
         onEditorReady(editorInstance) {
             this.editorInstance = editorInstance;
+            this.changePluginStatus();
             // Register Enter command
             this.editorInstance.keystrokes.set("Enter", (data, cancel) => {
-                cancel();
-
-                const currVal = this.editorInstance.getData();
-                if (currVal !== this.value) {
-                    // Incase user type fast
-                    return;
+                if (this.showToolBar != true) {
+                    cancel();
+                    this.trggerSendEvent();
                 }
-
-                setTimeout(() => {
-                    this.$emit("enter", currVal, data, cancel);
-                }, 0);
             });
 
             this.$emit("ready");
@@ -122,12 +109,38 @@ export default {
         onSend() {
             this.$emit("send", this.internalValue);
         },
+        trggerSendEvent() {
+            const currVal = this.editorInstance.getData();
+            if (currVal !== this.value) {
+                // Incase user type fast
+                setTimeout(this.trggerSendEvent, 0);
+                return;
+            }
+
+            this.$emit("send", currVal);
+        },
         writeText(text) {
             const editor = this.editorInstance;
             editor.model.change(writer => {
                 const insertPosition = editor.model.document.selection.getLastPosition();
                 writer.insertText(text, insertPosition);
             });
+        },
+        changePluginStatus() {
+            if (!this.editorInstance) {
+                return;
+            }
+
+            // Change Enter status
+            const enterPlugin = this.editorInstance.plugins.get("MyEnter");
+            if (enterPlugin) {
+                const key = "MyEnter" + this.id;
+                if (this.showToolBar) {
+                    enterPlugin.clearForceDisabled(key);
+                } else {
+                    enterPlugin.forceDisabled(key);
+                }
+            }
         },
     },
 };

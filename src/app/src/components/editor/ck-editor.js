@@ -32,8 +32,8 @@ import TextTransformation from "@ckeditor/ckeditor5-typing/src/texttransformatio
 
 // Essentials plugin
 import Clipboard from "@ckeditor/ckeditor5-clipboard/src/clipboard";
-// import Enter from '@ckeditor/ckeditor5-enter/src/enter';
 import ShiftEnter from "@ckeditor/ckeditor5-enter/src/shiftenter";
+// import Enter from '@ckeditor/ckeditor5-enter/src/enter';
 import Typing from "@ckeditor/ckeditor5-typing/src/typing";
 import Undo from "@ckeditor/ckeditor5-undo/src/undo";
 
@@ -41,10 +41,12 @@ import Undo from "@ckeditor/ckeditor5-undo/src/undo";
 import Image from '@ckeditor/ckeditor5-image/src/image';
 // import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
-import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
+// import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter";
 // import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
+
+import MyEnter from "./plugins/enter";
 
 export default class Editor extends ClassicEditor {}
 
@@ -53,11 +55,12 @@ Editor.builtinPlugins = [
     Image,
     // ImageToolbar,
     ImageStyle,
-    ImageResize,
+    // ImageResize,
     ImageUpload,
     SimpleUploadAdapter,
     // Base64UploadAdapter,
     Clipboard,
+    MyEnter,
     ShiftEnter,
     Typing,
     Undo,
