@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "MyTeam project",
   "scripts": {
-    "dev": "moleculer-runner --repl --hot --instances=2 services/**/*.service.js",
+    "dev": "moleculer-runner --repl --hot --instances=1 services/**/*.service.js",
     "start": "moleculer-runner --instances=1 services/**/*.service.js",
     "cli": "moleculer connect TCP",
     "ci": "jest --watch",
