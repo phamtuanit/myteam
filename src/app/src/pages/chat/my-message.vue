@@ -6,13 +6,10 @@
         <div style="min-width: 20px;"></div>
         <v-spacer></v-spacer>
         <!-- Actions -->
-        <div class="message-actions mr-1" v-if="isAvailable">
-            <v-btn icon small class="mx-auto" @click="onDeleteMessage">
+        <div class="message-actions d-flex justify-end mr-1" style="min-width: 40px;">
+            <v-btn icon small class="mx-auto" @click="onDeleteMessage" v-if="isAvailable">
                 <v-icon small>mdi-delete</v-icon>
             </v-btn>
-        </div>
-        <div style="min-width: 40px;" v-else>
-            <!-- Empty space -->
         </div>
 
         <!-- Content -->
