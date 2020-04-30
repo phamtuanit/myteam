@@ -1,12 +1,13 @@
-module.exports.cleanDbMark = function cleanDbMark(entity) {
+function cleanDbMark(entity) {
     if (entity) {
-        function clean(el) {
-            Object.keys(el).forEach(key => {
+        const clean = function clean(el) {
+            Object.keys(el).forEach((key) => {
                 if (key.startsWith("_")) {
                     delete el[key];
                 }
             });
-        }
+        };
+
         if (Array.isArray(entity)) {
             entity.forEach(clean);
         } else {
@@ -15,3 +16,16 @@ module.exports.cleanDbMark = function cleanDbMark(entity) {
     }
     return entity;
 }
+
+function hasCode(string) {
+    if (!string) {
+        return "";
+    }
+    const buf = Buffer.from(string, "utf8");
+    return buf.toString("hex");
+}
+
+module.exports = {
+    cleanDbMark,
+    hasCode,
+};

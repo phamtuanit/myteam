@@ -3,6 +3,7 @@ const path = require("path");
 const { MoleculerClientError } = require("moleculer").Errors;
 const mkdir = require("mkdirp").sync;
 const mime = require("mime-types");
+const { hasCode } = require("../utils/entity");
 
 const rootDir = "attachments";
 const uploadDir = path.join(__dirname, "../public/" + rootDir);
@@ -39,23 +40,25 @@ module.exports = {
                         ctx.meta.filename
                     }`;
                 }
+
+                // Prepare folder
+                const subDir = path.join(
+                    ctx.params.sub,
+                    "" + hasCode(ctx.meta.user.id),
+                    "" + now.getFullYear()
+                );
+
+                // Check folder
+                const dir = path.join(uploadDir, subDir);
+                if (!fs.existsSync(dir)) {
+                    mkdir(dir);
+                }
+
+                // Make full file path
+                const fileName = ctx.meta.filename || this.randomName();
+                const filePath = path.join(dir, fileName);
+
                 return new Promise((resolve, reject) => {
-                    // Prepare folder
-                    const subDir = path.join(
-                        ctx.params.sub,
-                        "" + now.getFullYear()
-                    );
-
-                    // Check folder
-                    const dir = path.join(uploadDir, subDir);
-                    if (!fs.existsSync(dir)) {
-                        mkdir(dir);
-                    }
-
-                    // Make full file path
-                    const fileName = ctx.meta.filename || this.randomName();
-                    const filePath = path.join(dir, fileName);
-
                     // Write file
                     const f = fs.createWriteStream(filePath);
                     f.on("close", () => {
