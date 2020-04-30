@@ -317,7 +317,17 @@ const moduleState = {
 
                     const me = this.state.users.me;
                     if (me.id === existingMsg.from.issuer) {
+                        // It's my message
                         existingMsg.status = "removed";
+                        setTimeout(() => {
+                            // Lazy delete message
+                            const msgIndex = conv.messages.findIndex(
+                                i => i.id == message.id
+                            );
+                            if (msgIndex >= 0) {
+                                conv.messages.splice(msgIndex, 1);
+                            }
+                        }, 5 * 1000);
                     } else {
                         conv.messages.splice(index, 1);
                     }
