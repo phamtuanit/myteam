@@ -8,15 +8,19 @@
     >
         <div class="message-item__user pr-1">
             <v-list-item-avatar class="ma-0">
-                <UserAvatar :user="user" :online-effect="!user._isMe" />
+                <UserAvatar
+                    :user="user"
+                    :online-effect="!user._isMe"
+                />
             </v-list-item-avatar>
         </div>
         <!-- content -->
         <div class="message-item__content d-flex flex-column flex-grow-1">
+            <slot></slot>
             <!-- Message -->
             <v-card
                 elevation="0"
-                class="flex-grow-1 px-3 py-2 message-item__content-card"
+                class="flex-grow-1 px-3 py-2 message-item__content-card no-border-radius"
                 :disabled="message.status == 'removed'"
             >
                 <!-- Header -->
@@ -26,7 +30,10 @@
                         class="subtitle-2 mr-2"
                         v-text="user._isMe ? 'Yours' : user.fullName"
                     ></span>
-                    <span class="caption" v-text="timeAgo"></span>
+                    <span
+                        class="caption"
+                        v-text="timeAgo"
+                    ></span>
                     <v-spacer></v-spacer>
 
                     <!-- Reacted Emoji -->
@@ -43,15 +50,18 @@
                     >
                         <v-menu left>
                             <template v-slot:activator="{ on }">
-                                <v-btn icon small v-on="on" class="mx-auto">
+                                <v-btn
+                                    icon
+                                    small
+                                    v-on="on"
+                                    class="mx-auto"
+                                >
                                     <v-icon small>mdi-dots-vertical</v-icon>
                                 </v-btn>
                             </template>
                             <v-list class="menus">
                                 <v-list-item @click="onDelete">
-                                    <v-list-item-title
-                                        >Delete</v-list-item-title
-                                    >
+                                    <v-list-item-title>Delete</v-list-item-title>
                                 </v-list-item>
                                 <v-list-item @click="onEdit">
                                     <v-list-item-title>Edit</v-list-item-title>
@@ -60,25 +70,28 @@
                         </v-menu>
                     </div>
                 </div>
-                <!-- SEparator -->
-                <v-divider class="mt-1"></v-divider>
+                <!-- Separator -->
+                <!-- <v-divider style="margin-top: 2px"></v-divider> -->
                 <!-- Content -->
                 <v-card-text
-                    class="message-item__content-text pa-0 mt-2 hl"
+                    class="message-item__content-text pa-0 mt-1 hl"
                     v-html="message.body.content"
                 ></v-card-text>
-            </v-card>
-            <div
-                class="message-item__content-footer d-flex"
-                v-if="message.status != 'removed'"
-            >
-                <v-spacer></v-spacer>
+                <div
+                    class="message-item__content-footer d-flex"
+                    v-if="message.status != 'removed'"
+                >
+                    <v-spacer></v-spacer>
 
-                <div class="custom-align">
-                    <!-- Reactions -->
-                    <Reaction @react="onReact" :selected="reactedType" />
+                    <div class="custom-align">
+                        <!-- Reactions -->
+                        <Reaction
+                            @react="onReact"
+                            :selected="reactedType"
+                        />
+                    </div>
                 </div>
-            </div>
+            </v-card>
         </div>
 
         <!-- Mark -->
@@ -171,7 +184,7 @@ export default {
 /* Reactions */
 .message-item__content-footer {
     position: relative;
-    height: 10px;
+    height: 8px;
 }
 
 .message-item__content-footer >>> .reactions-panel {
@@ -205,7 +218,6 @@ export default {
     right: 0px;
     bottom: 0;
     top: 0;
-    border-radius: 0 4px 4px 0;
 }
 
 .message-item--deleted .message-item__content-card::after {

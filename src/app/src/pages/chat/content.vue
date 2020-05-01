@@ -32,13 +32,11 @@
                             "
                             @click="onShowFriendList"
                         >
-                            <v-icon
-                                v-text="
+                            <v-icon v-text="
                                     friendList
                                         ? 'mdi-account-supervisor'
                                         : 'mdi-account-search'
-                                "
-                            ></v-icon>
+                                "></v-icon>
                         </v-btn>
                     </template>
                     <span>Friend list</span>
@@ -277,8 +275,8 @@ export default {
     margin-top: 16px;
 }
 
-.message-sheet >>> div.your-message:last-child {
-    margin-bottom: 20px !important;
+.message-sheet >>> div.message-item:last-child {
+    margin-bottom: 18px !important;
 }
 
 /* Message avatar */

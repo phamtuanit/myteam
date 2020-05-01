@@ -13,12 +13,13 @@
                     v-for="msg in messages"
                     :key="msg.id"
                     :message="msg"
-                    class="mt-1"
                     @react="onReact"
                     @dereact="onDereact"
                     @delete="onDeleteMessage"
                     @edit="onEditMessage"
-                ></Message>
+                >
+                    <v-divider class="message-item__content-separator mx-3"></v-divider>
+                </Message>
             </v-slide-y-transition>
         </v-sheet>
 
@@ -124,8 +125,18 @@ export default {
     margin-left: 60px;
     margin-right: 58px;
 }
+</style>
 
-.conversation-content >>> .channel-message-item:last-of-type {
+<style lang="css">
+.channel-message-item:first-of-type .message-item__content-separator {
+    display: none;
+}
+
+.channel-message-item:first-of-type {
+    margin-top: 10px;
+}
+
+.channel-message-item:last-of-type {
     margin-bottom: 10px;
 }
 </style>
