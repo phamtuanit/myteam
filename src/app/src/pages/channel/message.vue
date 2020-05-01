@@ -72,17 +72,17 @@
                 </div>
                 <!-- Content -->
                 <v-card-text
-                    class="message-item__content-text px-3 pt-0 pb-1 mt-1 hl"
+                    class="message-item__content-text px-3 pt-0 pb-0 mt-1 hl"
                     v-html="message.body.content"
                 ></v-card-text>
                 <!-- Actions -->
-                <div
-                    class="message-item__content-footer d-flex"
-                    v-if="message.status != 'removed'"
-                >
+                <div class="message-item__content-footer d-flex mb-1">
                     <v-spacer></v-spacer>
 
-                    <div class="custom-align">
+                    <div
+                        class="custom-align"
+                        v-if="message.status != 'removed'"
+                    >
                         <!-- Reactions -->
                         <Reaction
                             @react="onReact"
@@ -183,14 +183,14 @@ export default {
 /* Reactions */
 .message-item__content-footer {
     position: relative;
-    height: 8px;
+    height: 4px;
 }
 
 .message-item__content-footer >>> .reactions-panel {
     position: absolute;
     visibility: hidden;
     opacity: 0.3;
-    bottom: 10px;
+    bottom: 14px;
     right: 30px;
 }
 

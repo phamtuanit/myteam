@@ -146,14 +146,14 @@ export default {
 }
 
 .channel-message-item:first-of-type .message-item__content-card {
-    border-radius: 4px 4px 0 0 !important;
+    border-radius: 3px 3px 0 0 !important;
 }
 
 .channel-message-item:last-of-type .message-item__content-card {
-    border-radius: 0 0 4px 4px !important;
+    border-radius: 0 0 3px 3px !important;
 }
 
 .channel-message-item:last-of-type .message-item__content-card::after {
-    border-radius: 0 0 4px 0 !important;
+    border-radius: 0 0 3px 0 !important;
 }
 </style>
