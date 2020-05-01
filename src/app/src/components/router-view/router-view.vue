@@ -11,7 +11,7 @@ export default {
 </script>
 
 <style scoped>
-.keep-alive-view >>> .hidden {
+.keep-alive-view >>> div[data-active="false"] {
     display: none !important;
 }
 </style>

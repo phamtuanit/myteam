@@ -132,11 +132,9 @@ export default {
                 }
 
                 if (vm._inactive == true) {
-                    if (!vm.$el.classList.contains("hidden")) {
-                        vm.$el.classList.add("hidden");
-                    }
+                    vm.$el.dataset.active = "false";
                 } else {
-                    vm.$el.classList.remove("hidden");
+                    vm.$el.dataset.active = "true";
                 }
             }
 
