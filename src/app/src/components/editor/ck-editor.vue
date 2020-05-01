@@ -93,12 +93,13 @@ export default {
     },
     methods: {
         updateTopbar() {
-            const toolbar = this.editorInstance.ui.view.toolbar.element;
+            const view = this.editorInstance.ui.view;
+            const toolbar = view.toolbar.element;
 
             if (this.showToolBar == true) {
-                toolbar.classList.remove("ck-editor__top-hiden");
+                view.element.dataset.size = "full";
             } else {
-                toolbar.classList.add("ck-editor__top-hiden");
+                view.element.dataset.size = "mini";
             }
         },
         onEditorReady() {
@@ -121,5 +122,13 @@ export default {
 .ck.ck-content.ck-editor__editable {
     overflow-wrap: break-word;
     word-break: break-all;
+}
+
+.ck.ck-editor[data-size="mini"] .ck.ck-toolbar.ck-toolbar_grouping {
+    display: none;
+}
+
+.ck.ck-editor[data-size="mini"] .ck-editor__editable.ck-rounded-corners {
+    border-radius: var(--ck-border-radius) !important;
 }
 </style>

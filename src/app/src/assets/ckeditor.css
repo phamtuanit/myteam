@@ -144,10 +144,6 @@ body[data-theme-dark="true"] .ck.ck-form .ck.ck-toolbar.ck-toolbar_compact {
 }
 
 /* Custom CSS */
-.ck.ck-toolbar.ck-toolbar_grouping.ck-editor__top-hiden {
-    display: none;
-}
-
 .ck .ck-widget.ck-widget_with-selection-handle .ck-widget__selection-handle {
     left: calc(1px - var(--ck-widget-outline-thickness));
 }
