@@ -287,13 +287,13 @@ const moduleState = {
                 const pushToUnread = function (message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessage.push(message);
+                        informNewMessage(message, conv);
                     }
                 };
 
                 if (!conv.messages) {
                     conv.messages = [message];
                     pushToUnread(message);
-                    informNewMessage(message, conv);
                 } else {
                     const foundMessage = conv.messages.find(
                         i => i.id == message.id
@@ -301,7 +301,6 @@ const moduleState = {
                     if (!foundMessage) {
                         conv.messages.push(message);
                         pushToUnread(message);
-                        informNewMessage(message, conv);
                     } else {
                         Object.assign(foundMessage, message);
                     }
