@@ -10,16 +10,16 @@ import Bold from "@ckeditor/ckeditor5-basic-styles/src/bold.js";
 import Italic from "@ckeditor/ckeditor5-basic-styles/src/italic.js";
 import List from "@ckeditor/ckeditor5-list/src/list.js";
 import PasteFromOffice from "@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice";
-// import Table from "@ckeditor/ckeditor5-table/src/table.js";
-// import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar.js";
-// import TableCellProperties from "@ckeditor/ckeditor5-table/src/tablecellproperties";
-// import TableProperties from "@ckeditor/ckeditor5-table/src/tableproperties";
+import Table from "@ckeditor/ckeditor5-table/src/table.js";
+import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar.js";
+import TableCellProperties from "@ckeditor/ckeditor5-table/src/tablecellproperties";
+import TableProperties from "@ckeditor/ckeditor5-table/src/tableproperties";
 import Code from "@ckeditor/ckeditor5-basic-styles/src/code.js";
 import CodeBlock from "@ckeditor/ckeditor5-code-block/src/codeblock.js";
 import FontBackgroundColor from "@ckeditor/ckeditor5-font/src/fontbackgroundcolor.js";
 import FontColor from "@ckeditor/ckeditor5-font/src/fontcolor.js";
 import Indent from "@ckeditor/ckeditor5-indent/src/indent.js";
-// import TodoList from "@ckeditor/ckeditor5-list/src/todolist";
+import TodoList from "@ckeditor/ckeditor5-list/src/todolist";
 import IndentBlock from "@ckeditor/ckeditor5-indent/src/indentblock.js";
 // import Mention from "@ckeditor/ckeditor5-mention/src/mention.js";
 import Strikethrough from "@ckeditor/ckeditor5-basic-styles/src/strikethrough.js";
@@ -39,7 +39,7 @@ import Undo from "@ckeditor/ckeditor5-undo/src/undo";
 
 // Images: https://ckeditor.com/docs/ckeditor5/latest/features/image.html
 import Image from '@ckeditor/ckeditor5-image/src/image';
-// import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
+import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 // import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
@@ -48,12 +48,12 @@ import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleu
 
 import MyEnter from "./plugins/enter";
 
-export default class Editor extends ClassicEditor {}
+export default class Editor extends ClassicEditor { }
 
 // Plugins to include in the build.
 Editor.builtinPlugins = [
     Image,
-    // ImageToolbar,
+    ImageToolbar,
     ImageStyle,
     // ImageResize,
     ImageUpload,
@@ -69,16 +69,16 @@ Editor.builtinPlugins = [
     Italic,
     List,
     PasteFromOffice,
-    // Table,
-    // TableToolbar,
-    // TableProperties,
-    // TableCellProperties,
+    Table,
+    TableToolbar,
+    TableProperties,
+    TableCellProperties,
     Code,
     CodeBlock,
     FontBackgroundColor,
     FontColor,
     Indent,
-    // TodoList,
+    TodoList,
     IndentBlock,
     // Mention,
     Strikethrough,
@@ -101,7 +101,7 @@ ClassicEditor.defaultConfig = {
             "|",
             "bulletedList",
             "numberedList",
-            // "todoList",
+            "todoList",
             "indent",
             "outdent",
             "|",
@@ -116,21 +116,26 @@ ClassicEditor.defaultConfig = {
             "|",
             // "specialCharacters",
             // "|",
+            "insertTable",
             "code",
             "codeBlock",
-            // "insertTable",
         ],
     },
     language: "en",
-    // table: {
-    //     contentToolbar: [
-    //         "tableColumn",
-    //         "tableRow",
-    //         "mergeTableCells",
-    //         "tableProperties",
-    //         "tableCellProperties",
-    //     ],
-    // },
+    table: {
+        contentToolbar: [
+            "tableColumn",
+            "tableRow",
+            "mergeTableCells",
+            "tableProperties",
+            "tableCellProperties",
+        ],
+        tableProperties: {
+            tableWidth: "1000px",
+        },
+        tableCellProperties: {
+        }
+    },
     typing: {
         transformations: {
             extra: [

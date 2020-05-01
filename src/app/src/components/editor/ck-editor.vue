@@ -81,7 +81,7 @@ export default {
             simpleUpload.uploadUrl = config.attachment.url;
 
             if (simpleUpload.id) {
-                 simpleUpload.uploadUrl += `?sub=${simpleUpload.id}`;
+                simpleUpload.uploadUrl += `?sub=${simpleUpload.id}`;
             }
         }
     },
@@ -96,14 +96,19 @@ export default {
             const toolbar = this.editorInstance.ui.view.toolbar.element;
 
             if (this.showToolBar == true) {
-                toolbar.classList.remove("ck-editor__top-hide");
+                toolbar.classList.remove("ck-editor__top-hiden");
             } else {
-                toolbar.classList.add("ck-editor__top-hide");
+                toolbar.classList.add("ck-editor__top-hiden");
             }
         },
         onEditorReady() {
             this.editorInstance = this.$refs.editor.instance;
             this.updateTopbar();
+
+            // this.editorInstance.execute("tableWidth", {
+            //     value: "100%",
+            // });
+
             this.$emit("ready", this.editorInstance);
         },
     },

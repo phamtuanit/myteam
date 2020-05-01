@@ -15,9 +15,7 @@
             />
         </v-sheet>
 
-        <v-sheet
-            class="transparent d-flex justify-space-between mt-1 chat-editor__actions"
-        >
+        <v-sheet class="transparent d-flex justify-space-between mt-1 chat-editor__actions">
             <!-- Start -->
             <div class="d-flex flex-align-start">
                 <EmojiButton
@@ -30,13 +28,18 @@
                     @click="showToolBar = !showToolBar"
                     title="Format (ESC)"
                 >
-                    <v-icon size="18" :color="showToolBar ? 'orange' : ''"
-                        >mdi-format-letter-case-upper</v-icon
-                    >
+                    <v-icon
+                        size="18"
+                        :color="showToolBar ? 'orange' : ''"
+                    >mdi-format-letter-case-upper</v-icon>
                 </v-btn>
             </div>
             <!-- End -->
-            <v-btn icon @click="onSend" title="Send (Enter)">
+            <v-btn
+                icon
+                @click="onSend"
+                title="Send (Enter)"
+            >
                 <v-icon size="18">mdi-send</v-icon>
             </v-btn>
         </v-sheet>
@@ -171,15 +174,20 @@ export default {
 </script>
 
 <style>
-.chat-editor__container .ck.ck-editor__editable_inline > :first-child {
+.chat-editor__container:not(.chat-editor-expanded)
+    .ck.ck-editor__editable_inline
+    > :first-child {
     margin-top: 6px;
 }
 
-.chat-editor__container .ck.ck-editor__editable_inline > :last-child {
+.chat-editor__container:not(.chat-editor-expanded)
+    .ck.ck-editor__editable_inline
+    > :last-child {
     margin-bottom: 6px;
 }
 
 .chat-editor-expanded .ck .ck-editor__editable_inline {
+    max-height: 60vh;
     height: 30vh;
 }
 

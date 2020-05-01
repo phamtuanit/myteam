@@ -12,10 +12,17 @@
     --ck-color-text: rgba(0, 0, 0, 0.7);
     --ck-ui-component-min-height: 20px;
     --ck-color-base-border: #fff;
-    --ck-color-base-background: transparent;
+    --ck-color-base-background: #fff;
     --ck-border-radius: 4px;
     --ck-color-toolbar-border: #fff;
     --ck-color-toolbar-background: #fff;
+    --ck-color-panel-background: #fff;
+    --ck-color-widget-hover-border: #fb8c00;
+    --ck-color-base-action: #e47f04;
+}
+
+.ck.ck-form .ck.ck-toolbar.ck-toolbar_compact {
+    --ck-color-toolbar-border: rgba(0, 0, 0, 0.12);
 }
 
 .ck.ck-toolbar .ck.ck-toolbar__separator {
@@ -39,15 +46,26 @@
     border-bottom-style: solid;
 }
 
-.theme--dark .ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
-    border-bottom-color: rgba(255, 255, 255, 0.12);
-}
-
 .ck .ck-toolbar__items .ck-button {
     opacity: 0.8;
 }
 
-.theme--dark .ck {
+.ck .ck-insert-table-dropdown-grid-box {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.ck.ck-table-form .ck.ck-labeled-view .ck.ck-labeled-view__status {
+    background: white;
+    color: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--ck-color-base-error);
+}
+
+.ck.ck-table-form .ck.ck-labeled-view .ck.ck-labeled-view__status:after {
+    top: calc((-1 * var(--ck-table-properties-error-arrow-size)) - 1px);
+}
+
+body[data-theme-dark="true"] .ck {
+    --ck-color-base-background: #1E1E1E;
     --ck-color-text: rgba(255, 255, 255, 0.7);
     
     /* Toolbar */
@@ -67,7 +85,26 @@
 
     /* Content */
     --ck-color-base-text: #FFFFFF;
-    --ck-color-base-border: transparent 
+    --ck-color-base-border: #1E1E1E;
+
+    /* Panel */
+    --ck-color-panel-background: #1E1E1E;
+
+    /* Disabled */
+    --ck-color-input-disabled-background: rgb(59, 59, 59);
+    --ck-color-input-disabled-border: rgba(255, 255, 255, 0.12);
+    --ck-color-button-on-disabled-background: rgb(59, 59, 59);
+
+    /* Input */
+    --ck-color-input-background: transparent;
+}
+
+body[data-theme-dark="true"] .ck.ck-form .ck.ck-toolbar.ck-toolbar_compact {
+    --ck-color-toolbar-border: rgba(255, 255, 255, 0.12);
+}
+
+.theme--dark .ck .ck-toolbar__items .ck-button {
+    opacity: 1;
 }
 
 .ck-content code {
@@ -75,8 +112,16 @@
     -webkit-box-shadow: none;
 }
 
+.theme--dark .ck .ck-insert-table-dropdown-grid-box {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .theme--dark .ck-content code {
     color: rgba(255, 255, 255, 0.884);
+}
+
+.theme--dark .ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+    border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Code block */
@@ -99,6 +144,45 @@
 }
 
 /* Custom CSS */
-.ck.ck-toolbar.ck-toolbar_grouping.ck-editor__top-hide {
+.ck.ck-toolbar.ck-toolbar_grouping.ck-editor__top-hiden {
     display: none;
+}
+
+.ck .ck-widget.ck-widget_with-selection-handle .ck-widget__selection-handle {
+    left: calc(1px - var(--ck-widget-outline-thickness));
+}
+
+.ck-content .todo-list .todo-list__label > input[checked]:before {
+    background: #e47f04;
+    border-color: #e47f04;
+}
+
+/* Panel / From */
+.ck.ck-form .ck.ck-input-text {
+    box-shadow: unset;
+    -webkit-box-shadow: unset;
+}
+
+.ck.ck-form .ck.ck-input-color > .ck.ck-dropdown {
+    margin-left: 2px;
+    margin-top: 1px;
+}
+
+.ck.ck-form .ck.ck-input-color > .ck.ck-input-text {
+    border-top-right-radius: var(--ck-border-radius);
+    border-bottom-right-radius: var(--ck-border-radius);
+}
+
+/* Table forcus */
+td.ck-editor__editable.ck-editor__nested-editable:focus {
+    box-shadow: unset;
+    -webkit-box-shadow: unset;
+}
+
+.theme--dark .ck .ck-content .table table th {
+    background-color: rgb(59, 59, 59);
+}
+
+figure table {
+    max-width: 100%;
 }
