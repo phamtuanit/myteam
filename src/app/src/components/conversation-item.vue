@@ -32,7 +32,7 @@
         <!-- Conversation template -->
         <template v-else>
             <v-list-item-title
-                class="subtitle-2 my-0 content__text"
+                class="subtitle-2 my-0 content__text d-flex"
                 :class="{ 'font-weight-bold': hasNewMessage }"
             >
                 <v-icon size="15">mdi-pound</v-icon>
