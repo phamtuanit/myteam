@@ -141,9 +141,11 @@ function handleWSConversation(socket, state, commit, act, data) {
     const me = this.state.users.me;
     switch (act) {
         case "created":
-            this.dispatch("conversations/loadConversation", convId).catch(
-                console.error
-            );
+            if (payload.subscribers.includes(me.id)) {
+                this.dispatch("conversations/loadConversation", convId).catch(
+                    console.error
+                );
+            }
             break;
         case "updated":
             if (payload.subscribers.includes(me.id)) {
@@ -282,7 +284,7 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
             if (conv) {
-                const pushToUnread = function(message) {
+                const pushToUnread = function (message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessage.push(message);
                     }
@@ -432,23 +434,10 @@ const moduleState = {
                     const conv = convList[index];
 
                     // Load conversation content
-                    const content = await this.dispatch(
+                    await this.dispatch(
                         "conversations/getConversationContent",
                         conv.id
                     );
-                    conv.meta = {
-                        unreadMessage: [],
-                    };
-                    conv.messages = content || [];
-
-                    // Update message info
-                    conv.messages.forEach(msg => {
-                        // Init required value
-                        if (msg.from && msg.from.issuer == me.id) {
-                            msg._isMe = true;
-                        }
-                        msg.status = null;
-                    });
                 }
 
                 // Process message in queue
@@ -538,7 +527,7 @@ const moduleState = {
 
             return newConv;
         },
-        async updateConversation({ commit, state }, convInfo) {
+        async updateConversation({ state }, convInfo) {
             const invalid =
                 !convInfo ||
                 !convInfo.subscribers ||
@@ -651,6 +640,12 @@ const moduleState = {
                 conv.subscribers = subscribers || [];
 
                 commit("addConversation", conv);
+
+                // Load message
+                await this.dispatch(
+                    "conversations/getConversationContent",
+                    conv.id
+                );
                 return conv;
             }
         },
@@ -690,10 +685,34 @@ const moduleState = {
                 return msg.id;
             }
         },
-        getConversationContent(ctx, convId) {
+        getConversationContent({ state }, convId) {
             if (typeof convId == "number") {
                 return messageService.get(parseInt(convId)).then(res => {
                     return res.data;
+                }).then(messages => {
+                    const conv = state.channel.all
+                        .concat(state.chat.all)
+                        .find(c => c.id == convId);
+                    if (conv) {
+                        if (!conv.meta) {
+                            conv.meta = {
+                                unreadMessage: [],
+                            };
+                        }
+                        conv.messages = messages || [];
+
+                        // Update message info
+                        const me = this.state.users.me;
+                        messages.forEach(msg => {
+                            // Init required value
+                            if (msg.from && msg.from.issuer == me.id) {
+                                msg._isMe = true;
+                            }
+                            msg.status = null;
+                        });
+                    }
+
+                    return messages;
                 });
             }
             return Promise.reject("No conversation id");
