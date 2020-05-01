@@ -268,11 +268,11 @@ export default {
 }
 
 .message-sheet >>> .your-message + .my-message {
-    margin-top: 16px;
+    margin-top: 18px;
 }
 
 .message-sheet >>> .my-message + .your-message {
-    margin-top: 16px;
+    margin-top: 18px;
 }
 
 .message-sheet >>> div.message-item:last-child {
