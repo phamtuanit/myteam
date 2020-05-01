@@ -16,15 +16,15 @@
         </div>
         <!-- content -->
         <div class="message-item__content d-flex flex-column flex-grow-1">
-            <slot></slot>
-            <!-- Message -->
             <v-card
                 elevation="0"
-                class="flex-grow-1 px-3 py-2 message-item__content-card no-border-radius"
+                class="flex-grow-1 message-item__content-card"
                 :disabled="message.status == 'removed'"
             >
+                <slot></slot>
+
                 <!-- Header -->
-                <div class="message-item__content-header center-y">
+                <div class="message-item__content-header center-y px-3 pt-2">
                     <!-- User info -->
                     <span
                         class="subtitle-2 mr-2"
@@ -70,13 +70,12 @@
                         </v-menu>
                     </div>
                 </div>
-                <!-- Separator -->
-                <!-- <v-divider style="margin-top: 2px"></v-divider> -->
                 <!-- Content -->
                 <v-card-text
-                    class="message-item__content-text pa-0 mt-1 hl"
+                    class="message-item__content-text px-3 pt-0 pb-1 mt-1 hl"
                     v-html="message.body.content"
                 ></v-card-text>
+                <!-- Actions -->
                 <div
                     class="message-item__content-footer d-flex"
                     v-if="message.status != 'removed'"

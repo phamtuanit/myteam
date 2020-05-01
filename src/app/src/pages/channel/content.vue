@@ -18,6 +18,7 @@
                     @delete="onDeleteMessage"
                     @edit="onEditMessage"
                 >
+                    <!-- Separator -->
                     <v-divider class="message-item__content-separator mx-3"></v-divider>
                 </Message>
             </v-slide-y-transition>
@@ -138,5 +139,21 @@ export default {
 
 .channel-message-item:last-of-type {
     margin-bottom: 10px;
+}
+
+.message-item__content-card {
+    border-radius: 0 !important;
+}
+
+.channel-message-item:first-of-type .message-item__content-card {
+    border-radius: 4px 4px 0 0 !important;
+}
+
+.channel-message-item:last-of-type .message-item__content-card {
+    border-radius: 0 0 4px 4px !important;
+}
+
+.channel-message-item:last-of-type .message-item__content-card::after {
+    border-radius: 0 0 4px 0 !important;
 }
 </style>
