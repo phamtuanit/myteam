@@ -1,44 +1,44 @@
 <template>
-  <v-container
-    class="fill-height bg-1"
-    fluid
-    id="preparation-screen"
-  >
-    <div
-      align="center"
-      justify="center"
-      class="mx-auto"
+    <v-container
+        class="fill-height bg-1"
+        fluid
+        id="preparation-screen"
     >
-      <div class="cssload-dots">
-        <div class="cssload-dot"></div>
-        <div class="cssload-dot"></div>
-        <div class="cssload-dot"></div>
-        <div class="cssload-dot"></div>
-        <div class="cssload-dot"></div>
-      </div>
+        <div
+            align="center"
+            justify="center"
+            class="mx-auto"
+        >
+            <div class="cssload-dots">
+                <div class="cssload-dot"></div>
+                <div class="cssload-dot"></div>
+                <div class="cssload-dot"></div>
+                <div class="cssload-dot"></div>
+                <div class="cssload-dot"></div>
+            </div>
 
-      <svg
-        version="1.1"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <filter id="goo">
-            <feGaussianBlur
-              in="SourceGraphic"
-              result="blur"
-              stdDeviation="12"
-            ></feGaussianBlur>
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0	0 1 0 0 0	0 0 1 0 0	0 0 0 18 -7"
-              result="goo"
-            ></feColorMatrix>
-          </filter>
-        </defs>
-      </svg>
-    </div>
-  </v-container>
+            <svg
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <defs>
+                    <filter id="goo">
+                        <feGaussianBlur
+                            in="SourceGraphic"
+                            result="blur"
+                            stdDeviation="12"
+                        ></feGaussianBlur>
+                        <feColorMatrix
+                            in="blur"
+                            mode="matrix"
+                            values="1 0 0 0 0	0 1 0 0 0	0 0 1 0 0	0 0 0 18 -7"
+                            result="goo"
+                        ></feColorMatrix>
+                    </filter>
+                </defs>
+            </svg>
+        </div>
+    </v-container>
 </template>
 
 <script>
@@ -76,6 +76,9 @@ export default {
                                 // When previous state is done "startup"
                                 const theme = window.IoC.get("theme");
                                 this.$vuetify.theme.dark = theme.dark;
+
+                                // Update root element
+                                document.body.dataset.themeDark = theme.dark;
                             }
                             break;
 
