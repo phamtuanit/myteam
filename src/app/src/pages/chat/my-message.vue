@@ -7,7 +7,7 @@
         <v-spacer></v-spacer>
         <!-- Actions -->
         <div
-            class="message-actions d-flex justify-end mr-1"
+            class="message-item__actions d-flex justify-end mr-1"
             style="min-width: 40px;"
         >
             <v-btn
@@ -22,14 +22,14 @@
         </div>
 
         <!-- Content -->
-        <div class="message-content">
+        <div class="message-item__content">
             <v-card
                 flat
-                class="mr-1 message-card py-1 px-3"
+                class="mr-1 message-item__content--card py-1 px-3"
                 :disabled="!isAvailable"
             >
                 <!-- Header -->
-                <div class="message-card__header selection-disabled mb-0">
+                <div class="message-item__content-header selection-disabled mb-0">
                     <span
                         class="caption"
                         v-text="timeAgo"
@@ -50,7 +50,7 @@
                 </div>
                 <!-- Body -->
                 <v-card-text
-                    class="message-card_text pa-0 my-0 hl"
+                    class="message-item__content-text pa-0 my-0 hl"
                     v-html="message.body.content"
                 >
                 </v-card-text>
@@ -114,12 +114,7 @@ export default {
 </script>
 
 <style scoped>
-.message-content {
-    padding-top: 2px;
-    padding-bottom: 2px;
-}
-
-.message-card__header {
+.message-item__content-header {
     position: relative;
     display: flex;
     align-items: center;
@@ -127,11 +122,7 @@ export default {
     -webkit-box-flex: 1;
 }
 
-.message-card {
-    position: relative;
-}
-
-.message-card::after {
+.message-item__content--card::after {
     content: "";
     position: absolute;
     background-color: #1e88e5;
@@ -142,15 +133,16 @@ export default {
     border-radius: 0 4px 4px 0;
 }
 
-.message-error .message-card::after {
+.message-error .message-item__content--card::after {
     background-color: red;
 }
 
-.message-card .message-card_text {
+.message-item__content--card .message-item__content-text {
     color: rgba(0, 0, 0, 0.8);
+    padding-bottom: 2px !important;
 }
 
-.theme--dark .message-card .message-card_text {
+.theme--dark .message-item__content--card.message-item__content-text {
     color: rgba(255, 255, 255, 0.8);
 }
 

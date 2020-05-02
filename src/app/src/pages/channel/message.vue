@@ -1,6 +1,6 @@
 <template>
     <v-sheet
-        class="channel-message-item d-flex transparent mx-4"
+        class="message-item channel-message-item d-flex transparent mx-4"
         :class="{
             'message-item--me': isMyMessage,
             'message-item--deleted': message.status == 'removed',
@@ -18,7 +18,7 @@
         <div class="message-item__content d-flex flex-column flex-grow-1">
             <v-card
                 elevation="0"
-                class="flex-grow-1 message-item__content-card"
+                class="flex-grow-1 message-item__content--card"
                 :disabled="message.status == 'removed'"
             >
                 <slot></slot>
@@ -44,10 +44,7 @@
                     ></ReactionEmoji>
 
                     <!-- Actions -->
-                    <div
-                        class="message-item__content-actions center-y"
-                        v-if="isMyMessage"
-                    >
+                    <div class="message-item__content-actions center-y">
                         <v-menu left>
                             <template v-slot:activator="{ on }">
                                 <v-btn
@@ -59,12 +56,20 @@
                                     <v-icon small>mdi-dots-vertical</v-icon>
                                 </v-btn>
                             </template>
-                            <v-list class="menus">
+                            <v-list
+                                class="menus"
+                                v-if="isMyMessage"
+                            >
                                 <v-list-item @click="onDelete">
                                     <v-list-item-title>Delete</v-list-item-title>
                                 </v-list-item>
-                                <v-list-item @click="onEdit">
-                                    <v-list-item-title>Edit</v-list-item-title>
+                            </v-list>
+                            <v-list
+                                class="menus"
+                                v-else
+                            >
+                                <v-list-item @click="onReply">
+                                    <v-list-item-title>Reply</v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-menu>
@@ -75,6 +80,7 @@
                     class="message-item__content-text px-3 pt-0 pb-0 mt-1 hl"
                     v-html="message.body.content"
                 ></v-card-text>
+
                 <!-- Actions -->
                 <div class="message-item__content-footer d-flex mb-1">
                     <v-spacer></v-spacer>
@@ -153,8 +159,8 @@ export default {
         onDelete() {
             this.$emit("delete", this.message);
         },
-        onEdit() {
-            this.$emit("edit", this.message);
+        onReply() {
+            this.$emit("reply", this.message);
         },
     },
 };
@@ -167,7 +173,7 @@ export default {
 
 .message-item__content-header {
     position: relative;
-    min-height: 24px;
+    min-height: 36px;
 }
 
 .theme--light .message-item__content .message-item__content-text {
@@ -201,15 +207,11 @@ export default {
     right: 16px;
 }
 
-.channel-message-item >>> .message-item__content-text p:last-child {
-    margin-bottom: 2px;
-}
-
-.message-item__content-card {
+.message-item__content--card {
     position: relative;
 }
 
-.message-item--me .message-item__content-card::after {
+.message-item--me .message-item__content--card::after {
     content: "";
     position: absolute;
     background-color: #1e88e5;
@@ -219,22 +221,18 @@ export default {
     top: 0;
 }
 
-.message-item--deleted .message-item__content-card::after {
+.message-item--deleted .message-item__content--card::after {
     background-color: red;
 }
 
-.message-item--deleted .message-item__content-actions {
-    display: none;
+.message-item__content-actions {
+    opacity: 0.2;
 }
 
-.channel-message-item >>> .message-item__content-text blockquote {
-    position: relative;
-    overflow: hidden;
-    padding-right: 1.5em;
-    padding-left: 1.5em;
-    margin-left: 0;
-    margin-right: 0;
-    font-style: italic;
-    border-left: 4px solid #ccc;
+div:not(.message-item--deleted)
+    .message-item__content:hover
+    .message-item__content-actions {
+    transition: all 0.1s ease-in;
+    opacity: 01;
 }
 </style>

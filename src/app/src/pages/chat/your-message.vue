@@ -1,23 +1,29 @@
 <template>
     <v-list-item class="px-2 message-item your-message">
         <v-list-item-avatar class="my-0 ml-2 mr-0">
-            <UserAvatar :user="user" online-effect />
+            <UserAvatar
+                :user="user"
+                online-effect
+            />
         </v-list-item-avatar>
 
         <!-- Message -->
-        <div class="message-content">
+        <div class="message-item__content">
             <v-card
                 flat
-                class="message-card ml-1 py-2 px-3"
+                class="message-item__content--card ml-1 py-2 px-3"
                 :disabled="!isAvailable"
             >
                 <!-- Header -->
-                <div class="message-card__header selection-disabled">
+                <div class="message-item__content-header selection-disabled">
                     <span
                         class="subtitle-2 mr-2 user-name"
                         v-text="fullName"
                     ></span>
-                    <span class="caption" v-text="timeAgo"></span>
+                    <span
+                        class="caption"
+                        v-text="timeAgo"
+                    ></span>
                     <v-spacer></v-spacer>
                     <v-icon
                         v-if="!isAvailable"
@@ -36,13 +42,13 @@
 
                 <!-- Body -->
                 <v-card-text
-                    class="message-card_text pa-0 mt-1 hl"
+                    class="message-item__content-text pa-0 mt-1 hl"
                     v-html="message.body.content"
                 >
                 </v-card-text>
             </v-card>
 
-            <div class="message-content__bottom">
+            <div class="message-item__content-footer">
                 <v-spacer></v-spacer>
 
                 <div class="custom-align">
@@ -57,8 +63,16 @@
         </div>
 
         <!-- Actions -->
-        <div class="message-actions ml-2" v-if="isAvailable">
-            <v-btn icon small class="mx-auto" @click="onReply">
+        <div
+            class="message-item__actions ml-2"
+            v-if="isAvailable"
+        >
+            <v-btn
+                icon
+                small
+                class="mx-auto"
+                @click="onReply"
+            >
                 <v-icon small>mdi-reply</v-icon>
             </v-btn>
         </div>
@@ -148,15 +162,7 @@ export default {
 </script>
 
 <style scoped>
-.message-card-wrapper {
-    position: relative;
-}
-
-.message-card {
-    position: relative;
-}
-
-.message-content__bottom {
+.message-item__content-footer {
     position: relative;
     display: flex;
     align-items: center;
@@ -170,16 +176,11 @@ export default {
     align-items: center;
     -webkit-box-align: center;
     right: 0;
-    top: -10px;
-}
-
-.message-content {
-    padding-top: 2px;
-    padding-bottom: 2px;
+    top: -14px;
 }
 
 /* Card header */
-.message-card__header {
+.message-item__content-header {
     position: relative;
     display: flex;
     align-items: center;
@@ -193,7 +194,7 @@ export default {
 }
 
 /* Reactions */
-.message-content__bottom >>> .reactions-panel {
+.message-item__content-footer >>> .reactions-panel {
     position: absolute;
     visibility: hidden;
     bottom: 0;
@@ -201,7 +202,7 @@ export default {
     right: -10px;
 }
 
-.message-content:hover >>> .reactions-panel {
+.message-item__content:hover >>> .reactions-panel {
     transition: all 0.2s ease-in;
     visibility: visible;
     right: -30px;
