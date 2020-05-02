@@ -166,10 +166,12 @@ const moduleState = {
                 switch (act) {
                     case "on":
                     case "off":
+                        console.info("Received user status:", data.status);
                         user.status = data.status;
                         commit("cache", user);
                         break;
                     case "broadcast":
+                        console.info("Received broadcast status:", data.status);
                         this.dispatch("users/changeStatusAll", data.status);
                         break;
 
