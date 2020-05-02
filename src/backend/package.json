@@ -4,8 +4,9 @@
   "description": "MyTeam project",
   "scripts": {
     "dev": "moleculer-runner --repl --hot --instances=1 services/**/*.*.js",
-    "start": "moleculer-runner --instances=1 services/**/*.*.js",
-    "gateway": "set PORT=8082 && moleculer-runner services/*.gateway.js",
+    "start": "moleculer-runner services/**/*.*.js",
+    "service": "moleculer-runner --instances=2 services/**/*.service.js",
+    "gateway": "moleculer-runner services/*.gateway.js",
     "cli": "moleculer connect TCP",
     "ci": "jest --watch",
     "test": "jest --coverage",
