@@ -82,11 +82,6 @@ div.v-subheader {
     -webkit-box-align: center;
 }
 
-/* Override */
-.v-application .main-view p {
-    margin-bottom: 8px;
-}
-
 /* Menus */
 .menus .v-list-item {
     min-height: 34px;
@@ -100,42 +95,65 @@ figure img {
 
 /* Content format */
 /* Table */
-.table table {
+.message-item .table table {
     border-collapse: collapse;
     border-spacing: 0;
+    margin-bottom: 4px;
 }
 
-.table table td, .table table th {
+.message-item .table table td, .table table th {
     min-width: 2em;
     padding: .4em;
     border: 1px solid #bfbfbf;
 }
 
-.table table thead th {
+.message-item .table table thead th {
     background-color:  rgba(0, 0, 0, 0.12);
 }
 
-.theme--dark .table table thead th {
+.message-item.theme--dark .table table thead th {
     background-color:  rgba(255, 255, 255, 0.12);
 }
 
 /* ToDo */
-div:not(.ck-content) > ul.todo-list {
+.message-item ul.todo-list {
     list-style: none;
     padding-left: 0;
 }
 
-div:not(.ck-content) > ul.todo-list label.todo-list__label {    
+.message-item ul.todo-list label.todo-list__label {    
     display: flex;
     align-items: center;
 }
 
-div:not(.ck-content) > ul.todo-list label.todo-list__label > input {
+.message-item ul.todo-list label.todo-list__label > input {
     position: relative;
     height: 16px;
     width: 16px;
 }
 
-ul.todo-list .todo-list__label__description {
+.message-item .todo-list__label__description {
     margin-left: 6px;
+}
+
+/* Blockquote */
+.message-item blockquote {
+    position: relative;
+    overflow: hidden;
+    padding-right: 4px;
+    padding-left: 14px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 6px;
+    font-style: italic;
+    border-left: 4px solid #ccc;
+}
+
+/* P */
+.v-application .message-item p {
+    margin-bottom: 8px;
+}
+
+.v-application .message-item * > p:last-child {
+    margin-bottom: 2px;
 }

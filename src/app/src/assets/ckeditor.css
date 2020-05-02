@@ -182,3 +182,12 @@ td.ck-editor__editable.ck-editor__nested-editable:focus {
 figure table {
     max-width: 100%;
 }
+
+/* P */
+.ck.ck-editor__main p {
+    margin-bottom: 8px;
+}
+
+.ck.ck-editor__main * > p:last-child {
+    margin-bottom: 2px;
+}
