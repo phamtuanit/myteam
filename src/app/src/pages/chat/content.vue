@@ -210,7 +210,17 @@ export default {
             this.onReact(type, message, false);
         },
         onReply(message) {
-            console.log("Reply: ", message);
+            this.onRead();
+            if (
+                !message ||
+                !message.body.content ||
+                (message.body.type != null && message.body.type != "html")
+            ) {
+                return;
+            }
+
+            console.log("Reply: ", message.id);
+            this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
         },
         onRead() {
             const conv = this.conversation;
@@ -233,33 +243,23 @@ export default {
     height: 100vh;
 }
 
-/* Message style */
-.message-sheet >>> .message-content blockquote {
-    position: relative;
-    overflow: hidden;
-    padding-right: 1.5em;
-    padding-left: 1.5em;
-    margin-left: 0;
-    margin-right: 0;
-    font-style: italic;
-    border-left: 4px solid #ccc;
-}
-
 /* Message aligment */
 .message-sheet >>> .message-item:first-of-type {
     margin-top: 8px;
 }
 
-.message-sheet >>> .message-item:not(:first-of-type) .message-card__header {
+.message-sheet
+    >>> .message-item:not(:first-of-type)
+    .message-item__content-header {
     display: none;
 }
 
-.message-sheet >>> .my-message + .your-message .message-card__header,
-.message-sheet >>> .your-message + .my-message .message-card__header {
+.message-sheet >>> .my-message + .your-message .message-item__content-header,
+.message-sheet >>> .your-message + .my-message .message-item__content-header {
     display: flex;
 }
 
-.message-sheet >>> .message-item.has-reacted .message-card__header {
+.message-sheet >>> .message-item.has-reacted .message-item__content-header {
     display: flex;
 }
 
@@ -292,18 +292,23 @@ export default {
 }
 
 /* Message actions */
-.message-sheet >>> .message-actions {
+.message-sheet >>> .message-item__actions {
     align-items: center;
     opacity: 0;
 }
 
-.message-sheet >>> .message-item:hover > .message-actions {
+.message-sheet >>> .message-item:hover > .message-item__actions {
     opacity: 1;
     transition: all 0.2s ease-in;
 }
 
-.chat-box >>> .message-content p:last-child {
-    margin-bottom: 2px;
+.message-sheet >>> .message-item .message-item__content--card {
+    position: relative;
+}
+
+.message-sheet >>> .message-item .message-item__content {
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .chat-box >>> .chat-editor {

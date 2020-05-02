@@ -16,7 +16,7 @@
                     @react="onReact"
                     @dereact="onDereact"
                     @delete="onDeleteMessage"
-                    @edit="onEditMessage"
+                    @reply="onReply"
                 >
                     <!-- Separator -->
                     <v-divider class="message-item__content-separator mx-3"></v-divider>
@@ -107,7 +107,19 @@ export default {
                 .dispatch("conversations/deleteMessage", message)
                 .catch(console.error);
         },
-        onEditMessage() {},
+        onReply(message) {
+            this.onRead();
+            if (
+                !message ||
+                !message.body.content ||
+                (message.body.type != null && message.body.type != "html")
+            ) {
+                return;
+            }
+
+            console.log("Reply: ", message.id);
+            this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
+        },
         scrollToBottom() {
             const msgSheetEl = this.$refs.messageSheet.$el;
             msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
@@ -141,19 +153,23 @@ export default {
     margin-bottom: 10px;
 }
 
-.message-item__content-card {
+.message-item__content--card {
     border-radius: 0 !important;
 }
 
-.channel-message-item:first-of-type .message-item__content-card {
+.channel-message-item:first-of-type .message-item__content--card {
     border-radius: 3px 3px 0 0 !important;
 }
 
-.channel-message-item:last-of-type .message-item__content-card {
+.channel-message-item:last-of-type .message-item__content--card {
     border-radius: 0 0 3px 3px !important;
 }
 
-.channel-message-item:last-of-type .message-item__content-card::after {
+.channel-message-item:first-of-type .message-item__content--card::after {
+    border-radius: 0 3px 0 0 !important;
+}
+
+.channel-message-item:last-of-type .message-item__content--card::after {
     border-radius: 0 0 3px 0 !important;
 }
 </style>
