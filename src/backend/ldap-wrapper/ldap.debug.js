@@ -8,8 +8,14 @@ service.prototype = {
     close() {
         this.logger.info("Close LDAP connection.");
     },
-    verify() {
-        return Promise.resolve(authConf.debug.users[0]);
+    verify(userName) {
+        let found = authConf.debug.users.find(u => u.id === userName);
+        if (!found) {
+            found = authConf.debug.users[0];
+            found.id = userName;
+            found.userName = userName;
+        }
+        return Promise.resolve(found);
     },
 };
 
