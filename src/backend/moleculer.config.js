@@ -46,13 +46,13 @@ module.exports = {
 			// Using colors on the output
 			colors: true,
 			// Print module names with different colors (like docker-compose for containers)
-			moduleColors: false,
+			moduleColors: true,
 			// Line formatter. It can be "json", "short", "simple", "full", a `Function` or a template string like "{timestamp} {level} {nodeID}/{mod}: {msg}"
 			formatter: "full",
 			// Custom object printer. If not defined, it uses the `util.inspect` method.
 			objectPrinter: null,
 			// Auto-padding the module name in order to messages begin at the same column.
-			autoPadding: false
+			autoPadding: true
 		}
 	},
 	// Default log level for built-in console logger. It can be overwritten in logger options above.
@@ -63,7 +63,7 @@ module.exports = {
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: sysConf.redis.uri + sysConf.redis.transport || "TCP", //"TCP"
+	transporter: (sysConf.redis.uri + sysConf.redis.transport) || "TCP", //"TCP"
 
 
 	// Define a cacher.
@@ -99,6 +99,7 @@ module.exports = {
 
 	// Number of seconds to send heartbeat packet to other nodes.
 	heartbeatInterval: 10,
+
 	// Number of seconds to wait before setting node to unavailable status.
 	heartbeatTimeout: 30,
 
@@ -120,9 +121,9 @@ module.exports = {
 	registry: {
 		// Define balancing strategy. More info: https://moleculer.services/docs/0.14/balancing.html
 		// Available values: "RoundRobin", "Random", "CpuUsage", "Latency", "Shard"
-		strategy: "RoundRobin",
+		strategy: "CpuUsage",
 		// Enable local action call preferring. Always call the local action instance if available.
-		preferLocal: false
+		preferLocal: true
 	},
 
 	// Settings of Circuit Breaker. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Circuit-Breaker
@@ -202,17 +203,11 @@ module.exports = {
 	replCommands: null,
 
 	// Called after broker created.
-	created(broker) {
-
-	},
+	created(broker) { },
 
 	// Called after broker started.
-	async started(broker) {
-
-	},
+	started(broker) { },
 
 	// Called after broker stopped.
-	async stopped(broker) {
-
-	}
+	stopped(broker) { }
 };
