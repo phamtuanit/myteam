@@ -121,12 +121,12 @@ figure img {
     padding-left: 0;
 }
 
-.message-item ul.todo-list label.todo-list__label {    
+.message-item ul.todo-list * {    
     display: flex;
     align-items: center;
 }
 
-.message-item ul.todo-list label.todo-list__label > input {
+.message-item ul.todo-list label.todo-list__label input {
     position: relative;
     height: 16px;
     width: 16px;

@@ -17,7 +17,7 @@
                 <!-- Header -->
                 <div class="message-item__content-header selection-disabled">
                     <span
-                        class="subtitle-2 mr-2 user-name"
+                        class="subtitle-2 user-name"
                         v-text="fullName"
                     ></span>
                     <span
@@ -206,5 +206,12 @@ export default {
     transition: all 0.2s ease-in;
     visibility: visible;
     right: -30px;
+}
+
+.user-name::after {
+    content: "•";
+    padding-left: 5px;
+    padding-right: 5px;
+    color: hsl(0, 0%, 72%);
 }
 </style>

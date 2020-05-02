@@ -27,7 +27,7 @@
                 <div class="message-item__content-header selection-disabled center-y px-3 pt-2">
                     <!-- User info -->
                     <span
-                        class="subtitle-2 mr-2"
+                        class="subtitle-2 user-name"
                         v-text="user._isMe ? 'Yours' : user.fullName"
                     ></span>
                     <span
@@ -234,5 +234,12 @@ div:not(.message-item--deleted)
     .message-item__content-actions {
     transition: all 0.1s ease-in;
     opacity: 01;
+}
+
+.user-name::after {
+    content: "•";
+    padding-left: 5px;
+    padding-right: 5px;
+    color: hsl(0, 0%, 72%);
 }
 </style>

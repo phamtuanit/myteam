@@ -315,4 +315,11 @@ export default {
     margin-left: 60px;
     margin-right: 14px;
 }
+
+.message-sheet >>> .user-name::after {
+    content: "•";
+    padding-left: 5px;
+    padding-right: 5px;
+    color: hsl(0, 0%, 72%);
+}
 </style>
