@@ -20,23 +20,12 @@ module.exports = {
             const status = data.status;
             data.event = event;
 
-            if (typeof userId == "string") {
-                this.logger.debug(
-                    `WS >>> Status of user ${userId} has been changed.`,
-                    data
-                );
+            this.logger.info(
+                `WS >>> Status of user [${userId}] has been changed to`, status
+            );
 
-                const socketDict = this.sockets[userId];
-                // Broadcast to all user except itself
-                if (status == "on") {
-                    if (Object.keys(socketDict).length == 1) {
-                        const socket = Object.values(socketDict)[0];
-                        socket.to("live").emit("live", status, data, event);
-                    }
-                } else if (!socketDict || Object.keys(socketDict).length <= 0) {
-                    this.io.to("live").emit("live", status, data, event);
-                }
-            }
+            this.logger.debug("WS >>> Broadcast mesaage to all of user")
+            this.io.to("live").emit("live", status, data, event);
         },
         // message-queue.[userId].message.*
         "message-queue.*.message.*"(message, sender, event, ctx) {
@@ -87,7 +76,7 @@ module.exports = {
             // Save socket
             this.sockets[user.id] = this.sockets[user.id] || {};
             this.sockets[user.id][socket.id] = socket;
-            this.logger.info(`WS >>> User ${user.id} has been connected.`);
+            this.logger.info(`WS >>> User [${user.id}] has been connected via WebSocket.`);
 
             // Join to required room
             requiredRooms.forEach(room => {
