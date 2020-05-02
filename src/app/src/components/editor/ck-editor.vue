@@ -37,7 +37,7 @@ export default {
         ckeditor: CKEditor.component,
     },
     data() {
-        const editorConfig = { ...this.config };
+        const editorConfig = this.config;
         return {
             showEditor: false,
             editor: this.classEditor,

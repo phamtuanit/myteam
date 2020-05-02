@@ -8,7 +8,7 @@
 }
 
 /* Buttons */
-.ck {
+.ck.ck-editor {
     --ck-color-text: rgba(0, 0, 0, 0.7);
     --ck-ui-component-min-height: 20px;
     --ck-color-base-border: #fff;
@@ -19,6 +19,10 @@
     --ck-color-panel-background: #fff;
     --ck-color-widget-hover-border: #fb8c00;
     --ck-color-base-action: #e47f04;
+    
+    /* Mention */
+    --ck-color-mention-background: transparent;
+    --ck-color-mention-text: #1e88e5;
 }
 
 .ck.ck-form .ck.ck-toolbar.ck-toolbar_compact {
@@ -190,4 +194,9 @@ figure table {
 
 .ck.ck-editor__main * > p:last-child {
     margin-bottom: 2px;
+}
+
+/* Mention */
+.ck-content .mention {
+    padding-right: 2px;
 }

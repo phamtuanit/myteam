@@ -51,7 +51,11 @@ import EmojiButton from "..//emoji-button";
 import Editor from "./ck-editor.vue";
 
 // Editor
+import MyEnter from "./plugins/enter";
+import MyMention from "./plugins/mention";
 import ClassicEditor from "./ck-editor.js";
+
+ClassicEditor.builtinPlugins.push(MyEnter, MyMention);
 
 export default {
     props: {
@@ -62,6 +66,10 @@ export default {
         id: {
             type: [String, Number],
             default: "",
+        },
+        mention: {
+            type: Object,
+            default: null,
         },
     },
     components: { EmojiButton, Editor },
@@ -75,6 +83,7 @@ export default {
                 simpleUpload: {
                     id: this.id,
                 },
+                mention: this.mention,
             },
         };
     },
@@ -188,7 +197,7 @@ export default {
 
 .chat-editor-expanded .ck .ck-editor__editable_inline {
     max-height: 60vh;
-    height: 30vh;
+    height: 40vh;
 }
 
 .chat-editor__actions .v-btn.v-size--default {

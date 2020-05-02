@@ -21,7 +21,7 @@ import FontColor from "@ckeditor/ckeditor5-font/src/fontcolor.js";
 import Indent from "@ckeditor/ckeditor5-indent/src/indent.js";
 import TodoList from "@ckeditor/ckeditor5-list/src/todolist";
 import IndentBlock from "@ckeditor/ckeditor5-indent/src/indentblock.js";
-// import Mention from "@ckeditor/ckeditor5-mention/src/mention.js";
+import Mention from "@ckeditor/ckeditor5-mention/src/mention.js";
 import Strikethrough from "@ckeditor/ckeditor5-basic-styles/src/strikethrough.js";
 import Underline from "@ckeditor/ckeditor5-basic-styles/src/underline.js";
 // import SpecialCharactersEssentials from "@ckeditor/ckeditor5-special-characters/src/specialcharactersessentials.js";
@@ -41,12 +41,10 @@ import Undo from "@ckeditor/ckeditor5-undo/src/undo";
 import Image from '@ckeditor/ckeditor5-image/src/image';
 import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
-// import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
+import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter";
 // import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
-
-import MyEnter from "./plugins/enter";
 
 export default class Editor extends ClassicEditor { }
 
@@ -55,12 +53,11 @@ Editor.builtinPlugins = [
     Image,
     ImageToolbar,
     ImageStyle,
-    // ImageResize,
+    ImageResize,
     ImageUpload,
     SimpleUploadAdapter,
     // Base64UploadAdapter,
     Clipboard,
-    MyEnter,
     ShiftEnter,
     Typing,
     Undo,
@@ -80,7 +77,7 @@ Editor.builtinPlugins = [
     Indent,
     TodoList,
     IndentBlock,
-    // Mention,
+    Mention,
     Strikethrough,
     Underline,
     // SpecialCharactersEssentials,
@@ -110,10 +107,10 @@ ClassicEditor.defaultConfig = {
             "fontColor",
             "|",
             "imageUpload",
-            "imageStyle:alignLeft",
-            "imageStyle:full",
-            "imageStyle:alignRight",
-            "|",
+            // "imageStyle:alignLeft",
+            // "imageStyle:full",
+            // "imageStyle:alignRight",
+            // "|",
             // "specialCharacters",
             // "|",
             "insertTable",

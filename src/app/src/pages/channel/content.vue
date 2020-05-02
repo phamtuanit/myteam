@@ -2,7 +2,7 @@
     <div class="conversation-content pa-0 ma-0 d-flex flex-column">
         <!-- Content -->
         <v-sheet
-            class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent mb-2"
+            class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent mb-1"
             v-chat-scroll="{ always: false, smooth: true }"
             @click="onRead"
             ref="messageSheet"
@@ -16,7 +16,7 @@
                     @react="onReact"
                     @dereact="onDereact"
                     @delete="onDeleteMessage"
-                    @reply="onReply"
+                    @quote="onQuote"
                 >
                     <!-- Separator -->
                     <v-divider class="message-item__content-separator mx-3"></v-divider>
@@ -29,6 +29,7 @@
             class="channel__input mt-2 mb-1"
             v-model="newMessage"
             :id="conversation.id"
+            :mention="mention"
             @enter="onSend"
             @send="onSend"
             @ready="onChatEditorReady"
@@ -39,6 +40,7 @@
 <script>
 import ChatEditor from "../../components/editor/chat-editor.vue";
 import Message from "./message.vue";
+import { mapState } from "vuex";
 export default {
     props: {
         conversation: Object,
@@ -48,7 +50,21 @@ export default {
         return {
             newMessage: null,
             messages: [],
+            mention: {
+                feeds: [
+                    {
+                        marker: "@",
+                        minimumCharacters: 1,
+                        feed: this.getUsers,
+                    },
+                ],
+            },
         };
+    },
+    computed: {
+        ...mapState({
+            cachedUsers: state => state.users.all,
+        }),
     },
     created() {
         this.messages = this.conversation.messages;
@@ -107,7 +123,7 @@ export default {
                 .dispatch("conversations/deleteMessage", message)
                 .catch(console.error);
         },
-        onReply(message) {
+        onQuote(message) {
             this.onRead();
             if (
                 !message ||
@@ -117,12 +133,40 @@ export default {
                 return;
             }
 
-            console.log("Reply: ", message.id);
+            console.log("Quote: ", message.id);
             this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
         },
         scrollToBottom() {
             const msgSheetEl = this.$refs.messageSheet.$el;
             msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
+        },
+        getUsers(queryText) {
+            if (queryText.toLowerCase() == "all") {
+                return [
+                    {
+                        id: "@All",
+                        userId: "all-user",
+                        name: "All",
+                    },
+                ];
+            }
+
+            const found = this.conversation.subscribers.filter(
+                u =>
+                    u.userName.includes(queryText) ||
+                    u.fullName.includes(queryText)
+            );
+
+            if (found && found.length > 0) {
+                return found.map(u => {
+                    const item = { ...u };
+                    item.id = "@" + (u.fullName || u.userName);
+                    item.userId = u.id;
+                    item.name = u.fullName || u.userName;
+                    return item;
+                });
+            }
+            return [];
         },
     },
 };
@@ -146,11 +190,11 @@ export default {
 }
 
 .channel-message-item:first-of-type {
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .channel-message-item:last-of-type {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .message-item__content--card {

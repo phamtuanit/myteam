@@ -157,3 +157,15 @@ figure img {
 .v-application .message-item * > p:last-child {
     margin-bottom: 2px;
 }
+
+/* Mention */
+.message-item .mention {
+    padding-right: 2px;
+    color: #1e88e5;
+}
+
+.message-item .mention:hover {
+    text-decoration: underline; 
+    color: #1565C0;
+    cursor: pointer;
+}
