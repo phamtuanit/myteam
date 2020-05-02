@@ -24,7 +24,7 @@
                 <slot></slot>
 
                 <!-- Header -->
-                <div class="message-item__content-header center-y px-3 pt-2">
+                <div class="message-item__content-header selection-disabled center-y px-3 pt-2">
                     <!-- User info -->
                     <span
                         class="subtitle-2 mr-2"
