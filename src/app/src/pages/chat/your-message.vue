@@ -71,9 +71,10 @@
                 icon
                 small
                 class="mx-auto"
-                @click="onReply"
+                title="Quote"
+                @click="onQuote"
             >
-                <v-icon small>mdi-reply</v-icon>
+                <v-icon small>mdi-format-quote-close</v-icon>
             </v-btn>
         </div>
         <v-spacer></v-spacer>
@@ -154,8 +155,8 @@ export default {
         onClearReaction(type) {
             this.$emit("dereact", type, this.message);
         },
-        onReply() {
-            this.$emit("reply", this.message);
+        onQuote() {
+            this.$emit("quote", this.message);
         },
     },
 };

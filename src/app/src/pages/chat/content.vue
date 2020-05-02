@@ -76,7 +76,7 @@
                         }"
                         @react="onReact"
                         @dereact="onDereact"
-                        @reply="onReply"
+                        @quote="onQuote"
                     ></YourMessage>
                 </template>
             </v-slide-y-transition>
@@ -209,7 +209,7 @@ export default {
         onDereact(type, message) {
             this.onReact(type, message, false);
         },
-        onReply(message) {
+        onQuote(message) {
             this.onRead();
             if (
                 !message ||
@@ -219,7 +219,7 @@ export default {
                 return;
             }
 
-            console.log("Reply: ", message.id);
+            console.log("Quote: ", message.id);
             this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
         },
         onRead() {
@@ -314,12 +314,5 @@ export default {
 .chat-box >>> .chat-editor {
     margin-left: 60px;
     margin-right: 14px;
-}
-
-.message-sheet >>> .user-name::after {
-    content: "•";
-    padding-left: 5px;
-    padding-right: 5px;
-    color: hsl(0, 0%, 72%);
 }
 </style>

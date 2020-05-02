@@ -68,8 +68,8 @@
                                 class="menus"
                                 v-else
                             >
-                                <v-list-item @click="onReply">
-                                    <v-list-item-title>Reply</v-list-item-title>
+                                <v-list-item @click="onQuote">
+                                    <v-list-item-title>Quote</v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-menu>
@@ -159,8 +159,8 @@ export default {
         onDelete() {
             this.$emit("delete", this.message);
         },
-        onReply() {
-            this.$emit("reply", this.message);
+        onQuote() {
+            this.$emit("quote", this.message);
         },
     },
 };
