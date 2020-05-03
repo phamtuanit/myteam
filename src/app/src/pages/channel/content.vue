@@ -5,23 +5,26 @@
             class="message-sheet flex-grow-1 overflow-y-auto no-border-radius transparent mb-1"
             v-chat-scroll="{ always: false, smooth: true }"
             @click="onRead"
-            ref="messageSheet"
+            ref="messageFeed"
         >
-            <!-- MineMessage -->
-            <v-slide-y-transition group>
-                <Message
-                    v-for="msg in messages"
-                    :key="msg.id"
-                    :message="msg"
-                    @react="onReact"
-                    @dereact="onDereact"
-                    @delete="onDeleteMessage"
-                    @quote="onQuote"
-                >
-                    <!-- Separator -->
-                    <v-divider class="message-item__content-separator mx-3"></v-divider>
-                </Message>
-            </v-slide-y-transition>
+            <Loading
+                :load="loadMore"
+                :reached-end="conversation.reachedFullHistories"
+            ></Loading>
+
+            <!-- Message -->
+            <Message
+                v-for="msg in messages"
+                :key="msg.id"
+                :message="msg"
+                @react="onReact"
+                @dereact="onDereact"
+                @delete="onDeleteMessage"
+                @quote="onQuote"
+            >
+                <!-- Separator -->
+                <v-divider class="message-item__content-separator mx-3"></v-divider>
+            </Message>
         </v-sheet>
 
         <!-- Input -->
@@ -32,22 +35,24 @@
             :mention="mention"
             @enter="onSend"
             @send="onSend"
-            @ready="onChatEditorReady"
         ></ChatEditor>
     </div>
 </template>
 
 <script>
 import ChatEditor from "../../components/editor/chat-editor.vue";
+import Loading from "../../components/infinity-scroll-top.vue";
 import Message from "./message.vue";
 import { mapState } from "vuex";
+import { scrollToBottom } from "../../utils/layout.js";
 export default {
     props: {
         conversation: Object,
     },
-    components: { ChatEditor, Message },
+    components: { ChatEditor, Message, Loading },
     data() {
         return {
+            loadMore: this.onLoadMore,
             newMessage: null,
             messages: [],
             mention: {
@@ -70,12 +75,9 @@ export default {
         this.messages = this.conversation.messages;
     },
     methods: {
-        onChatEditorReady() {
-            this.scrollToBottom();
-        },
         onRead() {
             const conv = this.conversation;
-            if (conv && conv.meta.unreadMessage.length > 0) {
+            if (conv && conv.meta.unreadMessages.length > 0) {
                 this.$store
                     .dispatch("conversations/watchAllMessage", conv.id)
                     .catch(console.error);
@@ -136,9 +138,16 @@ export default {
             console.log("Quote: ", message.id);
             this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
         },
+        onLoadMore() {
+            return this.$store
+                .dispatch("conversations/getConversationContent", {
+                    convId: this.conversation.id,
+                })
+                .catch(console.error);
+        },
         scrollToBottom() {
-            const msgSheetEl = this.$refs.messageSheet.$el;
-            msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
+            const msgSheetEl = this.$refs.messageFeed.$el;
+            scrollToBottom(msgSheetEl);
         },
         getUsers(queryText) {
             if (queryText.toLowerCase() == "all") {

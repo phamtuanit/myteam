@@ -24,6 +24,7 @@ const store = new Vuex.Store({
         theme: {
             dark: true,
         },
+        messageQueue: []
     },
     getters: {
         initialized: state => state.initialized,

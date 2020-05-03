@@ -47,39 +47,43 @@
 
         <!-- Content -->
         <v-sheet
-            class="flex-grow-1 overflow-y-auto message-sheet no-border-radius transparent"
+            class="flex-grow-1 overflow-y-auto message-sheet no-border-radius transparent pt-1"
             v-chat-scroll="{ always: false, smooth: true }"
             ref="messageSheet"
             @click="onRead"
         >
-            <!-- MineMessage -->
-            <v-slide-y-transition group>
-                <template v-for="msg in messages">
-                    <MyMessage
-                        v-if="msg._isMe == true"
-                        :key="msg.id"
-                        :message="msg"
-                        :class="{
+            <!-- Loading -->
+            <Loading
+                :load="loadMore"
+                class="conversation-loading"
+                :reached-end="conversation.reachedFullHistories"
+            ></Loading>
+            <!-- Message -->
+            <template v-for="msg in messages">
+                <MyMessage
+                    v-if="msg._isMe == true"
+                    :key="msg.id"
+                    :message="msg"
+                    :class="{
                             'has-reacted':
                                 msg.reactions && msg.reactions.length > 0,
                         }"
-                        @delete="onDeleteMyMessage"
-                    ></MyMessage>
-                    <YourMessage
-                        v-else
-                        :user="destUser"
-                        :key="msg.id"
-                        :message="msg"
-                        :class="{
+                    @delete="onDeleteMyMessage"
+                ></MyMessage>
+                <YourMessage
+                    v-else
+                    :user="destUser"
+                    :key="msg.id"
+                    :message="msg"
+                    :class="{
                             'has-reacted':
                                 msg.reactions && msg.reactions.length > 0,
                         }"
-                        @react="onReact"
-                        @dereact="onDereact"
-                        @quote="onQuote"
-                    ></YourMessage>
-                </template>
-            </v-slide-y-transition>
+                    @react="onReact"
+                    @dereact="onDereact"
+                    @quote="onQuote"
+                ></YourMessage>
+            </template>
         </v-sheet>
 
         <!-- Input box -->
@@ -100,9 +104,10 @@ import FriendList from "./friend-list";
 
 import MyMessage from "./my-message";
 import YourMessage from "./your-message";
-import Avatar from "../../components/avatar";
+import Avatar from "../../components/avatar/avatar.vue";
 import ChatEditor from "../../components/editor/chat-editor.vue";
-
+import Loading from "../../components/infinity-scroll-top.vue";
+import { scrollToBottom } from "../../utils/layout.js";
 export default {
     components: {
         FriendList,
@@ -111,6 +116,7 @@ export default {
         YourMessage,
         Avatar,
         ChatEditor,
+        Loading,
     },
     props: {
         conversation: {
@@ -122,6 +128,7 @@ export default {
     },
     data() {
         return {
+            loadMore: this.onLoadMore,
             theme: this.$vuetify.theme,
             newMessage: null,
             messages: [],
@@ -146,6 +153,17 @@ export default {
         this.messages = this.conversation.messages;
     },
     methods: {
+        onLoadMore() {
+            if (this.conversation._isTemp == true) {
+                return Promise.resolve([]);
+            }
+
+            return this.$store
+                .dispatch("conversations/getConversationContent", {
+                    convId: this.conversation.id,
+                })
+                .catch(console.error);
+        },
         onShowFriendList() {
             this.$emit("show-friend-list", !this.friendList);
         },
@@ -224,7 +242,7 @@ export default {
         },
         onRead() {
             const conv = this.conversation;
-            if (conv && conv.meta.unreadMessage.length > 0) {
+            if (conv && conv.meta.unreadMessages.length > 0) {
                 this.$store
                     .dispatch("conversations/watchAllMessage", conv.id)
                     .catch(console.error);
@@ -232,7 +250,7 @@ export default {
         },
         scrollToBottom() {
             const msgSheetEl = this.$refs.messageSheet.$el;
-            msgSheetEl.scrollTop = msgSheetEl.scrollHeight;
+            scrollToBottom(msgSheetEl);
         },
     },
 };
@@ -244,10 +262,6 @@ export default {
 }
 
 /* Message aligment */
-.message-sheet >>> .message-item:first-of-type {
-    margin-top: 8px;
-}
-
 .message-sheet
     >>> .message-item:not(:first-of-type)
     .message-item__content-header {
@@ -255,7 +269,11 @@ export default {
 }
 
 .message-sheet >>> .my-message + .your-message .message-item__content-header,
-.message-sheet >>> .your-message + .my-message .message-item__content-header {
+.message-sheet >>> .your-message + .my-message .message-item__content-header,
+.message-sheet
+    >>> .conversation-loading
+    + .message-item
+    .message-item__content-header {
     display: flex;
 }
 
@@ -314,5 +332,9 @@ export default {
 .chat-box >>> .chat-editor {
     margin-left: 60px;
     margin-right: 14px;
+}
+
+.message-sheet {
+    position: relative;
 }
 </style>

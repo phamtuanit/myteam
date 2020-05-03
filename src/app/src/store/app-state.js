@@ -161,7 +161,6 @@ module.exports = {
     end(commit) {
         commit("setAppState", "finished");
         commit("setInitialization", true);
-        commit("setMessageQueue", []);
         console.info("Setting up application successfully");
     }
 };

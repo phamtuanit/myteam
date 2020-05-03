@@ -3,28 +3,6 @@ const convService = new (require("../../services/conversation.service").default)
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
 let eventBus = null;
 
-function pushInformation(count, sender) {
-    if (count <= 0) {
-        return;
-    }
-    const payload = {
-        sender,
-        inform: {
-            count: count,
-        },
-    };
-    eventBus.emit("drawer.inform", payload);
-}
-
-function informNewMessage(message, conv) {
-    if (message._isMe == true) {
-        return;
-    }
-
-    const sender = conv.channel == true ? "app-channel" : "app-chat";
-    pushInformation(1, sender);
-}
-
 function handleWSMessage(socket, state, commit, act, data) {
     const message = data.payload;
     const convId = message.to.conversation;
@@ -45,38 +23,43 @@ function handleWSMessage(socket, state, commit, act, data) {
         });
     };
 
+
+    const findConv = function find() {
+        return state.channel.all
+            .concat(state.chat.all)
+            .find(conv => {
+                if (conv.id == convId) {
+                    return true;
+                }
+
+                if (conv.channel == false) {
+                    if (
+                        conv.subscribers &&
+                        conv.subscribers.length == 2
+                    ) {
+                        const matchedSub = conv.subscribers.filter(
+                            sub => {
+                                return (
+                                    sub.id == me.id ||
+                                    sub.id == message.from.issuer
+                                );
+                            }
+                        );
+
+                        return matchedSub.length == 2;
+                    }
+                }
+                return false;
+            });
+    }
+
     // Handle event
     switch (act) {
         case "created":
             if (!data.payload || !data.payload) {
                 break;
             } else {
-                const existingConv = state.channel.all
-                    .concat(state.chat.all)
-                    .find(conv => {
-                        if (conv.id == convId) {
-                            return true;
-                        }
-
-                        if (conv.channel == false) {
-                            if (
-                                conv.subscribers &&
-                                conv.subscribers.length == 2
-                            ) {
-                                const matchedSub = conv.subscribers.filter(
-                                    sub => {
-                                        return (
-                                            sub.id == me.id ||
-                                            sub.id == message.from.issuer
-                                        );
-                                    }
-                                );
-
-                                return matchedSub.length == 2;
-                            }
-                        }
-                        return false;
-                    });
+                const existingConv = findConv();
 
                 // Change temp conversation to rea;
                 if (existingConv && existingConv._isTemp == true) {
@@ -102,6 +85,12 @@ function handleWSMessage(socket, state, commit, act, data) {
                             }
                         })
                         .catch(console.error);
+                }
+
+                // Config message
+                const me = this.state.users.me;
+                if (message.from && message.from.issuer == me.id) {
+                    confirmMsgFn();
                 }
             }
             break;
@@ -188,10 +177,12 @@ const moduleState = {
         chat: {
             active: null,
             all: [],
+            unread: []
         },
         channel: {
             active: null,
             all: [],
+            unread: []
         },
         moduleState: "startup",
     },
@@ -228,10 +219,6 @@ const moduleState = {
                     { convId: conv.id, top: 10 }
                 ).then(() => {
                     conv.isVerified = true;
-                    return this.dispatch(
-                        "conversations/confirmMsgQueue",
-                        conv.id
-                    )
                 });
             }
         },
@@ -242,9 +229,11 @@ const moduleState = {
 
             if (!conv.meta) {
                 conv.meta = {
-                    unreadMessage: [],
+                    unreadMessages: [],
                 };
             }
+
+            conv.reachedFullHistories = false;
 
             // Update conversation name (NOT channel)
             if (!conv.name) {
@@ -297,11 +286,18 @@ const moduleState = {
             const conv = state.channel.all
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
+
             if (conv) {
                 const pushToUnread = function (message) {
                     if (!message._isMe) {
-                        conv.meta.unreadMessage.push(message);
-                        informNewMessage(message, conv);
+                        conv.meta.unreadMessages.push(message);
+
+                        // Push information to unread
+                        const unread = conv.channel == true ? state.channel.unread : state.chat.unread;
+                        const foundConv = unread.find(c => c.id == convId);
+                        if (!foundConv) {
+                            unread.push(conv);
+                        }
                     }
                 };
 
@@ -316,6 +312,7 @@ const moduleState = {
                         conv.messages.push(message);
                         pushToUnread(message);
                     } else {
+                        // Update existing message
                         Object.assign(foundMessage, message);
                     }
                 }
@@ -329,22 +326,30 @@ const moduleState = {
                 const index = conv.messages.findIndex(i => i.id == message.id);
                 if (index >= 0) {
                     const existingMsg = conv.messages[index];
+                    existingMsg.status = "removed";
+                    setTimeout(() => {
+                        // Lazy delete message. Recaculate index
+                        const msgIndex = conv.messages.findIndex(
+                            i => i.id == message.id
+                        );
+                        if (msgIndex >= 0) {
+                            conv.messages.splice(msgIndex, 1);
+                        }
+                    }, 1 * 1000);
+                }
 
-                    const me = this.state.users.me;
-                    if (me.id === existingMsg.from.issuer) {
-                        // It's my message
-                        existingMsg.status = "removed";
-                        setTimeout(() => {
-                            // Lazy delete message
-                            const msgIndex = conv.messages.findIndex(
-                                i => i.id == message.id
-                            );
-                            if (msgIndex >= 0) {
-                                conv.messages.splice(msgIndex, 1);
-                            }
-                        }, 5 * 1000);
-                    } else {
-                        conv.messages.splice(index, 1);
+                // Check unread message 
+                const unreadMsgIndex = conv.meta.unreadMessages.findIndex(i => i.id == message.id);
+                if (unreadMsgIndex >= 0) {
+                    conv.meta.unreadMessages.splice(unreadMsgIndex, 1);
+
+                    // Clean notification if needed
+                    if (conv.meta.unreadMessages.length == 0) {
+                        const unread = conv.channel == true ? state.channel.unread : state.chat.unread;
+                        const convIndex = unread.findIndex(c => c.id === conv.id);
+                        if (convIndex >= 0) {
+                            unread.splice(convIndex, 1);
+                        }
                     }
                 }
             }
@@ -397,10 +402,21 @@ const moduleState = {
             const conv = state.channel.all
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
+
+            // Clean unread message
             if (conv) {
-                conv.meta.unreadMessage.splice(0);
-                return conv;
+                conv.meta.unreadMessages.splice(0);
             }
+
+            // Update notification
+            [state.channel.unread, state.chat.unread].find(unread => {
+                const index = unread.findIndex(conv => conv.id === convId);
+                if (index >= 0) {
+                    unread.splice(index, 1);
+                    return true;
+                }
+                return false;
+            });
         },
     },
     actions: {
@@ -410,52 +426,110 @@ const moduleState = {
             // Setup Socket
             await this.dispatch("conversations/setupSocket");
 
-            const { commit, rootState } = ctx;
+            const { state, commit, rootState } = ctx;
             const me = rootState.users.me;
-            const res = await convService.getByUser(me.id);
-            const convList = res.data;
 
-            if (convList) {
-                for (let index = 0; index < convList.length; index++) {
-                    const conv = convList[index];
-                    // Init required data
-                    conv.messages = [];
-                    conv.meta = { unreadMessage: [] };
+            // Load all conversation related to current user
+            const convList = await convService.getByUser(me.id).then(res => res.data);
+            if (!convList) {
+                commit("setModuleState", "initialized");
+                return;
+            }
 
-                    // Load subscriber information
-                    if (conv.subscribers && conv.subscribers.length > 0) {
-                        // Get user info
-                        const users = await this.dispatch(
-                            "users/resolve",
-                            conv.subscribers
+            for (let index = 0; index < convList.length; index++) {
+                const conv = convList[index];
+                // Init required data
+                conv.messages = [];
+                conv.meta = { unreadMessages: [] };
+
+                // Load subscriber information
+                if (conv.subscribers && conv.subscribers.length > 0) {
+                    // Get user info
+                    const users = await this.dispatch(
+                        "users/resolve",
+                        conv.subscribers
+                    );
+                    conv.subscribers = users;
+
+                    // Update conversation name
+                    if (!conv.name) {
+                        const friends = conv.subscribers.filter(
+                            user => !user._isMe
                         );
-                        conv.subscribers = users;
-
-                        // Update conversation name
-                        if (!conv.name) {
-                            const friends = conv.subscribers.filter(
-                                user => !user._isMe
-                            );
-                            if (friends.length > 0) {
-                                conv.name = friends[0].fullName;
-                            }
+                        if (friends.length > 0) {
+                            conv.name = friends[0].fullName;
                         }
                     }
+                }
 
-                    // Add message
-                    commit("addConversation", conv);
+                // Add message
+                commit("addConversation", conv);
 
-                    if (!conv.channel) {
-                        // Load message
-                        await this.dispatch(
-                            "conversations/getConversationContent",
-                            { convId: conv.id, top: 4 }
-                        );
-                    }
+                if (!conv.channel) {
+                    // Load message
+                    await this.dispatch(
+                        "conversations/getConversationContent",
+                        { convId: conv.id, top: 4 }
+                    );
                 }
             }
 
-            // commit("setAll", convList);
+            // Load unread message in queue
+            const confirmedMsqIds = [];
+            const convNotification = {
+                "channel": {},
+                "nonchannel": {}
+            };
+            const messageQueue = rootState.messageQueue;
+            messageQueue.forEach(message => {
+                if (message.type === "conversation") {
+                    // All information related to conversation is already updated at above steps
+                    confirmedMsqIds.push(message.id);
+                    return;
+                }
+
+                // Ignore other message types
+                if (message.type !== "message") {
+                    return;
+                }
+
+                const convId = message.payload.to.conversation;
+                const conv = convList.find(c => c.id == convId);
+
+                if (!conv) {
+                    // It may be that the conversation has been deleted
+                    confirmedMsqIds.push(message.id);
+                    return;
+                }
+
+                const rawMsg = message.payload;
+                switch (message.action) {
+                    case "created":
+                        {
+                            conv.meta.unreadMessages.push(rawMsg);
+                            const notf = conv.channel == true ? convNotification.channel : convNotification.nonchannel;
+                            if (!notf[conv.id]) {
+                                notf[conv.id] = conv;
+                            }
+                        }
+                        break;
+
+                    default:
+                        // Already confirmed after loading latest message
+                        confirmedMsqIds.push(message.id);
+                        break;
+                }
+            });
+
+            // Update notification
+            state.channel.unread = Object.values(convNotification.channel);
+            state.chat.unread = Object.values(convNotification.nonchannel);
+
+            // Confirm message queue
+            if (confirmedMsqIds.length > 0) {
+                messageQueueSvr.confirm(me.id, confirmedMsqIds).then(res => res.data);
+            }
+
             commit("setModuleState", "initialized");
         },
         async createConversation({ commit, state }, convInfo) {
@@ -658,7 +732,7 @@ const moduleState = {
                 return msg.id;
             }
         },
-        getConversationContent({ state }, { convId, top }) {
+        async getConversationContent({ state }, { convId, top }) {
             if (typeof convId == "number") {
                 const conv = state.channel.all
                     .concat(state.chat.all)
@@ -668,21 +742,26 @@ const moduleState = {
                     return;
                 }
 
-                const filter = { top: top || 10 };
+                top = top || 10;
+                const filter = { top };
                 if (conv.messages.length > 0) {
                     filter.rightId = conv.messages[0].id
                 }
 
-                return messageService.get(parseInt(convId), filter).then(res => {
+                return await messageService.get(parseInt(convId), filter).then(res => {
                     return res.data;
                 }).then(messages => {
+                    if (messages.length < top) {
+                        conv.reachedFullHistories = true;
+                    }
+
                     if (messages.length <= 0) {
                         return;
                     }
 
                     if (!conv.meta) {
                         conv.meta = {
-                            unreadMessage: [],
+                            unreadMessages: [],
                         };
                     }
 
@@ -708,66 +787,7 @@ const moduleState = {
                     return messages;
                 });
             }
-            return Promise.reject("No conversation id");
-        },
-        async confirmMsgQueue({ state, rootState }, convId) {
-            // Get message history from server after configured socket
-            if (typeof convId != "number") {
-                return;
-            }
-
-            const conv = state.channel.all
-                .concat(state.chat.all)
-                .find(c => c.id == convId);
-
-            if (!conv) {
-                return;
-            }
-
-            const me = this.state.users.me;
-            // Process message in queue
-            const messageQueue = rootState.messageQueue;
-            const confirmedMsqIds = [];
-            for (let index = messageQueue.length - 1; index >= 0; index--) {
-                const message = messageQueue[index];
-
-                if (message.type !== "message") {
-                    return;
-                }
-
-                const targetId = message.payload.to.conversation;
-                if (targetId !== convId) {
-                    continue;
-                }
-
-                const msgId = message.payload.id;
-                switch (message.action) {
-                    case "created":
-                        {
-                            const existingMsg = conv.messages.find(
-                                m => m.id == msgId
-                            );
-                            if (existingMsg) {
-                                conv.meta.unreadMessage.push(
-                                    existingMsg
-                                );
-                            } else {
-                                confirmedMsqIds.push(message.id);
-                            }
-                        }
-                        break;
-
-                    default:
-                        confirmedMsqIds.push(message.id);
-                        break;
-                }
-
-                messageQueue.splice(index, 1);
-            }
-
-            if (confirmedMsqIds.length > 0) {
-                return await messageQueueSvr.confirm(me.id, confirmedMsqIds).then(res => res.data);
-            }
+            console.warn("Conversation Id is required")
         },
         setupSocket({ commit, state }) {
             const socket = window.IoC.get("socket");
@@ -833,9 +853,9 @@ const moduleState = {
             const conv = state.channel.all
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
-            if (conv && conv.meta.unreadMessage.length > 0) {
+            if (conv && conv.meta.unreadMessages.length > 0) {
                 const me = rootState.users.me;
-                const msgIds = conv.meta.unreadMessage.map(m => m.id);
+                const msgIds = conv.meta.unreadMessages.map(m => m.id);
                 // Send request to server to delete unread-message
                 const deletedCount = await messageQueueSvr.confirmPayload(
                     me.id,
