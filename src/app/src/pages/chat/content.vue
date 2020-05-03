@@ -12,7 +12,7 @@
                     :user-name="conversation.name"
                     :src="destUser.avatar"
                     :size="30"
-                    class="ml-2"
+                    class="ml-1"
                 ></Avatar>
                 <!-- User name -->
                 <v-list-item-title
