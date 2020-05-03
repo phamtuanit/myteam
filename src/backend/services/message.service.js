@@ -42,7 +42,9 @@ module.exports = {
             params: {
                 conversation: { type: "number", convert: true },
                 limit: { type: "number", optional: true, convert: true },
+                rightId: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
+                top: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true },
                 history: { type: "boolean", optional: true, convert: true },
             },
@@ -57,9 +59,6 @@ module.exports = {
             params: {
                 conversation: { type: "number", convert: true },
                 id: { type: "number", optional: true, convert: true },
-                limit: { type: "number", optional: true, convert: true },
-                offset: { type: "number", optional: true, convert: true },
-                sort: { type: "array", optional: true, convert: true },
                 history: { type: "boolean", optional: true, convert: true },
             },
             handler(ctx) {
@@ -459,17 +458,32 @@ module.exports = {
                     result = await dbCollection.findOne({ id: id });
                     result = [result];
                 } else {
-                    let { limit, offset, sort } = ctx.params;
-                    limit = limit != undefined ? limit : 50;
-                    offset = offset != undefined ? offset : 0;
-                    // Get list of message
-                    const filter = {
-                        limit,
-                        offset,
-                        sort: sort || ["id"],
-                    };
+                    const { top, rightId } = ctx.params;
 
-                    result = await dbCollection.find(filter);
+                    const query = {};
+                    if (rightId) {
+                        query.id = { $lt: rightId };
+                    }
+
+                    // Support get top
+                    if (top) {
+                        result = await dbCollection.collection.find(query).sort({ $natural: -1 }).limit(top).toArray();
+                        result = result.reverse();
+                    } else {
+                        // The other cases
+                        const { limit, sort, offset } = ctx.params;
+                        const filter = { query };
+                        const options = { sort, limit, offset };
+
+                        Object.keys(options).forEach(key => {
+                            const val = options[key];
+                            if (val) {
+                                filter[key] = val;
+                            }
+                        });
+
+                        result = await dbCollection.find(filter);
+                    }
                 }
                 return result.map((record) => {
                     if (history != true) {
@@ -611,11 +625,11 @@ module.exports = {
             // Define default key
             message.modification = [];
             message.reactions = [];
+            cleanDbMark(message);
 
             // Insert one more record
-            const entity = dbCollection.insert(message);
+            const entity = await dbCollection.insert(message);
             cleanDbMark(entity);
-            cleanDbMark(message);
 
             if (convInfo.subscribers && convInfo.subscribers.length > 0) {
                 // 2. Save information to user queue and send message to WS
