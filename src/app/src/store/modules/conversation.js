@@ -220,6 +220,20 @@ const moduleState = {
             } else {
                 state.chat.active = conv;
             }
+
+            if (conv._isTemp != true && !conv.isVerified) {
+                // Load conversation content
+                this.dispatch(
+                    "conversations/getConversationContent",
+                    { convId: conv.id, top: 10 }
+                ).then(() => {
+                    conv.isVerified = true;
+                    return this.dispatch(
+                        "conversations/confirmMsgQueue",
+                        conv.id
+                    )
+                });
+            }
         },
         addConversation(state, conv) {
             if (!conv.messages) {
@@ -404,6 +418,11 @@ const moduleState = {
             if (convList) {
                 for (let index = 0; index < convList.length; index++) {
                     const conv = convList[index];
+                    // Init required data
+                    conv.messages = [];
+                    conv.meta = { unreadMessage: [] };
+
+                    // Load subscriber information
                     if (conv.subscribers && conv.subscribers.length > 0) {
                         // Get user info
                         const users = await this.dispatch(
@@ -422,65 +441,21 @@ const moduleState = {
                             }
                         }
                     }
+
+                    // Add message
+                    commit("addConversation", conv);
+
+                    if (!conv.channel) {
+                        // Load message
+                        await this.dispatch(
+                            "conversations/getConversationContent",
+                            { convId: conv.id, top: 4 }
+                        );
+                    }
                 }
             }
 
-            commit("setAll", convList);
-
-            // Get message history from server after configured socket
-            if (convList) {
-                for (let index = 0; index < convList.length; index++) {
-                    const conv = convList[index];
-
-                    // Load conversation content
-                    await this.dispatch(
-                        "conversations/getConversationContent",
-                        conv.id
-                    );
-                }
-
-                // Process message in queue
-                const messageQueue = rootState.messageQueue;
-                const confirmedMsqIds = [];
-                messageQueue.forEach(message => {
-                    if (message.type !== "message") {
-                        return;
-                    }
-
-                    const convId = message.payload.to.conversation;
-                    const msgId = message.payload.id;
-                    switch (message.action) {
-                        case "created":
-                            {
-                                const conv = convList.find(c => c.id == convId);
-                                if (conv) {
-                                    const existingMsg = conv.messages.find(
-                                        m => m.id == msgId
-                                    );
-                                    if (existingMsg) {
-                                        conv.meta.unreadMessage.push(
-                                            existingMsg
-                                        );
-                                    } else {
-                                        confirmedMsqIds.push(message.id);
-                                    }
-                                } else {
-                                    confirmedMsqIds.push(message.id);
-                                }
-                            }
-                            break;
-
-                        default:
-                            confirmedMsqIds.push(message.id);
-                            break;
-                    }
-                });
-
-                if (confirmedMsqIds.length > 0) {
-                    await messageQueueSvr.confirm(me.id, confirmedMsqIds);
-                }
-            }
-
+            // commit("setAll", convList);
             commit("setModuleState", "initialized");
         },
         async createConversation({ commit, state }, convInfo) {
@@ -598,7 +573,7 @@ const moduleState = {
             commit("setActivate", convInfo);
             return convInfo;
         },
-        activeChat({ commit, state }, convId) {
+        async activeChat({ commit, state }, convId) {
             const conv = state.channel.all
                 .concat(state.chat.all)
                 .find(c => (c.id || c._id) == convId);
@@ -637,13 +612,12 @@ const moduleState = {
                     conv.subscribers
                 );
                 conv.subscribers = subscribers || [];
-
                 commit("addConversation", conv);
 
                 // Load message
                 await this.dispatch(
                     "conversations/getConversationContent",
-                    conv.id
+                    { convId: conv.id, top: 2 }
                 );
                 return conv;
             }
@@ -684,37 +658,116 @@ const moduleState = {
                 return msg.id;
             }
         },
-        getConversationContent({ state }, convId) {
+        getConversationContent({ state }, { convId, top }) {
             if (typeof convId == "number") {
-                return messageService.get(parseInt(convId)).then(res => {
+                const conv = state.channel.all
+                    .concat(state.chat.all)
+                    .find(c => c.id == convId);
+
+                if (!conv) {
+                    return;
+                }
+
+                const filter = { top: top || 10 };
+                if (conv.messages.length > 0) {
+                    filter.rightId = conv.messages[0].id
+                }
+
+                return messageService.get(parseInt(convId), filter).then(res => {
                     return res.data;
                 }).then(messages => {
-                    const conv = state.channel.all
-                        .concat(state.chat.all)
-                        .find(c => c.id == convId);
-                    if (conv) {
-                        if (!conv.meta) {
-                            conv.meta = {
-                                unreadMessage: [],
-                            };
-                        }
-                        conv.messages = messages || [];
+                    if (messages.length <= 0) {
+                        return;
+                    }
 
-                        // Update message info
-                        const me = this.state.users.me;
-                        messages.forEach(msg => {
-                            // Init required value
-                            if (msg.from && msg.from.issuer == me.id) {
-                                msg._isMe = true;
-                            }
-                            msg.status = null;
-                        });
+                    if (!conv.meta) {
+                        conv.meta = {
+                            unreadMessage: [],
+                        };
+                    }
+
+                    // Update message info
+                    const me = this.state.users.me;
+                    messages.forEach(msg => {
+                        // Init required value
+                        if (msg.from && msg.from.issuer == me.id) {
+                            msg._isMe = true;
+                        }
+                        msg.status = null;
+                    });
+
+                    if (!conv.messages) {
+                        conv.messages = messages;
+                    } else {
+                        for (let index = (messages.length - 1); index >= 0; index--) {
+                            const msg = messages[index];
+                            conv.messages.unshift(msg);
+                        }
                     }
 
                     return messages;
                 });
             }
             return Promise.reject("No conversation id");
+        },
+        async confirmMsgQueue({ state, rootState }, convId) {
+            // Get message history from server after configured socket
+            if (typeof convId != "number") {
+                return;
+            }
+
+            const conv = state.channel.all
+                .concat(state.chat.all)
+                .find(c => c.id == convId);
+
+            if (!conv) {
+                return;
+            }
+
+            const me = this.state.users.me;
+            // Process message in queue
+            const messageQueue = rootState.messageQueue;
+            const confirmedMsqIds = [];
+            for (let index = messageQueue.length - 1; index >= 0; index--) {
+                const message = messageQueue[index];
+
+                if (message.type !== "message") {
+                    return;
+                }
+
+                const targetId = message.payload.to.conversation;
+                if (targetId !== convId) {
+                    continue;
+                }
+
+                const msgId = message.payload.id;
+                switch (message.action) {
+                    case "created":
+                        {
+                            const existingMsg = conv.messages.find(
+                                m => m.id == msgId
+                            );
+                            if (existingMsg) {
+                                conv.meta.unreadMessage.push(
+                                    existingMsg
+                                );
+                            } else {
+                                confirmedMsqIds.push(message.id);
+                            }
+                        }
+                        break;
+
+                    default:
+                        confirmedMsqIds.push(message.id);
+                        break;
+                }
+
+                messageQueue.splice(index, 1);
+            }
+
+            if (confirmedMsqIds.length > 0) {
+                return await messageQueueSvr.confirm(me.id, confirmedMsqIds).then(res => res.data);
+            }
         },
         setupSocket({ commit, state }) {
             const socket = window.IoC.get("socket");

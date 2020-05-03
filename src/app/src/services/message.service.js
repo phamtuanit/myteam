@@ -2,7 +2,7 @@ import Axios from "axios";
 const Service = function service() {
     this.name = "messages/";
 };
-Service.prototype.get = function(convId, filter = {}) {
+Service.prototype.get = function (convId, filter = {}) {
     if (typeof convId == "number") {
         const queries = Object.keys(filter).map(key => {
             const val = filter[key];
@@ -12,7 +12,7 @@ Service.prototype.get = function(convId, filter = {}) {
             return null;
         });
 
-        queries.unshift(`?conversation=${convId}&limit=50`);
+        queries.unshift(`?conversation=${convId}`);
         const queryStr = queries.join("&");
         console.info(`Getting message in [${convId}]`);
         return Axios.get(this.name + queryStr);
@@ -20,7 +20,7 @@ Service.prototype.get = function(convId, filter = {}) {
     return Promise.reject("Data is invalid");
 };
 
-Service.prototype.create = function(convId, body, type = "html") {
+Service.prototype.create = function (convId, body, type = "html") {
     if (
         typeof convId == "number" &&
         (typeof body == "object" || typeof body == "string")
@@ -35,7 +35,7 @@ Service.prototype.create = function(convId, body, type = "html") {
     return Promise.reject("Data is invalid");
 };
 
-Service.prototype.update = function(convId, msg) {
+Service.prototype.update = function (convId, msg) {
     if (
         typeof convId == "number" &&
         msg != null &&
@@ -61,7 +61,7 @@ Service.prototype.react = function (convId, msgId, type, status) {
     return Promise.reject("Data is invalid");
 }
 
-Service.prototype.delete = function(convId, msgId) {
+Service.prototype.delete = function (convId, msgId) {
     if (typeof convId == "number" && typeof msgId == "number") {
         console.info(`Deleting message ${convId}/${msgId}`);
         return Axios.delete(this.name + msgId + `?conversation=${convId}`);
