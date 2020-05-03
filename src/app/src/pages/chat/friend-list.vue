@@ -79,7 +79,7 @@
 <script>
 import { fillHeight } from "../../utils/layout.js";
 import { mapState } from "vuex";
-import UserAvatar from "../../components/user-avatar.vue";
+import UserAvatar from "../../components/avatar/user-avatar.vue";
 export default {
     components: { UserAvatar },
     data() {

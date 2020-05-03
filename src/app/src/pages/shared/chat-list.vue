@@ -67,7 +67,7 @@
 
 <script>
 import { fillHeight } from "../../utils/layout.js";
-import UserAvatar from "../../components/user-avatar.vue";
+import UserAvatar from "../../components/avatar/user-avatar.vue";
 import Conversation from "../../components/conversation-item.vue";
 export default {
     props: {

@@ -46,14 +46,14 @@
 </template>
 
 <script>
-import UserAvatar from "./user-avatar.vue";
+import UserAvatar from "./avatar/user-avatar.vue";
 export default {
     props: ["conversation"],
     components: { UserAvatar },
     data: vm => ({
         recentMessage: "",
         messages: vm.conversation.messages,
-        unreadMessage: vm.conversation.meta.unreadMessage,
+        unreadMessages: vm.conversation.meta.unreadMessages,
     }),
     computed: {
         targetUser() {
@@ -69,11 +69,14 @@ export default {
             return {};
         },
         hasNewMessage() {
-            return this.unreadMessage.length > 0;
+            return this.unreadMessages.length > 0;
         },
     },
     watch: {
         messages() {
+            this.updateRecentMessage();
+        },
+        hasNewMessage() {
             this.updateRecentMessage();
         },
     },
@@ -102,6 +105,11 @@ export default {
             }
         },
         getRecentMessage() {
+            // Show unread message
+            if (this.hasNewMessage == true && this.unreadMessages.length > 0) {
+                return this.unreadMessages[this.unreadMessages.length - 1];
+            }
+
             if (
                 !this.conversation.messages ||
                 this.conversation.messages.length <= 0
@@ -109,12 +117,13 @@ export default {
                 return null;
             }
 
+            // Show the last message
             return this.conversation.messages[
                 this.conversation.messages.length - 1
             ];
         },
         onOpenConv() {
-            if (this.conversation.meta.unreadMessage.length > 0) {
+            if (this.conversation.meta.unreadMessages.length > 0) {
                 this.$store
                     .dispatch(
                         "conversations/watchAllMessage",

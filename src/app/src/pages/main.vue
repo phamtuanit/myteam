@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import LeftDrawer from "../components/left-drawer";
+import LeftDrawer from "../components/drawer/left-drawer";
 import RouterView from "../components/router-view/keep-alive-view.vue";
 export default {
     components: { LeftDrawer, RouterView },

@@ -25,19 +25,13 @@ export const fillHeight = function (element, marginBottom, parentElement) {
     }
 };
 
-export const scrollToBottom = (className, parent, smooth, force) => {
-    parent.getElementsByClassName(className).forEach((el) => {
-        if (!force && !el.scrollTop == 0) {
-            return;
-        }
-
-        if (typeof el.scroll === "function") {
-            el.scroll({
-                top: el.scrollHeight,
-                behavior: smooth ? "smooth" : "instant",
-            });
-        } else {
-            el.scrollTop = el.scrollHeight;
-        }
-    });
+export const scrollToBottom = (el, smooth = true) => {
+    if (typeof el.scroll === "function") {
+        el.scroll({
+            top: el.scrollHeight,
+            behavior: smooth ? "smooth" : "instant",
+        });
+    } else {
+        el.scrollTop = el.scrollHeight;
+    }
 };
