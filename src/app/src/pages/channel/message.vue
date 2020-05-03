@@ -105,7 +105,7 @@
 </template>
 
 <script>
-import UserAvatar from "../../components/user-avatar.vue";
+import UserAvatar from "../../components/avatar/user-avatar.vue";
 import ReactionEmoji from "../../components/message-emoji.vue";
 import Reaction from "../../components/message-reaction.vue";
 

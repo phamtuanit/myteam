@@ -142,7 +142,7 @@ export default {
     padding-bottom: 2px !important;
 }
 
-.theme--dark .message-item__content--card.message-item__content-text {
+.theme--dark .message-item__content--card .message-item__content-text {
     color: rgba(255, 255, 255, 0.8);
 }
 
