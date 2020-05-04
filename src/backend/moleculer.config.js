@@ -29,7 +29,7 @@ const sysConf = require("./conf/system.json");
  */
 module.exports = {
 	// Namespace of nodes to segment your nodes on the same network.
-	namespace: "myteams",
+	namespace: "myteam",
 	// Unique node identifier. Must be unique in a namespace.
 	nodeID: null,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
