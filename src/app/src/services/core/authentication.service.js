@@ -1,7 +1,7 @@
 const axios = require("axios");
 const sysConfig = require("../../conf/system.json");
 const axiosInstance = axios.create({
-    baseURL: sysConfig.env == "production"
+    baseURL: sysConfig.env == "prd"
         ? window.location.origin
         : sysConfig.server.address,
 });
