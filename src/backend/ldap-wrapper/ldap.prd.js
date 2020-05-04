@@ -16,6 +16,7 @@ service.prototype = {
         if (this.ldapClient) {
             this.logger.info("Close LDAP connection.");
             this.ldapClient.destroy();
+            this.ldapClient = null;
         }
     },
     confirmLdap() {
