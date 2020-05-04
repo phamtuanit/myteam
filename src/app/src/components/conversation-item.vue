@@ -10,10 +10,7 @@
         }"
     >
         <template v-if="!conversation.channel">
-            <UserAvatar
-                :user="targetUser"
-                :infinity="hasNewMessage"
-            />
+            <UserAvatar :user="targetUser" :infinity="hasNewMessage" />
 
             <v-list-item-content class="py-1 px-2 content__text">
                 <v-list-item-title
@@ -25,7 +22,10 @@
                     class="caption"
                     style="line-height: 0.8rem;"
                     :class="{ 'font-weight-bold': hasNewMessage }"
-                    v-text="recentMessage || (conversation._isTemp == true && 'Draft')"
+                    v-text="
+                        recentMessage ||
+                            (conversation._isTemp == true && 'Draft')
+                    "
                 ></v-list-item-subtitle>
             </v-list-item-content>
         </template>
@@ -36,10 +36,7 @@
                 :class="{ 'font-weight-bold': hasNewMessage }"
             >
                 <v-icon size="15">mdi-pound</v-icon>
-                <span
-                    class="ml-1"
-                    v-text="conversation.name"
-                ></span>
+                <span class="ml-1" v-text="conversation.name"></span>
             </v-list-item-title>
         </template>
     </v-list-item>
@@ -92,7 +89,8 @@ export default {
                 switch (msgType) {
                     case "html":
                         {
-                            const html = recentMsg.body.content;
+                            let html = recentMsg.body.content;
+                            html = html.replace(/<img/g, '<span').replace(/<\/img/g, '</span');
                             const el = document.createElement("div");
                             el.innerHTML = html;
                             this.recentMessage = el.innerText;

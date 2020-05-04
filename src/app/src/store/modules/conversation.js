@@ -820,6 +820,11 @@ const moduleState = {
         },
         async setupNotification() {
             eventBus.on("messages", (act, conv, message) => {
+                const me = this.state.users.me;
+                if (!message.from || me.id == message.from.issuer) {
+                    return;
+                }
+
                 switch (act) {
                     case "added":
                         {
@@ -830,7 +835,8 @@ const moduleState = {
                                 message.body.type == "html"
                             ) {
                                 // Convert raw html to text
-                                const html = message.body.content;
+                                let html = message.body.content;
+                                html = html.replace(/<img/g, '<span').replace(/<\/img/g, '</span');
                                 const el = document.createElement("div");
                                 el.innerHTML = html;
                                 notifyBody = el.innerText;
@@ -844,12 +850,14 @@ const moduleState = {
                                         Array.isArray(users) &&
                                         users.length > 0
                                     ) {
-                                        userName = users[0].fullName || userName;
+                                        userName =
+                                            users[0].fullName || userName;
                                     }
                                     let notifyTitle = `Message from ${userName}`;
 
                                     if (conv.channel == true) {
-                                        notifyTitle =`${conv.name} • ` + notifyTitle;
+                                        notifyTitle =
+                                            `${conv.name} • ` + notifyTitle;
                                     }
                                     notification.notify(
                                         notifyTitle,
