@@ -1,10 +1,10 @@
 {
     "env": "prd-",
     "server": {
-        "address": "http://localhost:8081",
+        "address": "https://localhost:8081",
         "api": "/api/v1/"
     },
     "attachment": {
-        "url": "http://localhost:8081/upload/"
+        "url": "https://localhost:8081/upload/"
     }
 }
