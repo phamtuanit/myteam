@@ -237,7 +237,7 @@ div:not(.message-item--deleted)
 }
 
 .user-name::after {
-    content: "•";
+    content: "\2022";
     padding-left: 5px;
     padding-right: 5px;
     color: hsl(0, 0%, 72%);
