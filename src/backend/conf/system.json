@@ -11,5 +11,8 @@
         "cache": "/cache",
         "bus": "/bus",
         "transport": "/transport"
+    },
+    "ssl": {
+        "enabled": true
     }
 }
