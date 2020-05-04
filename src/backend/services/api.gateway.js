@@ -1,4 +1,7 @@
 "use strict";
+let fs = require("fs");
+let path = require("path");
+
 const ApiGateway = require("moleculer-web");
 const sysConf = require("../conf/system.json");
 const SocketService = require("../mixins/socket.mixin");
@@ -28,6 +31,12 @@ module.exports = {
         io: {
             path: "/chat-io",
         },
+
+        // HTTPS server with certificate
+        https: sysConf.ssl.enabled ? {
+            key: fs.readFileSync(path.join(__dirname, "../ssl",  "myteam.key")),
+            cert: fs.readFileSync(path.join(__dirname, "../ssl", "myteam.cer")),
+        } : null,
 
         routes: [
             {
