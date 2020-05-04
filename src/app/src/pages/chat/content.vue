@@ -57,6 +57,7 @@
                 :load="loadMore"
                 class="conversation-loading"
                 :reached-end="conversation.reachedFullHistories"
+                v-if="conversation.id"
             ></Loading>
             <!-- Message -->
             <template v-for="msg in messages">

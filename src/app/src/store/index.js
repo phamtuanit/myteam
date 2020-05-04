@@ -22,7 +22,7 @@ const store = new Vuex.Store({
         initialized: false,
         authenticated: false,
         theme: {
-            dark: true,
+            dark: false,
         },
         messageQueue: []
     },
