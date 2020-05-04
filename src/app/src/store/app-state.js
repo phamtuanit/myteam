@@ -1,6 +1,7 @@
 const config = require("../conf/system.json");
 const baseServerAddr = config.env == "prd" ? window.location.origin : config.server.address;
 const messageQueueSvr = new (require("../services/message-queue.service.js").default)();
+const notification = new (require("../plugins/notification.js"))();
 
 module.exports = {
     startup(commit, store) {
@@ -21,6 +22,9 @@ module.exports = {
                 }
 
                 window.IoC.register("theme", store.getters.theme);
+
+                window.IoC.register("notification", notification);
+
                 commit("setAppState", "authentication");
                 resolve();
             } catch (err) {

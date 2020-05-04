@@ -2,6 +2,7 @@ const messageService = new (require("../../services/message.service").default)()
 const convService = new (require("../../services/conversation.service").default)();
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
 let eventBus = null;
+let notification = null;
 
 function handleWSMessage(socket, state, commit, act, data) {
     const message = data.payload;
@@ -23,35 +24,24 @@ function handleWSMessage(socket, state, commit, act, data) {
         });
     };
 
-
     const findConv = function find() {
-        return state.channel.all
-            .concat(state.chat.all)
-            .find(conv => {
-                if (conv.id == convId) {
-                    return true;
-                }
+        return state.channel.all.concat(state.chat.all).find(conv => {
+            if (conv.id == convId) {
+                return true;
+            }
 
-                if (conv.channel == false) {
-                    if (
-                        conv.subscribers &&
-                        conv.subscribers.length == 2
-                    ) {
-                        const matchedSub = conv.subscribers.filter(
-                            sub => {
-                                return (
-                                    sub.id == me.id ||
-                                    sub.id == message.from.issuer
-                                );
-                            }
-                        );
+            if (conv.channel == false) {
+                if (conv.subscribers && conv.subscribers.length == 2) {
+                    const matchedSub = conv.subscribers.filter(sub => {
+                        return sub.id == me.id || sub.id == message.from.issuer;
+                    });
 
-                        return matchedSub.length == 2;
-                    }
+                    return matchedSub.length == 2;
                 }
-                return false;
-            });
-    }
+            }
+            return false;
+        });
+    };
 
     // Handle event
     switch (act) {
@@ -177,12 +167,12 @@ const moduleState = {
         chat: {
             active: null,
             all: [],
-            unread: []
+            unread: [],
         },
         channel: {
             active: null,
             all: [],
-            unread: []
+            unread: [],
         },
         moduleState: "startup",
     },
@@ -214,10 +204,10 @@ const moduleState = {
 
             if (conv._isTemp != true && !conv.isVerified) {
                 // Load conversation content
-                this.dispatch(
-                    "conversations/getConversationContent",
-                    { convId: conv.id, top: 10 }
-                ).then(() => {
+                this.dispatch("conversations/getConversationContent", {
+                    convId: conv.id,
+                    top: 10,
+                }).then(() => {
                     conv.isVerified = true;
                 });
             }
@@ -249,7 +239,7 @@ const moduleState = {
                 state.chat.all.push(conv);
             }
 
-            eventBus.emit("conversation", "added", conv);
+            eventBus.emit("conversations", "added", conv);
         },
         removeConv(state, convId) {
             const convList = [state.channel.all, state.chat.all];
@@ -266,7 +256,7 @@ const moduleState = {
                     }
 
                     all.splice(index, 1);
-                    eventBus.emit("conversation", "removed", found);
+                    eventBus.emit("conversations", "removed", found);
                     return;
                 }
             });
@@ -288,12 +278,15 @@ const moduleState = {
                 .find(c => c.id == convId);
 
             if (conv) {
-                const pushToUnread = function (message) {
+                const pushToUnread = function(message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessages.push(message);
 
                         // Push information to unread
-                        const unread = conv.channel == true ? state.channel.unread : state.chat.unread;
+                        const unread =
+                            conv.channel == true
+                                ? state.channel.unread
+                                : state.chat.unread;
                         const foundConv = unread.find(c => c.id == convId);
                         if (!foundConv) {
                             unread.push(conv);
@@ -304,6 +297,7 @@ const moduleState = {
                 if (!conv.messages) {
                     conv.messages = [message];
                     pushToUnread(message);
+                    eventBus.emit("messages", "added", conv, message);
                 } else {
                     const foundMessage = conv.messages.find(
                         i => i.id == message.id
@@ -311,6 +305,7 @@ const moduleState = {
                     if (!foundMessage) {
                         conv.messages.push(message);
                         pushToUnread(message);
+                        eventBus.emit("messages", "added", conv, message);
                     } else {
                         // Update existing message
                         Object.assign(foundMessage, message);
@@ -338,15 +333,22 @@ const moduleState = {
                     }, 1 * 1000);
                 }
 
-                // Check unread message 
-                const unreadMsgIndex = conv.meta.unreadMessages.findIndex(i => i.id == message.id);
+                // Check unread message
+                const unreadMsgIndex = conv.meta.unreadMessages.findIndex(
+                    i => i.id == message.id
+                );
                 if (unreadMsgIndex >= 0) {
                     conv.meta.unreadMessages.splice(unreadMsgIndex, 1);
 
                     // Clean notification if needed
                     if (conv.meta.unreadMessages.length == 0) {
-                        const unread = conv.channel == true ? state.channel.unread : state.chat.unread;
-                        const convIndex = unread.findIndex(c => c.id === conv.id);
+                        const unread =
+                            conv.channel == true
+                                ? state.channel.unread
+                                : state.chat.unread;
+                        const convIndex = unread.findIndex(
+                            c => c.id === conv.id
+                        );
                         if (convIndex >= 0) {
                             unread.splice(convIndex, 1);
                         }
@@ -422,15 +424,19 @@ const moduleState = {
     actions: {
         async initialize(ctx) {
             eventBus = window.IoC.get("bus");
+            notification = window.IoC.get("notification");
 
             // Setup Socket
             await this.dispatch("conversations/setupSocket");
+            await this.dispatch("conversations/setupNotification");
 
             const { state, commit, rootState } = ctx;
             const me = rootState.users.me;
 
             // Load all conversation related to current user
-            const convList = await convService.getByUser(me.id).then(res => res.data);
+            const convList = await convService
+                .getByUser(me.id)
+                .then(res => res.data);
             if (!convList) {
                 commit("setModuleState", "initialized");
                 return;
@@ -477,8 +483,8 @@ const moduleState = {
             // Load unread message in queue
             const confirmedMsqIds = [];
             const convNotification = {
-                "channel": {},
-                "nonchannel": {}
+                channel: {},
+                nonchannel: {},
             };
             const messageQueue = rootState.messageQueue;
             messageQueue.forEach(message => {
@@ -507,7 +513,10 @@ const moduleState = {
                     case "created":
                         {
                             conv.meta.unreadMessages.push(rawMsg);
-                            const notf = conv.channel == true ? convNotification.channel : convNotification.nonchannel;
+                            const notf =
+                                conv.channel == true
+                                    ? convNotification.channel
+                                    : convNotification.nonchannel;
                             if (!notf[conv.id]) {
                                 notf[conv.id] = conv;
                             }
@@ -527,7 +536,9 @@ const moduleState = {
 
             // Confirm message queue
             if (confirmedMsqIds.length > 0) {
-                messageQueueSvr.confirm(me.id, confirmedMsqIds).then(res => res.data);
+                messageQueueSvr
+                    .confirm(me.id, confirmedMsqIds)
+                    .then(res => res.data);
             }
 
             commit("setModuleState", "initialized");
@@ -689,10 +700,10 @@ const moduleState = {
                 commit("addConversation", conv);
 
                 // Load message
-                await this.dispatch(
-                    "conversations/getConversationContent",
-                    { convId: conv.id, top: 2 }
-                );
+                await this.dispatch("conversations/getConversationContent", {
+                    convId: conv.id,
+                    top: 2,
+                });
                 return conv;
             }
         },
@@ -745,51 +756,58 @@ const moduleState = {
                 top = top || 10;
                 const filter = { top };
                 if (conv.messages.length > 0) {
-                    filter.rightId = conv.messages[0].id
+                    filter.rightId = conv.messages[0].id;
                 }
 
-                return await messageService.get(parseInt(convId), filter).then(res => {
-                    return res.data;
-                }).then(messages => {
-                    if (messages.length < top) {
-                        conv.reachedFullHistories = true;
-                    }
-
-                    if (messages.length <= 0) {
-                        return;
-                    }
-
-                    if (!conv.meta) {
-                        conv.meta = {
-                            unreadMessages: [],
-                        };
-                    }
-
-                    // Update message info
-                    const me = this.state.users.me;
-                    messages.forEach(msg => {
-                        // Init required value
-                        if (msg.from && msg.from.issuer == me.id) {
-                            msg._isMe = true;
+                return await messageService
+                    .get(parseInt(convId), filter)
+                    .then(res => {
+                        return res.data;
+                    })
+                    .then(messages => {
+                        if (messages.length < top) {
+                            conv.reachedFullHistories = true;
                         }
-                        msg.status = null;
+
+                        if (messages.length <= 0) {
+                            return;
+                        }
+
+                        if (!conv.meta) {
+                            conv.meta = {
+                                unreadMessages: [],
+                            };
+                        }
+
+                        // Update message info
+                        const me = this.state.users.me;
+                        messages.forEach(msg => {
+                            // Init required value
+                            if (msg.from && msg.from.issuer == me.id) {
+                                msg._isMe = true;
+                            }
+                            msg.status = null;
+                        });
+
+                        if (!conv.messages) {
+                            conv.messages = messages;
+                        } else {
+                            for (
+                                let index = messages.length - 1;
+                                index >= 0;
+                                index--
+                            ) {
+                                const msg = messages[index];
+                                conv.messages.unshift(msg);
+                            }
+                        }
+
+                        return messages;
                     });
-
-                    if (!conv.messages) {
-                        conv.messages = messages;
-                    } else {
-                        for (let index = (messages.length - 1); index >= 0; index--) {
-                            const msg = messages[index];
-                            conv.messages.unshift(msg);
-                        }
-                    }
-
-                    return messages;
-                });
             }
-            console.warn("Conversation Id is required")
+            console.warn("Conversation Id is required");
         },
-        setupSocket({ commit, state }) {
+        async setupSocket({ commit, state }) {
             const socket = window.IoC.get("socket");
             socket.on(
                 "message",
@@ -799,6 +817,53 @@ const moduleState = {
                 "conversation",
                 handleWSConversation.bind(this, socket, state, commit)
             );
+        },
+        async setupNotification() {
+            eventBus.on("messages", (act, conv, message) => {
+                switch (act) {
+                    case "added":
+                        {
+                            // Notify to user vie Notification API
+                            let notifyBody = "Non-html message";
+                            if (
+                                message.body.type == "" ||
+                                message.body.type == "html"
+                            ) {
+                                // Convert raw html to text
+                                const html = message.body.content;
+                                const el = document.createElement("div");
+                                el.innerHTML = html;
+                                notifyBody = el.innerText;
+                            }
+
+                            const userId = message.from.issuer;
+                            this.dispatch("users/resolve", [userId]).then(
+                                users => {
+                                    let userName = userId;
+                                    if (
+                                        Array.isArray(users) &&
+                                        users.length > 0
+                                    ) {
+                                        userName = users[0].fullName || userName;
+                                    }
+                                    let notifyTitle = `Message from ${userName}`;
+
+                                    if (conv.channel == true) {
+                                        notifyTitle =`${conv.name} • ` + notifyTitle;
+                                    }
+                                    notification.notify(
+                                        notifyTitle,
+                                        notifyBody
+                                    );
+                                }
+                            );
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            });
         },
         async reactMessage({ commit, state }, { type, message, status }) {
             const convId = message.to.conversation;

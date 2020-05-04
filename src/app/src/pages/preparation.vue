@@ -1,14 +1,6 @@
 <template>
-    <v-container
-        class="fill-height bg-1"
-        fluid
-        id="preparation-screen"
-    >
-        <div
-            align="center"
-            justify="center"
-            class="mx-auto"
-        >
+    <v-container class="fill-height bg-1" fluid id="preparation-screen">
+        <div align="center" justify="center" class="mx-auto">
             <div class="cssload-dots">
                 <div class="cssload-dot"></div>
                 <div class="cssload-dot"></div>
@@ -17,10 +9,7 @@
                 <div class="cssload-dot"></div>
             </div>
 
-            <svg
-                version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <filter id="goo">
                         <feGaussianBlur
@@ -54,6 +43,7 @@ export default {
             if (this.isInitialized == true) {
                 // In case preparation is finieshed
                 this.redirectToExpectation();
+                setTimeout(this.checkUserConfirmation, 2 * 1000);
             }
         }, 0 * 1000);
 
@@ -91,6 +81,7 @@ export default {
                         // Incase preparation is just finished before timmer is done
                         if (this.timmer == null) {
                             this.redirectToExpectation();
+                            setTimeout(this.checkUserConfirmation, 2 * 1000);
                         }
                     } else {
                         // Continue preparation
@@ -136,12 +127,15 @@ export default {
             }
             this.$router.push({ name: nextRoute, query: route.query });
         },
+        checkUserConfirmation() {
+            const notification = window.IoC.get("notification");
+            notification.requestPermission();
+        },
     },
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
 
 <style>
 /* spinner https://icons8.com/cssload/en/spinners*/
