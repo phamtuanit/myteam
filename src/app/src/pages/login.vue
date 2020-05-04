@@ -10,9 +10,9 @@
                             class="mx-0 my-auto white--text"
                         >
                             <v-img
-                                max-width="84"
+                                max-height="80"
                                 aspect-ratio="0.9"
-                                src="@/assets/logo/v-logo_dark_84.png"
+                                src="@/assets/logo/logo.png"
                             ></v-img>
                         </v-row>
                     </v-container>
