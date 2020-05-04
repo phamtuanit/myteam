@@ -5,6 +5,7 @@ const notification = new (require("../plugins/notification.js"))();
 
 module.exports = {
     startup(commit, store) {
+        console.info(">>>>>>>>> API Server:", baseServerAddr);
         return new Promise((resolve, reject) => {
             console.info("Setting up: application setting");
             try {
