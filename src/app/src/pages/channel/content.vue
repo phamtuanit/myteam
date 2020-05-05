@@ -214,7 +214,7 @@ export default {
     border-radius: 0 !important;
 }
 
-.channel-message-item:first-of-type,
+.channel-message-item:first-of-type .message-item__content--card,
 .conversation-loading + .channel-message-item .message-item__content--card {
     border-radius: 3px 3px 0 0 !important;
 }
@@ -223,7 +223,7 @@ export default {
     border-radius: 0 0 3px 3px !important;
 }
 
-.channel-message-item:first-of-type,
+.channel-message-item:first-of-type .message-item__content--card::after,
 .conversation-loading + .channel-message-item .message-item__content--card::after {
     border-radius: 0 3px 0 0 !important;
 }
