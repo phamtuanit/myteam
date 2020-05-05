@@ -85,7 +85,7 @@ export default {
         ...mapState({
             me: state => state.users.me,
             chatUnreadMessages: state => state.conversations.chat.unread,
-            conversationUnreadMessages: state =>
+            channelUread: state =>
                 state.conversations.channel.unread,
         }),
     },
@@ -93,7 +93,7 @@ export default {
         chatUnreadMessages() {
             this.updateChatInformation();
         },
-        conversationUnreadMessages() {
+        channelUread() {
             this.updateConversationInformation();
         },
     },
@@ -114,7 +114,7 @@ export default {
 
             if (menu) {
                 menu.inform = {
-                    count: this.conversationUnreadMessages.length,
+                    count: this.channelUread.length,
                 };
             }
         },
