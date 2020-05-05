@@ -10,6 +10,7 @@
             <Loading
                 :load="loadMore"
                 :reached-end="conversation.reachedFullHistories"
+                class="conversation-loading"
             ></Loading>
 
             <!-- Message -->
@@ -194,11 +195,14 @@ export default {
 </style>
 
 <style lang="css">
-.channel-message-item:first-of-type .message-item__content-separator {
+.channel-message-item:first-of-type .message-item__content-separator,
+.conversation-loading + .channel-message-item .message-item__content-separator
+ {
     display: none;
 }
 
-.channel-message-item:first-of-type {
+.channel-message-item:first-of-type,
+.conversation-loading + .channel-message-item {
     margin-top: 8px;
 }
 
@@ -210,7 +214,8 @@ export default {
     border-radius: 0 !important;
 }
 
-.channel-message-item:first-of-type .message-item__content--card {
+.channel-message-item:first-of-type,
+.conversation-loading + .channel-message-item .message-item__content--card {
     border-radius: 3px 3px 0 0 !important;
 }
 
@@ -218,7 +223,8 @@ export default {
     border-radius: 0 0 3px 3px !important;
 }
 
-.channel-message-item:first-of-type .message-item__content--card::after {
+.channel-message-item:first-of-type,
+.conversation-loading + .channel-message-item .message-item__content--card::after {
     border-radius: 0 3px 0 0 !important;
 }
 

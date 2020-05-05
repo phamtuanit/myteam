@@ -263,18 +263,13 @@ export default {
 }
 
 /* Message aligment */
-.message-sheet
-    >>> .message-item:not(:first-of-type)
-    .message-item__content-header {
+.message-sheet >>> .message-item:not(:first-of-type) .message-item__content-header {
     display: none;
 }
 
 .message-sheet >>> .my-message + .your-message .message-item__content-header,
 .message-sheet >>> .your-message + .my-message .message-item__content-header,
-.message-sheet
-    >>> .conversation-loading
-    + .message-item
-    .message-item__content-header {
+.message-sheet >>> .conversation-loading + .message-item .message-item__content-header {
     display: flex;
 }
 
