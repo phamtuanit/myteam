@@ -863,7 +863,7 @@ const moduleState = {
                                         userName =
                                             users[0].fullName || userName;
                                     }
-                                    let notifyTitle = `Message from ${userName}`;
+                                    let notifyTitle = `New message from ${userName}`;
 
                                     if (conv.channel == true) {
                                         notifyTitle =

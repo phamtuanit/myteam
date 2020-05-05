@@ -32,7 +32,7 @@ export default {
         updateTitle() {
             if (this.chatUnread.length > 0 || this.chatUnread.length > 0) {
                 // Update website title
-                document.title = `${BASE_WEB_TITLE} - You have new message`;
+                document.title = `${BASE_WEB_TITLE} \ud83d\udc8c You have new message`;
             } else {
                 document.title = BASE_WEB_TITLE;
             }
