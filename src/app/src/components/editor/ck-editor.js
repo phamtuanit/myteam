@@ -46,10 +46,13 @@ import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter";
 // import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 
+import Link from '@ckeditor/ckeditor5-link/src/link';
+
 export default class Editor extends ClassicEditor { }
 
 // Plugins to include in the build.
 Editor.builtinPlugins = [
+    Link,
     Image,
     ImageToolbar,
     ImageStyle,
@@ -99,6 +102,7 @@ ClassicEditor.defaultConfig = {
             "bulletedList",
             "numberedList",
             "todoList",
+            "|",
             "indent",
             "outdent",
             "|",
@@ -106,6 +110,7 @@ ClassicEditor.defaultConfig = {
             "fontBackgroundColor",
             "fontColor",
             "|",
+            'link',
             "imageUpload",
             // "imageStyle:alignLeft",
             // "imageStyle:full",
@@ -137,9 +142,9 @@ ClassicEditor.defaultConfig = {
         transformations: {
             extra: [
                 // Add some custom transformations – e.g. for emojis.
-                { from: ":):", to: "🙂" },
-                { from: ":+1:", to: "👍" },
-                { from: ":tada:", to: "🎉" },
+                // { from: ":):", to: "🙂" },
+                // { from: ":+1:", to: "👍" },
+                // { from: ":tada:", to: "🎉" },
             ],
             remove: [
                 "quotesPrimary",
@@ -169,4 +174,8 @@ ClassicEditor.defaultConfig = {
             "alignRight",
         ],
     },
+    link: {
+        // Automatically add target="_blank" and rel="noopener noreferrer" to all external links.
+        addTargetToExternalLinks: true,
+    }
 };
