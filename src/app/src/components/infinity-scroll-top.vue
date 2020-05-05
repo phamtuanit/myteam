@@ -15,6 +15,7 @@
             color="orange darken-1"
             :loading="isLoading"
             v-if="!scrollBar"
+            title="Load more"
             @click="onLoadMore"
         >
             <v-icon>mdi-reload</v-icon>
