@@ -197,14 +197,14 @@ export default {
     visibility: hidden;
     opacity: 0.3;
     bottom: 14px;
-    right: 30px;
+    left: -40px;
 }
 
 .message-item__content:hover >>> .reactions-panel {
     transition: all 0.2s ease-in;
     visibility: visible;
     opacity: 1;
-    right: 16px;
+    left: -60px;
 }
 
 .message-item__content--card {
