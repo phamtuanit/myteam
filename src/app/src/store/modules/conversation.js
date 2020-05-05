@@ -1,6 +1,8 @@
 const messageService = new (require("../../services/message.service").default)();
 const convService = new (require("../../services/conversation.service").default)();
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
+
+const MAX_MESSAGES = 100;
 let eventBus = null;
 let notification = null;
 
@@ -303,9 +305,16 @@ const moduleState = {
                         i => i.id == message.id
                     );
                     if (!foundMessage) {
+                        // Remove oldest message
+                        if (conv.messages.length >= MAX_MESSAGES) {
+                            conv.messages.splice(0, conv.messages.length - MAX_MESSAGES + 1);
+                            conv.reachedFullHistories = false;
+                        }
+
                         conv.messages.push(message);
                         pushToUnread(message);
                         eventBus.emit("messages", "added", conv, message);
+                        
                     } else {
                         // Update existing message
                         Object.assign(foundMessage, message);
