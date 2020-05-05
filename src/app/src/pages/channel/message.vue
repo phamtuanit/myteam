@@ -44,7 +44,7 @@
                     ></ReactionEmoji>
 
                     <!-- Actions -->
-                    <div class="message-item__content-actions center-y">
+                    <div class="message-item__content-actions center-y ml-1">
                         <v-menu left>
                             <template v-slot:activator="{ on }">
                                 <v-btn
