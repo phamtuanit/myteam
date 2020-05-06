@@ -2,7 +2,7 @@ const messageService = new (require("../../services/message.service").default)()
 const convService = new (require("../../services/conversation.service").default)();
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
 
-const MAX_MESSAGES = 100;
+const MAX_MESSAGES = 50;
 
 let eventBus = null;
 let notification = null;
