@@ -21,14 +21,14 @@
                             <v-list-item-title>Setting</v-list-item-title>
                         </v-list-item>
                         <v-list-item @click="onDelete">
-                            <v-list-item-title>Delete</v-list-item-title>
+                            <v-list-item-title class="red--text">Delete</v-list-item-title>
                         </v-list-item>
                     </template>
                     <v-list-item
                         v-show="conversation.creator != me.id"
                         @click="onLeave"
                     >
-                        <v-list-item-title>Leave</v-list-item-title>
+                        <v-list-item-title class="red--text">Leave</v-list-item-title>
                     </v-list-item>
                 </v-list>
             </v-menu>

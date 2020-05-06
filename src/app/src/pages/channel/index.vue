@@ -8,7 +8,7 @@
         <ChatList
             :list="allConv"
             :activated-item="activatedConv"
-            :allow-add="true"
+            :channel="true"
             @add="onCreateConv"
         ></ChatList>
 

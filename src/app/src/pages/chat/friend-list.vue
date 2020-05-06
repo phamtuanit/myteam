@@ -13,7 +13,7 @@
             <v-text-field
                 v-model="searchText"
                 prepend-inner-icon="mdi-magnify"
-                label="Friend"
+                label="Search"
                 flat
                 name="search-friend"
                 solo

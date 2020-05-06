@@ -13,7 +13,7 @@
             <v-text-field
                 v-model="searchText"
                 prepend-inner-icon="mdi-magnify"
-                label="Conversation"
+                label="Search"
                 name="search-conversation"
                 flat
                 solo
@@ -27,17 +27,18 @@
         <v-divider></v-divider>
 
         <div class="pa-0 ma-0 center-y justify-sm-space-between">
-            <v-subheader class="pl-3 pr-2 selection-disabled">Conversations</v-subheader>
+            <v-subheader class="pl-3 pr-2 selection-disabled" v-text="channel ? 'Channels' : 'Conversations'"></v-subheader>
 
             <!-- Add btn -->
             <v-btn
-                v-show="allowAdd"
+                v-show="channel"
                 icon
                 fab
                 class="ml-1 mr-3"
                 rounded
                 height="26"
                 width="26"
+                title="Add channel"
                 @click="onAddConv"
             >
                 <v-icon :size="20">mdi-plus</v-icon>
@@ -73,7 +74,7 @@ export default {
     props: {
         list: Array,
         activatedItem: Object,
-        allowAdd: {
+        channel: {
             type: Boolean,
             default: false,
         },

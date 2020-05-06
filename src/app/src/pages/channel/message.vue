@@ -8,10 +8,7 @@
     >
         <div class="message-item__user pr-1">
             <v-list-item-avatar class="ma-0">
-                <UserAvatar
-                    :user="user"
-                    :online-effect="!user._isMe"
-                />
+                <UserAvatar :user="user" :online-effect="!user._isMe" />
             </v-list-item-avatar>
         </div>
         <!-- content -->
@@ -24,16 +21,15 @@
                 <slot></slot>
 
                 <!-- Header -->
-                <div class="message-item__content-header selection-disabled center-y px-3 pt-2">
+                <div
+                    class="message-item__content-header selection-disabled center-y px-3 pt-2"
+                >
                     <!-- User info -->
                     <span
                         class="subtitle-2 user-name"
                         v-text="user._isMe ? 'Yours' : user.fullName"
                     ></span>
-                    <span
-                        class="caption"
-                        v-text="timeAgo"
-                    ></span>
+                    <span class="caption" v-text="timeAgo"></span>
                     <v-spacer></v-spacer>
 
                     <!-- Reacted Emoji -->
@@ -47,27 +43,21 @@
                     <div class="message-item__content-actions center-y ml-1">
                         <v-menu left>
                             <template v-slot:activator="{ on }">
-                                <v-btn
-                                    icon
-                                    small
-                                    v-on="on"
-                                    class="mx-auto"
-                                >
+                                <v-btn icon small v-on="on" class="mx-auto">
                                     <v-icon small>mdi-dots-vertical</v-icon>
                                 </v-btn>
                             </template>
-                            <v-list
-                                class="menus"
-                                v-if="isMyMessage"
-                            >
+                            <v-list class="menus" v-if="isMyMessage">
+                                <v-list-item @click="onQuote">
+                                    <v-list-item-title>Quote</v-list-item-title>
+                                </v-list-item>
                                 <v-list-item @click="onDelete">
-                                    <v-list-item-title>Delete</v-list-item-title>
+                                    <v-list-item-title class="red--text"
+                                        >Delete</v-list-item-title
+                                    >
                                 </v-list-item>
                             </v-list>
-                            <v-list
-                                class="menus"
-                                v-else
-                            >
+                            <v-list class="menus" v-else>
                                 <v-list-item @click="onQuote">
                                     <v-list-item-title>Quote</v-list-item-title>
                                 </v-list-item>
@@ -90,10 +80,7 @@
                         v-if="message.status != 'removed'"
                     >
                         <!-- Reactions -->
-                        <Reaction
-                            @react="onReact"
-                            :selected="reactedType"
-                        />
+                        <Reaction @react="onReact" :selected="reactedType" />
                     </div>
                 </div>
             </v-card>
