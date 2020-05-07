@@ -2,48 +2,50 @@
     <v-scale-transition>
         <div class="reaction-emoji">
             <div class="emoji-panel px-1 center-y" v-show="emojis.length > 0">
-                <template v-for="reaction in emojis">
-                    <v-menu
-                        top
-                        left
-                        nudge-left="18"
-                        open-on-hover
-                        :key="reaction.type + '-icon'"
-                        content-class="elevation-1"
-                    >
-                        <template v-slot:activator="{ on }">
-                            <v-icon
-                                size="16"
-                                class="mr-1"
-                                v-on="on"
-                                :color="reaction.color"
-                                :class="{
-                                    'my-reaction': reaction.mine == true,
-                                }"
-                                v-text="'mdi-' + reaction.icon"
-                                @click="
-                                    reaction.mine == true
-                                        ? onReaction(reaction)
-                                        : ''
-                                "
-                            ></v-icon>
-                        </template>
-                        <!-- Reactors -->
-                        <v-list
-                            class="emoji-reactors"
-                            elevation="0"
-                            max-height="200"
+                <div class="emoji-panel_content">
+                    <template v-for="reaction in emojis">
+                        <v-menu
+                            top
+                            left
+                            nudge-left="18"
+                            open-on-hover
+                            :key="reaction.type + '-icon'"
+                            content-class="elevation-1"
                         >
-                            <v-list-item
-                                v-for="user in reaction.reactors"
-                                :key="user.id"
-                                class="px-3 py-1"
-                                v-text="user.name"
+                            <template v-slot:activator="{ on }">
+                                <v-icon
+                                    size="16"
+                                    class="mr-1"
+                                    v-on="on"
+                                    :color="reaction.color"
+                                    :class="{
+                                        'my-reaction': reaction.mine == true,
+                                    }"
+                                    v-text="'mdi-' + reaction.icon"
+                                    @click="
+                                        reaction.mine == true
+                                            ? onReaction(reaction)
+                                            : ''
+                                    "
+                                ></v-icon>
+                            </template>
+                            <!-- Reactors -->
+                            <v-list
+                                class="emoji-reactors"
+                                elevation="0"
+                                max-height="200"
                             >
-                            </v-list-item>
-                        </v-list>
-                    </v-menu>
-                </template>
+                                <v-list-item
+                                    v-for="user in reaction.reactors"
+                                    :key="user.id"
+                                    class="px-3 py-1"
+                                    v-text="user.name"
+                                >
+                                </v-list-item>
+                            </v-list>
+                        </v-menu>
+                    </template>
+                </div>
                 <!-- count -->
                 <v-menu
                     top
