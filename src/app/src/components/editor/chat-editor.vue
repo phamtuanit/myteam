@@ -121,7 +121,7 @@ export default {
             this.editorInstance.keystrokes.set("enter", (data, cancel) => {
                 if (this.showToolBar != true) {
                     cancel();
-                    this.trggerSendEvent();
+                    this.triggerSendEvent();
                 }
             });
 
@@ -145,11 +145,11 @@ export default {
         onSend() {
             this.$emit("send", this.internalValue);
         },
-        trggerSendEvent() {
+        triggerSendEvent() {
             const currVal = this.editorInstance.getData();
             if (currVal !== this.value) {
                 // Incase user type fast
-                setTimeout(this.trggerSendEvent, 0);
+                setTimeout(this.triggerSendEvent, 0);
                 return;
             }
 
