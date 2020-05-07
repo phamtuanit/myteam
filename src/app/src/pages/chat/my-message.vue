@@ -138,7 +138,6 @@ export default {
 }
 
 .message-item__content--card .message-item__content-text {
-    color: rgba(0, 0, 0, 0.8);
     padding-bottom: 2px !important;
 }
 

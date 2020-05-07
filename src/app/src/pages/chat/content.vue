@@ -32,11 +32,13 @@
                             "
                             @click="onShowFriendList"
                         >
-                            <v-icon v-text="
+                            <v-icon
+                                v-text="
                                     friendList
                                         ? 'mdi-account-supervisor'
                                         : 'mdi-account-search'
-                                "></v-icon>
+                                "
+                            ></v-icon>
                         </v-btn>
                     </template>
                     <span>Friend list</span>
@@ -49,7 +51,7 @@
         <v-sheet
             class="flex-grow-1 overflow-y-auto message-sheet no-border-radius transparent pt-1"
             v-chat-scroll="{ always: false, smooth: true }"
-            ref="messageSheet"
+            ref="messageFeed"
             @click="onRead"
         >
             <!-- Loading -->
@@ -66,10 +68,10 @@
                     :key="msg.id"
                     :message="msg"
                     :class="{
-                            'has-reacted':
-                                msg.reactions && msg.reactions.length > 0,
-                        }"
-                    @delete="onDeleteMyMessage"
+                        'has-reacted':
+                            msg.reactions && msg.reactions.length > 0,
+                    }"
+                    @delete="onDeleteMessage"
                 ></MyMessage>
                 <YourMessage
                     v-else
@@ -77,9 +79,9 @@
                     :key="msg.id"
                     :message="msg"
                     :class="{
-                            'has-reacted':
-                                msg.reactions && msg.reactions.length > 0,
-                        }"
+                        'has-reacted':
+                            msg.reactions && msg.reactions.length > 0,
+                    }"
                     @react="onReact"
                     @dereact="onDereact"
                     @quote="onQuote"
@@ -87,12 +89,17 @@
             </template>
         </v-sheet>
 
+        <Notification
+            class="notification"
+            :read-more="allowReadMore"
+            @read-more="onReadMore"
+        />
+
         <!-- Input box -->
         <ChatEditor
             class="chat-editor mt-2 mb-1"
             v-model="newMessage"
             :id="conversation.id"
-            @enter="onSendMessage"
             @send="onSendMessage"
             @ready="onChatEditorReady"
         ></ChatEditor>
@@ -108,8 +115,15 @@ import YourMessage from "./your-message";
 import Avatar from "../../components/avatar/avatar.vue";
 import ChatEditor from "../../components/editor/chat-editor.vue";
 import Loading from "../../components/infinity-scroll-top.vue";
-import { scrollToBottom } from "../../utils/layout.js";
+import Notification from "../shared/conversation-notification.vue";
+
+import mixin from "../mixin/conversation-content.mix.js";
 export default {
+    props: {
+        friendList: {
+            type: Boolean,
+        },
+    },
     components: {
         FriendList,
         EmojiButton,
@@ -118,22 +132,11 @@ export default {
         Avatar,
         ChatEditor,
         Loading,
+        Notification,
     },
-    props: {
-        conversation: {
-            type: Object,
-        },
-        friendList: {
-            type: Boolean,
-        },
-    },
+    mixins: [mixin],
     data() {
-        return {
-            loadMore: this.onLoadMore,
-            theme: this.$vuetify.theme,
-            newMessage: null,
-            messages: [],
-        };
+        return {};
     },
     computed: {
         destUser() {
@@ -151,25 +154,10 @@ export default {
     created() {
         this.bus = window.IoC.get("bus");
         this.chatId = this.conversation._id || this.conversation.id;
-        this.messages = this.conversation.messages;
     },
     methods: {
-        onLoadMore() {
-            if (this.conversation._isTemp == true) {
-                return Promise.resolve([]);
-            }
-
-            return this.$store
-                .dispatch("conversations/getConversationContent", {
-                    convId: this.conversation.id,
-                })
-                .catch(console.error);
-        },
         onShowFriendList() {
             this.$emit("show-friend-list", !this.friendList);
-        },
-        onChatEditorReady() {
-            this.scrollToBottom();
         },
         onSendMessage(html) {
             this.onRead();
@@ -208,51 +196,6 @@ export default {
                 })
                 .catch(console.error);
         },
-        onDeleteMyMessage(message) {
-            this.$store
-                .dispatch("conversations/deleteMessage", message)
-                .catch(console.error);
-        },
-        onReact(type, message, status = true) {
-            this.$store
-                .dispatch("conversations/reactMessage", {
-                    type,
-                    message,
-                    status,
-                })
-                .then(msg => {
-                    message.reactions = msg.reactions;
-                })
-                .catch(console.error);
-        },
-        onDereact(type, message) {
-            this.onReact(type, message, false);
-        },
-        onQuote(message) {
-            this.onRead();
-            if (
-                !message ||
-                !message.body.content ||
-                (message.body.type != null && message.body.type != "html")
-            ) {
-                return;
-            }
-
-            console.log("Quote: ", message.id);
-            this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
-        },
-        onRead() {
-            const conv = this.conversation;
-            if (conv && conv.meta.unreadMessages.length > 0) {
-                this.$store
-                    .dispatch("conversations/watchAllMessage", conv.id)
-                    .catch(console.error);
-            }
-        },
-        scrollToBottom() {
-            const msgSheetEl = this.$refs.messageSheet.$el;
-            scrollToBottom(msgSheetEl);
-        },
     },
 };
 </script>
@@ -263,13 +206,18 @@ export default {
 }
 
 /* Message aligment */
-.message-sheet >>> .message-item:not(:first-of-type) .message-item__content-header {
+.message-sheet
+    >>> .message-item:not(:first-of-type)
+    .message-item__content-header {
     display: none;
 }
 
 .message-sheet >>> .my-message + .your-message .message-item__content-header,
 .message-sheet >>> .your-message + .my-message .message-item__content-header,
-.message-sheet >>> .conversation-loading + .message-item .message-item__content-header {
+.message-sheet
+    >>> .conversation-loading
+    + .message-item
+    .message-item__content-header {
     display: flex;
 }
 
@@ -325,6 +273,7 @@ export default {
     padding-bottom: 2px;
 }
 
+.chat-box >>> .notification,
 .chat-box >>> .chat-editor {
     margin-left: 60px;
     margin-right: 14px;

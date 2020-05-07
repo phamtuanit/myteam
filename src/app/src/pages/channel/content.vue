@@ -28,14 +28,20 @@
             </Message>
         </v-sheet>
 
+        <Notification
+            class="notification"
+            :read-more="allowReadMore"
+            @read-more="onReadMore"
+        />
+
         <!-- Input -->
         <ChatEditor
-            class="channel__input mt-2 mb-1"
+            class="channel_input mt-2 mb-1"
             v-model="newMessage"
             :id="conversation.id"
             :mention="mention"
-            @enter="onSend"
-            @send="onSend"
+            @send="onSendMessage"
+            @ready="onChatEditorReady"
         ></ChatEditor>
     </div>
 </template>
@@ -44,18 +50,17 @@
 import ChatEditor from "../../components/editor/chat-editor.vue";
 import Loading from "../../components/infinity-scroll-top.vue";
 import Message from "./message.vue";
+import Notification from "../shared/conversation-notification.vue";
 import { mapState } from "vuex";
-import { scrollToBottom } from "../../utils/layout.js";
+import mixin from "../mixin/conversation-content.mix.js";
 export default {
     props: {
         conversation: Object,
     },
-    components: { ChatEditor, Message, Loading },
+    components: { ChatEditor, Message, Loading, Notification },
+    mixins: [mixin],
     data() {
         return {
-            loadMore: this.onLoadMore,
-            newMessage: null,
-            messages: [],
             mention: {
                 feeds: [
                     {
@@ -72,19 +77,8 @@ export default {
             cachedUsers: state => state.users.all,
         }),
     },
-    created() {
-        this.messages = this.conversation.messages;
-    },
     methods: {
-        onRead() {
-            const conv = this.conversation;
-            if (conv && conv.meta.unreadMessages.length > 0) {
-                this.$store
-                    .dispatch("conversations/watchAllMessage", conv.id)
-                    .catch(console.error);
-            }
-        },
-        onSend(html) {
+        onSendMessage(html) {
             this.onRead();
             if (!html) {
                 return;
@@ -105,50 +99,6 @@ export default {
                     setTimeout(this.scrollToBottom, 10);
                 })
                 .catch(console.error);
-        },
-        onReact(type, message, status = true) {
-            this.$store
-                .dispatch("conversations/reactMessage", {
-                    type,
-                    message,
-                    status,
-                })
-                .then(msg => {
-                    message.reactions = msg.reactions;
-                })
-                .catch(console.error);
-        },
-        onDereact(type, message) {
-            this.onReact(type, message, false);
-        },
-        onDeleteMessage(message) {
-            this.$store
-                .dispatch("conversations/deleteMessage", message)
-                .catch(console.error);
-        },
-        onQuote(message) {
-            this.onRead();
-            if (
-                !message ||
-                !message.body.content ||
-                (message.body.type != null && message.body.type != "html")
-            ) {
-                return;
-            }
-
-            console.log("Quote: ", message.id);
-            this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
-        },
-        onLoadMore() {
-            return this.$store
-                .dispatch("conversations/getConversationContent", {
-                    convId: this.conversation.id,
-                })
-                .catch(console.error);
-        },
-        scrollToBottom() {
-            const msgSheetEl = this.$refs.messageFeed.$el;
-            scrollToBottom(msgSheetEl);
         },
         getUsers(queryText) {
             if (queryText.toLowerCase() == "all") {
@@ -188,7 +138,8 @@ export default {
     width: 100%;
 }
 
-.channel__input {
+.conversation-content >>> .notification,
+.channel_input {
     margin-left: 60px;
     margin-right: 58px;
 }
