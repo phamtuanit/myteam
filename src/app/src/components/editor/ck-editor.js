@@ -47,6 +47,7 @@ import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleu
 // import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 
 import Link from '@ckeditor/ckeditor5-link/src/link';
+import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 
 export default class Editor extends ClassicEditor { }
 
@@ -88,6 +89,7 @@ Editor.builtinPlugins = [
     // Essentials,
     Paragraph,
     TextTransformation,
+    MediaEmbed,
 ];
 
 // Editor configuration.
@@ -112,6 +114,7 @@ ClassicEditor.defaultConfig = {
             "|",
             'link',
             "imageUpload",
+            "mediaEmbed",
             // "imageStyle:alignLeft",
             // "imageStyle:full",
             // "imageStyle:alignRight",
