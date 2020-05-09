@@ -36,6 +36,8 @@ export default {
         this.notification = window.IoC.get("notification");
         const eventBus = window.IoC.get("bus");
         eventBus.on("messages", this.onNewMessage);
+
+        this.updateTitle();
     },
     methods: {
         updateTitle() {
@@ -83,7 +85,7 @@ export default {
 
                                 if (conv.channel == true) {
                                     notifyTitle =
-                                        `${conv.name} • ` + notifyTitle;
+                                        `#${conv.name} • ` + notifyTitle;
                                 }
                                 this.notification.notify(
                                     notifyTitle,
