@@ -34,6 +34,7 @@ export default {
     mounted() {
         this.me = this.$store.state.users.me;
         this.notification = window.IoC.get("notification");
+
         const eventBus = window.IoC.get("bus");
         eventBus.on("messages", this.onNewMessage);
 
