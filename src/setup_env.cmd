@@ -13,3 +13,5 @@ start "myteam-mongodb" mongod.exe --dbpath=%MONGO_DB_PATH%  --bind_ip_all
 cd %REDIS_DB_PATH%
 echo Setting up Redis: %REDIS_DB_PATH%
 start "myteam-redis" redis-server.exe %REDIS_DB_CONF%
+
+exit
