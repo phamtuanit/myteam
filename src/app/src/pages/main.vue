@@ -1,5 +1,8 @@
 <template>
-    <v-content id="main-layout" class="main-view">
+    <v-content
+        id="main-layout"
+        class="main-view"
+    >
         <LeftDrawer></LeftDrawer>
         <RouterView :key="$route.name" />
     </v-content>
@@ -28,13 +31,70 @@ export default {
             this.updateTitle();
         },
     },
+    mounted() {
+        this.me = this.$store.state.users.me;
+        this.notification = window.IoC.get("notification");
+        const eventBus = window.IoC.get("bus");
+        eventBus.on("messages", this.onNewMessage);
+    },
     methods: {
         updateTitle() {
-            if (this.chatUnread.length > 0 || this.chatUnread.length > 0) {
+            if (this.chatUnread.length > 0 || this.channelUread.length > 0) {
                 // Update website title
                 document.title = `${BASE_WEB_TITLE} \ud83d\udc8c You have new message`;
             } else {
                 document.title = BASE_WEB_TITLE;
+            }
+        },
+        onNewMessage(act, conv, message) {
+            const me = this.me;
+            if (!message.from || me.id == message.from.issuer) {
+                return;
+            }
+
+            switch (act) {
+                case "added":
+                    {
+                        // Notify to user vie Notification API
+                        let notifyBody = "Non-html message";
+                        if (
+                            message.body.type == "" ||
+                            message.body.type == "html"
+                        ) {
+                            // Convert raw html to text
+                            let html = message.body.content;
+                            html = html
+                                .replace(/<img/g, "<span")
+                                .replace(/<\/img/g, "</span");
+                            const el = document.createElement("div");
+                            el.innerHTML = html;
+                            notifyBody = el.innerText;
+                        }
+
+                        const userId = message.from.issuer;
+                        this.$store
+                            .dispatch("users/resolve", [userId])
+                            .then(users => {
+                                let userName = userId;
+                                if (Array.isArray(users) && users.length > 0) {
+                                    userName = users[0].fullName || userName;
+                                }
+                                let notifyTitle = `New message from ${userName}`;
+
+                                if (conv.channel == true) {
+                                    notifyTitle =
+                                        `${conv.name} • ` + notifyTitle;
+                                }
+                                this.notification.notify(
+                                    notifyTitle,
+                                    notifyBody
+                                );
+                            });
+                    }
+                    break;
+
+                default:
+                    break;
             }
         },
     },

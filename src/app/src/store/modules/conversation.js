@@ -281,7 +281,7 @@ const moduleState = {
                 .find(c => c.id == convId);
 
             if (conv) {
-                const pushToUnread = function(message) {
+                const pushToUnread = function (message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessages.push(message);
 
@@ -315,7 +315,7 @@ const moduleState = {
                         conv.messages.push(message);
                         pushToUnread(message);
                         eventBus.emit("messages", "added", conv, message);
-                        
+
                     } else {
                         // Update existing message
                         Object.assign(foundMessage, message);
@@ -438,7 +438,6 @@ const moduleState = {
 
             // Setup Socket
             await this.dispatch("conversations/setupSocket");
-            await this.dispatch("conversations/setupNotification");
 
             const { state, commit, rootState } = ctx;
             const me = rootState.users.me;
@@ -827,61 +826,6 @@ const moduleState = {
                 "conversation",
                 handleWSConversation.bind(this, socket, state, commit)
             );
-        },
-        async setupNotification() {
-            eventBus.on("messages", (act, conv, message) => {
-                const me = this.state.users.me;
-                if (!message.from || me.id == message.from.issuer) {
-                    return;
-                }
-
-                switch (act) {
-                    case "added":
-                        {
-                            // Notify to user vie Notification API
-                            let notifyBody = "Non-html message";
-                            if (
-                                message.body.type == "" ||
-                                message.body.type == "html"
-                            ) {
-                                // Convert raw html to text
-                                let html = message.body.content;
-                                html = html.replace(/<img/g, '<span').replace(/<\/img/g, '</span');
-                                const el = document.createElement("div");
-                                el.innerHTML = html;
-                                notifyBody = el.innerText;
-                            }
-
-                            const userId = message.from.issuer;
-                            this.dispatch("users/resolve", [userId]).then(
-                                users => {
-                                    let userName = userId;
-                                    if (
-                                        Array.isArray(users) &&
-                                        users.length > 0
-                                    ) {
-                                        userName =
-                                            users[0].fullName || userName;
-                                    }
-                                    let notifyTitle = `New message from ${userName}`;
-
-                                    if (conv.channel == true) {
-                                        notifyTitle =
-                                            `${conv.name} • ` + notifyTitle;
-                                    }
-                                    notification.notify(
-                                        notifyTitle,
-                                        notifyBody
-                                    );
-                                }
-                            );
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            });
         },
         async reactMessage({ commit, state }, { type, message, status }) {
             const convId = message.to.conversation;
