@@ -41,7 +41,6 @@
             :id="conversation.id"
             :mention="mention"
             @send="onSendMessage"
-            @ready="onChatEditorReady"
         ></ChatEditor>
     </div>
 </template>

@@ -25,6 +25,7 @@ export default {
             "scroll",
             this.handleScroll
         );
+        setTimeout(this.scrollToBottom, 1000, this);
     },
     watch: {
         "unreadMessages"() {
@@ -42,9 +43,6 @@ export default {
                     convId: this.conversation.id,
                 })
                 .catch(console.error);
-        },
-        onChatEditorReady() {
-            this.scrollToBottom();
         },
         onDeleteMessage(message) {
             this.$store

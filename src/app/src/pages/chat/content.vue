@@ -101,7 +101,6 @@
             v-model="newMessage"
             :id="conversation.id"
             @send="onSendMessage"
-            @ready="onChatEditorReady"
         ></ChatEditor>
     </div>
 </template>
