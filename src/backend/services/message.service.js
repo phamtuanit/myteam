@@ -75,6 +75,7 @@ module.exports = {
                     type: "object",
                     props: {
                         type: { type: "string" },
+                        content:  [{ type: "string" }, { type: "object" }],
                     },
                 },
             },
@@ -124,7 +125,7 @@ module.exports = {
                     type: "object",
                     props: {
                         type: { type: "string" },
-                        content: "object",
+                        content:  [{ type: "string" }, { type: "object" }],
                     },
                 },
             },
@@ -553,6 +554,7 @@ module.exports = {
             );
             cleanDbMark(updatedEntity);
 
+            const payload = { ...updatedEntity };
             const msgQueue = {
                 id: new Date(payload.updated).getTime(),
                 type: "message",
@@ -561,7 +563,6 @@ module.exports = {
             };
 
             if (convInfo.subscribers && convInfo.subscribers.length > 0) {
-                const payload = { ...updatedEntity };
                 payload.modification = [];
 
                 // 2. Save information to user queue
