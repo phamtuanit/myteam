@@ -24,7 +24,9 @@
                 @quote="onQuote"
             >
                 <!-- Separator -->
-                <v-divider class="message-item__content-separator mx-3"></v-divider>
+                <v-divider
+                    class="message-item__content-separator mx-3"
+                ></v-divider>
             </Message>
         </v-sheet>
 
@@ -40,6 +42,7 @@
             v-model="newMessage"
             :id="conversation.id"
             :mention="mention"
+            :sending="sending"
             @send="onSendMessage"
         ></ChatEditor>
     </div>
@@ -60,6 +63,7 @@ export default {
     mixins: [mixin],
     data() {
         return {
+            sending: false,
             mention: {
                 feeds: [
                     {
@@ -91,13 +95,18 @@ export default {
                     content: html,
                 },
             };
+
+            this.sending = true;
             this.$store
                 .dispatch("conversations/sendMessage", msg)
                 .then(() => {
                     this.newMessage = "";
                     setTimeout(this.scrollToBottom, 10);
                 })
-                .catch(console.error);
+                .catch(console.error)
+                .finally(() => {
+                    this.sending = false;
+                });
         },
         getUsers(queryText) {
             if (queryText.toLowerCase() == "all") {
@@ -146,8 +155,7 @@ export default {
 
 <style lang="css">
 .channel-message-item:first-of-type .message-item__content-separator,
-.conversation-loading + .channel-message-item .message-item__content-separator
- {
+.conversation-loading + .channel-message-item .message-item__content-separator {
     display: none;
 }
 
@@ -174,7 +182,9 @@ export default {
 }
 
 .channel-message-item:first-of-type .message-item__content--card::after,
-.conversation-loading + .channel-message-item .message-item__content--card::after {
+.conversation-loading
+    + .channel-message-item
+    .message-item__content--card::after {
     border-radius: 0 3px 0 0 !important;
 }
 

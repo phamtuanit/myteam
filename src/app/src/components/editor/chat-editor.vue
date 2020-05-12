@@ -15,7 +15,9 @@
             />
         </v-sheet>
 
-        <v-sheet class="transparent d-flex justify-space-between mt-1 chat-editor__actions">
+        <v-sheet
+            class="transparent d-flex justify-space-between mt-1 chat-editor__actions"
+        >
             <!-- Start -->
             <div class="d-flex flex-align-start">
                 <EmojiButton
@@ -28,15 +30,16 @@
                     @click="showToolBar = !showToolBar"
                     title="Format (ESC)"
                 >
-                    <v-icon
-                        size="18"
-                        :color="showToolBar ? 'orange' : ''"
-                    >mdi-format-letter-case-upper</v-icon>
+                    <v-icon size="18" :color="showToolBar ? 'orange' : ''"
+                        >mdi-format-letter-case-upper</v-icon
+                    >
                 </v-btn>
             </div>
             <!-- End -->
             <v-btn
                 icon
+                :loading="isSending"
+                :color="isSending ? 'orange' : ''"
                 @click="onSend"
                 title="Send (Enter)"
             >
@@ -71,6 +74,10 @@ export default {
             type: Object,
             default: null,
         },
+        sending: {
+            type: Boolean,
+            default: false,
+        },
     },
     components: { EmojiButton, Editor },
     data() {
@@ -79,6 +86,7 @@ export default {
             showToolBar: false,
             internalValue: this.value,
             emojiPopup: false,
+            isSending: this.sending,
             editorConfig: {
                 simpleUpload: {
                     id: this.id,
@@ -105,6 +113,15 @@ export default {
                 if (!val) {
                     this.showToolBar = false;
                 }
+            }
+        },
+        sending(val) {
+            if (val) {
+                setTimeout(() => {
+                    this.isSending = this.sending;
+                }, 1000);
+            } else {
+                this.isSending = val;
             }
         },
     },

@@ -100,6 +100,7 @@
             class="chat-editor mt-2 mb-1"
             v-model="newMessage"
             :id="conversation.id"
+            :sending="sending"
             @send="onSendMessage"
         ></ChatEditor>
     </div>
@@ -135,7 +136,9 @@ export default {
     },
     mixins: [mixin],
     data() {
-        return {};
+        return {
+            sending: false,
+        };
     },
     computed: {
         destUser() {
@@ -187,13 +190,18 @@ export default {
                     content: html,
                 },
             };
+
+            this.sending = true;
             this.$store
                 .dispatch("conversations/sendMessage", msg)
                 .then(() => {
                     this.newMessage = "";
                     setTimeout(this.scrollToBottom, 10);
                 })
-                .catch(console.error);
+                .catch(console.error)
+                .finally(() => {
+                    this.sending = false;
+                });
         },
     },
 };
