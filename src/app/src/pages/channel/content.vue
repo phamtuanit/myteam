@@ -22,6 +22,7 @@
                 @dereact="onDereact"
                 @delete="onDeleteMessage"
                 @quote="onQuote"
+                @edit="onEditMessage"
             >
                 <!-- Separator -->
                 <v-divider
@@ -33,7 +34,10 @@
         <Notification
             class="notification"
             :read-more="allowReadMore"
+            :editing="editingMessage != null"
             @read-more="onReadMore"
+            @edit:locate="onLocateEditingMessage"
+            @edit:cancel="onCancelEditingMessage"
         />
 
         <!-- Input -->
@@ -64,6 +68,7 @@ export default {
     data() {
         return {
             sending: false,
+            editingMessage: null,
             mention: {
                 feeds: [
                     {
@@ -87,6 +92,73 @@ export default {
                 return;
             }
 
+            if (this.editingMessage) {
+                // Update message content
+                this.updateMessage(html);
+            } else {
+                // Send new message
+                this.sendMessage(html);
+            }
+        },
+        onEditMessage(message) {
+            if (this.editingMessage) {
+                this.editingMessage.status = "";
+            }
+
+            this.editingMessage = message;
+            this.editingMessage.status = "editing";
+            this.newMessage = this.editingMessage.body.content;
+        },
+        onLocateEditingMessage() {
+            if (this.editingMessage) {
+                const mesgId = this.editingMessage.id;
+                const containerEl = this.$refs.messageFeed.$el;
+                const msgEl = containerEl.querySelector(
+                    `.message-item[data-message-id="${mesgId}"]`
+                );
+                if (msgEl) {
+                    msgEl.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest",
+                        inline: "nearest",
+                    });
+                }
+            }
+        },
+        onCancelEditingMessage() {
+            if (this.editingMessage) {
+                this.editingMessage.status = "";
+                this.editingMessage = null;
+                this.newMessage = "";
+            }
+        },
+        updateMessage(html) {
+            const convId = this.conversation.id;
+            const originalMsg = this.editingMessage;
+            // Send message
+            const msg = {
+                convId: convId,
+                id: originalMsg.id,
+                body: {
+                    content: html,
+                },
+            };
+
+            this.sending = true;
+            this.$store
+                .dispatch("conversations/updateMessage", msg)
+                .then(() => {
+                    // Scroll to message item
+                    this.onLocateEditingMessage();
+                    // Reset editing state
+                    this.onCancelEditingMessage();
+                })
+                .catch(console.error)
+                .finally(() => {
+                    this.sending = false;
+                });
+        },
+        sendMessage(html) {
             const convId = this.conversation.id;
             // Send message
             const msg = {

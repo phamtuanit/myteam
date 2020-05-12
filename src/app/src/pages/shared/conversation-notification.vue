@@ -1,14 +1,30 @@
 <template>
     <div class="conversation-notification">
-        <div class="notification_container d-flex">
+        <div
+            class="notification_container--fixed pa-1 center-y"
+            v-show="editing"
+        >
+            <v-chip
+                color="orange darken-1"
+                outlined
+                @click="onScrollToOrigin"
+            >
+                <v-icon>mdi-chevron-double-up</v-icon>
+                <span class="ml-1">Editing message</span>
+            </v-chip>
+            <v-icon size="24" color="red" class="ml-1" @click="onCancelEdit"
+                >mdi-close-circle</v-icon
+            >
             <v-spacer></v-spacer>
-            <div class="notification_content right d-flex">
+        </div>
+        <div class="notification_container--float d-flex">
+            <v-spacer></v-spacer>
+            <div v-show="allowScrollDown">
                 <v-chip
                     class="ma-2"
                     color="blue darken-1"
                     outlined
                     @click="onReadMessage"
-                    v-show="allowScrollDown"
                 >
                     <span class="ml-1">New message</span>
                     <v-icon>mdi-chevron-double-down</v-icon>
@@ -26,10 +42,14 @@ export default {
             type: Boolean,
             default: false,
         },
+        editing: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
-            allowScrollDown: false,
+            allowScrollDown: this.readMore,
         };
     },
     watch: {
@@ -47,6 +67,12 @@ export default {
         onReadMessage() {
             this.$emit("read-more");
         },
+        onCancelEdit() {
+            this.$emit("edit:cancel");
+        },
+        onScrollToOrigin() {
+            this.$emit("edit:locate");
+        },
     },
 };
 </script>
@@ -54,11 +80,9 @@ export default {
 <style scoped>
 .conversation-notification {
     position: relative;
-    height: 0;
-    background: green;
 }
 
-.notification_container {
+.notification_container--float {
     position: absolute;
     height: 40px;
     top: -46px;

@@ -281,7 +281,7 @@ const moduleState = {
                 .find(c => c.id == convId);
 
             if (conv) {
-                const pushToUnread = function (message) {
+                const pushToUnread = function(message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessages.push(message);
 
@@ -308,14 +308,16 @@ const moduleState = {
                     if (!foundMessage) {
                         // Remove oldest message
                         if (conv.messages.length >= MAX_MESSAGES) {
-                            conv.messages.splice(0, conv.messages.length - MAX_MESSAGES + 1);
+                            conv.messages.splice(
+                                0,
+                                conv.messages.length - MAX_MESSAGES + 1
+                            );
                             conv.reachedFullHistories = false;
                         }
 
                         conv.messages.push(message);
                         pushToUnread(message);
                         eventBus.emit("messages", "added", conv, message);
-
                     } else {
                         // Update existing message
                         Object.assign(foundMessage, message);
@@ -731,6 +733,29 @@ const moduleState = {
             }
 
             return await messageService.create(conv.id, body).then(res => {
+                const payload = {
+                    convId: conv.id,
+                    message: res.data,
+                };
+                commit("addMessage", payload);
+                return res.data;
+            });
+        },
+        async updateMessage({ commit, state }, { convId, id, body }) {
+            if (!convId) {
+                console.warn("convId is required.");
+                return;
+            }
+
+            let conv = state.channel.all
+                .concat(state.chat.all)
+                .find(i => (i.id || i._id) == convId);
+            if (!conv) {
+                console.warn("The conversation doesn't exist");
+                return;
+            }
+
+            return await messageService.update(conv.id, id, body).then(res => {
                 const payload = {
                     convId: conv.id,
                     message: res.data,

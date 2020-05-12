@@ -1,9 +1,12 @@
 <template>
     <v-sheet
         class="message-item channel-message-item d-flex transparent mx-4"
+        :id="'channel-message-' + message.id"
+        :data-message-id="message.id"
         :class="{
             'message-item--me': isMyMessage,
             'message-item--deleted': message.status == 'removed',
+            'message-item--editing': message.status == 'editing',
         }"
     >
         <div class="message-item__user pr-1">
@@ -51,6 +54,11 @@
                                 <v-list-item @click="onQuote">
                                     <v-list-item-title>Quote</v-list-item-title>
                                 </v-list-item>
+                                <v-list-item @click="onEdit">
+                                    <v-list-item-title
+                                        >Edit</v-list-item-title
+                                    > </v-list-item
+                                >
                                 <v-list-item @click="onDelete">
                                     <v-list-item-title class="red--text"
                                         >Delete</v-list-item-title
@@ -149,6 +157,9 @@ export default {
         onQuote() {
             this.$emit("quote", this.message);
         },
+        onEdit() {
+            this.$emit("edit", this.message);
+        },
     },
 };
 </script>
@@ -210,6 +221,10 @@ export default {
 
 .message-item--deleted .message-item__content--card::after {
     background-color: red;
+}
+
+.message-item.message-item--editing .message-item__content--card::after {
+    background-color: var(--primary-color);
 }
 
 .message-item__content-actions {
