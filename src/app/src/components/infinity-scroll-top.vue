@@ -39,32 +39,16 @@ export default {
         return {
             isLoading: false,
             isBusy: false,
-            scrollBar: false,
+            scrollBar: true,
         };
     },
     mounted() {
         this.parent = this.$parent;
-        this.scrollBar = this.hasScrollBar();
 
-        this.scrollToBottom();
-
-        // Watch scroll
-        this.parent.$el.addEventListener("scroll", () => {
-            if (!this.reachedEnd) {
-                setTimeout(this.checkScroll, 0);
-            }
-        });
-
-        // Watch inner items
-        this.mutationObserver = new MutationObserver(() => {
-            if (!this.isBusy) {
-                this.scrollBar = this.hasScrollBar();
-            }
-        });
-        this.mutationObserver.observe(this.parent.$el, {
-            childList: true,
-            subtree: true,
-        });
+        setTimeout(() => {
+            this.scrollBar = this.hasScrollBar();
+            this.setupObserver();
+        }, 2000);
     },
     destroyed() {
         this.mutationObserver.disconnect();
@@ -119,9 +103,25 @@ export default {
         isFeedAtTop() {
             return;
         },
-        scrollToBottom() {
-            const containerEl = this.parent.$el;
-            containerEl.scrollTop = containerEl.scrollHeight;
+        setupObserver() {
+            // Watch scroll
+            this.parent.$el.addEventListener("scroll", () => {
+                if (!this.reachedEnd) {
+                    setTimeout(this.checkScroll, 0);
+                }
+            });
+
+            // Watch inner items
+            this.mutationObserver = new MutationObserver(() => {
+                if (!this.isBusy) {
+                    this.scrollBar = this.hasScrollBar();
+                }
+            });
+
+            this.mutationObserver.observe(this.parent.$el, {
+                childList: true,
+                subtree: true,
+            });
         },
         checkScroll() {
             if (this.isBusy == true || this.isLoading == true) {
