@@ -1,6 +1,7 @@
 "use strict";
 const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
+const MessageFactory = require("../message-processor/factory.js");
 const { cleanDbMark } = require("../utils/entity");
 
 /**
@@ -75,7 +76,7 @@ module.exports = {
                     type: "object",
                     props: {
                         type: { type: "string" },
-                        content:  [{ type: "string" }, { type: "object" }],
+                        content: [{ type: "string" }, { type: "object" }],
                     },
                 },
             },
@@ -110,8 +111,7 @@ module.exports = {
                     );
                 }
 
-                const newMessage = this.processMessage(message, true);
-                return await this.storeMessage(newMessage, ctx, convInfo);
+                return await this.storeMessage(message, ctx, convInfo);
             },
         },
         updateMessage: {
@@ -125,7 +125,7 @@ module.exports = {
                     type: "object",
                     props: {
                         type: { type: "string" },
-                        content:  [{ type: "string" }, { type: "object" }],
+                        content: [{ type: "string" }, { type: "object" }],
                     },
                 },
             },
@@ -146,8 +146,7 @@ module.exports = {
                     body,
                 };
 
-                const newMessage = this.processMessage(message, false);
-                return await this.updateMessage(newMessage, ctx);
+                return await this.updateMessage(message, ctx);
             },
         },
         removeMessage: {
@@ -234,7 +233,9 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${conversationId}.message.removed`;
-                this.broker.broadcast(eventName, message).catch(this.logger.error);
+                this.broker
+                    .broadcast(eventName, message)
+                    .catch(this.logger.error);
 
                 return message;
             },
@@ -403,7 +404,9 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${conversationId}.message.updated.reacted`;
-                this.broker.broadcast(eventName, result).catch(this.logger.error);
+                this.broker
+                    .broadcast(eventName, result)
+                    .catch(this.logger.error);
 
                 return result;
             },
@@ -415,6 +418,26 @@ module.exports = {
      */
     methods: {
         processMessage(message, isNew) {
+            // Update message type
+            if (!message.body.type) {
+                message.body.type = "html";
+            }
+
+            // Get processor to process message before store the message into DB
+            const processor = this.msgFactory.getProcessor(message);
+            if (processor) {
+                const newMsg = processor.process(
+                    message,
+                    isNew ? "new" : "update"
+                );
+                message = newMsg || message;
+            }
+
+            // Check mentions
+            if (message.mentions && message.mentions.length > 0) {
+                const issuer = message.from.issuer;
+                message.mentions = message.mentions.filter((u) => u !== issuer);
+            }
             return message;
         },
         getHistoryCollectionName(conversation) {
@@ -468,7 +491,11 @@ module.exports = {
 
                     // Support get top
                     if (top) {
-                        result = await dbCollection.collection.find(query).sort({ $natural: -1 }).limit(top).toArray();
+                        result = await dbCollection.collection
+                            .find(query)
+                            .sort({ $natural: -1 })
+                            .limit(top)
+                            .toArray();
                         result = result.reverse();
                     } else {
                         // The other cases
@@ -476,7 +503,7 @@ module.exports = {
                         const filter = { query };
                         const options = { sort, limit, offset };
 
-                        Object.keys(options).forEach(key => {
+                        Object.keys(options).forEach((key) => {
                             const val = options[key];
                             if (val) {
                                 filter[key] = val;
@@ -534,8 +561,14 @@ module.exports = {
                 );
             }
 
+            // Verify role
+            this.checkCreatorRole(ctx, oldEntity);
+
+            // Process message
+            const newMessage = this.processMessage(message, false);
+
             // 2. Update message
-            const newEntity = message;
+            const newEntity = newMessage;
             // Update history
             const modification = oldEntity.modification || [];
             const history = oldEntity.body;
@@ -589,18 +622,14 @@ module.exports = {
 
             // Broadcast message
             const eventName = `conversation.${conversationId}.message.updated`;
-            this.broker.broadcast(eventName, updatedEntity).catch(this.logger.error);
+            this.broker
+                .broadcast(eventName, updatedEntity)
+                .catch(this.logger.error);
 
             return updatedEntity;
         },
         async storeMessage(message, ctx, convObj) {
             const conversationId = parseInt(message.to.conversation);
-            const msgQueue = {
-                id: message.id,
-                type: "message",
-                action: "created",
-                payload: message,
-            };
 
             let convInfo =
                 convObj ||
@@ -623,16 +652,20 @@ module.exports = {
             const convCollId = this.getHistoryCollectionName(conversationId);
             const dbCollection = await this.getDBCollection(convCollId);
 
-            // Define default key
-            message.modification = [];
-            message.reactions = [];
-            cleanDbMark(message);
+            // Process message
+            message = this.processMessage(message, true, convInfo);
 
             // Insert one more record
-            const entity = await dbCollection.insert(message);
-            cleanDbMark(entity);
+            const entity = await dbCollection.insert(message).then(cleanDbMark);
 
             if (convInfo.subscribers && convInfo.subscribers.length > 0) {
+                const msgQueue = {
+                    id: message.id,
+                    type: "message",
+                    action: "created",
+                    payload: message,
+                };
+
                 // 2. Save information to user queue and send message to WS
                 for (
                     let index = 0;
@@ -666,15 +699,17 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {
+        this.msgFactory = new MessageFactory(this.logger);
+    },
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { },
+    stopped() {},
 };
