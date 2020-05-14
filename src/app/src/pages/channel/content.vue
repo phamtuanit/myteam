@@ -185,7 +185,7 @@ export default {
                 return [
                     {
                         id: "@All",
-                        userId: "all-user",
+                        userId: "all-users",
                         name: "All",
                     },
                 ];
