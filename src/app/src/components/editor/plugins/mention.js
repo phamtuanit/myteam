@@ -5,7 +5,7 @@ export default function MentionCustomization(editor) {
         view: {
             name: "span",
             key: "data-mention",
-            classes: "mention user-mention",
+            classes: "mention",
             attributes: {
                 "data-user-id": true,
             },
@@ -28,7 +28,7 @@ export default function MentionCustomization(editor) {
         converterPriority: "high",
     });
 
-    // Downcast the model 'mention' text attribute to a view <a> element.
+    // Downcast the model 'mention' text attribute to a view <span> element.
     editor.conversion.for("downcast").attributeToElement({
         model: "mention",
         view: (modelAttributeValue, viewWriter) => {
@@ -37,19 +37,13 @@ export default function MentionCustomization(editor) {
                 return;
             }
 
-            const obj = {
-                class: "mention",
+            const options = {
+                class: "mention user-mention",
                 "data-mention": modelAttributeValue.id,
+                "data-user-id": modelAttributeValue.userId
             };
 
-            if (modelAttributeValue.userId) {
-                obj["data-user-id"] = modelAttributeValue.userId;
-                obj.class += " user-mention";
-            } else {
-                obj.class += " user-mention--unknown";
-            }
-
-            return viewWriter.createAttributeElement("span", obj);
+            return viewWriter.createAttributeElement("span", options);
         },
         converterPriority: "high",
     });
