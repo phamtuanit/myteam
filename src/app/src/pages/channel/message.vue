@@ -43,10 +43,12 @@
                     ></ReactionEmoji>
 
                     <!-- Actions -->
-                    <div class="message-item__content-actions center-y ml-1">
+                    <div
+                        class="message-item__content-actions center-y ml-1 mr-1"
+                    >
                         <v-menu left>
                             <template v-slot:activator="{ on }">
-                                <v-btn icon small v-on="on" class="mx-auto">
+                                <v-btn icon small v-on="on" class="mr-0">
                                     <v-icon small>mdi-dots-vertical</v-icon>
                                 </v-btn>
                             </template>
@@ -55,10 +57,8 @@
                                     <v-list-item-title>Quote</v-list-item-title>
                                 </v-list-item>
                                 <v-list-item @click="onEdit">
-                                    <v-list-item-title
-                                        >Edit</v-list-item-title
-                                    > </v-list-item
-                                >
+                                    <v-list-item-title>Edit</v-list-item-title>
+                                </v-list-item>
                                 <v-list-item @click="onDelete">
                                     <v-list-item-title class="red--text"
                                         >Delete</v-list-item-title
@@ -95,7 +95,17 @@
         </div>
 
         <!-- Mark -->
-        <div class="message-item__mark"></div>
+        <div class="message-item__mark">
+            <div class="message-item__mark-container">
+                <div
+                    class="mark-item rounded orange darken-1"
+                    icon
+                    v-if="isMentionMe"
+                >
+                    <v-icon small color="white">mdi-at</v-icon>
+                </div>
+            </div>
+        </div>
     </v-sheet>
 </template>
 
@@ -133,6 +143,20 @@ export default {
         isMyMessage() {
             return this.me.id === this.message.from.issuer;
         },
+        isMentionMe() {
+            if (
+                this.isMyMessage ||
+                !this.message.mentions ||
+                this.message.mentions.length === 0
+            ) {
+                return false;
+            }
+
+            return (
+                this.message.mentions.includes(this.me.id) ||
+                this.message.mentions.includes("all-users")
+            );
+        },
     },
     created() {
         if (this.message.from.issuer) {
@@ -166,6 +190,7 @@ export default {
 
 <style scoped>
 .message-item__mark {
+    position: relative;
     min-width: 40px;
 }
 
@@ -243,5 +268,39 @@ div:not(.message-item--deleted)
     padding-left: 5px;
     padding-right: 5px;
     color: hsl(0, 0%, 72%);
+}
+
+/* Marker */
+.message-item__mark-container {
+    position: absolute;
+    left: -10px;
+    top: 8px;
+}
+
+.btn-mention {
+    cursor: default;
+}
+
+.mark-item {
+    height: 28px;
+    width: 28px;
+    will-change: box-shadow;
+    cursor: default;
+    font-size: 0.75rem;
+    -webkit-appearance: button;
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-weight: 500;
+    letter-spacing: 0.0892857143em;
+    justify-content: center;
+    user-select: none;
+    vertical-align: middle;
+    white-space: nowrap;
+    position: relative;
+}
+
+.mark-item.rounded {
+    border-radius: 50%;
 }
 </style>
