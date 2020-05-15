@@ -6,8 +6,8 @@ module.exports = class ProcessorFactory {
         this.registerBuiltInProcessor();
     }
 
-    getProcessor(message) {
-        const msgType = message.body.type || "html";
+    getProcessor(type) {
+        const msgType = type || "html";
         return this.processors[msgType];
     }
 

@@ -1,8 +1,8 @@
 "use strict";
 const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
-const MessageFactory = require("../message-processor/factory.js");
 const { cleanDbMark } = require("../utils/entity");
+const ControllerFactory = require("../message-controller/factory.js");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -97,21 +97,15 @@ module.exports = {
                     },
                 };
 
-                let convInfo = await ctx.call(
-                    "v1.conversations.getConversationById",
-                    {
-                        id: conversation,
-                    }
+                const controller = this.controllerFactory.getController(
+                    message.body.type
                 );
-
-                if (!convInfo) {
-                    throw new Errors.MoleculerClientError(
-                        "The conversation could not be found.",
-                        404
-                    );
-                }
-
-                return await this.storeMessage(message, ctx, convInfo);
+                return await controller
+                    .inConversation(conversation)
+                    .withContext(ctx)
+                    .add(message)
+                    .commit()
+                    .then(cleanDbMark);
             },
         },
         updateMessage: {
@@ -131,22 +125,24 @@ module.exports = {
             },
             async handler(ctx) {
                 const { conversation, body, id } = ctx.params;
-                const { user } = ctx.meta;
 
                 const message = {
                     updated: new Date(),
                     id: id,
-                    from: {
-                        issuer: user.id,
-                        edited: true,
-                    },
-                    to: {
-                        conversation: conversation,
-                    },
                     body,
                 };
 
-                return await this.updateMessage(message, ctx);
+                const controller = this.controllerFactory.getController(
+                    message.body.type
+                );
+                return await controller
+                    .inConversation(conversation)
+                    .withContext(ctx)
+                    .update(message)
+                    .commit()
+                    .then(cleanDbMark);
+
+                // return await this.updateMessage(message, ctx);
             },
         },
         removeMessage: {
@@ -159,85 +155,13 @@ module.exports = {
             },
             async handler(ctx) {
                 const { conversation: conversationId, id } = ctx.params;
-
-                // Check conversation
-                let convInfo = await ctx.call(
-                    "v1.conversations.getConversationById",
-                    {
-                        id: conversationId,
-                    }
-                );
-
-                if (!convInfo) {
-                    throw new Errors.MoleculerClientError(
-                        "The conversation could not be found.",
-                        404
-                    );
-                }
-
-                const convCollId = this.getHistoryCollectionName(
-                    conversationId
-                );
-
-                // Get adapter
-                const dbCollection = await this.getDBCollection(convCollId);
-                const message = await dbCollection.findOne({ id });
-
-                // 1. Verify existing message
-                if (!message) {
-                    // The message not found
-                    this.logger.warn("The message could not be found.");
-                    return;
-                }
-
-                // Verify role
-                this.checkCreatorRole(ctx, message);
-
-                // 2. Delete record
-                message.deleted = new Date();
-                await dbCollection.removeById(message._id);
-                cleanDbMark(message);
-
-                // 3. Store information to message queue
-                if (convInfo.subscribers && convInfo.subscribers.length > 0) {
-                    const msgQueue = {
-                        id: new Date().getTime(),
-                        type: "message",
-                        action: "removed",
-                        payload: message,
-                    };
-
-                    for (
-                        let index = 0;
-                        index < convInfo.subscribers.length;
-                        index++
-                    ) {
-                        const subscriberId = convInfo.subscribers[index];
-
-                        // Store information to message queue
-                        ctx.call("v1.messages-queue.pushMessageToQueue", {
-                            userId: subscriberId,
-                            message: msgQueue,
-                        }).catch((error) => {
-                            this.logger.warn(
-                                "Could not save message to queue.",
-                                msgQueue,
-                                error
-                            );
-                        });
-                    }
-                }
-
-                // Clean _id
-                cleanDbMark(message);
-
-                // Broadcast message
-                const eventName = `conversation.${conversationId}.message.removed`;
-                this.broker
-                    .broadcast(eventName, message)
-                    .catch(this.logger.error);
-
-                return message;
+                const controller = this.controllerFactory.getController("html");
+                return await controller
+                    .inConversation(conversationId)
+                    .withContext(ctx)
+                    .delete({ id })
+                    .commit()
+                    .then(cleanDbMark);
             },
         },
         reactionMessage: {
@@ -628,79 +552,16 @@ module.exports = {
 
             return updatedEntity;
         },
-        async storeMessage(message, ctx, convObj) {
-            const conversationId = parseInt(message.to.conversation);
-
-            let convInfo =
-                convObj ||
-                (await ctx.call("v1.conversations.getConversationById", {
-                    id: conversationId,
-                }));
-
-            if (!convInfo) {
-                throw new Errors.MoleculerClientError(
-                    "The conversation could not be found.",
-                    404
-                );
-            }
-
-            if (!convInfo) {
-                throw new Error("Conversation not found");
-            }
-
-            // 1 Save message to conversation collection in DB
-            const convCollId = this.getHistoryCollectionName(conversationId);
-            const dbCollection = await this.getDBCollection(convCollId);
-
-            // Process message
-            message = this.processMessage(message, true, convInfo);
-
-            // Insert one more record
-            const entity = await dbCollection.insert(message).then(cleanDbMark);
-
-            if (convInfo.subscribers && convInfo.subscribers.length > 0) {
-                const msgQueue = {
-                    id: message.id,
-                    type: "message",
-                    action: "created",
-                    payload: message,
-                };
-
-                // 2. Save information to user queue and send message to WS
-                for (
-                    let index = 0;
-                    index < convInfo.subscribers.length;
-                    index++
-                ) {
-                    const subscriberId = convInfo.subscribers[index];
-
-                    // 2.1 Save new information to DB of corresponding user cache
-                    ctx.call("v1.messages-queue.pushMessageToQueue", {
-                        userId: subscriberId,
-                        message: msgQueue,
-                    }).catch((error) => {
-                        this.logger.warn(
-                            "Could not save message to queue.",
-                            msgQueue,
-                            error
-                        );
-                    });
-                }
-            }
-
-            // Broadcast message
-            const eventName = `conversation.${conversationId}.message.created`;
-            this.broker.broadcast(eventName, entity).catch(this.logger.error);
-
-            return entity;
-        },
     },
 
     /**
      * Service created lifecycle event handler
      */
     created() {
-        this.msgFactory = new MessageFactory(this.logger);
+        this.controllerFactory = new ControllerFactory(
+            this.broker,
+            this.logger
+        );
     },
 
     /**

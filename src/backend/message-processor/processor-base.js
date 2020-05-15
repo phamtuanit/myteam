@@ -1,21 +1,15 @@
-module.exports = class Processor {
+module.exports = class ProcessorBase {
     constructor(logger, name) {
         this.logger = logger;
         this.name = name;
     }
 
-    process(message, operation) {
+    process(message) {
         this.logger.debug(
             `[${this.name}]`,
             "Trying to process message with type",
-            message.body.type,
-            ", operation",
-            operation
+            message.body.type
         );
-
-        // Define default key
-        message.modification = message.modification || [];
-        message.reactions = message.reactions || [];
         return message;
     }
 };
