@@ -25,9 +25,7 @@
                 @edit="onEditMessage"
             >
                 <!-- Separator -->
-                <v-divider
-                    class="message-item__content-separator mx-3"
-                ></v-divider>
+                <v-divider class="message-item__content-separator mx-3"></v-divider>
             </Message>
         </v-sheet>
 

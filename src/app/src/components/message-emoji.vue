@@ -1,8 +1,11 @@
 <template>
     <v-scale-transition>
         <div class="reaction-emoji">
-            <div class="emoji-panel px-1 center-y" v-show="emojis.length > 0">
-                <div class="emoji-panel_content">
+            <div
+                class="emoji-panel px-1 center-y"
+                v-show="emojis.length > 0"
+            >
+                <div class="emoji-panel_content center-y">
                     <template v-for="reaction in emojis">
                         <v-menu
                             top
@@ -55,10 +58,16 @@
                     content-class="elevation-1"
                 >
                     <template v-slot:activator="{ on }">
-                        <small v-on="on" v-text="totalReactor"></small>
+                        <small
+                            v-on="on"
+                            v-text="totalReactor"
+                        ></small>
                     </template>
                     <!-- Detail -->
-                    <v-list class="emoji-count" elevation="0">
+                    <v-list
+                        class="emoji-count"
+                        elevation="0"
+                    >
                         <v-list-item
                             v-for="reaction in emojis"
                             :key="reaction.type"
