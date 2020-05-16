@@ -1,6 +1,6 @@
 const Base = require("../processor-base.js");
 
-const MENTION_REGEX = /<.*data-mention="@\w+".*data-user-id="\w+.*">/gm;
+const MENTION_REGEX = /<.*data-mention="@\w+.*".*data-user-id="\w+.*">/gm;
 const USER_ID_REGEX = /data-user-id="\w.*"/gm;
 module.exports = class Mention extends Base {
     constructor(logger) {

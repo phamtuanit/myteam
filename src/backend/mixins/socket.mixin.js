@@ -39,19 +39,19 @@ module.exports = {
             }
         },
         // conversation.[conversation].message.rejected.[create]
-        "conversation.*.message.rejected.*"(message, sender, event, ctx) {
-            const [, , resource, act] = event.split(".");
-            const fromUser = message.payload.from.issuer;
+        // "conversation.*.message.rejected.*"(message, sender, event, ctx) {
+        //     const [, , resource, act] = event.split(".");
+        //     const fromUser = message.payload.from.issuer;
 
-            const socketDict = this.sockets[fromUser];
-            if (socketDict && Object.keys(socketDict).length > 0) {
-                message.error = message.error
-                    ? message.error.message
-                    : "Server unknown error";
-                // To private user room
-                this.io.to(fromUser).emit(resource, act, message, event);
-            }
-        },
+        //     const socketDict = this.sockets[fromUser];
+        //     if (socketDict && Object.keys(socketDict).length > 0) {
+        //         message.error = message.error
+        //             ? message.error.message
+        //             : "Server unknown error";
+        //         // To private user room
+        //         this.io.to(fromUser).emit(resource, act, message, event);
+        //     }
+        // },
     },
 
     methods: {
