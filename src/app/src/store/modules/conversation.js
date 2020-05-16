@@ -5,7 +5,6 @@ const messageQueueSvr = new (require("../../services/message-queue.service.js").
 const MAX_MESSAGES = 50;
 
 let eventBus = null;
-let notification = null;
 
 function handleWSMessage(socket, state, commit, act, data) {
     const message = data.payload;
@@ -281,7 +280,7 @@ const moduleState = {
                 .find(c => c.id == convId);
 
             if (conv) {
-                const pushToUnread = function(message) {
+                const pushToUnread = function (message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessages.push(message);
 
@@ -436,7 +435,6 @@ const moduleState = {
     actions: {
         async initialize(ctx) {
             eventBus = window.IoC.get("bus");
-            notification = window.IoC.get("notification");
 
             // Setup Socket
             await this.dispatch("conversations/setupSocket");
@@ -524,13 +522,6 @@ const moduleState = {
                     case "created":
                         {
                             conv.meta.unreadMessages.push(rawMsg);
-                            const notf =
-                                conv.channel == true
-                                    ? convNotification.channel
-                                    : convNotification.nonchannel;
-                            if (!notf[conv.id]) {
-                                notf[conv.id] = conv;
-                            }
                         }
                         break;
 

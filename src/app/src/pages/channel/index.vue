@@ -83,7 +83,7 @@ export default {
         onAddConv(convInfo) {
             return this.$store
                 .dispatch("conversations/createConversation", convInfo)
-                .then(conv => {
+                .then(() => {
                     this.isAdding = false;
                 })
                 .catch(console.error);

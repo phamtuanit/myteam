@@ -78,7 +78,10 @@ export default {
 
         if (simpleUpload && !simpleUpload.uploadUrl) {
             const config = require("../../conf/system.json");
-            const baseUrl = config.env == "prd" ? window.location.origin : config.server.address;
+            const baseUrl =
+                config.env == "prd"
+                    ? window.location.origin
+                    : config.server.address;
             simpleUpload.uploadUrl = baseUrl + config.attachment.url;
 
             if (simpleUpload.id) {
@@ -90,12 +93,11 @@ export default {
         setTimeout(() => {
             // Display editor
             this.showEditor = true;
-        }, 5);
+        }, 20);
     },
     methods: {
         updateTopbar() {
             const view = this.editorInstance.ui.view;
-            const toolbar = view.toolbar.element;
 
             if (this.showToolBar == true) {
                 view.element.dataset.size = "full";
