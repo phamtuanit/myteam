@@ -96,26 +96,13 @@ module.exports = {
                 const { conversation, body } = ctx.params;
                 const { user } = ctx.meta;
 
-                const message = {
-                    arrivalTime: new Date(),
-                    id: new Date().getTime(),
-                    body,
-                    from: {
-                        issuer: user.id,
-                        edited: false,
-                    },
-                    to: {
-                        conversation,
-                    },
-                };
-
                 const controller = this.controllerFactory.getController(
-                    message.body.type
+                    body.type
                 );
                 return await controller
                     .setConversation(conversation)
                     .setContext(ctx)
-                    .add(message)
+                    .add({ body })
                     .commit()
                     .then(cleanDbMark);
             },
@@ -225,5 +212,7 @@ module.exports = {
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { },
+    stopped() {
+        this.controllerFactory.clean();
+    },
 };

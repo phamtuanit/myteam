@@ -32,11 +32,6 @@ module.exports = class HandlerBase {
     add(message) {
         this.message = message;
         this.operation = "add";
-
-        // Define default key
-        message.modification = message.modification || [];
-        message.reactions = message.reactions || [];
-        message.mentions = message.mentions || [];
         return this;
     }
 
@@ -60,7 +55,7 @@ module.exports = class HandlerBase {
 
     async commit() {
         await this.checkConversationInfo();
-        let latestMessage = null;
+        let latestMessage = this.message;
 
         switch (this.operation) {
             case "get":
@@ -73,8 +68,10 @@ module.exports = class HandlerBase {
                 latestMessage = await this.editMessage(this.message);
                 latestMessage = {
                     id: latestMessage.id,
-                    updated: new Date(latestMessage.updated).getTime(),
+                    updated: latestMessage.updated,
                     body: latestMessage.body,
+                    edited: latestMessage.edited,
+                    histories: latestMessage.histories,
                     from: latestMessage.from,
                     to: latestMessage.to,
                 };
@@ -235,7 +232,7 @@ module.exports = class HandlerBase {
             // Correct output
             return message.map((record) => {
                 if (history != true) {
-                    delete record.modification;
+                    delete record.histories;
                 }
                 return cleanDbMark(record);
             });
@@ -249,8 +246,25 @@ module.exports = class HandlerBase {
      * Protect method
      *
      */
-    async addMessage(message) {
-        message = this.processMessage(this.message);
+    async addMessage({ body }) {
+        const { user } = this.ctx.meta;
+        let message = {
+            id: new Date().getTime(),
+            from: {
+                issuer: user.id,
+            },
+            to: {
+                conversation: this.convId,
+            },
+            created: new Date().getTime(),
+            edited: false,
+            body,
+            histories: [],
+            reactions: [],
+            mentions: []
+        };
+
+        message = this.processMessage(message);
         const convCollId = this.getHistoryCollectionName(this.convId);
         const dbCollection = await this.getDBCollection(convCollId);
         return await dbCollection.insert(message);
@@ -262,14 +276,12 @@ module.exports = class HandlerBase {
      */
     async editMessage(message) {
         const convCollId = this.getHistoryCollectionName(this.convId);
-
-        // Get adapter
         const dbCollection = await this.getDBCollection(convCollId);
 
-        const { id } = this.ctx.params;
-        const oldEntity = await dbCollection.findOne({ id: id });
+        const { id: messageId } = this.ctx.params;
+        const existingMessage = await dbCollection.findOne({ id: messageId });
 
-        if (!oldEntity) {
+        if (!existingMessage) {
             throw new Errors.MoleculerClientError(
                 "The message could not be found.",
                 404
@@ -277,9 +289,9 @@ module.exports = class HandlerBase {
         }
 
         const { user } = this.ctx.meta;
-        if (user.id !== oldEntity.from.issuer) {
+        if (user.id !== existingMessage.from.issuer) {
             this.logger.warn(
-                `${user.id} are not creator of the message ${oldEntity.id}.`
+                `${user.id} are not creator of the message ${messageId}.`
             );
             throw new Errors.MoleculerError(
                 "You are not allowed to update this message.",
@@ -288,22 +300,21 @@ module.exports = class HandlerBase {
         }
 
         message = this.processMessage(this.message);
-        message.from = oldEntity.from;
-        message.from.edited = true;
+        message.edited = true;
 
         // Update history
-        const modification = oldEntity.modification || [];
-        const history = oldEntity.body;
-        history.updated = new Date();
-        modification.unshift(history);
-        message.modification = modification;
+        const histories = existingMessage.histories || [];
+        const history = existingMessage.body;
+        history.updated = new Date().getTime();
+        histories.unshift(history);
+        message.histories = histories;
 
-        // 3.Update record in DB
+        // Update record in DB
         const update = {
             $set: message,
         };
 
-        return await dbCollection.updateById(oldEntity._id, update);
+        return await dbCollection.updateById(existingMessage._id, update);
     }
 
     /**
@@ -359,6 +370,8 @@ module.exports = class HandlerBase {
                             "reactions.$.type": type,
                         },
                     };
+
+                    // Change reaction type
                     latestMessage = await dbCollection.update(
                         {
                             _id: existingMessage._id,
@@ -373,6 +386,8 @@ module.exports = class HandlerBase {
                             reactions: reactionInfo,
                         },
                     };
+
+                    // Add new one into reactions list
                     latestMessage = await dbCollection.updateById(
                         existingMessage._id,
                         update
@@ -387,6 +402,8 @@ module.exports = class HandlerBase {
                         },
                     },
                 };
+
+                // Remove reaction
                 latestMessage = await dbCollection.updateById(
                     existingMessage._id,
                     update
@@ -459,7 +476,7 @@ module.exports = class HandlerBase {
                     .then(() => {
                         resolve(dbCl);
                         this.logger.debug(
-                            ">>>> Collection adapter is ready",
+                            "[DB] Collection adapter is ready",
                             collection
                         );
                     })
@@ -482,7 +499,7 @@ module.exports = class HandlerBase {
     clean() {
         Object.values(this.dbCollections).forEach((db) => {
             db.then((db) => {
-                this.logger.info(">>>> Disconnect to DB");
+                this.logger.info("[DB] Disconnect DB");
                 db.disconnect();
             });
         });
