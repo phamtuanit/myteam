@@ -33,7 +33,8 @@ export default {
     },
     methods: {
         updatedUIMix() {
-            this.timeAgo = toTimeAgo(this.message.arrivalTime);
+            // TODO: will remove arrivalTime
+            this.timeAgo = toTimeAgo(this.message.created || this.message.arrivalTime);
         },
         supportZoomImage() {
             // Get the modal
@@ -46,7 +47,7 @@ export default {
             const containerEl = this.$el;
             const imgEls = containerEl.getElementsByTagName("img");
             imgEls.forEach(img => {
-                img.onclick = function() {
+                img.onclick = function () {
                     modal.style.display = "flex";
                     modalContent.src = this.src;
                 };
@@ -58,7 +59,7 @@ export default {
             )[0];
 
             // When the user clicks on <span> (x), close the modal
-            closeBtn.onclick = function() {
+            closeBtn.onclick = function () {
                 modal.style.display = "none";
             };
         },
@@ -70,7 +71,7 @@ export default {
                 const modal = el.firstElementChild;
                 document.body.appendChild(modal);
 
-                document.body.addEventListener("keyup", function(e) {
+                document.body.addEventListener("keyup", function (e) {
                     if (
                         (e.key === "Escape" || e.keyCode == 27) &&
                         modal.style.display &&
