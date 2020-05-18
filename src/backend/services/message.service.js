@@ -28,7 +28,7 @@ module.exports = {
                 const collection = dbCollection.collection;
                 const count = await collection.countDocuments();
                 if (count > 0) {
-                    this.logger.info("Deleting DB collection", convCollId);
+                    this.logger.info("[DB] Deleting DB collection", convCollId);
                     return await collection.drop();
                 }
             }
