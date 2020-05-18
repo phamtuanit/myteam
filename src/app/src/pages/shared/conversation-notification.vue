@@ -1,14 +1,10 @@
 <template>
-    <div class="conversation-notification">
+    <div class="conversation-notification" v-show="isDisplayed">
         <div
             class="notification_container--fixed pa-1 center-y"
             v-show="editing"
         >
-            <v-chip
-                color="orange darken-1"
-                outlined
-                @click="onScrollToOrigin"
-            >
+            <v-chip color="orange darken-1" outlined @click="onScrollToOrigin">
                 <v-icon>mdi-chevron-double-up</v-icon>
                 <span class="ml-1">Editing message</span>
             </v-chip>
@@ -51,6 +47,11 @@ export default {
         return {
             allowScrollDown: this.readMore,
         };
+    },
+    computed: {
+        isDisplayed() {
+            return this.editing || this.allowScrollDown;
+        },
     },
     watch: {
         readMore(val) {
