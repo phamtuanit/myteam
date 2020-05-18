@@ -190,7 +190,7 @@ module.exports = {
                 },
 
                 aliases: {
-                    "GET /:id": "attachments.getFile",
+                    // "GET /:id": "attachments.getFile",
                     "POST /": "multipart:attachments.saveFile",
                     "POST /multi/": {
                         type: "multipart",
