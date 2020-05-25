@@ -1,5 +1,6 @@
 const Vuex = require("vuex");
 const Vue = require("vue").default;
+const sysConfig = require("../conf/system.json");
 const createLogger = require("vuex/dist/logger");
 const conversationModule = require("./modules/conversation.js");
 const userModule = require("./modules/user");
@@ -14,9 +15,16 @@ window.IoC.register("bus", eventBus);
 
 const appStateMap = require("./app-state.js");
 
+const plugins = [];
+
+// Prepare plugins
+if (sysConfig.env != "prd") {
+    plugins.push(createLogger());
+}
+
 Vue.use(Vuex);
 const store = new Vuex.Store({
-    plugins: [createLogger()],
+    plugins: plugins,
     state: {
         appState: "startup",
         initialized: false,
@@ -24,7 +32,7 @@ const store = new Vuex.Store({
         theme: {
             dark: false,
         },
-        messageQueue: []
+        messageQueue: [],
     },
     getters: {
         initialized: state => state.initialized,
@@ -67,11 +75,11 @@ const store = new Vuex.Store({
         },
     },
     methods: {
-        startup() { },
+        startup() {},
     },
     modules: {
         users: userModule,
-        conversations: conversationModule
+        conversations: conversationModule,
     },
 });
 
