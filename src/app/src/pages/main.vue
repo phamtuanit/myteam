@@ -1,8 +1,5 @@
 <template>
-    <v-content
-        id="main-layout"
-        class="main-view"
-    >
+    <v-content id="main-layout" class="main-view">
         <LeftDrawer></LeftDrawer>
         <RouterView :key="$route.name" />
     </v-content>
@@ -86,12 +83,47 @@ export default {
 
                                 if (conv.channel == true) {
                                     notifyTitle =
-                                        `#${conv.name} • ` + notifyTitle;
+                                        `#${conv.name} \u2022 ` + notifyTitle;
                                 }
-                                this.notification.notify(
+                                const notification = this.notification.notify(
                                     notifyTitle,
-                                    notifyBody
+                                    notifyBody,
+                                    null,
+                                    {
+                                        id: message.id,
+                                        from: message.from,
+                                        to: message.to,
+                                    }
                                 );
+                                notification.onOpen = (evt, msg) => {
+                                    const { to } = msg;
+                                    if (to && to.conversation) {
+                                        this.$store
+                                            .dispatch(
+                                                "conversations/activeChat",
+                                                to.conversation
+                                            )
+                                            .then(conv => {
+                                                const route = this.$route;
+                                                if (
+                                                    conv.channel == true &&
+                                                    route.name !== "app-channel"
+                                                ) {
+                                                    this.$router.push({
+                                                        name: "app-channel",
+                                                    });
+                                                } else if (
+                                                    conv.channel == false &&
+                                                    route.name !== "app-chat"
+                                                ) {
+                                                    this.$router.push({
+                                                        name: "app-chat",
+                                                    });
+                                                }
+                                            })
+                                            .catch(console.error);
+                                    }
+                                };
                             });
                     }
                     break;

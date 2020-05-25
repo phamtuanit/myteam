@@ -43,7 +43,8 @@
                                     color="white"
                                     v-on="on"
                                     class="mx-auto pa-1"
-                                >mdi-{{ menu.icon }}</v-icon>
+                                    >mdi-{{ menu.icon }}</v-icon
+                                >
                             </template>
                             <span>{{ menu.name }}</span>
                         </v-tooltip>
@@ -55,11 +56,7 @@
         <!-- Dark mode -->
         <template v-slot:append>
             <div class="pa-2 text-center">
-                <v-btn
-                    icon
-                    @click="enableDarkMode"
-                    title="Dark / Light"
-                >
+                <v-btn icon @click="enableDarkMode" title="Dark / Light">
                     <v-icon>mdi-theme-light-dark</v-icon>
                 </v-btn>
             </div>
@@ -85,8 +82,7 @@ export default {
         ...mapState({
             me: state => state.users.me,
             chatUnreadMessages: state => state.conversations.chat.unread,
-            channelUread: state =>
-                state.conversations.channel.unread,
+            channelUread: state => state.conversations.channel.unread,
         }),
     },
     watch: {
@@ -96,11 +92,18 @@ export default {
         channelUread() {
             this.updateConversationInformation();
         },
+        "$route.name"(name) {
+            const matchedMenu = this.menus.find(item => {
+                return item.route.name === name;
+            });
+            if (matchedMenu) {
+                this.onActivateMenu(matchedMenu);
+            }
+        },
     },
     mounted() {
         this.activateDefaultMenu();
         this.updateInformation();
-        this.setUpEvent();
     },
     methods: {
         updateInformation() {
@@ -184,42 +187,6 @@ export default {
                     })
                     .catch(console.error);
             }
-        },
-        setUpEvent() {
-            // const bus = window.IoC.get("bus");
-            // bus.on("drawer.inform", payload => {
-            //     const sender = payload.sender;
-            //     if (
-            //         this.activatedMenu.route &&
-            //         this.activatedMenu.route.name == sender
-            //     ) {
-            //         console.debug(
-            //             "The module is avtivated. Ignore information.",
-            //             payload
-            //         );
-            //         return;
-            //     }
-            //     if (
-            //         !payload.inform ||
-            //         typeof payload.inform.count != "number"
-            //     ) {
-            //         console.warn(
-            //             "Information doesn't include required inforamtion.",
-            //             payload
-            //         );
-            //         return;
-            //     }
-            //     const menu = this.menus.find(
-            //         me => me.route && me.route.name == sender
-            //     );
-            //     if (
-            //         menu &&
-            //         menu.inform &&
-            //         typeof menu.inform.count == "number"
-            //     ) {
-            //         menu.inform.count += payload.inform.count;
-            //     }
-            // });
         },
     },
 };

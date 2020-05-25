@@ -280,7 +280,7 @@ const moduleState = {
                 .find(c => c.id == convId);
 
             if (conv) {
-                const pushToUnread = function (message) {
+                const pushToUnread = function(message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessages.push(message);
 
@@ -671,11 +671,11 @@ const moduleState = {
                         : state.chat.active;
                 if (currentConv) {
                     if (
-                        currentConv.id == conv.id ||
-                        (currentConv._id && currentConv._id == conv._id)
+                        currentConv.id === conv.id ||
+                        (currentConv._id && currentConv._id === conv._id)
                     ) {
                         // Already activated
-                        return;
+                        return conv;
                     }
                 }
 
