@@ -30,7 +30,7 @@
                     <!-- User info -->
                     <span
                         class="subtitle-2 user-name"
-                        v-text="user._isMe ? 'Yours' : user.fullName"
+                        v-text="user._isMe ? 'Me' : user.fullName"
                     ></span>
                     <span class="caption" v-text="timeAgo"></span>
                     <v-spacer></v-spacer>
