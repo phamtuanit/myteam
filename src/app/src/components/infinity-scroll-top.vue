@@ -48,7 +48,7 @@ export default {
         setTimeout(() => {
             this.scrollBar = this.hasScrollBar();
             this.setupObserver();
-        }, 2000);
+        }, 3000);
     },
     destroyed() {
         this.mutationObserver.disconnect();
@@ -99,9 +99,6 @@ export default {
         hasScrollBar() {
             const containerEl = this.parent.$el;
             return containerEl.scrollHeight > containerEl.clientHeight;
-        },
-        isFeedAtTop() {
-            return;
         },
         setupObserver() {
             // Watch scroll
