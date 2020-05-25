@@ -1,5 +1,5 @@
 <template>
-    <v-sheet height="57" min-height="57" class="pa-0 no-border-radius px-3">
+    <v-sheet height="57" min-height="57" class="pa-0 no-border-radius pl-6 pr-3">
         <div class="center-y" style="height: 100%;" v-show="conversation.id">
             <v-icon>mdi-pound</v-icon>
             <v-list-item-title

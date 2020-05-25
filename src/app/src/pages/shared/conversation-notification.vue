@@ -60,7 +60,7 @@ export default {
             } else {
                 debounce(() => {
                     this.allowScrollDown = this.readMore;
-                }, 2 * 1000)();
+                }, 1000)();
             }
         },
     },
