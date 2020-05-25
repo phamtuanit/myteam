@@ -86,7 +86,7 @@ export default {
     methods: {
         onSendMessage(html) {
             this.onRead();
-            if (!html) {
+            if (!html || this.sending == true) {
                 return;
             }
 
