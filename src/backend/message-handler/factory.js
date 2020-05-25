@@ -14,6 +14,12 @@ module.exports = class ControllerFactory {
     use(msgType, controller) {
         this.controllers[msgType] = controller;
     }
+	
+	clean() {
+		Object.values(this.controllers).forEach((ctrl) => {
+            ctrl.clean();
+        });
+	}
 
     registerBuiltInController() {
         this.use("html", new Html(this.broker ,this.logger));
