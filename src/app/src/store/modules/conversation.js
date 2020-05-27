@@ -493,7 +493,7 @@ const moduleState = {
             const confirmedMsqIds = [];
             const convNotification = {
                 channel: {},
-                nonchannel: {},
+                nonChannel: {},
             };
             const messageQueue = rootState.messageQueue;
             messageQueue.forEach(message => {
@@ -534,7 +534,7 @@ const moduleState = {
 
             // Update notification
             state.channel.unread = Object.values(convNotification.channel);
-            state.chat.unread = Object.values(convNotification.nonchannel);
+            state.chat.unread = Object.values(convNotification.nonChannel);
 
             // Confirm message queue
             if (confirmedMsqIds.length > 0) {

@@ -25,7 +25,9 @@
                 @edit="onEditMessage"
             >
                 <!-- Separator -->
-                <v-divider class="message-item__content-separator mx-3"></v-divider>
+                <v-divider
+                    class="message-item__content-separator mx-3"
+                ></v-divider>
             </Message>
         </v-sheet>
 
@@ -189,11 +191,12 @@ export default {
                 ];
             }
 
-            const found = this.conversation.subscribers.filter(
-                u =>
-                    u.userName.includes(queryText) ||
-                    u.fullName.includes(queryText)
-            );
+            const found = this.conversation.subscribers.filter(u => {
+                return (
+                    (u.userName && u.userName.includes(queryText)) ||
+                    (u.fullName && u.fullName.includes(queryText))
+                );
+            });
 
             if (found && found.length > 0) {
                 return found.map(u => {

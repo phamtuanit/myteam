@@ -133,21 +133,6 @@ module.exports = {
             }
         });
     },
-    // "modules-channel"(commit, store) {
-    //     return new Promise((resolve, reject) => {
-    //         console.info("Setting up: chat module");
-    //         try {
-    //             store.dispatch("channels/initialize")
-    //                 .then(() => {
-    //                     commit("setAppState", "resolve-users");
-    //                     resolve();
-    //                 })
-    //                 .catch(reject);
-    //         } catch (err) {
-    //             reject(err);
-    //         }
-    //     });
-    // },
     "resolve-users"(commit, store) {
         return new Promise((resolve, reject) => {
             console.info("Setting up: chat module");
@@ -166,6 +151,6 @@ module.exports = {
     end(commit) {
         commit("setAppState", "finished");
         commit("setInitialization", true);
-        console.info("Setting up application successfully");
+        console.info("Application is ready");
     }
 };
