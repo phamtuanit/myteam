@@ -108,11 +108,6 @@ export default {
         onEditorReady() {
             this.editorInstance = this.$refs.editor.instance;
             this.updateTopbar();
-
-            // this.editorInstance.execute("tableWidth", {
-            //     value: "100%",
-            // });
-
             this.$emit("ready", this.editorInstance);
         },
     },

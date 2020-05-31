@@ -1,10 +1,13 @@
 {
     "env": "prd-",
     "server": {
-        "address": "https://localhost:8081",
+        "address": "http://localhost:8081",
         "api": "/api/v1/"
     },
     "attachment": {
         "url": "/upload/"
+    },
+    "giphy": {
+        "key": "Auos0u6GcHzzRhBCmfozpgBY1VmyPRaW"
     }
 }

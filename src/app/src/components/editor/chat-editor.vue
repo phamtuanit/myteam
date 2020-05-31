@@ -15,43 +15,53 @@
             />
         </v-sheet>
 
-        <v-sheet
-            class="transparent d-flex justify-space-between mt-1 chat-editor__actions"
-        >
+        <v-sheet class="transparent d-flex justify-space-between mt-1 chat-editor__actions">
             <!-- Start -->
             <div class="d-flex flex-align-start">
+                <!-- Emoji -->
                 <EmojiButton
                     size="18"
                     v-model="emojiPopup"
                     @select="onSelectEmoji"
                 ></EmojiButton>
+                <!-- Gifs -->
+                <Giphy
+                    size="18"
+                    @select="onSelectGif"
+                ></Giphy>
+                <!-- Format -->
                 <v-btn
                     icon
                     @click="showToolBar = !showToolBar"
                     title="Format (ESC)"
                 >
-                    <v-icon size="18" :color="showToolBar ? 'orange' : ''"
-                        >mdi-format-letter-case-upper</v-icon
-                    >
+                    <v-icon
+                        size="18"
+                        :color="showToolBar ? 'orange' : ''"
+                    >mdi-format-letter-case-upper</v-icon>
                 </v-btn>
             </div>
             <!-- End -->
-            <v-btn
-                icon
-                :loading="isSending"
-                :color="isSending ? 'orange' : ''"
-                @click="onSend"
-                title="Send (Enter)"
-            >
-                <v-icon size="18">mdi-send</v-icon>
-            </v-btn>
+            <div class="d-flex flex-align-end">
+                <!-- Send -->
+                <v-btn
+                    icon
+                    :loading="isSending"
+                    :color="isSending ? 'orange' : ''"
+                    @click="onSend"
+                    title="Send (Enter)"
+                >
+                    <v-icon size="18">mdi-send</v-icon>
+                </v-btn>
+            </div>
         </v-sheet>
     </div>
 </template>
 
 <script>
-import EmojiButton from "..//emoji-button";
+import EmojiButton from "../emoji-button";
 import Editor from "./ck-editor.vue";
+import Giphy from "../giphy/giphy.vue";
 
 // Editor
 import MyEnter from "./plugins/enter";
@@ -79,7 +89,7 @@ export default {
             default: false,
         },
     },
-    components: { EmojiButton, Editor },
+    components: { EmojiButton, Editor, Giphy },
     data() {
         return {
             classEditor: ClassicEditor,
@@ -126,6 +136,14 @@ export default {
         },
     },
     methods: {
+        onSelectGif(gif) {
+            if (gif.images && gif.images.original && gif.images.original.url) {
+                let imageEl = `<img id="gif-${gif.id}" class="image-gif" alt="${gif.title}" `;
+                imageEl += `src="${gif.images.original.url}" data-medium="${gif.images.downsized_medium.url}"></img>`;
+                const figureEl = `<figure class="image gif">${imageEl}</figure>`;
+                this.$emit("send", figureEl);
+            }
+        },
         onSelectEmoji(emoji) {
             if (emoji.native) {
                 this.writeText(emoji.native);
