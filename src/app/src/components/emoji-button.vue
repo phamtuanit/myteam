@@ -1,6 +1,7 @@
 <template>
     <v-menu
         top
+        left
         offset-y
         v-model="showEmojiPicker"
         :eager="true"
@@ -9,7 +10,11 @@
         :close-on-content-click="false"
     >
         <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on" title="Ctrl+Shift+S">
+            <v-btn
+                icon
+                v-on="on"
+                title="Ctrl+Shift+S"
+            >
                 <v-icon :size="size">mdi-emoticon-happy-outline</v-icon>
             </v-btn>
         </template>
