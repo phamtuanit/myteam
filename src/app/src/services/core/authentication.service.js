@@ -1,12 +1,13 @@
 const axios = require("axios");
 const sysConfig = require("../../conf/system.json");
 const axiosInstance = axios.create({
-    baseURL: sysConfig.env == "prd"
-        ? window.location.origin
-        : sysConfig.server.address,
+    baseURL:
+        sysConfig.env == "prd"
+            ? window.location.origin
+            : sysConfig.server.address,
 });
 
-const Service = function () {
+const Service = function() {
     this.locker = this.verifyToken();
 };
 
@@ -66,36 +67,40 @@ Service.prototype = {
                             }
                         })
                         .catch(err => {
-                            console.error("Got an error while refreshing token.", err);
+                            console.error(
+                                "Got an error while refreshing token.",
+                                err
+                            );
                             reject(err);
                         });
                 });
-                // Return promise
-                return this.locker;
+            } else {
+                this.locker = new Promise((resole, reject) => {
+                    axiosInstance
+                        .post("/verify-token", null, {
+                            headers: {
+                                authorization: token.access,
+                            },
+                        })
+                        .then(({ data }) => {
+                            this.isAuthenticated = true;
+                            this.user = data;
+                            resole(token);
+                        })
+                        .catch(err => {
+                            console.error(
+                                "Got an error while verify token.",
+                                err
+                            );
+                            reject(err);
+                        });
+                });
             }
-
-            this.locker = new Promise((resole, reject) => {
-                axiosInstance
-                    .post("/verify-token", null, {
-                        headers: {
-                            authorization: token.access,
-                        },
-                    })
-                    .then(({ data }) => {
-                        this.isAuthenticated = true;
-                        this.user = data;
-                        resole(token);
-                    })
-                    .catch(err => {
-                        console.error("Got an error while verify token.", err);
-                        reject(err);
-                    });
-            });
         } else {
-            return Promise.reject("No token found");
+            this.locker = Promise.reject("No token found");
         }
 
-        return this.locker;
+        return await this.locker;
     },
     login(userName, password) {
         this.isAuthenticated = false;
