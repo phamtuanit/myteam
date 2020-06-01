@@ -8,27 +8,31 @@
         :id="id"
         content-class="giphy-popup-content"
         transition="scroll-y-transition"
+        :close-on-content-click="false"
     >
         <template v-slot:activator="{ on }">
-            <v-btn
-                icon
-                v-on="on"
-                title="Ctrl+Shift+G"
-            >
+            <v-btn icon v-on="on" title="Gifs">
                 <v-icon :size="size">mdi-sticker-emoji</v-icon>
             </v-btn>
         </template>
-        <div :id="contentId">
-
+        <div>
+            <v-text-field
+                v-model="search"
+                class="mt-0 mb-3"
+                placeholder="Search gif"
+                hide-details
+            ></v-text-field>
+            <div :id="contentId" class="gifs-content"></div>
         </div>
     </v-menu>
 </template>
 
 <script>
-import { throttle } from "throttle-debounce";
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { renderGrid } from "@giphy/js-components";
+import { debounce } from "../../utils/function.js";
 import config from "../../conf/system.json";
+
 const gf = new GiphyFetch(config.giphy.key);
 export default {
     props: {
@@ -54,7 +58,7 @@ export default {
         return {
             show: false,
             search: "",
-            contentId: "giphy-content-" + id,
+            contentId: "gifs-content-" + id,
             id: "giphy-" + id,
         };
     },
@@ -66,12 +70,18 @@ export default {
                 this.search = "";
             }
         },
+        search() {
+            if (this.show == true) {
+                this.render();
+            }
+        },
     },
     mounted() {
         this.contentEl = document.getElementById(this.contentId);
         this.contentEl.style.width = this.width + "px";
         this.contentEl.style.height = this.height + "px";
 
+        // Define fetch option
         const width = this.getWidth();
         this.giphyOpt = {
             width,
@@ -91,19 +101,32 @@ export default {
             e.preventDefault();
         },
         render() {
-            renderGrid(this.giphyOpt, this.contentEl);
+            if (this.renderTask) {
+                // Remove old data
+                this.renderTask();
+            }
+
+            // Debounce
+            if (this.timmer) {
+                clearTimeout(this.timmer);
+            }
+
+            setTimeout(() => {
+                this.renderTask = renderGrid(this.giphyOpt, this.contentEl);
+            }, 500);
         },
         getWidth() {
             return this.width;
         },
         fetchGifs(offset) {
             const limit = 10;
-            if (this.search) {
-                return gf.search(this.search, { offset, limit });
+            const searchStr = this.search.trim();
+            if (searchStr) {
+                return gf.search(searchStr, { offset, limit });
             }
 
             // Trending
-            return gf.trending(this.search, { offset, limit });
+            return gf.trending(searchStr, { offset, limit });
         },
         fetchGifsWithoutAttribution(offset) {
             return this.fetchGifs(offset).then(res => {
@@ -122,21 +145,15 @@ export default {
 
 <style scoped>
 .giphy-popup-content {
-    padding: 4px;
-    border-width: 4px;
-    border-top: 4px;
-    border-bottom: 4px;
-    border-style: solid;
-    border-color: #ffffff;
+    padding: 0 6px 6px 6px;
     background: #ffffff;
+}
+.gifs-content {
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .giphy-popup-content img.giphy-gif-img + div {
     display: none;
-}
-
-.theme--dark .giphy-popup-content {
-    border-color: #1e1e1e;
-    background: #1e1e1e;
 }
 </style>
