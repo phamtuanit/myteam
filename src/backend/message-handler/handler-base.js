@@ -62,7 +62,9 @@ module.exports = class HandlerBase {
                 return await this.getMessage().then(cleanDbMark);
                 break;
             case "add":
-                latestMessage = await this.addMessage(this.message).then(cleanDbMark);
+                latestMessage = await this.addMessage(this.message).then(
+                    cleanDbMark
+                );
                 break;
             case "update":
                 latestMessage = await this.editMessage(this.message);
@@ -87,7 +89,9 @@ module.exports = class HandlerBase {
                 };
                 break;
             case "delete":
-                latestMessage = await this.deleteMessage(this.message).then(cleanDbMark);
+                latestMessage = await this.deleteMessage(this.message).then(
+                    cleanDbMark
+                );
                 break;
 
             default:
@@ -143,7 +147,6 @@ module.exports = class HandlerBase {
             case "react":
                 act = "reacted";
                 break;
-
 
             default:
                 break;
@@ -261,7 +264,7 @@ module.exports = class HandlerBase {
             body,
             histories: [],
             reactions: [],
-            mentions: []
+            mentions: [],
         };
 
         message = this.processMessage(message);
@@ -454,11 +457,15 @@ module.exports = class HandlerBase {
         if (this.operation == "delete") {
             return message;
         }
-        // Get processor to process message before store the message into DB
-        const processor = this.msgFactory.getProcessor(message.body.type);
-        if (processor) {
-            const newMsg = processor.process(message);
-            message = newMsg || message;
+        try {
+            // Get processor to process message before store the message into DB
+            const processor = this.msgFactory.getProcessor(message.body.type);
+            if (processor) {
+                const newMsg = processor.process(message);
+                message = newMsg || message;
+            }
+        } catch (error) {
+            console.warn("Cannot process message.", error);
         }
         return message;
     }
