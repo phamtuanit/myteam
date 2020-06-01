@@ -13,6 +13,14 @@ module.exports = {
     settings: {},
     dependencies: [],
     mixins: [DBCollectionService],
+
+    events: {
+        async "conversation.*.updated|removed|created"(payload, sender, event) {
+            // Clear all cache entries which keys start with `users.`
+            this.broker.cacher.clean("*.conversations.*");
+        },
+    },
+
     actions: {
         createConversation: {
             auth: true,
@@ -83,7 +91,9 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${newConv.id}.created`;
-                this.broker.broadcast(eventName, newConv).catch(this.logger.error);
+                this.broker
+                    .broadcast(eventName, newConv)
+                    .catch(this.logger.error);
                 return newConv;
             },
         },
@@ -91,14 +101,31 @@ module.exports = {
             auth: true,
             roles: [1],
             rest: "GET /:id",
+            cache: true,
             params: {
                 id: { type: "number", convert: true },
             },
-            handler(ctx) {
+            async handler(ctx) {
                 const { id } = ctx.params;
-                return this.getDBCollection("conversations").then(
+                const { user: me } = ctx.meta;
+                return await this.getDBCollection("conversations").then(
                     (collection) => {
-                        return collection.findOne({ id }).then(cleanDbMark);
+                        return collection
+                            .findOne({ id })
+                            .then((convInfo) => {
+                                if (
+                                    convInfo &&
+                                    !convInfo.subscribers.includes(me.id)
+                                ) {
+                                    throw new Errors.MoleculerClientError(
+                                        "You are not member of that conversation.",
+                                        404
+                                    );
+                                }
+
+                                return convInfo;
+                            })
+                            .then(cleanDbMark);
                     }
                 );
             },
@@ -106,11 +133,12 @@ module.exports = {
         getConversation: {
             auth: true,
             roles: [1],
+            cache: true,
             rest: "GET /",
             params: {
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
-                sort: { type: "array", optional: true, convert: true },
+                sort: { type: "string", optional: true },
                 user: { type: "string", optional: true },
                 channel: {
                     type: "boolean",
@@ -119,7 +147,9 @@ module.exports = {
                 },
             },
             handler(ctx) {
-                const { user, sort, channel } = ctx.params;
+                const { sort, channel } = ctx.params;
+                let { user } = ctx.params;
+                const { user: me } = ctx.meta;
                 let { limit, offset } = ctx.params;
                 limit = limit != undefined ? limit : 50;
                 offset = offset != undefined ? offset : 0;
@@ -137,17 +167,22 @@ module.exports = {
                 }
 
                 if (user) {
-                    const users = user.split(",");
-                    if (users.length > 0) {
-                        filter.query.subscribers = {
-                            $in: users,
-                        };
-                    } else {
-                        filter.query.subscribers = {
-                            $in: user,
-                        };
+                    if (user !== me.id) {
+                        throw new Errors.MoleculerClientError(
+                            "You don't have permission to do this request.",
+                            404
+                        );
                     }
+
+                    user = [user];
+                } else {
+                    // Update user
+                    user = [me.id];
                 }
+
+                filter.query.subscribers = {
+                    $in: user,
+                };
 
                 return this.getDBCollection("conversations").then(
                     (collection) => {
@@ -210,6 +245,7 @@ module.exports = {
                 const subscribers = new Set(
                     existingConv.subscribers.concat(updatedEntity.subscribers)
                 );
+
                 if (subscribers.size > 0) {
                     const msgQueue = {
                         id: new Date(channel.updated).getTime(),
@@ -271,11 +307,14 @@ module.exports = {
                 }
 
                 // Remove subscriber
-                const newEntity = await dbCollection.updateById(existingConv._id, {
-                    $pull: {
-                        subscribers: userId,
-                    },
-                });
+                const newEntity = await dbCollection.updateById(
+                    existingConv._id,
+                    {
+                        $pull: {
+                            subscribers: userId,
+                        },
+                    }
+                );
 
                 cleanDbMark(existingConv);
 
@@ -412,15 +451,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { },
+    stopped() {},
 };

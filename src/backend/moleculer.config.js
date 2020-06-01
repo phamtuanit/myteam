@@ -68,7 +68,7 @@ module.exports = {
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
-	// cacher: sysConf.redis.uri + sysConf.redis.cache || "Redis",
+	cacher: "Memory", // sysConf.redis.uri + sysConf.redis.cache || "Redis",
 
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
