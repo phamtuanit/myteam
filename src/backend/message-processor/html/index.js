@@ -11,9 +11,13 @@ module.exports = class HtmlProcessor extends Base {
     process(message, operation) {
         message = super.process(message, operation);
         this.subProcessors.forEach((processor) => {
-            const newOne = processor.process(message, operation);
-            if (newOne) {
-                message = newOne;
+            try {
+                const newOne = processor.process(message, operation);
+                if (newOne) {
+                    message = newOne;
+                }
+            } catch (error) {
+                console.error("Couldn't process message with ", processor.name, error);
             }
         });
 
