@@ -161,10 +161,10 @@ export default {
             }
 
             // Incase user re-open existing chat
-            this.$store.dispatch(
+            return this.$store.dispatch(
                 "conversations/activeChat",
                 chat.id || chat._id
-            );
+            ).catch(console.warn);
         },
         onAddConv() {
             this.$emit("add");

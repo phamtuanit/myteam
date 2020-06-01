@@ -48,7 +48,7 @@ export default {
         setTimeout(() => {
             this.scrollBar = this.hasScrollBar();
             this.setupObserver();
-        }, 3000);
+        }, 2000);
     },
     destroyed() {
         this.mutationObserver.disconnect();
@@ -124,6 +124,7 @@ export default {
             if (this.isBusy == true || this.isLoading == true) {
                 return;
             }
+            this.scrollBar = this.hasScrollBar();
 
             const containerEl = this.parent.$el;
             this.isLoading = containerEl.scrollTop == 0 && this.hasScrollBar();
