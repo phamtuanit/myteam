@@ -18,7 +18,8 @@
         <div>
             <v-text-field
                 v-model="search"
-                class="mt-0 mb-3"
+                name="search-gif"
+                class="mt-0 mb-2"
                 placeholder="Search gif"
                 hide-details
             ></v-text-field>
@@ -113,7 +114,7 @@ export default {
 
             setTimeout(() => {
                 this.renderTask = renderGrid(this.giphyOpt, this.contentEl);
-            }, 500);
+            }, 300);
         },
         getWidth() {
             return this.width;
@@ -148,9 +149,14 @@ export default {
     padding: 0 6px 6px 6px;
     background: #ffffff;
 }
+
 .gifs-content {
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.theme--dark.giphy-popup-content {
+    background: #1E1E1E;
 }
 
 .giphy-popup-content img.giphy-gif-img + div {
