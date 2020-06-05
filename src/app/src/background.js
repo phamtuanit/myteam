@@ -38,12 +38,15 @@ function createWindow() {
     win = new BrowserWindow({
         width: 1024,
         height: 700,
+        center: true,
+        minWidth: 1000,
+        minHeight: 600,
         webPreferences: {
             nodeIntegration: true,
             webSecurity: false, // ignore ERR_CERT_AUTHORITY_INVALID
             allowRunningInsecureContent: true,
         },
-        icon: path.join(__static, "favicon.ico"),
+        icon: path.join(__static, "icon.png"),
     });
 
     // Enable flash effect at the first time startup
