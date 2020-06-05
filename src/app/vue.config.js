@@ -67,6 +67,7 @@ module.exports = {
         electronBuilder: {
             appId: "com.myteam.app",
             nodeIntegration: true,
+            icon: "build/icon.png",
             builderOptions: {
                 win: {
                     signAndEditExecutable: false,
