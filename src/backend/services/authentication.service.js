@@ -45,7 +45,8 @@ module.exports = {
                     const today = new Date();
                     const expirationDate = new Date(decoded.exp);
                     if (today > expirationDate) {
-                        throw new MoleculerClientError("Token is expired");
+                        //"Token is expired." + " User: " + user.id
+                        throw new MoleculerClientError(`You ${user.id} is trying to login with expired token. Expiration ${expirationDate.toLocaleString()}`);
                     }
                     this.logger.debug("Logged in user:", user.id);
                     return user;
