@@ -63,4 +63,19 @@ module.exports = {
                 });
             });
     },
+    pluginOptions: {
+        electronBuilder: {
+            appId: "com.myteam.app",
+            nodeIntegration: true,
+            builderOptions: {
+                win: {
+                    signAndEditExecutable: false,
+                    target: ["portable"],
+                },
+                portable: {
+                    artifactName: "${name}-${os}-portable.${version}.exe",
+                },
+            },
+        },
+    },
 };
