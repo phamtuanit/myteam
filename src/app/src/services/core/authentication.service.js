@@ -12,11 +12,20 @@ const Service = function() {
 };
 
 Service.prototype = {
-    async getToken() {
+    async getToken(count = 0) {
+        if (count > 3) {
+            throw new Error("Reached maximum retry time.", count);
+        }
+
         try {
             await this.locker;
             const token = window.localStorage.getItem("token");
             if (token) {
+                if (this.isExpired(token)) {
+                    // Renew token
+                    this.locker = this.renewToken();
+                    return await this.getUser(++count);
+                }
                 return JSON.parse(token).access;
             }
         } catch (error) {
@@ -38,42 +47,19 @@ Service.prototype = {
         }
         return null;
     },
+    isExpired(token) {
+        const expDate = new Date(token.exp);
+        const now = new Date();
+        now.setDate(now.getDate() + 1);
+        return now >= expDate;
+    },
     async verifyToken() {
         this.isAuthenticated = false;
         const token = JSON.parse(window.localStorage.getItem("token"));
         if (token && token.exp && token.refresh) {
-            const expDate = new Date(token.exp);
-            const now = new Date();
-            now.setDate(now.getDate() + 1);
-            if (now >= expDate) {
+            if (this.isExpired(token)) {
                 // Renew token
-                this.locker = new Promise((resole, reject) => {
-                    axiosInstance
-                        .post("/renew-token", null, {
-                            headers: {
-                                authorization: token.refresh,
-                            },
-                        })
-                        .then(({ data }) => {
-                            if (data.token && data.token.access) {
-                                this.isAuthenticated = true;
-                                window.localStorage.setItem(
-                                    "token",
-                                    JSON.stringify(data.token)
-                                );
-                                return resole(data.token.access);
-                            } else {
-                                reject("Could not get access token");
-                            }
-                        })
-                        .catch(err => {
-                            console.error(
-                                "Got an error while refreshing token.",
-                                err
-                            );
-                            reject(err);
-                        });
-                });
+                this.locker = this.renewToken();
             } else {
                 this.locker = new Promise((resole, reject) => {
                     axiosInstance
@@ -101,6 +87,33 @@ Service.prototype = {
         }
 
         return await this.locker;
+    },
+    renewToken() {
+        const token = JSON.parse(window.localStorage.getItem("token"));
+        return new Promise((resole, reject) => {
+            axiosInstance
+                .post("/renew-token", null, {
+                    headers: {
+                        authorization: token.refresh,
+                    },
+                })
+                .then(({ data }) => {
+                    if (data.token && data.token.access) {
+                        this.isAuthenticated = true;
+                        window.localStorage.setItem(
+                            "token",
+                            JSON.stringify(data.token)
+                        );
+                        return resole(data.token.access);
+                    } else {
+                        reject("Could not get access token");
+                    }
+                })
+                .catch(err => {
+                    console.error("Got an error while refreshing token.", err);
+                    reject(err);
+                });
+        });
     },
     login(userName, password) {
         this.isAuthenticated = false;

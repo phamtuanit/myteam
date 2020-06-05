@@ -1,5 +1,5 @@
-const socket = require('socket.io-client');
-const authSvr = window.IoC.get('auth');
+const socket = require("socket.io-client");
+const authSvr = window.IoC.get("auth");
 
 /**
  * Socket class
@@ -7,7 +7,7 @@ const authSvr = window.IoC.get('auth');
 class Socket {
     /**
      * Constructor
-     * @param {*} path 
+     * @param {*} path
      */
     constructor(baseUri, path, retryTimes = 10) {
         this.baseUri = baseUri;
@@ -17,7 +17,7 @@ class Socket {
         this.subscribers = {};
         this.rooms = [];
 
-        this.eventBus = window.IoC.get('bus');
+        this.eventBus = window.IoC.get("bus");
         this.eventBus.on("logout", () => this.close());
         this.eventBus.on("login", () => this.connect());
     }
@@ -71,18 +71,21 @@ class Socket {
      */
     connect() {
         this.close();
-        return authSvr.getToken().then(token => {
-            this.io = socket(this.baseUri, {
-                path: this.path,
-                query: {
-                    token: token
-                }
-            });
+        return authSvr
+            .getToken()
+            .then(token => {
+                this.io = socket(this.baseUri, {
+                    path: this.path,
+                    query: {
+                        token: token,
+                    },
+                });
 
-            this.registerEvents();
-            this.io.connect();
-            return this;
-        }).catch(console.error);
+                this.registerEvents();
+                this.io.connect();
+                return this;
+            })
+            .catch(console.error);
     }
     /**
      * Register subscriber to inner socket
@@ -96,24 +99,21 @@ class Socket {
             });
         });
 
-        this.io.on('connect', () => {
+        this.io.on("connect", () => {
             console.info("Socket connection is available now");
             // Join to given room
             this.rooms.forEach(room => {
-                this.io.emit('join', room);
+                this.io.emit("join", room);
             });
         });
 
-        this.io.on('connect_error', (error) => {
+        this.io.on("connect_error", error => {
             console.error("Socket connection is interrupted.", error);
         });
 
-        this.io.on('disconnect', (reason) => {
+        this.io.on("disconnect", reason => {
             console.error("Socket connection is disconnected.", reason);
-            if (reason === 'io server disconnect') {
-                // The disconnection was initiated by the server, reconnect manually
-                this.io.connect();
-            }
+            this.connect();
         });
     }
 }
