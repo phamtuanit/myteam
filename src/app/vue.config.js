@@ -67,9 +67,9 @@ module.exports = {
         electronBuilder: {
             appId: "com.myteam.app",
             nodeIntegration: true,
-            icon: "build/icon.png",
             builderOptions: {
                 win: {
+                    icon: "build/icon.png",
                     signAndEditExecutable: false,
                     target: ["portable"],
                 },
