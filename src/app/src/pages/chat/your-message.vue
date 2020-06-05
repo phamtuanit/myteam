@@ -216,7 +216,7 @@ export default {
     color: hsl(0, 0%, 72%);
 }
 
-.message-item__content--card .message-item__content-text {
+.theme--light .message-item__content--card .message-item__content-text {
     color: rgba(0, 0, 0, 0.8);
 }
 </style>
