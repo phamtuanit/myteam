@@ -69,8 +69,7 @@ module.exports = {
             nodeIntegration: true,
             builderOptions: {
                 win: {
-                    icon: "build/icon.png",
-                    signAndEditExecutable: false,
+                    signAndEditExecutable: true,
                     target: ["portable"],
                 },
                 portable: {
