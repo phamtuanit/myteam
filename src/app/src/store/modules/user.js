@@ -70,7 +70,6 @@ const moduleState = {
         async initialize({ commit }) {
             // Setup Socket
             await this.dispatch("users/setupSocket");
-
             commit("setModuleState", "initialized");
         },
         require({ commit }, userId) {
@@ -159,14 +158,15 @@ const moduleState = {
                 return users;
             });
         },
-        setupSocket({ commit }) {
+        setupSocket({ commit, state }) {
             const socket = window.IoC.get("socket");
+
             socket.on("live", (act, data) => {
                 const user = data.user;
                 switch (act) {
                     case "on":
                     case "off":
-                        console.info("Received user status:", data.status);
+                        console.info("Received user status:", user.id, data.status);
                         user.status = data.status;
                         commit("cache", user);
                         break;
@@ -179,6 +179,18 @@ const moduleState = {
                         console.warn("Unsupported message.", data);
                         break;
                 }
+            });
+
+            // Handle re-connect
+            socket.on("connect", () => {
+                console.info("Fetch all user statuses after WS reconnected.");
+                const userIds = state.all.map(u => u.id);
+                service.getByIds(userIds).then(res => {
+                    const users = res.data;
+                    if (users && users.length > 0) {
+                        commit("cache", users);
+                    }
+                });
             });
         },
         changeStatusAll({ state, commit }, status) {
