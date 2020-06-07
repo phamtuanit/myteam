@@ -31,7 +31,7 @@ module.exports = class NotificationWrapper {
 
         const options = {
             body: body,
-            icon: icon,
+            icon: icon || "icon.png",
             data: data,
         };
 
