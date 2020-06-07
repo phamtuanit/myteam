@@ -1,5 +1,4 @@
 const socket = require("socket.io-client");
-const authSvr = window.IoC.get("auth");
 
 /**
  * Socket class
@@ -17,6 +16,7 @@ class Socket {
         this.subscribers = {};
         this.rooms = [];
 
+        this.authSvr = window.IoC.get("auth");
         this.eventBus = window.IoC.get("bus");
         this.eventBus.on("logout", () => this.close());
         this.eventBus.on("login", () => this.connect());
@@ -71,7 +71,7 @@ class Socket {
      */
     connect() {
         this.close();
-        return authSvr
+        return this.authSvr
             .getToken()
             .then(token => {
                 this.io = socket(this.baseUri, {
