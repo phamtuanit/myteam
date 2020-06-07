@@ -1,4 +1,5 @@
 const config = require("../conf/system.json");
+const Socket = require("../plugins/socket.js");
 const baseServerAddr = config.env == "prd" ? window.location.origin : config.server.address;
 const messageQueueSvr = new (require("../services/message-queue.service.js").default)();
 const notification = new (require("../plugins/notification.js"))();
@@ -83,13 +84,13 @@ module.exports = {
         return new Promise((resolve, reject) => {
             try {
                 console.info("Setting up: socket service");
-                const Socket = require("../plugins/socket.js");
                 const socket = new Socket(baseServerAddr, "/chat-io");
                 window.IoC.register("socket", socket);
-                socket.connect().then(() => {
+                socket.on("connect", () => {
                     commit("setAppState", "pull-message-queue");
                     resolve();
-                }).catch(reject);
+                });
+                socket.connect();
             } catch (error) {
                 reject(error);
             }
