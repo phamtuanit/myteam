@@ -16,6 +16,9 @@ const indexUrl =
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
 
+// https://www.electronjs.org/docs/tutorial/notifications#windows
+app.setAppUserModelId(process.execPath);
+
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
     { scheme: "app", privileges: { secure: true, standard: true } },
