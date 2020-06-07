@@ -46,6 +46,16 @@ class Socket {
         }
         return this;
     }
+    off(evt, callback) {
+        if (evt && callback) {
+            const subscribers = this.subscribers[evt] || [];
+            const index = subscribers.findIndex(cb => cb == callback);
+            if (index >= 0) {
+                subscribers.splice(index, 1);
+            }
+        }
+        return this;
+    }
     emit(evt, payload) {
         if (this.io) {
             payload.created = new Date().getTime();
@@ -91,14 +101,6 @@ class Socket {
      * Register subscriber to inner socket
      */
     registerEvents() {
-        // Register message handler
-        Object.keys(this.subscribers).forEach(evt => {
-            const callbackList = this.subscribers[evt];
-            callbackList.forEach(callback => {
-                this.io.on(evt, callback);
-            });
-        });
-
         this.io.on("connect", () => {
             console.info("Socket connection is available now.");
             // Join to given room
@@ -117,6 +119,14 @@ class Socket {
             console.error("Socket connection is disconnected.", reason);
             this.eventBus.emit("socket:disconnect", reason, this);
             this.connect();
+        });
+
+        // Register message handler
+        Object.keys(this.subscribers).forEach(evt => {
+            const callbackList = this.subscribers[evt];
+            callbackList.forEach(callback => {
+                this.io.on(evt, callback);
+            });
         });
     }
 }
