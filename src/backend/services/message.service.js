@@ -44,6 +44,7 @@ module.exports = {
                 conversation: { type: "number", convert: true },
                 limit: { type: "number", optional: true, convert: true },
                 rightId: { type: "number", optional: true, convert: true },
+                leftId: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
                 top: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true },

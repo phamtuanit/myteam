@@ -198,12 +198,21 @@ module.exports = class HandlerBase {
                 message = await dbCollection.findOne({ id: id });
                 message = [message];
             } else {
-                const { top, rightId } = ctx.params;
-                const query = {};
+                const { top, rightId, leftId } = ctx.params;
+                const query = { id: {} };
 
                 if (rightId) {
                     // Less than rightId
-                    query.id = { $lt: rightId };
+                    query.id.$lt = rightId;
+                }
+
+                if (leftId) {
+                    // More than rightId
+                    query.id.$gt = leftId;
+                }
+
+                if (Object.keys(query.id).length == 0) {
+                    delete query.id;
                 }
 
                 // Support get Top messages
