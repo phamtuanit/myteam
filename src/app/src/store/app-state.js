@@ -86,10 +86,13 @@ module.exports = {
                 console.info("Setting up: socket service");
                 const socket = new Socket(baseServerAddr, "/chat-io");
                 window.IoC.register("socket", socket);
-                socket.on("connect", () => {
+
+                const onConnect = () => {
                     commit("setAppState", "pull-message-queue");
+                    socket.off("connect", onConnect);
                     resolve();
-                });
+                };
+                socket.on("connect", onConnect);
                 socket.connect();
             } catch (error) {
                 reject(error);
@@ -103,6 +106,16 @@ module.exports = {
 
         commit("setMessageQueue", messages);
         commit("setAppState", "modules-user");
+
+        // Handle re-connect
+        const socket = window.IoC.get("socket");
+        socket.on("connect", async () => {
+            messageQueueSvr.getAll(me.id).then(res => {
+                commit("setMessageQueue", res.data);
+                // Confirm message in queue
+                this.dispatch("conversations/checkMessageQueue");
+            }).catch(console.error);
+        });
     },
     "modules-user"(commit, store) {
         return new Promise((resolve, reject) => {
