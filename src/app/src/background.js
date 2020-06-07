@@ -22,16 +22,16 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 app.commandLine.appendSwitch("ignore-certificate-errors");
-app.setUserTasks([
-    {
-      program: process.execPath,
-      arguments: '--new-window',
-      iconPath: path.join(__static, "favicon.ico"),
-      iconIndex: 0,
-      title: 'My Team',
-      description: 'Open another window'
-    }
-  ])
+// app.setUserTasks([
+//     {
+//       program: process.execPath,
+//       arguments: '--new-window',
+//       iconPath: path.join(__static, "favicon.ico"),
+//       iconIndex: 0,
+//       title: 'My Team',
+//       description: 'Open another window'
+//     }
+//   ])
 
 function createWindow() {
     // Create the browser window.
