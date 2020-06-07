@@ -138,7 +138,15 @@ export default {
     methods: {
         onSelectGif(gif) {
             if (gif.images && gif.images.original && gif.images.original.url) {
-                let imageEl = `<img id="gif-${gif.id}" class="image-gif" alt="${gif.title}" `;
+                let alt = "";
+                let author = "";
+                if (gif.title) {
+                    const titleArr = gif.title.split("GIF");
+                    alt = titleArr[0];
+                    author = titleArr.length > 1 ? titleArr[1] : "";
+                }
+
+                let imageEl = `<img id="gif-${gif.id}" class="image image-gif" alt="${alt}"  data-author="${author}" `;
                 imageEl += `src="${gif.images.original.url}" data-medium="${gif.images.downsized_medium.url}"></img>`;
                 const figureEl = `<figure class="image gif">${imageEl}</figure>`;
                 this.$emit("send", figureEl);
