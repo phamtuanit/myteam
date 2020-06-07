@@ -3,7 +3,6 @@ const convService = new (require("../../services/conversation.service").default)
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
 
 const MAX_MESSAGES = 50;
-
 let eventBus = null;
 
 function handleWSMessage(socket, state, commit, act, data) {
@@ -280,7 +279,7 @@ const moduleState = {
                 .find(c => c.id == convId);
 
             if (conv) {
-                const pushToUnread = function(message) {
+                const pushToUnread = function (message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessages.push(message);
 
@@ -522,6 +521,8 @@ const moduleState = {
                     case "created":
                         {
                             conv.meta.unreadMessages.push(rawMsg);
+                            const unread = conv.channel == true ? convNotification.channel : convNotification.nonChannel;
+                            unread[conv.id] = conv;
                         }
                         break;
 
