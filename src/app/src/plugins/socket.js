@@ -100,19 +100,22 @@ class Socket {
         });
 
         this.io.on("connect", () => {
-            console.info("Socket connection is available now");
+            console.info("Socket connection is available now.");
             // Join to given room
             this.rooms.forEach(room => {
                 this.io.emit("join", room);
             });
+            this.eventBus.emit("socket:ready", this);
         });
 
         this.io.on("connect_error", error => {
             console.error("Socket connection is interrupted.", error);
+            this.eventBus.emit("socket:error", error, this);
         });
 
         this.io.on("disconnect", reason => {
             console.error("Socket connection is disconnected.", reason);
+            this.eventBus.emit("socket:disconnect", reason, this);
             this.connect();
         });
     }
