@@ -858,7 +858,7 @@ const moduleState = {
             // Load unread message first
             const tracker = {};
             messageQueue.forEach(msg => {
-                if (msg.action === "created") {
+                if (msg.type === "message" && msg.action === "created") {
                     const convId = msg.payload.to.conversation;
                     tracker[convId] = convId;
                 }
