@@ -177,7 +177,7 @@ export default {
                 return this.$store
                     .dispatch("conversations/createConversation", convInfo)
                     .then(() => {
-                        this.onSendMessage();
+                        this.onSendMessage(html);
                     })
                     .catch(console.error);
             }
