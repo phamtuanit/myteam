@@ -1,0 +1,7 @@
+{
+    "latest_version": "0.1.1",
+    "release_note": {
+        "0.1.1": "Improve task-bar effect and integrate IPC module",
+        "0.1.0": "The first version"
+    }
+}
