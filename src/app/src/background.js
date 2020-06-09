@@ -1,16 +1,22 @@
 "use strict";
 import path from "path";
-import { app, protocol, BrowserWindow } from "electron";
+import {
+    app,
+    protocol,
+    BrowserWindow,
+    ipcMain,
+    globalShortcut,
+} from "electron";
 import config from "./conf/system.json";
 import {
     createProtocol,
-    /* installVueDevtools */
+    installVueDevtools
 } from "vue-cli-plugin-electron-builder/lib";
-const isDevelopment = config.env !== "prd";
-const indexUrl =
-    isDevelopment == true
-        ? "app://./index.html"
-        : config.server.address + "/index.html";
+const isDevelopment = config.env !== "prd" || process.argv.includes("--debug");
+const indexUrl = "myteam://./index.html";
+// isDevelopment == true || process.argv.includes("--debug")
+//     ? "app://./index.html"
+//     : config.server.address;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -21,20 +27,49 @@ app.setAppUserModelId(process.execPath);
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
-    { scheme: "app", privileges: { secure: true, standard: true } },
+    { scheme: "myteam", privileges: { secure: true, standard: true } },
 ]);
 
 app.commandLine.appendSwitch("ignore-certificate-errors");
-// app.setUserTasks([
-//     {
-//       program: process.execPath,
-//       arguments: '--new-window',
-//       iconPath: path.join(__static, "favicon.ico"),
-//       iconIndex: 0,
-//       title: 'My Team',
-//       description: 'Open another window'
-//     }
-//   ])
+
+// Register global shortcut
+app.whenReady().then(() => {
+    globalShortcut.register("CommandOrControl+Shift+D", () => {
+        if (win) {
+            win.webContents.openDevTools();
+        }
+    });
+
+    globalShortcut.register("CommandOrControl+Shift+F", () => {
+        if (win) {
+            win.webContents.reload();
+        }
+    });
+});
+
+// Register command event
+function registerCommEvents(win) {
+    ipcMain.on("set-flash-frame", function(event, val) {
+        win.flashFrame(val);
+    });
+
+    ipcMain.on("set-progress", function(event, val, mode) {
+        if (val >= 0) {
+            win.setProgressBar(val, {
+                mode: mode || "indeterminate",
+            });
+        } else {
+            win.setProgressBar(val);
+        }
+    });
+
+    ipcMain.on("get-data", function() {
+        win.webContents.send("set-data", {
+            version: app.getVersion(),
+            name: app.getName(),
+        });
+    });
+}
 
 function createWindow() {
     // Create the browser window.
@@ -46,35 +81,32 @@ function createWindow() {
         minHeight: 600,
         webPreferences: {
             nodeIntegration: true,
+            // preload: path.join(__dirname, "preload.js"), // use a preload script
             webSecurity: false, // ignore ERR_CERT_AUTHORITY_INVALID
             allowRunningInsecureContent: true,
         },
         icon: path.join(__static, "icon.png"),
     });
 
-    // Enable flash effect at the first time startup
-    console.debug("Enable flash effect at the first time startup");
-    win.flashFrame(true);
-
-    // Off flash effect when user focus in the application
-    win.once("focus", () => win.flashFrame(false));
+    registerCommEvents(win);
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {
         // Load the url of the dev server if in development mode
         win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
     } else {
-        createProtocol("app");
+        createProtocol("myteam");
         // Load the index.html when not in development
-        win.loadURL(indexUrl);
         console.info("Load index file from", indexUrl);
+        win.loadURL(indexUrl);
     }
 
     if (!isDevelopment) {
-        win.setMenu(null); // Hide Dev tool
+        win.setMenu(null); // Hide Menu-bar
     }
 
     if (isDevelopment) {
         console.debug("Open DevTool for debug");
+        installVueDevtools();
         win.webContents.openDevTools();
     }
 
