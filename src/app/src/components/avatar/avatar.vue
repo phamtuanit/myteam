@@ -1,6 +1,10 @@
 <template>
     <!-- Ref: https://github.com/eliep/vue-avatar -->
-    <div class="initial-avatar" :class="{ animated: animation }">
+    <div
+        class="initial-avatar"
+        :class="{ animated: animation }"
+        @click="onClick"
+    >
         <div
             class="initial-avatar-content"
             :style="[style, customStyle]"
@@ -157,6 +161,9 @@ export default {
     },
 
     methods: {
+        onClick(evt) {
+            this.$emit("click", evt, this);
+        },
         initial(userName) {
             const parts = userName.split(/[ -]/);
             let initials = "";
@@ -211,9 +218,7 @@ export default {
 };
 </script>
 
-
 <style scoped>
-
 /* Avatar effect */
 /* Ref: https://codepen.io/FlorinPop17/pen/drJJzK */
 @keyframes pulse {

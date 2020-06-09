@@ -9,13 +9,63 @@
     >
         <!-- Self Avatar -->
         <v-list-item class="px-0 mt-2 mb-1 mx-auto">
-            <Avatar
-                :size="40"
-                :user-name="me.fullName"
-                class="mx-auto"
-                :src="me.avatar"
-            >
-            </Avatar>
+            <v-menu :close-on-content-click="true">
+                <template v-slot:activator="{ on }">
+                    <Avatar
+                        :size="40"
+                        v-on="on"
+                        :user-name="me.fullName"
+                        class="mx-auto user-avatar"
+                        :src="me.avatar"
+                    >
+                    </Avatar>
+                </template>
+
+                <v-card class="px-2">
+                    <v-list>
+                        <v-list-item class="px-2">
+                            <v-list-item-avatar>
+                                <Avatar
+                                    :size="48"
+                                    :user-name="me.fullName"
+                                    class="mx-auto"
+                                    :src="me.avatar"
+                                ></Avatar>
+                            </v-list-item-avatar>
+
+                            <v-list-item-content>
+                                <v-list-item-title
+                                    v-if="me.firstName && me.lastName"
+                                >
+                                    {{ me.firstName }},
+                                    {{ me.lastName }}
+                                </v-list-item-title>
+                                <v-list-item-subtitle>
+                                    {{ me.mail }}
+                                </v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list>
+
+                    <v-divider></v-divider>
+                    <!-- Action -->
+                    <v-card-actions>
+                        <!-- Dark mode -->
+                        <v-btn
+                            icon
+                            @click="enableDarkMode"
+                            title="Dark / Light"
+                        >
+                            <v-icon>mdi-theme-light-dark</v-icon>
+                        </v-btn>
+                        <v-spacer></v-spacer>
+                        <!-- Logout -->
+                        <v-btn class="color-1" text @click="onLogout"
+                            >Logout</v-btn
+                        >
+                    </v-card-actions>
+                </v-card>
+            </v-menu>
         </v-list-item>
 
         <!-- Menus -->
@@ -53,14 +103,9 @@
             </template>
         </v-list>
 
-        <!-- Dark mode -->
-        <template v-slot:append>
-            <div class="pa-2 text-center">
-                <v-btn icon @click="enableDarkMode" title="Dark / Light">
-                    <v-icon>mdi-theme-light-dark</v-icon>
-                </v-btn>
-            </div>
-        </template>
+        <!-- Footer -->
+        <!-- <template v-slot:append>
+        </template> -->
     </v-navigation-drawer>
 </template>
 
@@ -101,6 +146,9 @@ export default {
             }
         },
     },
+    created() {
+        this.auth = window.IoC.get("auth");
+    },
     mounted() {
         this.activateDefaultMenu();
         this.updateInformation();
@@ -119,6 +167,10 @@ export default {
                 menu.inform = {
                     count: this.channelUread.length,
                 };
+
+                if (this.channelUread.length > 0) {
+                    window.IoC.get("ipc").send("set-flash-frame", true);
+                }
             }
         },
         updateChatInformation() {
@@ -130,6 +182,10 @@ export default {
                 menu.inform = {
                     count: this.chatUnreadMessages.length,
                 };
+
+                if (this.chatUnreadMessages.length > 0) {
+                    window.IoC.get("ipc").send("set-flash-frame", true);
+                }
             }
         },
         enableDarkMode() {
@@ -188,6 +244,23 @@ export default {
                     .catch(console.error);
             }
         },
+        onLogout() {
+            this.auth
+                .logout()
+                .then(() => {
+                    // Refresh page
+                    window.history.pushState({}, document.title, "/");
+                    // this.$router.go(0);
+                    location.reload();
+                })
+                .catch(console.error);
+        },
     },
 };
 </script>
+
+<style scoped>
+.user-avatar {
+    cursor: pointer;
+}
+</style>
