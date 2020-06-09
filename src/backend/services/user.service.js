@@ -141,7 +141,7 @@ module.exports = {
         const dbCollection = await this.getDBCollection("users");
         dbCollection.collection.createIndex({
             firstName: "text",
-            lastNme: "text",
+            lastName: "text",
             fullName: "text",
             mail: "text",
             phone: "text",

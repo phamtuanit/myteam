@@ -6,7 +6,7 @@ const {
 const ldap = require("ldapjs");
 const authConf = require("../conf/auth.json");
 
-const service = function(logger) {
+const service = function (logger) {
     this.logger = logger || console;
     this.ldapClient = null;
 };
@@ -42,11 +42,16 @@ service.prototype = {
         }
 
         return new Promise((resolve, reject) => {
-            this.search("", userName).then(users => {
+            this.search("", userName).then((users) => {
                 const user = users[0];
-                this.ldapClient.bind(user.dn, password, err => {
+                this.ldapClient.bind(user.dn, password, (err) => {
                     if (err) {
-                        reject(new MoleculerServerError(err));
+                        reject(
+                            new MoleculerClientError(
+                                "Username or Password is not correct.",
+                                401
+                            )
+                        );
                     } else {
                         resolve(user);
                     }
@@ -80,29 +85,30 @@ service.prototype = {
                     this.logger.error("ERROR: " + err);
                     reject(
                         new MoleculerClientError(
-                            "Cannot recognize user. " + err
+                            "Cannot recognize user. " + err,
+                            404
                         )
                     );
                     return;
                 }
 
                 const searchList = [];
-                res.on("searchEntry", function(entry) {
+                res.on("searchEntry", function (entry) {
                     searchList.push(entry);
                 });
-                res.on("error", function(err) {
+                res.on("error", function (err) {
                     reject(new MoleculerServerError(err.message));
                 });
                 res.on("end", () => {
                     if (searchList.length >= 1) {
                         const users = [];
-                        searchList.forEach(item => {
+                        searchList.forEach((item) => {
                             const ldapUser = item.object;
                             const userInfo = {
                                 id: ldapUser.uid.replace(/\./g, "-"),
                                 userName: ldapUser.uid,
                                 firstName: ldapUser.givenName,
-                                lastNme: ldapUser.sn,
+                                lastName: ldapUser.sn,
                                 fullName: ldapUser.cn,
                                 mail: ldapUser.mail,
                                 dn: ldapUser.dn,
@@ -114,7 +120,10 @@ service.prototype = {
                         resolve(users);
                     } else {
                         reject(
-                            new MoleculerClientError("Cannot recognize user")
+                            new MoleculerClientError(
+                                "Cannot recognize user",
+                                404
+                            )
                         );
                     }
                 });
