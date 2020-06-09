@@ -70,8 +70,8 @@ module.exports = {
 
                 const requestInterceptor = require("../utils/http-injector/request-injector.js");
                 const responseInterceptor = require("../utils/http-injector/response-injector.js");
-                requestInterceptor();
-                responseInterceptor();
+                requestInterceptor(axios);
+                responseInterceptor(axios);
 
                 commit("setAppState", "socket");
                 resolve();
@@ -110,18 +110,22 @@ module.exports = {
         // Handle re-connect
         const socket = window.IoC.get("socket");
         socket.on("connect", async () => {
-            messageQueueSvr.getAll(me.id).then(res => {
-                commit("setMessageQueue", res.data);
-                // Confirm message in queue
-                this.dispatch("conversations/checkMessageQueue");
-            }).catch(console.error);
+            messageQueueSvr
+                .getAll(me.id)
+                .then(res => {
+                    commit("setMessageQueue", res.data);
+                    // Confirm message in queue
+                    this.dispatch("conversations/checkMessageQueue");
+                })
+                .catch(console.error);
         });
     },
     "modules-user"(commit, store) {
         return new Promise((resolve, reject) => {
             console.info("Setting up: users module");
             try {
-                store.dispatch("users/initialize")
+                store
+                    .dispatch("users/initialize")
                     .then(() => {
                         commit("setAppState", "modules-conversation");
                         resolve();
@@ -136,7 +140,8 @@ module.exports = {
         return new Promise((resolve, reject) => {
             console.info("Setting up: chat module");
             try {
-                store.dispatch("conversations/initialize")
+                store
+                    .dispatch("conversations/initialize")
                     .then(() => {
                         commit("setAppState", "resolve-users");
                         resolve();
@@ -151,7 +156,8 @@ module.exports = {
         return new Promise((resolve, reject) => {
             console.info("Setting up: chat module");
             try {
-                store.dispatch("users/resolveAll")
+                store
+                    .dispatch("users/resolveAll")
                     .then(() => {
                         commit("setAppState", "end");
                         resolve();
@@ -166,5 +172,42 @@ module.exports = {
         commit("setAppState", "finished");
         commit("setInitialization", true);
         console.info("Application is ready");
-    }
+
+        // Notify Desktop app
+        const bus = window.IoC.get("bus");
+
+        const Axios = require("axios");
+        const axiosInstance = Axios.create({
+            baseURL:
+                config.env == "prd"
+                    ? window.location.origin
+                    : config.server.address,
+        });
+        axiosInstance.get("/application.json").then(res => {
+            const { latest_version } = res.data;
+            const icon = `<i class="v-icon notranslate mdi mdi-download-outline"></i>`;
+            const filePath = `/attachments/application/myteam-win-portable.${latest_version}.exe`;
+            let msg = `<span>Get Desktop application <a href="${filePath}" target="_blank" class="ml-1 white--text" style="text-decoration:none">${icon}</a></span>`;
+            if (!window.isElectron) {
+                setTimeout(() => {
+                    bus.emit("show-snack", {
+                        message: msg,
+                        type: "info",
+                        timeout: 10000,
+                    });
+                }, 2000);
+            } else {
+                if (!window.app || !window.app.version || latest_version != window.app.version) {
+                    msg = `<span>New application available V${latest_version} <a href="${filePath}" target="_blank" class="ml-1 white--text" style="text-decoration:none">${icon}</a></span>`;
+                    setTimeout(() => {
+                        bus.emit("show-snack", {
+                            message: msg,
+                            type: "info",
+                            timeout: 10000,
+                        });
+                    }, 2000);
+                }
+            }
+        });
+    },
 };
