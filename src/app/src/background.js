@@ -99,12 +99,6 @@ app.whenReady().then(() => {
             win.webContents.openDevTools();
         }
     });
-
-    globalShortcut.register("CommandOrControl+Shift+F", () => {
-        if (win) {
-            win.webContents.reload();
-        }
-    });
 });
 
 // Register command event
