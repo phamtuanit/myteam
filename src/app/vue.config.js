@@ -7,6 +7,7 @@ const { styles } = require("@ckeditor/ckeditor5-dev-utils");
 module.exports = {
     configureWebpack: {
         devtool: "source-map",
+        target: "electron-renderer",
         plugins: [
             // CKEditor needs its own plugin to be built using webpack.
             new CKEditorWebpackPlugin({
@@ -67,6 +68,7 @@ module.exports = {
         electronBuilder: {
             appId: "com.myteam.app",
             nodeIntegration: true,
+            customFileProtocol: 'myteam://./',
             builderOptions: {
                 win: {
                     signAndEditExecutable: true,
@@ -75,6 +77,17 @@ module.exports = {
                 portable: {
                     artifactName: "${name}-${os}-portable.${version}.exe",
                 },
+            },
+            chainWebpackMainProcess: config => {
+                // Chain webpack config for electron main process only
+            },
+            chainWebpackRendererProcess: config => {
+                // Chain webpack config for electron renderer process only
+                // The following example will set IS_ELECTRON to true in your app
+                config.plugin("define").tap(args => {
+                    args[0]["IS_ELECTRON"] = true;
+                    return args;
+                });
             },
         },
     },

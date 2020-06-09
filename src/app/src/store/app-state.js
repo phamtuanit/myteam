@@ -197,8 +197,12 @@ module.exports = {
                     });
                 }, 2000);
             } else {
-                if (!window.app || !window.app.version || latest_version != window.app.version) {
-                    msg = `<span>New application available V${latest_version} <a href="${filePath}" target="_blank" class="ml-1 white--text" style="text-decoration:none">${icon}</a></span>`;
+                if (
+                    !window.app ||
+                    !window.app.version ||
+                    latest_version != window.app.version
+                ) {
+                    msg = `<span>New version available V${latest_version} <a href="${filePath}" target="_blank" class="ml-1 white--text" style="text-decoration:none">${icon}</a></span>`;
                     setTimeout(() => {
                         bus.emit("show-snack", {
                             message: msg,

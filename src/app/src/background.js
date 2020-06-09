@@ -10,66 +10,20 @@ import {
 import config from "./conf/system.json";
 import {
     createProtocol,
-    installVueDevtools
+    installVueDevtools,
 } from "vue-cli-plugin-electron-builder/lib";
-const isDevelopment = config.env !== "prd" || process.argv.includes("--debug");
-const indexUrl = "myteam://./index.html";
-// isDevelopment == true || process.argv.includes("--debug")
-//     ? "app://./index.html"
-//     : config.server.address;
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
 let win;
+const isDevelopment = config.env !== "prd" || process.argv.includes("--debug");
+const indexUrl = isDevelopment == true ? "myteam://./index.html" : config.server.address;
 
-// https://www.electronjs.org/docs/tutorial/notifications#windows
-app.setAppUserModelId(process.execPath);
+app.setAppUserModelId(process.execPath); // https://www.electronjs.org/docs/tutorial/notifications#windows
+app.commandLine.appendSwitch("ignore-certificate-errors");
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
     { scheme: "myteam", privileges: { secure: true, standard: true } },
 ]);
-
-app.commandLine.appendSwitch("ignore-certificate-errors");
-
-// Register global shortcut
-app.whenReady().then(() => {
-    globalShortcut.register("CommandOrControl+Shift+D", () => {
-        if (win) {
-            win.webContents.openDevTools();
-        }
-    });
-
-    globalShortcut.register("CommandOrControl+Shift+F", () => {
-        if (win) {
-            win.webContents.reload();
-        }
-    });
-});
-
-// Register command event
-function registerCommEvents(win) {
-    ipcMain.on("set-flash-frame", function(event, val) {
-        win.flashFrame(val);
-    });
-
-    ipcMain.on("set-progress", function(event, val, mode) {
-        if (val >= 0) {
-            win.setProgressBar(val, {
-                mode: mode || "indeterminate",
-            });
-        } else {
-            win.setProgressBar(val);
-        }
-    });
-
-    ipcMain.on("get-data", function() {
-        win.webContents.send("set-data", {
-            version: app.getVersion(),
-            name: app.getName(),
-        });
-    });
-}
 
 function createWindow() {
     // Create the browser window.
@@ -81,7 +35,6 @@ function createWindow() {
         minHeight: 600,
         webPreferences: {
             nodeIntegration: true,
-            // preload: path.join(__dirname, "preload.js"), // use a preload script
             webSecurity: false, // ignore ERR_CERT_AUTHORITY_INVALID
             allowRunningInsecureContent: true,
         },
@@ -136,21 +89,47 @@ app.on("activate", () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
-    if (isDevelopment && !process.env.IS_TEST) {
-        // Install Vue Devtools
-        // Devtools extensions are broken in Electron 6.0.0 and greater
-        // See https://github.com/nklayman/vue-cli-plugin-electron-builder/issues/378 for more info
-        // Electron will not launch with Devtools extensions installed on Windows 10 with dark mode
-        // If you are not using Windows 10 dark mode, you may uncomment these lines
-        // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
-        // try {
-        //   await installVueDevtools()
-        // } catch (e) {
-        //   console.error('Vue Devtools failed to install:', e.toString())
-        // }
-    }
     createWindow();
 });
+
+// Register global shortcut
+app.whenReady().then(() => {
+    globalShortcut.register("CommandOrControl+Shift+D", () => {
+        if (win) {
+            win.webContents.openDevTools();
+        }
+    });
+
+    globalShortcut.register("CommandOrControl+Shift+F", () => {
+        if (win) {
+            win.webContents.reload();
+        }
+    });
+});
+
+// Register command event
+function registerCommEvents(win) {
+    ipcMain.on("set-flash-frame", function(event, val) {
+        win.flashFrame(val);
+    });
+
+    ipcMain.on("set-progress", function(event, val, mode) {
+        if (val >= 0) {
+            win.setProgressBar(val, {
+                mode: mode || "indeterminate",
+            });
+        } else {
+            win.setProgressBar(val);
+        }
+    });
+
+    ipcMain.on("get-data", function() {
+        win.webContents.send("set-data", {
+            version: app.getVersion(),
+            name: app.getName(),
+        });
+    });
+}
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
