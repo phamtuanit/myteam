@@ -1,5 +1,6 @@
 const axios = require("axios");
 const sysConfig = require("../../conf/system.json");
+const responseInterceptor = require("../../utils/http-injector/response-injector.js");
 const axiosInstance = axios.create({
     baseURL:
         sysConfig.env == "prd"
@@ -7,7 +8,8 @@ const axiosInstance = axios.create({
             : sysConfig.server.address,
 });
 
-const Service = function() {
+const Service = function () {
+    responseInterceptor(axiosInstance);
     this.locker = this.verifyToken();
 };
 
@@ -145,6 +147,15 @@ Service.prototype = {
         });
         // Return promise
         return this.locker;
+    },
+    async logout() {
+        try {
+            await this.locker;
+        } finally {
+            this.locker = Promise.resolve();
+            this.isAuthenticated = false;
+            window.localStorage.removeItem("token");
+        }
     },
 };
 
