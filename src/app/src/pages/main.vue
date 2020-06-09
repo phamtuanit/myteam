@@ -14,6 +14,9 @@ import { mapState } from "vuex";
 const BASE_WEB_TITLE = "My Team";
 export default {
     components: { LeftDrawer, RouterView },
+    data() {
+        return {};
+    },
     computed: {
         ...mapState({
             chatUnread: state => state.conversations.chat.unread,

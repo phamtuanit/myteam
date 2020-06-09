@@ -126,6 +126,10 @@ export default {
                 nextRoute = "app";
             }
             this.$router.push({ name: nextRoute, query: route.query });
+
+            // Stop blink tray icon in Electron Env
+            window.IoC.get("ipc").send("set-progress", -1);
+            window.IoC.get("ipc").send("ready");
         },
         checkUserConfirmation() {
             const notification = window.IoC.get("notification");
