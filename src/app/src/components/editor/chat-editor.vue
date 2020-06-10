@@ -147,7 +147,7 @@ export default {
                 }
 
                 let imageEl = `<img id="gif-${gif.id}" class="image image-gif" alt="${alt}"  data-author="${author}" `;
-                imageEl += `src="${gif.images.downsized_still.url}" data-original-src="${gif.images.original.url} data-preview-src="${gif.images.preview_gif.url}"></img>`;
+                imageEl += `src="${gif.images.downsized_still.url}" data-original-src="${gif.images.original.url}" data-preview-src="${gif.images.preview_gif.url}"></img>`;
                 const figureEl = `<figure class="image gif">${imageEl}</figure>`;
                 this.$emit("send", figureEl);
             }
