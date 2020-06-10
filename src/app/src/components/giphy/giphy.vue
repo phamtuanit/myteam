@@ -65,10 +65,8 @@ export default {
     },
     watch: {
         show(val) {
-            if (val) {
+            if (val == true && this.search == "") {
                 this.$nextTick(this.render);
-            } else {
-                this.search = "";
             }
         },
         search() {
