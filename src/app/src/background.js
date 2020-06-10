@@ -6,6 +6,7 @@ import {
     BrowserWindow,
     ipcMain,
     globalShortcut,
+    shell,
 } from "electron";
 import config from "./conf/system.json";
 import {
@@ -15,7 +16,8 @@ import {
 
 let win;
 const isDevelopment = config.env !== "prd" || process.argv.includes("--debug");
-const indexUrl = isDevelopment == true ? "myteam://./index.html" : config.server.address;
+const indexUrl =
+    isDevelopment == true ? "myteam://./index.html" : config.server.address;
 
 app.setAppUserModelId(process.execPath); // https://www.electronjs.org/docs/tutorial/notifications#windows
 app.commandLine.appendSwitch("ignore-certificate-errors");
@@ -123,6 +125,14 @@ function registerCommEvents(win) {
             name: app.getName(),
         });
     });
+
+    // Open link outside app
+    const handleRedirect = (e, url) => {
+        e.preventDefault();
+        shell.openExternal(url);
+    };
+
+    win.webContents.on("will-navigate", handleRedirect);
 }
 
 // Exit cleanly on request from parent process in development mode.
