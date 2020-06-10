@@ -49,7 +49,7 @@ export default {
             imgEls.forEach(img => {
                 img.onclick = function () {
                     modal.style.display = "flex";
-                    modalContent.src = this.src;
+                    modalContent.src = this.dataset.originalSrc || this.src;
                 };
             });
 

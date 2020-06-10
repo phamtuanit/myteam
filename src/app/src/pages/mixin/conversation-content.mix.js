@@ -74,7 +74,6 @@ export default {
                 return;
             }
 
-            console.log("Quote: ", message.id);
             this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
         },
         onRead() {
