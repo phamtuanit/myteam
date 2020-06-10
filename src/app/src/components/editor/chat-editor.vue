@@ -142,12 +142,12 @@ export default {
                 let author = "";
                 if (gif.title) {
                     const titleArr = gif.title.split("GIF");
-                    alt = titleArr[0];
-                    author = titleArr.length > 1 ? titleArr[1] : "";
+                    alt = (titleArr[0] && titleArr[0].trim()) || "gif";
+                    author = titleArr.length > 1 && titleArr[1] ? titleArr[1].trim() : "giphy";
                 }
 
                 let imageEl = `<img id="gif-${gif.id}" class="image image-gif" alt="${alt}"  data-author="${author}" `;
-                imageEl += `src="${gif.images.downsized_still.url}" data-original-src="${gif.images.original.url}" data-preview-src="${gif.images.preview_gif.url}"></img>`;
+                imageEl += `src="${gif.images.downsized_medium.url}" data-original-src="${gif.images.original.url}" data-preview-src="${gif.images.preview_gif.url}"></img>`;
                 const figureEl = `<figure class="image gif">${imageEl}</figure>`;
                 this.$emit("send", figureEl);
             }

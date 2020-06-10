@@ -97,6 +97,7 @@ export default {
             e.preventDefault();
             this.$emit("input", gif);
             this.$emit("select", gif);
+            this.show = false;
         },
         onGifRightClick(gif, e) {
             e.preventDefault();
