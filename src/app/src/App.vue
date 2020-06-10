@@ -72,4 +72,5 @@ export default {
 @import "./assets/common.css";
 @import "./assets/color.css";
 @import "./assets/spinner.css";
+@import "./assets/image.css";
 </style>

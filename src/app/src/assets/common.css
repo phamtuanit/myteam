@@ -88,11 +88,6 @@ div.v-subheader {
     min-width: 120px;
 }
 
-/* Image */
-figure img {
-    max-width: 100%;
-}
-
 /* Content format */
 /* Table */
 .message-item .table table {
