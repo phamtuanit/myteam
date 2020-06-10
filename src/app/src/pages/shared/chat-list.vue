@@ -31,7 +31,7 @@
 
             <!-- Add btn -->
             <v-btn
-                v-show="channel && allowAddChannel"
+                v-show="channel"
                 icon
                 fab
                 class="ml-1 mr-3"
@@ -85,7 +85,6 @@ export default {
             searchText: null,
             convList: [],
             activatedConv: null,
-            allowAddChannel: false
         };
     },
     watch: {
@@ -141,11 +140,6 @@ export default {
         } else if (this.list.length > 0 && !this.activatedConv) {
             // Set default conversation
             this.activatedConv = this.list[0];
-        }
-
-        // TODO: SEtup back-door
-        window.allowAddChannel = () => {
-            this.allowAddChannel = true;
         }
     },
     mounted() {
