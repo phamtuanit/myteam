@@ -54,6 +54,7 @@ function setupElectonEnv() {
             { label: "Cut", role: "cut" },
             { label: "Copy", role: "copy" },
             { label: "Paste", role: "paste" },
+            { label: "Paste as plain text", role: 'pasteandmatchstyle'},
             { label: "Select All", role: "selectall" },
             { label: "Delete", role: "delete" },
             { type: "separator" },
