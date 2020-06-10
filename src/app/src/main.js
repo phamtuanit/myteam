@@ -61,12 +61,12 @@ function setupElectonEnv() {
             {
                 label: "App",
                 submenu: [
-                    { role: "reload" },
+                    { role: "reload", accelerator: "CommandOrControl+F5" },
                     // { role: "forcereload" },
                     { type: "separator" },
-                    { role: "resetzoom" },
-                    { role: "zoomin" },
-                    { role: "zoomout" },
+                    { role: "resetzoom", accelerator: "CommandOrControl+0" },
+                    { role: "zoomin", accelerator: "CommandOrControl+numadd" },
+                    { role: "zoomout", accelerator: "CommandOrControl+numsub" },
                     { type: "separator" },
                     { label: "Version: " + window.app.version },
                 ],
