@@ -21,8 +21,6 @@
     "@ckeditor/ckeditor5-clipboard": "^18.0.0",
     "@ckeditor/ckeditor5-code-block": "^18.0.0",
     "@ckeditor/ckeditor5-core": "^18.0.0",
-    "@ckeditor/ckeditor5-dev-utils": "^12.0.9",
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^8.0.9",
     "@ckeditor/ckeditor5-editor-classic": "^18.0.0",
     "@ckeditor/ckeditor5-enter": "^18.0.0",
     "@ckeditor/ckeditor5-font": "^18.0.0",
@@ -55,6 +53,8 @@
     "vuex": "^3.1.3"
   },
   "devDependencies": {
+    "@ckeditor/ckeditor5-dev-utils": "^12.0.9",
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^8.0.9",
     "@mdi/font": "^4.9.95",
     "@vue/cli-plugin-babel": "^4.2.0",
     "@vue/cli-plugin-eslint": "^4.2.0",
