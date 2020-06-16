@@ -12,27 +12,27 @@ export default function init(store) {
             {
                 path: "/error",
                 name: "system-error",
-                component: () => import("../pages/errors/system-error.vue"),
+                component: () => import(/* webpackChunkName: "system-error" */ "../pages/errors/system-error.vue"),
             },
             {
                 path: "/login",
                 name: "login",
-                component: () => import("../pages/login.vue"),
+                component: () => import(/* webpackChunkName: "login" */ "../pages/login.vue"),
             },
             {
                 path: "/app",
                 name: "app",
-                component: () => import("../pages/main.vue"),
+                component: () => import(/* webpackPreload: true*/ "../pages/main.vue"),
                 children: [
                     {
                         name: "app-chat",
                         path: "chat",
-                        component: () => import("../pages/chat/index.vue"),
+                        component: () => import(/* webpackPreload: true */ "../pages/chat/index.vue"),
                     },
                     {
                         name: "app-channel",
                         path: "channel",
-                        component: () => import("../pages/channel/index.vue"),
+                        component: () => import(/* webpackPreload: true */ "../pages/channel/index.vue"),
                     },
                 ],
             },
