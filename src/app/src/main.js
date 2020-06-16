@@ -15,7 +15,7 @@ const router = require("./plugins/vue-router").default(store);
 // Check electron environment
 window.isElectron = typeof process != "undefined";
 if (window.isElectron == true) {
-    setupElectonEnv();
+    setupElectronEnv();
 } else {
     const IPC = require("./plugins/empty-ipc-render.js");
     window.IoC.register("ipc", new IPC());
@@ -39,7 +39,7 @@ new Vue({
     watch: {},
 }).$mount("#app");
 
-function setupElectonEnv() {
+function setupElectronEnv() {
     const electron = require("electron");
     const ipcRenderer = electron.ipcRenderer;
     window.IoC.register("ipc", ipcRenderer);
@@ -54,7 +54,7 @@ function setupElectonEnv() {
             { label: "Cut", role: "cut" },
             { label: "Copy", role: "copy" },
             { label: "Paste", role: "paste" },
-            { label: "Paste as plain text", role: 'pasteandmatchstyle'},
+            { label: "Paste as plain text", role: 'pasteandmatchstyle' },
             { label: "Select All", role: "selectall" },
             { label: "Delete", role: "delete" },
             { type: "separator" },
