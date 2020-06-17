@@ -13,6 +13,8 @@ const Errors = ApiGateway.Errors;
  * @typedef {import('http').ServerResponse} ServerResponse HTTP Server Response
  */
 
+console.info("ENV:", process.env);
+
 module.exports = {
     name: "api",
     mixins: [SocketService, ApiGateway],
@@ -251,7 +253,7 @@ module.exports = {
 
         // Serve assets from "public" folder. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Serve-static-files
         assets: {
-            folder: sysConf.gateway.static || "public",
+            folder: process.env.STATIC_DIR || sysConf.gateway.static || "public",
 
             // Options to `server-static` module
             options: {},
