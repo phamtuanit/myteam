@@ -19,7 +19,7 @@ const isDevelopment = config.env !== "prd" || process.argv.includes("--debug");
 const indexUrl =
     isDevelopment == true ? "myteam://./index.html" : config.server.address;
 
-app.setAppUserModelId(process.execPath); // https://www.electronjs.org/docs/tutorial/notifications#windows
+app.setAppUserModelId("My Team"); // https://www.electronjs.org/docs/tutorial/notifications#windows
 app.commandLine.appendSwitch("ignore-certificate-errors");
 
 // Scheme must be registered before the app is ready
