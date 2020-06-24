@@ -20,6 +20,11 @@ export default {
             timeAgo: null,
         };
     },
+    watch: {
+        "message.body.content"() {
+            this.$nextTick(this.supportZoomImage);
+        }
+    },
     created() {
         this.updatedUIMix();
         this.timer = setInterval(this.updatedUIMix, 60 * 1000);
