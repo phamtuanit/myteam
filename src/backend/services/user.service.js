@@ -9,12 +9,12 @@ module.exports = {
     name: "users",
     version: 1,
     settings: {},
-    dependencies: [],
+    dependencies: ["v1.auth"],
     mixins: [DBCollectionService],
     actions: {
         addUser: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "POST /",
             params: {
                 user: "object",
@@ -26,7 +26,7 @@ module.exports = {
         },
         getUserById: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /:id",
             params: {
                 id: "string",
@@ -39,7 +39,7 @@ module.exports = {
         },
         getUser: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /",
             params: {
                 user: { type: "string", optional: true },

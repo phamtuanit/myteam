@@ -7,12 +7,12 @@ module.exports = {
     name: "live",
     version: 1,
     settings: {},
-    dependencies: [],
+    dependencies: ["v1.auth", "v1.users"],
     mixins: [],
     actions: {
         getAll: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /",
             handler() {
                 return Object.values(this.livingUser).map(user => {
@@ -25,7 +25,7 @@ module.exports = {
         },
         getUserById: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /:userId",
             params: {
                 userId: "any",

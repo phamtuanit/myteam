@@ -12,7 +12,7 @@ module.exports = {
     name: "messages",
     version: 1,
     settings: {},
-    dependencies: [],
+    dependencies: ["v1.auth", "v1.users"],
     mixins: [DBCollectionService],
 
     /**
@@ -38,7 +38,7 @@ module.exports = {
     actions: {
         getMessages: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /",
             params: {
                 conversation: { type: "number", convert: true },
@@ -62,7 +62,7 @@ module.exports = {
         },
         getMessagesById: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /:id",
             params: {
                 conversation: { type: "number", convert: true },
@@ -81,7 +81,7 @@ module.exports = {
         },
         postMessage: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "POST /",
             params: {
                 conversation: { type: "number", convert: true },
@@ -110,7 +110,7 @@ module.exports = {
         },
         updateMessage: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "PUT /:id",
             params: {
                 conversation: { type: "number", convert: true },
@@ -145,7 +145,7 @@ module.exports = {
         },
         removeMessage: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "DELETE /:id",
             params: {
                 conversation: { type: "number", convert: true },
@@ -164,7 +164,7 @@ module.exports = {
         },
         reactionMessage: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "PUT /:id/reactions/:type",
             params: {
                 conversation: { type: "number", convert: true },

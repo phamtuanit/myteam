@@ -11,7 +11,7 @@ module.exports = {
     name: "conversations",
     version: 1,
     settings: {},
-    dependencies: [],
+    dependencies: ["v1.auth"],
     mixins: [DBCollectionService],
 
     events: {
@@ -24,7 +24,7 @@ module.exports = {
     actions: {
         createConversation: {
             auth: true,
-            roles: [1],
+            roles: [0],
             rest: "POST /",
             params: {
                 channel: {
@@ -99,7 +99,7 @@ module.exports = {
         },
         getConversationById: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /:id",
             cache: true,
             params: {
@@ -132,7 +132,7 @@ module.exports = {
         },
         getConversation: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             cache: true,
             rest: "GET /",
             params: {
@@ -195,7 +195,7 @@ module.exports = {
         },
         updateConversation: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "PUT /:id",
             params: {
                 id: { type: "number", convert: true },
@@ -280,7 +280,7 @@ module.exports = {
         },
         leaveConversation: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "PUT /:id/leave",
             params: {
                 id: { type: "number", convert: true },
@@ -356,7 +356,7 @@ module.exports = {
         },
         deleteConversation: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "DELETE /:id",
             params: {
                 id: { type: "number", convert: true },

@@ -11,7 +11,7 @@ module.exports = {
     name: "messages-queue",
     version: 1,
     settings: {},
-    dependencies: [],
+    dependencies: ["v1.auth", "v1.users", "v1.messages"],
     mixins: [DBCollectionService],
 
     /**
@@ -19,7 +19,7 @@ module.exports = {
      */
     events: {
         // message-queue.[userId].message.confirmed
-        async "message-queue.*.message.confirmed"(payload, sender, event, ctx) {
+        async "message-queue.*.message.confirmed"(payload, sender, event) {
             const [, userId] = event.split(".");
 
             try {
@@ -42,7 +42,7 @@ module.exports = {
     actions: {
         confirmMessage: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "PUT /:userId/messages",
             params: {
                 userId: "string",
@@ -89,7 +89,7 @@ module.exports = {
         },
         pullMessageById: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /:userId/messages/:id",
             params: {
                 userId: "string",
@@ -109,7 +109,7 @@ module.exports = {
         },
         pullMessages: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "GET /:userId/messages",
             params: {
                 userId: "string",
@@ -126,7 +126,7 @@ module.exports = {
         },
         pushMessageToQueue: {
             auth: true,
-            roles: [1],
+            roles: [-1],
             rest: "POST /:userId/messages",
             params: {
                 userId: "string",

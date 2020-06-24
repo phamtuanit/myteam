@@ -40,6 +40,22 @@ module.exports = {
             cert: fs.readFileSync(path.join(__dirname, "../ssl", "myteam.cer")),
         } : null,
 
+        // Global CORS settings for all routes
+        cors: {
+            // Configures the Access-Control-Allow-Origin CORS header.
+            origin: "*",
+            // Configures the Access-Control-Allow-Methods CORS header. 
+            methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+            // Configures the Access-Control-Allow-Headers CORS header.
+            allowedHeaders: [],
+            // Configures the Access-Control-Expose-Headers CORS header.
+            exposedHeaders: [],
+            // Configures the Access-Control-Allow-Credentials CORS header.
+            credentials: false,
+            // Configures the Access-Control-Max-Age CORS header.
+            maxAge: 3600
+        },
+
         routes: [
             {
                 // Root
@@ -57,10 +73,10 @@ module.exports = {
 
                 cors: {
                     origin: "*",
-                    methods: ["GET", "POST", "PUT", "DELETE"],
+                    methods: ["GET"],
                     allowedHeaders: "*",
                     credentials: true,
-                    maxAge: null,
+                    maxAge: 3600,
                 },
 
                 // Action aliases refreshToken
@@ -144,15 +160,6 @@ module.exports = {
                     ctx.meta.headers = { ...req.headers };
                 },
 
-                // Global CORS settings
-                cors: {
-                    origin: "*",
-                    methods: ["GET", "POST", "PUT", "DELETE"],
-                    allowedHeaders: "*",
-                    credentials: true,
-                    maxAge: null,
-                },
-
                 // Calling options. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Calling-options
                 callingOptions: {},
 
@@ -176,14 +183,6 @@ module.exports = {
             {
                 path: "/upload",
                 authentication: sysConf.gateway.authentication,
-
-                cors: {
-                    origin: "*",
-                    methods: ["GET", "POST", "PUT", "DELETE"],
-                    allowedHeaders: "*",
-                    credentials: true,
-                    maxAge: null,
-                },
 
                 // You should disable body parsers
                 bodyParsers: {
@@ -311,30 +310,8 @@ module.exports = {
          * @param {*} req
          * @returns NUll if you have right permission
          */
-        async authorize(ctx, route, req) {
-            // It check the `auth` property in action schema.
-            if (
-                req.$action.auth == true &&
-                req.$action.roles &&
-                Array.isArray(req.$action.roles)
-            ) {
-                const user = ctx.meta.user;
-                const userEntity = await ctx.call("v1.users.getUser", {
-                    id: user.id,
-                });
-                // Check the user role
-                if (
-                    !userEntity ||
-                    userEntity.role == undefined ||
-                    userEntity.role == "null" ||
-                    req.$action.roles.indexOf(userEntity.role) === -1
-                ) {
-                    throw new Errors.ForbiddenError(
-                        "You don't have right permission"
-                    );
-                }
-            }
-            return null;
+        authorize(ctx, route, req) {
+            return ctx.call("v1.authorization.canAccess", { target: req.$action }).catch(this.logger.error);
         },
     },
 };

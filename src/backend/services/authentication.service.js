@@ -73,7 +73,7 @@ module.exports = {
 
                     // Inform user login
                     const eventName = `user.login`;
-                    await this.broker.broadcast(eventName, user, ["users"]);
+                    this.broker.broadcast(eventName, user, ["users"]);
                     return userToken;
                 } else {
                     throw new MoleculerClientError(
