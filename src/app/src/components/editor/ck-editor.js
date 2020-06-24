@@ -180,5 +180,8 @@ ClassicEditor.defaultConfig = {
     link: {
         // Automatically add target="_blank" and rel="noopener noreferrer" to all external links.
         addTargetToExternalLinks: true,
+    },
+    mediaEmbed: {
+        previewsInData: true
     }
 };
