@@ -113,6 +113,7 @@ module.exports = {
             });
             if (!existingUser) {
                 user.created = new Date();
+                user.role = 10;
                 return await dbCollection.insert(user).then(entity => {
                     delete entity._id;
                     return entity;
