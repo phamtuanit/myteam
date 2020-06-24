@@ -4,7 +4,7 @@
         "host": "0.0.0.0",
         "static": "public",
         "authentication": true,
-        "authorization": false
+        "authorization": true
     },
     "redis": {
         "uri": "redis://localhost:6379",
