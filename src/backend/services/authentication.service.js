@@ -46,7 +46,11 @@ module.exports = {
                     const expirationDate = new Date(decoded.exp);
                     if (today > expirationDate) {
                         //"Token is expired." + " User: " + user.id
-                        throw new MoleculerClientError(`You ${user.id} is trying to login with expired token. Expiration ${expirationDate.toLocaleString()}`);
+                        throw new MoleculerClientError(
+                            `You ${
+                                user.id
+                            } is trying to login with expired token. Expiration ${expirationDate.toLocaleString()}`
+                        );
                     }
                     this.logger.debug("Logged in user:", user.id);
                     return user;
@@ -68,12 +72,23 @@ module.exports = {
                     password = passBuf.toString();
 
                     // Search user info
-                    const user = await this.ldap.verify(username, password);
+                    let user = await this.ldap.verify(username, password);
+                    const latestUserInfo = await ctx.call(
+                        "v1.users.getUserById",
+                        {
+                            id: user.id,
+                        }
+                    );
+
+                    if (latestUserInfo) {
+                        user = latestUserInfo;
+                    }
+
                     const userToken = this.getUserToken(user);
 
                     // Inform user login
                     const eventName = `user.login`;
-                    this.broker.broadcast(eventName, user, ["users"]);
+                    this.broker.emit(eventName, user);
                     return userToken;
                 } else {
                     throw new MoleculerClientError(
@@ -102,8 +117,13 @@ module.exports = {
                         throw new MoleculerClientError("Token is expired");
                     }
 
-                    const user = decoded.data;
-                    const userToken = this.getUserToken(user);
+                    const latestUserInfo = await ctx.call(
+                        "v1.users.getUserById",
+                        {
+                            id: user.id,
+                        }
+                    );
+                    const userToken = this.getUserToken(latestUserInfo);
                     return userToken;
                 } catch (error) {
                     this.logger.error(error);
@@ -173,7 +193,7 @@ module.exports = {
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
