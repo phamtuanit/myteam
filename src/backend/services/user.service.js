@@ -1,4 +1,5 @@
 "use strict";
+const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
 const { cleanDbMark } = require("../utils/entity");
 /**
@@ -44,17 +45,30 @@ module.exports = {
             params: {
                 user: { type: "string", optional: true },
                 text: { type: "string", optional: true },
-                limit: { type: "number", optional: true, convert: true, default: 20 },
+                limit: {
+                    type: "number",
+                    optional: true,
+                    convert: true,
+                    default: undefined,
+                },
             },
             async handler(ctx) {
                 const { user, text, limit } = ctx.params;
-                const dbCollection = await this.getDBCollection("users");
+                const { user: loggedUser } = ctx.meta;
 
+                if (!text && !user && loggedUser.role != 0) {
+                    throw new Errors.RequestRejectedError(
+                        "You don't have permission to get all users.",
+                        403
+                    );
+                }
+
+                const dbCollection = await this.getDBCollection("users");
                 const filter = {
                     query: {},
                 };
 
-                if (limit >= 0 && !text) {
+                if (limit) {
                     filter.limit = limit;
                 }
 
@@ -75,7 +89,7 @@ module.exports = {
 
                 // Delete _id and get status
                 if (result) {
-                    const userIds = result.map(i => i.id);
+                    const userIds = result.map((i) => i.id);
                     const statusList = await ctx.call("v1.live.getUserById", {
                         userId: userIds,
                     });
@@ -106,19 +120,24 @@ module.exports = {
      * Methods
      */
     methods: {
-        async addOrUpdateUser(user, addOnly = false) {
+        async addOrUpdateUser(user) {
             const dbCollection = await this.getDBCollection("users");
             const existingUser = await dbCollection.findOne({
                 id: user.id,
             });
+
             if (!existingUser) {
                 user.created = new Date();
-                user.role = 10;
-                return await dbCollection.insert(user).then(entity => {
+                user.role = 10; // Normal member
+                return await dbCollection.insert(user).then((entity) => {
                     delete entity._id;
                     return entity;
                 });
-            } else if (!addOnly) {
+            } else {
+                if (typeof existingUser.role == "undefined") {
+                    user.role = 10; // Normal member. TODO: to be delete when all users has role
+                }
+
                 user.updated = new Date();
                 const update = {
                     $set: user,
@@ -133,7 +152,7 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {},
 
     /**
      * Service started lifecycle event handler
@@ -152,5 +171,5 @@ module.exports = {
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { },
+    stopped() {},
 };
