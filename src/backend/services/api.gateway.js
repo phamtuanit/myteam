@@ -311,7 +311,10 @@ module.exports = {
          * @returns NUll if you have right permission
          */
         authorize(ctx, route, req) {
-            return ctx.call("v1.authorization.canAccess", { target: req.$action }).catch(this.logger.error);
+            if (req.$action.role && !req.$action.roles.includes(-1)) {
+                return ctx.call("v1.authorization.canAccess", { target: req.$action })
+                    .catch(this.logger.error);
+            }
         },
     },
 };
