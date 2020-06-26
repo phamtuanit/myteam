@@ -180,8 +180,8 @@ module.exports = class HandlerBase {
         }
 
         // Broadcast message
-        const eventName = `conversation.${this.convId}.message.${act}`;
-        this.broker.broadcast(eventName, message).catch(this.logger.error);
+        const eventName = `message.${message.id}.${act}`;
+        this.broker.emit(eventName, message).catch(this.logger.error);
     }
 
     async getMessage() {

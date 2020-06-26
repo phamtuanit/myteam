@@ -15,7 +15,7 @@ module.exports = {
     mixins: [DBCollectionService],
 
     events: {
-        async "conversation.*.updated|removed|created"(payload, sender, event) {
+        async "conversation.*.updated|removed|created"(/*payload, sender, event*/) {
             // Clear all cache entries which keys start with `users.`
             this.broker.cacher.clean("*.conversations.*");
         },
@@ -91,9 +91,7 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${newConv.id}.created`;
-                this.broker
-                    .broadcast(eventName, newConv)
-                    .catch(this.logger.error);
+                this.broker.broadcast(eventName, newConv).catch(this.logger.error);
                 return newConv;
             },
         },
