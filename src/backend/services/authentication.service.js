@@ -19,7 +19,7 @@ module.exports = {
     name: "auth",
     version: 1,
     settings: {},
-    dependencies: [],
+    dependencies: ["users"],
     mixins: [DBCollectionService],
     actions: {
         verifyToken: {
@@ -68,7 +68,18 @@ module.exports = {
                     password = passBuf.toString();
 
                     // Search user info
-                    const user = await this.ldap.verify(username, password);
+                    let user = await this.ldap.verify(username, password);
+                    const latestUserInfo = await ctx.call(
+                        "v1.users.getUserById",
+                        {
+                            id: user.id,
+                        }
+                    );
+
+                    if (latestUserInfo) {
+                        user = latestUserInfo;
+                    }
+
                     const userToken = this.getUserToken(user);
 
                     // Inform user login
@@ -102,8 +113,13 @@ module.exports = {
                         throw new MoleculerClientError("Token is expired");
                     }
 
-                    const user = decoded.data;
-                    const userToken = this.getUserToken(user);
+                    const latestUserInfo = await ctx.call(
+                        "v1.users.getUserById",
+                        {
+                            id: user.id,
+                        }
+                    );
+                    const userToken = this.getUserToken(latestUserInfo);
                     return userToken;
                 } catch (error) {
                     this.logger.error(error);
