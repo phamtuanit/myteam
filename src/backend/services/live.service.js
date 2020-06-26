@@ -7,7 +7,7 @@ module.exports = {
     name: "live",
     version: 1,
     settings: {},
-    dependencies: ["v1.auth", "v1.users"],
+    dependencies: ["v1.auth"],
     mixins: [],
     actions: {
         getAll: {

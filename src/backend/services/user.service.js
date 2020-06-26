@@ -10,7 +10,7 @@ module.exports = {
     name: "users",
     version: 1,
     settings: {},
-    dependencies: ["v1.auth"],
+    dependencies: [],
     mixins: [DBCollectionService],
     actions: {
         addUser: {

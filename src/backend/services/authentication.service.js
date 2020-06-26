@@ -19,7 +19,7 @@ module.exports = {
     name: "auth",
     version: 1,
     settings: {},
-    dependencies: ["users"],
+    dependencies: ["v1.users"],
     mixins: [DBCollectionService],
     actions: {
         verifyToken: {

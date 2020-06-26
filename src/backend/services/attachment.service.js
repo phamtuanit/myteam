@@ -11,6 +11,10 @@ mkdir(uploadDir);
 
 module.exports = {
     name: "attachments",
+    version: 1,
+    settings: {},
+    dependencies: ["v1.auth"],
+    mixins: [],
     actions: {
         getFile: {
             params: {

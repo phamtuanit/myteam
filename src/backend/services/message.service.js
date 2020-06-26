@@ -12,7 +12,7 @@ module.exports = {
     name: "messages",
     version: 1,
     settings: {},
-    dependencies: ["v1.auth", "v1.users"],
+    dependencies: ["v1.auth", "v1.conversations"],
     mixins: [DBCollectionService],
 
     /**
