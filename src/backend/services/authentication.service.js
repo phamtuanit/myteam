@@ -46,11 +46,7 @@ module.exports = {
                     const expirationDate = new Date(decoded.exp);
                     if (today > expirationDate) {
                         //"Token is expired." + " User: " + user.id
-                        throw new MoleculerClientError(
-                            `You ${
-                                user.id
-                            } is trying to login with expired token. Expiration ${expirationDate.toLocaleString()}`
-                        );
+                        throw new MoleculerClientError(`You ${user.id} is trying to login with expired token. Expiration ${expirationDate.toLocaleString()}`);
                     }
                     this.logger.debug("Logged in user:", user.id);
                     return user;
@@ -72,18 +68,7 @@ module.exports = {
                     password = passBuf.toString();
 
                     // Search user info
-                    let user = await this.ldap.verify(username, password);
-                    const latestUserInfo = await ctx.call(
-                        "v1.users.getUserById",
-                        {
-                            id: user.id,
-                        }
-                    );
-
-                    if (latestUserInfo) {
-                        user = latestUserInfo;
-                    }
-
+                    const user = await this.ldap.verify(username, password);
                     const userToken = this.getUserToken(user);
 
                     // Inform user login
@@ -117,13 +102,8 @@ module.exports = {
                         throw new MoleculerClientError("Token is expired");
                     }
 
-                    const latestUserInfo = await ctx.call(
-                        "v1.users.getUserById",
-                        {
-                            id: user.id,
-                        }
-                    );
-                    const userToken = this.getUserToken(latestUserInfo);
+                    const user = decoded.data;
+                    const userToken = this.getUserToken(user);
                     return userToken;
                 } catch (error) {
                     this.logger.error(error);
