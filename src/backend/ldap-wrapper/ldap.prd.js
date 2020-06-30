@@ -19,29 +19,34 @@ service.prototype = {
             this.ldapClient = null;
         }
     },
-    confirmLdap() {
-        if (!this.ldapClient) {
-            try {
+    async confirmLdap() {
+        if (!this.ldapClient || (!this.ldapClient.connected && !this.ldapClient.connecting)) {
+            return await new Promise((resolve) => {
                 this.ldapClient = ldap.createClient({
                     url: authConf.server,
                 });
-                return true;
-            } catch (error) {
-                this.logger.error(error);
-                this.ldapClient = null;
-                return false;
-            }
+
+                this.ldapClient.on("connect", () => {
+                    this.logger.info("LDAP connection is ready.");
+                    resolve(true);
+
+                    this.ldapClient.on("error", (err) => {
+                        this.logger.error("LDAP connection has problem.", err);
+                        this.close();
+                    });
+                });
+
+                this.ldapClient.once("error", (err) => {
+                    this.logger.error("Could not connect to LDAP.", err);
+                    this.close();
+                    resolve(false);
+                });
+            });
         }
         return true;
     },
-    verify(userName, password) {
-        if (!this.confirmLdap()) {
-            return Promise.reject(
-                new ServiceNotAvailableError("Could not connect to LDAP server")
-            );
-        }
-
-        return new Promise((resolve, reject) => {
+    async verify(userName, password) {
+        return await new Promise((resolve, reject) => {
             this.search("", userName).then((users) => {
                 const user = users[0];
                 this.ldapClient.bind(user.dn, password, (err) => {
@@ -56,14 +61,12 @@ service.prototype = {
                         resolve(user);
                     }
                 });
-            });
+            }).catch(reject);
         });
     },
-    search(dn, userName) {
-        if (!this.confirmLdap()) {
-            return Promise.reject(
-                new ServiceNotAvailableError("Could not connect to LDAP server")
-            );
+    async search(dn, userName) {
+        if (!(await this.confirmLdap())) {
+            throw new MoleculerServerError("Could not connect to LDAP server");
         }
 
         let dnSearch;
@@ -79,7 +82,7 @@ service.prototype = {
             filter = { scope: "sub" };
         }
 
-        return new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             this.ldapClient.search(dnSearch, filter, (err, res) => {
                 if (err) {
                     this.logger.error("ERROR: " + err);

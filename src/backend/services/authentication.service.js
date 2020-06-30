@@ -68,7 +68,7 @@ module.exports = {
                     password = passBuf.toString();
 
                     // Search user info
-                    let user = await this.ldap.verify(username, password);
+                    let user = await (this.ldap.verify(username, password));
                     const latestUserInfo = await ctx.call(
                         "v1.users.getUserById",
                         {
