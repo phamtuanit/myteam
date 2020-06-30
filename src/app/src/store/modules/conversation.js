@@ -224,7 +224,7 @@ const moduleState = {
             eventBus.emit("conversations", "added", conv);
         },
         updateConversation(state, conv) {
-            const convList = [state.channel.all, state.chat.all];
+            const convList = state.channel.all.concat(state.chat.all);
             const existingConv = convList.find(c => c.id === conv.id);
             if (!existingConv) {
                 return;
@@ -248,7 +248,7 @@ const moduleState = {
             return existingConv;
         },
         removeConv(state, convId) {
-            const convList = [state.channel.all, state.chat.all];
+            const convList = state.channel.all.concat(state.chat.all);
             convList.forEach(all => {
                 const index = all.findIndex(i => i.id == convId);
                 if (index >= 0) {
@@ -541,15 +541,13 @@ const moduleState = {
             return newConv;
         },
         async loadLatestConversation({ state, rootState, commit }, convId) {
-            const convList = [state.channel.all, state.chat.all];
+            const convList = state.channel.all.concat(state.chat.all);
             const existingConv = convList.find(c => c.id === convId);
             if (!existingConv) {
                 return await this.dispatch("conversations/loadConversation", convId).catch(
                     console.error
                 );
             }
-
-            const me = rootState.userInfo.me;
 
             // Load latest information
             const conv = (await convService.getAllById(convId)).data;
@@ -558,7 +556,7 @@ const moduleState = {
                     "users/resolve",
                     conv.subscribers
                 );
-
+                const me = rootState.users.me;
                 if (!conv.subscribers.includes(me.id)) {
                     conv.subscribers = subscribers || [];
                     commit("removeConv", convId);
@@ -819,7 +817,7 @@ const moduleState = {
             console.warn("Conversation Id is required");
         },
         async checkMessageQueue({ state, rootState, commit }) {
-            const convList = [...state.channel.all, ...state.chat.all];
+            const convList = state.channel.all.concat(state.chat.all);
             const confirmedMsqIds = [];
             const messageQueue = rootState.messageQueue;
 
