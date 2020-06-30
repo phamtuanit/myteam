@@ -21,37 +21,30 @@ module.exports = {
             data.event = event;
 
             this.logger.info(
-                `WS >>> Status of user [${userId}] has been changed to`, status
+                `WS >>> Status of user [${userId}] has been changed to`,
+                status
             );
 
-            this.logger.debug("WS >>> Broadcast mesaage to all of user")
+            this.logger.debug("WS >>> Broadcast message to all of user.");
             this.io.to("live").emit("live", status, data, event);
         },
         // message-queue.[userId].message.*
-        "message-queue.*.message.*"(message, sender, event, ctx) {
+        "message-queue.*.message.*"(message, sender, event) {
             const [, userId, resource, act] = event.split(".");
-            this.logger.info("WS >>> Receiving a message from user-queue.", userId, event);
+            this.logger.info(
+                "WS >>> Receiving a message from user-queue.",
+                userId,
+                event
+            );
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
                 message.event = event;
                 // To private user room
-                this.io.to(userId).emit(message.type || resource, act, message, event);
+                this.io
+                    .to(userId)
+                    .emit(message.type || resource, act, message, event);
             }
         },
-        // conversation.[conversation].message.rejected.[create]
-        // "conversation.*.message.rejected.*"(message, sender, event, ctx) {
-        //     const [, , resource, act] = event.split(".");
-        //     const fromUser = message.payload.from.issuer;
-
-        //     const socketDict = this.sockets[fromUser];
-        //     if (socketDict && Object.keys(socketDict).length > 0) {
-        //         message.error = message.error
-        //             ? message.error.message
-        //             : "Server unknown error";
-        //         // To private user room
-        //         this.io.to(fromUser).emit(resource, act, message, event);
-        //     }
-        // },
     },
 
     methods: {
@@ -59,10 +52,10 @@ module.exports = {
             let token = socket.handshake.query.token;
             this.broker
                 .call("v1.auth.verifyToken", { token })
-                .then(user => {
+                .then((user) => {
                     this.handleNewSocket(socket, user);
                 })
-                .catch(err => {
+                .catch((err) => {
                     this.logger.warn(
                         "WS >>> Incoming socket don't has valid access-token. Disconnecting...",
                         err.message
@@ -76,10 +69,12 @@ module.exports = {
             // Save socket
             this.sockets[user.id] = this.sockets[user.id] || {};
             this.sockets[user.id][socket.id] = socket;
-            this.logger.info(`WS >>> User [${user.id}] has been connected via WebSocket.`);
+            this.logger.info(
+                `WS >>> User [${user.id}] has been connected via WebSocket.`
+            );
 
             // Join to required room
-            requiredRooms.forEach(room => {
+            requiredRooms.forEach((room) => {
                 socket.join(room);
             });
 
@@ -87,15 +82,17 @@ module.exports = {
             const connectedEvt = `user.${user.id}.socket.connected`;
             this.broker.broadcast(connectedEvt, user, ["live"]); // live service only
 
-            socket.on("confirm", data => {
+            socket.on("confirm", (data) => {
                 return this.onSocketConfirmed(socket, data);
             });
 
             socket.on("disconnect", () => {
-                this.logger.info(`WS >>> User ${user.id} has been disconnected.`);
+                this.logger.info(
+                    `WS >>> User ${user.id} has been disconnected.`
+                );
 
                 // Leave to required room
-                requiredRooms.forEach(room => {
+                requiredRooms.forEach((room) => {
                     socket.leave(room);
                 });
 
@@ -114,11 +111,11 @@ module.exports = {
                 this.broker.broadcast(disconnectedEvt, user, ["live"]);
             });
 
-            socket.on("join", room => {
+            socket.on("join", (room) => {
                 socket.join(room);
             });
 
-            socket.on("leave", room => {
+            socket.on("leave", (room) => {
                 socket.leave(room);
             });
         },
