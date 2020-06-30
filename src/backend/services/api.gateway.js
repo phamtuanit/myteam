@@ -192,7 +192,7 @@ module.exports = {
 
                 aliases: {
                     // "GET /:id": "attachments.getFile",
-                    "POST /": "multipart:attachments.saveFile",
+                    "POST /": "multipart:v1.attachments.saveFile",
                     "POST /multi/": {
                         type: "multipart",
                         // Action level busboy config
@@ -207,7 +207,7 @@ module.exports = {
                                 );
                             },
                         },
-                        action: "attachments.saveFiles",
+                        action: "v1.attachments.saveFiles",
                     },
                 },
 
