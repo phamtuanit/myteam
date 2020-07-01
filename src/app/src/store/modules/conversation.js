@@ -248,7 +248,7 @@ const moduleState = {
             return existingConv;
         },
         removeConv(state, convId) {
-            const convList = state.channel.all.concat(state.chat.all);
+            const convList = [state.channel.all, state.chat.all];
             convList.forEach(all => {
                 const index = all.findIndex(i => i.id == convId);
                 if (index >= 0) {
