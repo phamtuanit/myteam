@@ -774,12 +774,12 @@ const moduleState = {
                         return res.data;
                     })
                     .then(messages => {
-                        if (!leftId && messages.length < top) {
+                        if (!leftId && (messages.length == 0 || messages.length < top)) {
                             // Reached to end of history
                             conv.reachedFullHistories = true;
                         }
 
-                        if (messages.length <= 0) {
+                        if (!messages || messages.length === 0) {
                             return conv.messages;
                         }
 
@@ -800,6 +800,7 @@ const moduleState = {
                         });
 
                         if (conv.messages == null) {
+                            // Overide
                             conv.messages = messages;
                         } else {
                             if (conv.messages.length > 0 && conv.messages[0].id < messages[0].id) {
