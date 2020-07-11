@@ -2,7 +2,6 @@
     <div
         class="infinity-scroll infinity-scroll--top d-flex justify-center"
         v-bind="$attrs"
-        v-if="!reachedEnd"
     >
         <div
             v-show="isLoading & scrollBar"
@@ -26,10 +25,6 @@
 <script>
 export default {
     props: {
-        reachedEnd: {
-            type: Boolean,
-            default: true,
-        },
         load: {
             type: Function,
             default: null,
@@ -52,6 +47,8 @@ export default {
     },
     destroyed() {
         this.mutationObserver.disconnect();
+        this.mutationObserver = undefined;
+        this.parent = undefined;
     },
     methods: {
         onLoadMore() {
@@ -103,9 +100,7 @@ export default {
         setupObserver() {
             // Watch scroll
             this.parent.$el.addEventListener("scroll", () => {
-                if (!this.reachedEnd) {
-                    setTimeout(this.checkScroll, 0);
-                }
+                setTimeout(this.checkScroll, 0);
             });
 
             // Watch inner items
