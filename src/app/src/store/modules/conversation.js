@@ -184,7 +184,9 @@ const moduleState = {
                 state.chat.active = conv;
             }
 
-            if (conv._isTemp != true && !conv.isVerified) {
+            const needToLoadMore = conv.messages && conv.messages.length <= 10 && !conv.reachedFullHistories;
+            const notVerifyYet = conv._isTemp != true && !conv.isVerified;
+            if (notVerifyYet || needToLoadMore) {
                 // Load conversation content
                 this.dispatch("conversations/getConversationContent", {
                     convId: conv.id,
@@ -483,14 +485,9 @@ const moduleState = {
 
                 // Add message
                 commit("addConversation", conv);
-
-                if (!conv.channel) {
-                    // Load message
-                    await this.dispatch(
-                        "conversations/getConversationContent",
-                        { convId: conv.id, top: 5 }
-                    );
-                }
+                // Load message in a channel
+                const maxMessage = conv.channel ? 4 : 2;
+                await this.dispatch("conversations/getConversationContent", { convId: conv.id, top: maxMessage });
             }
 
             // Confirm message in queue
@@ -645,15 +642,11 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => (c.id || c._id) == convId);
             if (conv) {
-                const currentConv =
-                    conv.channel == true
-                        ? state.channel.active
-                        : state.chat.active;
+                const currentConv = conv.channel == true
+                    ? state.channel.active
+                    : state.chat.active;
                 if (currentConv) {
-                    if (
-                        currentConv.id === conv.id ||
-                        (currentConv._id && currentConv._id === conv._id)
-                    ) {
+                    if (currentConv.id === conv.id || (currentConv._id && currentConv._id === conv._id)) {
                         // Already activated
                         return conv;
                     }
@@ -684,7 +677,7 @@ const moduleState = {
                 // Load message
                 await this.dispatch("conversations/getConversationContent", {
                     convId: conv.id,
-                    top: 20,
+                    top: 10,
                 });
                 return conv;
             }
@@ -836,13 +829,12 @@ const moduleState = {
                         commit("removeConv", convId);
                         break;
                     default:
-                        this.dispatch("conversations/loadLatestConversation", convId).catch(
-                            await console.error
-                        ).then((conv) => {
-                            if (conv) {
-                                conv.isVerified = true;
-                            }
-                        });
+                        this.dispatch("conversations/loadLatestConversation", convId)
+                            .catch(console.error).then((conv) => {
+                                if (conv) {
+                                    conv.isVerified = true;
+                                }
+                            });
                         break;
                 }
             }
