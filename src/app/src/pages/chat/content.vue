@@ -32,13 +32,11 @@
                             "
                             @click="onShowFriendList"
                         >
-                            <v-icon
-                                v-text="
+                            <v-icon v-text="
                                     friendList
                                         ? 'mdi-account-supervisor'
                                         : 'mdi-account-search'
-                                "
-                            ></v-icon>
+                                "></v-icon>
                         </v-btn>
                     </template>
                     <span>Friend list</span>
@@ -58,8 +56,7 @@
             <Loading
                 :load="loadMore"
                 class="conversation-loading"
-                :reached-end="conversation.reachedFullHistories"
-                v-if="conversation.id"
+                v-if="!conversation.reachedFullHistories && conversation.id"
             ></Loading>
             <!-- Message -->
             <template v-for="msg in messages">

@@ -9,14 +9,15 @@
         >
             <Loading
                 :load="loadMore"
-                :reached-end="conversation.reachedFullHistories"
+                v-if="!conversation.reachedFullHistories"
                 class="conversation-loading"
             ></Loading>
 
             <!-- Message -->
             <Message
-                v-for="msg in messages"
+                v-for="(msg, index) in messages"
                 :key="msg.id"
+                :index="index"
                 :message="msg"
                 @react="onReact"
                 @dereact="onDereact"
@@ -25,9 +26,7 @@
                 @edit="onEditMessage"
             >
                 <!-- Separator -->
-                <v-divider
-                    class="message-item__content-separator mx-3"
-                ></v-divider>
+                <v-divider class="message-item__content-separator mx-3"></v-divider>
             </Message>
         </v-sheet>
 
