@@ -486,8 +486,7 @@ const moduleState = {
                 // Add message
                 commit("addConversation", conv);
                 // Load message in a channel
-                const maxMessage = conv.channel ? 4 : 2;
-                await this.dispatch("conversations/getConversationContent", { convId: conv.id, top: maxMessage });
+                await this.dispatch("conversations/getConversationContent", { convId: conv.id, top: 4 });
             }
 
             // Confirm message in queue
