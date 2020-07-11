@@ -32,7 +32,6 @@
     "@ckeditor/ckeditor5-mention": "^18.0.0",
     "@ckeditor/ckeditor5-paragraph": "^18.0.0",
     "@ckeditor/ckeditor5-paste-from-office": "^18.0.0",
-    "@ckeditor/ckeditor5-special-characters": "^18.0.0",
     "@ckeditor/ckeditor5-table": "^18.0.0",
     "@ckeditor/ckeditor5-theme-lark": "^18.0.0",
     "@ckeditor/ckeditor5-typing": "^18.0.0",

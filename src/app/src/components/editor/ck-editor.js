@@ -25,6 +25,7 @@ import Mention from "@ckeditor/ckeditor5-mention/src/mention.js";
 import Strikethrough from "@ckeditor/ckeditor5-basic-styles/src/strikethrough.js";
 import Underline from "@ckeditor/ckeditor5-basic-styles/src/underline.js";
 // import SpecialCharactersEssentials from "@ckeditor/ckeditor5-special-characters/src/specialcharactersessentials.js";
+// Package.js: "@ckeditor/ckeditor5-special-characters": "^18.0.0",
 // import SpecialCharacters from "@ckeditor/ckeditor5-special-characters/src/specialcharacters.js";
 // import Essentials from "@ckeditor/ckeditor5-essentials/src/essentials.js";
 import Paragraph from "@ckeditor/ckeditor5-paragraph/src/paragraph.js";
@@ -145,9 +146,9 @@ ClassicEditor.defaultConfig = {
         transformations: {
             extra: [
                 // Add some custom transformations – e.g. for emojis.
-                // { from: ":):", to: "🙂" },
-                // { from: ":+1:", to: "👍" },
-                // { from: ":tada:", to: "🎉" },
+                { from: ":)", to: "🙂" },
+                { from: ":+1", to: "👍" },
+                { from: ":tada", to: "🎉" },
             ],
             remove: [
                 "quotesPrimary",
