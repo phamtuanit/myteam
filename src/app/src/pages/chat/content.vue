@@ -59,14 +59,15 @@
                 v-if="!conversation.reachedFullHistories && conversation.id"
             ></Loading>
             <!-- Message -->
-            <template v-for="msg in messages">
+            <template v-for="(msg, index) in messages">
                 <MyMessage
                     v-if="msg._isMe == true"
                     :key="msg.id"
                     :message="msg"
                     :class="{
-                        'has-reacted':
+                        'has-reaction':
                             msg.reactions && msg.reactions.length > 0,
+                        'separate-time': !isSamePeriod(index, msg)
                     }"
                     @delete="onDeleteMessage"
                 ></MyMessage>
@@ -76,8 +77,9 @@
                     :key="msg.id"
                     :message="msg"
                     :class="{
-                        'has-reacted':
+                        'has-reaction':
                             msg.reactions && msg.reactions.length > 0,
+                        'separate-time': !isSamePeriod(index, msg)
                     }"
                     @react="onReact"
                     @dereact="onDereact"
@@ -200,6 +202,21 @@ export default {
                     this.sending = false;
                 });
         },
+        isSamePeriod(index, message) {
+            if (index == 0) {
+                // The first message
+                return true;
+            }
+
+            const previousMsg = this.messages[index - 1];
+            if (previousMsg._isMe !== message._isMe) {
+                return true;
+            }
+
+            const diffMiliseconds =
+                new Date(message.created) - new Date(previousMsg.created);
+            return diffMiliseconds / (60 * 1000) < 30; // 30 mins
+        },
     },
 };
 </script>
@@ -225,11 +242,15 @@ export default {
     display: flex;
 }
 
-.message-sheet >>> .message-item.has-reacted .message-item__content-header {
+.message-sheet >>> .message-item.has-reaction .message-item__content-header {
     display: flex;
 }
 
-.message-sheet >>> .your-message + .your-message.has-reacted .user-name {
+.message-sheet >>> .message-item.separate-time .message-item__content-header {
+    display: flex;
+}
+
+.message-sheet >>> .your-message + .your-message.has-reaction .user-name {
     display: none;
 }
 
