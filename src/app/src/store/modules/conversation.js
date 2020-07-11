@@ -2,7 +2,7 @@ const messageService = new (require("../../services/message.service").default)()
 const convService = new (require("../../services/conversation.service").default)();
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
 
-const MAX_MESSAGES = 50;
+const MAX_MESSAGES = 30;
 let eventBus = null;
 
 function handleWSMessage(socket, state, commit, act, data) {
@@ -69,10 +69,7 @@ function handleWSMessage(socket, state, commit, act, data) {
                     this.dispatch("conversations/loadConversation", convId)
                         .then(chat => {
                             if (chat) {
-                                commit("addMessage", {
-                                    convId,
-                                    message,
-                                });
+                                commit("addMessage", { convId, message });
                             }
                         })
                         .catch(console.error);
@@ -307,16 +304,11 @@ const moduleState = {
                     pushToUnread(message);
                     eventBus.emit("messages", "added", conv, message);
                 } else {
-                    const foundMessage = conv.messages.find(
-                        i => i.id == message.id
-                    );
+                    const foundMessage = conv.messages.find(i => i.id == message.id);
                     if (!foundMessage) {
                         // Remove oldest message
                         if (conv.messages.length >= MAX_MESSAGES) {
-                            conv.messages.splice(
-                                0,
-                                conv.messages.length - MAX_MESSAGES + 1
-                            );
+                            conv.messages.splice(0, conv.messages.length - MAX_MESSAGES + 1);
                             conv.reachedFullHistories = false;
                         }
 
@@ -340,7 +332,7 @@ const moduleState = {
                     const existingMsg = conv.messages[index];
                     existingMsg.status = "removed";
                     setTimeout(() => {
-                        // Lazy delete message. Recaculate index
+                        // Lazy delete message. Recalculate index
                         const msgIndex = conv.messages.findIndex(
                             i => i.id == message.id
                         );
@@ -696,11 +688,11 @@ const moduleState = {
             }
 
             return await messageService.create(conv.id, body).then(res => {
-                const payload = {
-                    convId: conv.id,
-                    message: res.data,
-                };
-                commit("addMessage", payload);
+                // const payload = {
+                //     convId: conv.id,
+                //     message: res.data,
+                // };
+                // commit("addMessage", payload);
                 return res.data;
             });
         },
@@ -719,11 +711,11 @@ const moduleState = {
             }
 
             return await messageService.update(conv.id, id, body).then(res => {
-                const payload = {
-                    convId: conv.id,
-                    message: res.data,
-                };
-                commit("addMessage", payload);
+                // const payload = {
+                //     convId: conv.id,
+                //     message: res.data,
+                // };
+                // commit("addMessage", payload);
                 return res.data;
             });
         },
