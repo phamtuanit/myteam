@@ -31,7 +31,7 @@
 
             <!-- Add btn -->
             <v-btn
-                v-show="channel"
+                v-show="channel && allowAddChannel"
                 icon
                 fab
                 class="ml-1 mr-3"
@@ -85,6 +85,7 @@ export default {
             searchText: null,
             convList: [],
             activatedConv: null,
+            allowAddChannel: false
         };
     },
     watch: {
@@ -117,6 +118,8 @@ export default {
     },
     created() {
         // Init data
+        const userRole = this.$store.state.users.me.role;
+        this.allowAddChannel = typeof userRole === "number" && userRole >= 0 && userRole <= 5;
         this.convList = this.list;
         this.activatedConv = this.activatedItem;
         this.searchLocker = Promise.resolve();
