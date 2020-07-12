@@ -278,9 +278,16 @@ const moduleState = {
                 message._isMe = message.from.issuer == me.id;
             }
 
-            const conv = state.channel.all
-                .concat(state.chat.all)
-                .find(c => c.id == convId);
+            let conv;
+            let convIndex = -1;
+            let convGroup;
+            [state.channel.all, state.chat.all].forEach(convItems => {
+                convIndex = convItems.findIndex(c => c.id == convId);
+                if (convIndex >= 0) {
+                    conv = convItems[convIndex];
+                    convGroup = convItems;
+                }
+            });
 
             if (conv) {
                 const pushToUnread = function (message) {
@@ -296,6 +303,10 @@ const moduleState = {
                         if (!foundConv) {
                             unread.push(conv);
                         }
+
+                        // Move the conversation to top
+                        convGroup.splice(convIndex, 1);
+                        convGroup.unshift(conv);
                     }
                 };
 
@@ -478,7 +489,9 @@ const moduleState = {
                 // Add message
                 commit("addConversation", conv);
                 // Load message in a channel
-                await this.dispatch("conversations/getConversationContent", { convId: conv.id, top: 4 });
+                if (conv.channel !== true) {
+                    await this.dispatch("conversations/getConversationContent", { convId: conv.id, top: 4 });
+                }
             }
 
             // Confirm message in queue
