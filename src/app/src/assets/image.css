@@ -4,6 +4,10 @@ figure.image > img {
     max-height: 300px;
 }
 
+blockquote figure.image > img {
+    max-height: 50px;
+}
+
 img.image.image-gif {
     max-height: 300px;
 }
