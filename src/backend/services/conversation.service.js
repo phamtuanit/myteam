@@ -24,7 +24,7 @@ module.exports = {
     actions: {
         createConversation: {
             auth: true,
-            roles: [0],
+            roles: [0, 5],
             rest: "POST /",
             params: {
                 channel: {
