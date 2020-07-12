@@ -11,7 +11,7 @@
                 Close
             </v-btn>
         </v-snackbar>
-        <router-view key="page"></router-view>
+        <router-view key="root"></router-view>
     </v-app>
 </template>
 

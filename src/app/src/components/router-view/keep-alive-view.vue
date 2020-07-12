@@ -132,9 +132,9 @@ export default {
                 }
 
                 if (vm._inactive == true) {
-                    vm.$el.dataset.active = "false";
+                    vm.$el.dataset && (vm.$el.dataset.active = "false");
                 } else {
-                    vm.$el.dataset.active = "true";
+                    vm.$el.dataset && (vm.$el.dataset.active = "true");
                 }
             }
 
