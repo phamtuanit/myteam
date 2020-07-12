@@ -41,13 +41,18 @@ export default {
         this.parent = this.$parent;
 
         setTimeout(() => {
+            if (this._isDestroyed || this._isBeingDestroyed) {
+                return;
+            }
             this.scrollBar = this.hasScrollBar();
             this.setupObserver();
         }, 2000);
     },
     destroyed() {
-        this.mutationObserver.disconnect();
-        this.mutationObserver = undefined;
+        if (this.mutationObserver) {
+            this.mutationObserver.disconnect();
+            this.mutationObserver = undefined;
+        }
         this.parent = undefined;
     },
     methods: {
