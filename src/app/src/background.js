@@ -7,6 +7,8 @@ import {
     ipcMain,
     globalShortcut,
     shell,
+    MenuItem,
+    Menu
 } from "electron";
 import config from "./conf/system.json";
 import {
@@ -36,6 +38,7 @@ function createWindow() {
         minWidth: 1000,
         minHeight: 600,
         webPreferences: {
+            spellcheck: true,
             nodeIntegration: true,
             webSecurity: false, // ignore ERR_CERT_AUTHORITY_INVALID
             allowRunningInsecureContent: true,
@@ -134,6 +137,68 @@ function registerCommEvents(win) {
 
     win.webContents.on("will-navigate", handleRedirect);
     win.webContents.on('new-window', handleRedirect);
+
+
+    win.webContents.on('context-menu', (event, params) => {
+        // Define menu context
+        const contextMenu = Menu.buildFromTemplate([
+            { label: "Cut", role: "cut" },
+            { label: "Copy", role: "copy" },
+            { label: "Paste", role: "paste" },
+            { label: "Paste as plain text", role: 'pasteandmatchstyle' },
+            { label: "Select All", role: "selectall" },
+            { label: "Delete", role: "delete" },
+            { type: "separator" },
+            {
+                label: "App",
+                submenu: [
+                    { role: "reload", accelerator: "CommandOrControl+F5" },
+                    { role: "forcereload" },
+                    { type: "separator" },
+                    { role: "resetzoom", accelerator: "CommandOrControl+0" },
+                    { role: "zoomin", accelerator: "CommandOrControl+numadd" },
+                    { role: "zoomout", accelerator: "CommandOrControl+numsub" },
+                    { type: "separator" },
+                    { label: "Version: " + app.getVersion() },
+                ],
+            },
+        ]);
+
+        const spellItems = [];
+
+        // Add each spelling suggestion
+        for (const suggestion of params.dictionarySuggestions) {
+            const menu = new MenuItem({
+                label: suggestion,
+                click: () => win.webContents.replaceMisspelling(suggestion)
+            })
+            menu.spell = true;
+            spellItems.push(menu);
+        }
+      
+        // Allow users to add the misspelled word to the dictionary
+        if (params.misspelledWord) {
+            const menu = new MenuItem({
+                label: 'Add to dictionary',
+                click: () => win.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+            });
+            menu.spell = true;
+            spellItems.push(menu);
+        }
+
+        if (spellItems.length > 0) {
+            const separator = new MenuItem({
+                type: "separator"
+            });
+            separator.spell = true;
+            contextMenu.append(separator);
+            spellItems.forEach(menu => {
+                contextMenu.append(menu);
+            });
+        }
+
+        contextMenu.popup();
+      })
 }
 
 // Exit cleanly on request from parent process in development mode.
