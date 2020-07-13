@@ -236,12 +236,16 @@ export default {
             }
 
             if (menu.route) {
-                this.$router
-                    .push(menu.route)
-                    .then(() => {
-                        this.activatedMenu = menu;
-                    })
-                    .catch(console.error);
+                if (menu.route.link) {
+                    window.open(menu.route.link, '_blank');
+                } else {
+                    this.$router
+                        .push(menu.route)
+                        .then(() => {
+                            this.activatedMenu = menu;
+                        })
+                        .catch(console.error);
+                }
             }
         },
         onLogout() {
