@@ -304,9 +304,11 @@ const moduleState = {
                             unread.push(conv);
                         }
 
-                        // Move the conversation to top
-                        convGroup.splice(convIndex, 1);
-                        convGroup.unshift(conv);
+                        if (convIndex > 0) {
+                            // Move the conversation to top
+                            convGroup.splice(convIndex, 1);
+                            convGroup.unshift(conv);
+                        }
                     }
                 };
 
