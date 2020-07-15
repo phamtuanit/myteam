@@ -46,14 +46,14 @@ export default {
             }
             this.scrollBar = this.hasScrollBar();
             this.setupObserver();
-        }, 2000);
+        }, 500);
     },
     destroyed() {
         if (this.mutationObserver) {
             this.mutationObserver.disconnect();
             this.mutationObserver = undefined;
         }
-        this.parent = undefined;
+        this.parent.$el.removeEventListener("scroll", this.onScroll);
     },
     methods: {
         onLoadMore() {
@@ -104,9 +104,7 @@ export default {
         },
         setupObserver() {
             // Watch scroll
-            this.parent.$el.addEventListener("scroll", () => {
-                setTimeout(this.checkScroll, 0);
-            });
+            this.parent.$el.addEventListener("scroll", this.onScroll);
 
             // Watch inner items
             this.mutationObserver = new MutationObserver(() => {
@@ -133,6 +131,9 @@ export default {
                 this.onLoadMore();
             }
         },
+        onScroll() {
+            setTimeout(this.checkScroll, 0);
+        }
     },
 };
 </script>
