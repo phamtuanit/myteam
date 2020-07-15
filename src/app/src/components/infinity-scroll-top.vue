@@ -1,24 +1,26 @@
 <template>
-    <div
-        class="infinity-scroll infinity-scroll--top d-flex justify-center"
-        v-bind="$attrs"
-    >
+    <div class="infinity-scroll-container">
         <div
-            v-show="isLoading & scrollBar"
-            class="spinner lds-dual-ring my-2"
-        ></div>
-        <v-btn
-            icon
-            rounded
-            class="my-2"
-            color="orange darken-1"
-            :loading="isLoading"
-            v-if="!scrollBar"
-            title="Load more"
-            @click="onLoadMore"
+            class="infinity-scroll infinity-scroll--top d-flex justify-center"
+            v-bind="$attrs"
         >
-            <v-icon>mdi-reload</v-icon>
-        </v-btn>
+            <div
+                v-show="isLoading & scrollBar"
+                class="spinner lds-dual-ring my-2"
+            ></div>
+            <v-btn
+                icon
+                rounded
+                class="my-2"
+                color="orange darken-1"
+                :loading="isLoading"
+                v-if="!scrollBar"
+                title="Load more"
+                @click="onLoadMore"
+            >
+                <v-icon>mdi-reload</v-icon>
+            </v-btn>
+        </div>
     </div>
 </template>
 
@@ -133,12 +135,16 @@ export default {
         },
         onScroll() {
             setTimeout(this.checkScroll, 0);
-        }
+        },
     },
 };
 </script>
 
 <style>
+.infinity-scroll-container {
+    position: relative;
+}
+
 .infinity-scroll {
     position: absolute;
     z-index: 99;
