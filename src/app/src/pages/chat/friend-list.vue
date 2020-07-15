@@ -29,7 +29,7 @@
         <!-- Friends -->
         <v-list
             two-line
-            class="py-0 px-0 flex-grow-1 d-flex flex-column"
+            class="py-0 px-0 flex-grow-1 d-flex flex-column no-border-radius"
         >
             <v-progress-linear
                 :active="loading"

@@ -1,5 +1,9 @@
 <template>
-    <v-sheet height="57" min-height="57" class="pa-0 no-border-radius pl-6 pr-3">
+    <v-sheet
+        height="57"
+        min-height="57"
+        class="pa-0 no-border-radius pl-6 pr-3"
+    >
         <div class="center-y" style="height: 100%;" v-show="conversation.id">
             <v-icon>mdi-pound</v-icon>
             <v-list-item-title
@@ -8,8 +12,12 @@
             ></v-list-item-title>
 
             <v-spacer></v-spacer>
+            <!-- Pinned message -->
+            <v-btn icon small class="mr-2 btn-pin" :class="state.activePinnedMessages == true ? 'pin-activated' : ''" @click="onPin">
+                <v-icon small v-text="state.activePinnedMessages == true ? 'mdi-pin' : 'mdi-pin-off-outline'"></v-icon>
+            </v-btn>
             <!-- Setting -->
-            <v-menu left>
+            <v-menu offset-y right>
                 <template v-slot:activator="{ on }">
                     <v-btn icon small v-on="on" class="mx-auto">
                         <v-icon small>mdi-dots-vertical</v-icon>
@@ -21,14 +29,18 @@
                             <v-list-item-title>Setting</v-list-item-title>
                         </v-list-item>
                         <v-list-item @click="onDelete">
-                            <v-list-item-title class="red--text">Delete</v-list-item-title>
+                            <v-list-item-title class="red--text"
+                                >Delete</v-list-item-title
+                            >
                         </v-list-item>
                     </template>
                     <v-list-item
                         v-show="conversation.creator != me.id"
                         @click="onLeave"
                     >
-                        <v-list-item-title class="red--text">Leave</v-list-item-title>
+                        <v-list-item-title class="red--text"
+                            >Leave</v-list-item-title
+                        >
                     </v-list-item>
                 </v-list>
             </v-menu>
@@ -50,6 +62,10 @@ import { mapState } from "vuex";
 export default {
     props: {
         conversation: {
+            type: Object,
+            default: () => ({}),
+        },
+        state: {
             type: Object,
             default: () => ({}),
         },
@@ -96,6 +112,20 @@ export default {
                 )
                 .catch(console.error);
         },
+        onPin() {
+            this.$emit("pin", this.conversation);
+        }
     },
 };
 </script>
+
+
+<style scoped>
+.btn-pin {
+    transform: rotateZ(45deg);
+}
+
+.btn-pin.pin-activated {
+    transform: rotateZ(0deg);
+}
+</style>

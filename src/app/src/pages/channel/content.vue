@@ -214,7 +214,7 @@ export default {
 
 <style lang="css" scoped>
 .conversation-content {
-    height: calc(100vh - 58px);
+    height: 100%;
     width: 100%;
 }
 

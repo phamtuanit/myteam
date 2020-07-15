@@ -15,7 +15,7 @@
         <!-- Conversation content container -->
         <div class="flex-grow-1 d-flex flex-column">
             <!-- Header -->
-            <Header :conversation="activatedConv || {}"></Header>
+            <Header :conversation="activeConvItem.value || {}" @pin="onPin" :state="activeConvItem.state || {}"></Header>
             <v-divider></v-divider>
 
             <!-- Conversation content -->
@@ -30,7 +30,14 @@
                     :transition="false"
                     :reverse-transition="false"
                 >
-                    <ChatContent :conversation="conv.value"></ChatContent>
+                    <div class="conversation-context-container d-flex flex-grow">
+                        <!-- Message content and input -->
+                        <ChatContent :conversation="conv.value" class="flex-grow-1"></ChatContent>
+                        <!-- Pinned messages -->
+                        <v-expand-x-transition v-if="conv.state.activePinnedMessages == true">
+                            <PinnedMessages></PinnedMessages>
+                        </v-expand-x-transition>
+                    </div>
                 </v-tab-item>
             </v-tabs-items>
         </div>
@@ -48,17 +55,28 @@ import ChatList from "../shared/chat-list";
 import ChatContent from "./content.vue";
 import ChannelSetting from "./channel-setting.vue";
 import Header from "./header.vue";
+import PinnedMessages from "./pinned-messages";
 
 import { mapState } from "vuex";
 export default {
     name: "channel-main",
-    components: { ChatList, ChatContent, ChannelSetting, Header },
+    components: {
+        ChatList,
+        ChatContent,
+        ChannelSetting,
+        Header,
+        PinnedMessages,
+    },
     data() {
         return {
             isAdding: false,
             displayFriendList: true,
             currentConvId: null,
             conversations: [],
+            activeConvItem: {
+                value: null,
+                state: null
+            }
         };
     },
     computed: {
@@ -71,6 +89,9 @@ export default {
         activatedConv() {
             this.updateData();
         },
+        currentConvId() {
+            this.activeConvItem = this.getActiveConv();
+        }
     },
     created() {
         this.updateData();
@@ -88,6 +109,11 @@ export default {
                 })
                 .catch(console.error);
         },
+        onPin() {
+            if (this.activeConvItem && this.activeConvItem.state) {
+                this.activeConvItem.state.activePinnedMessages = !this.activeConvItem.state.activePinnedMessages;
+            }
+        },
         updateData() {
             if (this.activatedConv) {
                 const convId = this.activatedConv.id || this.activatedConv._id;
@@ -99,6 +125,9 @@ export default {
                     existingConv = {
                         id: new Date().getTime(),
                         value: this.activatedConv,
+                        state: {
+                            activePinnedMessages: false
+                        }
                     };
                     this.conversations.push(existingConv);
                 }
@@ -131,6 +160,9 @@ export default {
                     break;
             }
         },
+        getActiveConv() {
+            return this.conversations.find(cn => cn.id === this.currentConvId);
+        }
     },
 };
 </script>
@@ -142,5 +174,9 @@ export default {
 
 .channel-conversation.theme--dark {
     background: #121212;
+}
+
+.conversation-context-container {
+    height: calc(100vh - 58px);
 }
 </style>
