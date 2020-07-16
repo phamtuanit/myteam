@@ -20,7 +20,9 @@ module.exports = function httpResponseSetup(axios) {
                     });
                 }
             } else {
-                const msg = `${err.response.statusText}. ${err.message}`;
+                const msg = `${err.response ? err.response.statusText + '. ' : ""}${
+                    err.message
+                }`;
                 eventBus.emit("show-snack", {
                     message: msg,
                     type: "error",
