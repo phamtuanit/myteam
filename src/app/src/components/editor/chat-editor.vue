@@ -15,7 +15,9 @@
             />
         </v-sheet>
 
-        <v-sheet class="transparent d-flex justify-space-between mt-1 chat-editor__actions">
+        <v-sheet
+            class="transparent d-flex justify-space-between mt-1 chat-editor__actions"
+        >
             <!-- Start -->
             <div class="d-flex flex-align-start">
                 <!-- Emoji -->
@@ -25,20 +27,16 @@
                     @select="onSelectEmoji"
                 ></EmojiButton>
                 <!-- Gifs -->
-                <Giphy
-                    size="18"
-                    @select="onSelectGif"
-                ></Giphy>
+                <Giphy size="18" @select="onSelectGif"></Giphy>
                 <!-- Format -->
                 <v-btn
                     icon
                     @click="showToolBar = !showToolBar"
                     title="Format (ESC)"
                 >
-                    <v-icon
-                        size="18"
-                        :color="showToolBar ? 'orange' : ''"
-                    >mdi-format-letter-case-upper</v-icon>
+                    <v-icon size="18" :color="showToolBar ? 'orange' : ''"
+                        >mdi-format-letter-case-upper</v-icon
+                    >
                 </v-btn>
             </div>
             <!-- End -->
@@ -67,6 +65,8 @@ import Giphy from "../giphy/giphy.vue";
 import MyEnter from "./plugins/enter";
 import MyMention from "./plugins/mention";
 import ClassicEditor from "./ck-editor.js";
+import plainTextToHtml from "@ckeditor/ckeditor5-clipboard/src/utils/plaintexttohtml";
+import normalizeclipboarddata from "@ckeditor/ckeditor5-clipboard/src/utils/normalizeclipboarddata";
 
 ClassicEditor.builtinPlugins.push(MyEnter, MyMention);
 
@@ -143,7 +143,10 @@ export default {
                 if (gif.title) {
                     const titleArr = gif.title.split("GIF");
                     alt = (titleArr[0] && titleArr[0].trim()) || "gif";
-                    author = titleArr.length > 1 && titleArr[1] ? titleArr[1].trim() : "giphy";
+                    author =
+                        titleArr.length > 1 && titleArr[1]
+                            ? titleArr[1].trim()
+                            : "giphy";
                 }
 
                 let imageEl = `<img id="gif-${gif.id}" class="image image-gif" alt="${alt}"  data-author="${author}" `;
@@ -183,6 +186,13 @@ export default {
                 }
             );
 
+            // Handle clipboard input
+            this.clipboardPlugin = this.editorInstance.plugins.get("Clipboard");
+            this.editorInstance.editing.view.document.on(
+                "clipboardInput",
+                this.formatClipboardData
+            );
+
             this.$emit("ready");
         },
         onSend() {
@@ -220,6 +230,53 @@ export default {
                     enterPlugin.forceDisabled(key);
                 }
             }
+        },
+        formatClipboardData(evt, data) {
+            const clipboardPlugin = this.clipboardPlugin;
+            const htmlProcessor = clipboardPlugin._htmlDataProcessor;
+            const dataTransfer = data.dataTransfer;
+            let content = dataTransfer.getData("text/html");
+            if (content) {
+                content = this.reformatHtml(content);
+            } else {
+                content = dataTransfer.getData("text/plain");
+                if (content) {
+                    content = plainTextToHtml(content);
+                }
+            }
+
+            const viewContent = htmlProcessor.toView(content);
+
+            // Just like the clipboard feature, trigger the inputTransformation event
+            // to allow further processing of the content.
+            clipboardPlugin.fire("inputTransformation", {
+                content: viewContent,
+                dataTransfer,
+            });
+
+            this.editorInstance.editing.view.scrollToTheSelection();
+            evt.stop();
+        },
+        reformatHtml(html) {
+            let content = normalizeclipboarddata(html)
+                .replace(/<.?html.*>/g, "")
+                .replace(/<(body|\/body).*>/g, "");
+            const rootEl = document.createElement("div");
+            rootEl.innerHTML = content;
+
+            // Format table
+            const tableEls = rootEl.getElementsByTagName("table");
+            if (tableEls && tableEls.length > 0) {
+                tableEls.forEach(tableEl => {
+                    // Update table's width
+                    tableEl.style.width = "100%";
+                    // Reset color and background
+                    tableEl.style.color = "";
+                    tableEl.style.backgroundColor = "";
+                });
+            }
+
+            return rootEl.innerHTML;
         },
     },
 };
