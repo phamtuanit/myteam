@@ -52,22 +52,24 @@
                                     <v-icon small>mdi-dots-vertical</v-icon>
                                 </v-btn>
                             </template>
-                            <v-list class="menus" v-if="isMyMessage">
+                            <v-list class="menus">
+                                <template v-if="isMyMessage">
+                                    <v-list-item @click="onEdit">
+                                        <v-list-item-title
+                                            >Edit</v-list-item-title
+                                        >
+                                    </v-list-item>
+                                    <v-list-item @click="onDelete">
+                                        <v-list-item-title class="red--text"
+                                            >Delete</v-list-item-title
+                                        >
+                                    </v-list-item>
+                                </template>
                                 <v-list-item @click="onQuote">
                                     <v-list-item-title>Quote</v-list-item-title>
                                 </v-list-item>
-                                <v-list-item @click="onEdit">
-                                    <v-list-item-title>Edit</v-list-item-title>
-                                </v-list-item>
-                                <v-list-item @click="onDelete">
-                                    <v-list-item-title class="red--text"
-                                        >Delete</v-list-item-title
-                                    >
-                                </v-list-item>
-                            </v-list>
-                            <v-list class="menus" v-else>
-                                <v-list-item @click="onQuote">
-                                    <v-list-item-title>Quote</v-list-item-title>
+                                <v-list-item @click="onPin">
+                                    <v-list-item-title>Pin</v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-menu>
@@ -180,6 +182,9 @@ export default {
         },
         onEdit() {
             this.$emit("edit", this.message);
+        },
+        onPin() {
+            this.$emit("pin", this.message);
         },
     },
 };

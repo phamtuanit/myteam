@@ -24,9 +24,12 @@
                 @delete="onDeleteMessage"
                 @quote="onQuote"
                 @edit="onEditMessage"
+                @pin="onPin"
             >
                 <!-- Separator -->
-                <v-divider class="message-item__content-separator mx-3"></v-divider>
+                <v-divider
+                    class="message-item__content-separator mx-3"
+                ></v-divider>
             </Message>
         </v-sheet>
 
@@ -82,6 +85,7 @@ export default {
     computed: {
         ...mapState({
             cachedUsers: state => state.users.all,
+            me: state => state.users.me,
         }),
     },
     methods: {
@@ -130,6 +134,11 @@ export default {
                 this.editingMessage = null;
                 this.newMessage = "";
             }
+        },
+        onPin(message) {
+            this.$store
+                .dispatch("conversations/pinMessage", { message })
+                .catch(console.error);
         },
         updateMessage(html) {
             const convId = this.conversation.id;

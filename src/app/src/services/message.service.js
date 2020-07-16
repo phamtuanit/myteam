@@ -16,7 +16,7 @@ Service.prototype.get = function(convId, filter = {}) {
         const queryStr = queries.join("&");
         return Axios.get(this.name + queryStr);
     }
-    return Promise.reject("Data is invalid");
+    return Promise.reject("Data is invalid", convId, filter);
 };
 
 Service.prototype.create = function(convId, body, type = "html") {
@@ -30,7 +30,7 @@ Service.prototype.create = function(convId, body, type = "html") {
         };
         return Axios.post(this.name + `?conversation=${convId}`, msg);
     }
-    return Promise.reject("Data is invalid");
+    return Promise.reject("Data is invalid", convId, type);
 };
 
 Service.prototype.update = function(convId, id, body, type = "html") {
@@ -47,7 +47,7 @@ Service.prototype.update = function(convId, id, body, type = "html") {
         };
         return Axios.put(this.name + id + `?conversation=${convId}`, msg);
     }
-    return Promise.reject("Data is invalid");
+    return Promise.reject("Data is invalid", convId, id, type);
 };
 
 Service.prototype.react = function(convId, msgId, type, status) {
@@ -57,20 +57,39 @@ Service.prototype.react = function(convId, msgId, type, status) {
         typeof msgId == "number" &&
         typeof status == "boolean"
     ) {
+        const qr = `${type}?status=${status}&conversation=${convId}`;
+        return Axios.put(this.name + msgId + `/reactions/${qr}`);
+    }
+    return Promise.reject("Data is invalid", convId, msgId, type, status);
+};
+
+Service.prototype.pin = function(convId, msgId, status) {
+    if (
+        typeof convId == "number" &&
+        typeof msgId == "number" &&
+        typeof status == "boolean"
+    ) {
         return Axios.put(
-            this.name +
-                msgId +
-                `/reactions/${type}?status=${status}&conversation=${convId}`
+            this.name + msgId + `/pins?status=${status}&conversation=${convId}`
         );
     }
-    return Promise.reject("Data is invalid");
+    return Promise.reject("Data is invalid", convId, msgId, status);
+};
+
+Service.prototype.getPinned = function(convId, { userId }) {
+    if (typeof convId == "number") {
+        return Axios.get(
+            this.name + `pins?conversation=${convId}${userId ? "&user" + userId : ""}`
+        );
+    }
+    return Promise.reject("Data is invalid", convId, userId);
 };
 
 Service.prototype.delete = function(convId, msgId) {
     if (typeof convId == "number" && typeof msgId == "number") {
         return Axios.delete(this.name + msgId + `?conversation=${convId}`);
     }
-    return Promise.reject("Data is invalid");
+    return Promise.reject("Data is invalid", convId, msgId);
 };
 
 export default Service;

@@ -35,7 +35,7 @@
                         <ChatContent :conversation="conv.value" class="flex-grow-1"></ChatContent>
                         <!-- Pinned messages -->
                         <v-expand-x-transition v-if="conv.state.activePinnedMessages == true">
-                            <PinnedMessages></PinnedMessages>
+                            <PinnedMessages :conversation="conv.value"></PinnedMessages>
                         </v-expand-x-transition>
                     </div>
                 </v-tab-item>

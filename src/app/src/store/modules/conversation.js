@@ -82,13 +82,31 @@ function handleWSMessage(socket, state, commit, act, data) {
                 }
             }
             break;
+        case "pinned":
+            commit("updateMessage", {
+                convId,
+                message: { pins: message.pins },
+            });
+            commit("updatePinStatus", message);
+            break;
         case "reacted":
+            commit("updateMessage", { convId, message });
+            confirmMsgFn();
+            break;
         case "updated":
             commit("updateMessage", { convId, message });
+            commit("updatePinStatus", message);
             confirmMsgFn();
             break;
         case "removed":
             commit("removeMessage", { convId, message });
+            commit("updatePinStatus", {
+                id: message.id,
+                body: message.body,
+                to: message.to,
+                from: message.from,
+                pins: []
+            });
             confirmMsgFn();
             break;
 
@@ -127,9 +145,10 @@ function handleWSConversation(socket, state, commit, act, data) {
         case "left":
         case "updated":
             if (payload.subscribers.includes(me.id)) {
-                this.dispatch("conversations/loadLatestConversation", convId).catch(
-                    console.error
-                );
+                this.dispatch(
+                    "conversations/loadLatestConversation",
+                    convId
+                ).catch(console.error);
             } else {
                 commit("removeConv", convId);
             }
@@ -181,7 +200,10 @@ const moduleState = {
                 state.chat.active = conv;
             }
 
-            const needToLoadMore = conv.messages && conv.messages.length <= 10 && !conv.reachedFullHistories;
+            const needToLoadMore =
+                conv.messages &&
+                conv.messages.length <= 10 &&
+                !conv.reachedFullHistories;
             const notVerifyYet = conv._isTemp != true && !conv.isVerified;
             if (notVerifyYet || needToLoadMore) {
                 // Load conversation content
@@ -197,6 +219,8 @@ const moduleState = {
             if (!conv.messages) {
                 conv.messages = [];
             }
+
+            conv.pinnedMessages = conv.pinnedMessages || [];
 
             if (!conv.meta) {
                 conv.meta = {
@@ -290,7 +314,7 @@ const moduleState = {
             });
 
             if (conv) {
-                const pushToUnread = function (message) {
+                const pushToUnread = function(message) {
                     if (!message._isMe) {
                         conv.meta.unreadMessages.push(message);
 
@@ -317,11 +341,16 @@ const moduleState = {
                     pushToUnread(message);
                     eventBus.emit("messages", "added", conv, message);
                 } else {
-                    const foundMessage = conv.messages.find(i => i.id == message.id);
+                    const foundMessage = conv.messages.find(
+                        i => i.id == message.id
+                    );
                     if (!foundMessage) {
                         // Remove oldest message
                         if (conv.messages.length >= MAX_MESSAGES) {
-                            conv.messages.splice(0, conv.messages.length - MAX_MESSAGES + 1);
+                            conv.messages.splice(
+                                0,
+                                conv.messages.length - MAX_MESSAGES + 1
+                            );
                             conv.reachedFullHistories = false;
                         }
 
@@ -386,6 +415,59 @@ const moduleState = {
                 const existingMsg = conv.messages.find(i => i.id == message.id);
                 if (existingMsg) {
                     Object.assign(existingMsg, message);
+                }
+            }
+        },
+        updatePinStatus(state, message) {
+            const convId = message.to.conversation;
+            const existingConv = state.channel.all
+                .concat(state.chat.all)
+                .find(c => c.id == convId);
+
+            if (!existingConv) {
+                return;
+            }
+
+            const me = this.state.users.me;
+            const resolveUser = () => {
+                this.dispatch("users/resolve", [message.from.issuer])
+                    .then(users => {
+                        if (users && users.length > 0) {
+                            message.from.issuer = users[0];
+                        }
+                    })
+                    .catch(console.error);
+            };
+            if (message.pins && message.pins.length == 0) {
+                // Unpin => Remove if needed
+                if (
+                    existingConv.pinnedMessages &&
+                    existingConv.pinnedMessages.length > 0
+                ) {
+                    const foundIndex = existingConv.pinnedMessages.findIndex(
+                        i => i.id === message.id
+                    );
+                    if (foundIndex >= 0) {
+                        existingConv.pinnedMessages.splice(foundIndex, 1);
+                    }
+                }
+            } else {
+                // Pin / Update message body => add
+                message.pinnedByMe = message.pins && message.pins.includes(me.id);
+                if (!existingConv.pinnedMessages) {
+                    existingConv.pinnedMessages = [message];
+                } else {
+                    const foundIndex = existingConv.pinnedMessages.findIndex(
+                        i => i.id === message.id
+                    );
+                    if (foundIndex >= 0) {
+                        const currMsg = existingConv.pinnedMessages[foundIndex];
+                        currMsg.pins = message.pins || currMsg.pins;
+                        currMsg.body = message.body;
+                    } else {
+                        resolveUser();
+                        existingConv.pinnedMessages.push(message);
+                    }
                 }
             }
         },
@@ -492,7 +574,10 @@ const moduleState = {
                 commit("addConversation", conv);
                 // Load message in a channel
                 if (conv.channel !== true) {
-                    await this.dispatch("conversations/getConversationContent", { convId: conv.id, top: 4 });
+                    await this.dispatch(
+                        "conversations/getConversationContent",
+                        { convId: conv.id, top: 4 }
+                    );
                 }
             }
 
@@ -547,9 +632,10 @@ const moduleState = {
             const convList = state.channel.all.concat(state.chat.all);
             const existingConv = convList.find(c => c.id === convId);
             if (!existingConv) {
-                return await this.dispatch("conversations/loadConversation", convId).catch(
-                    console.error
-                );
+                return await this.dispatch(
+                    "conversations/loadConversation",
+                    convId
+                ).catch(console.error);
             }
 
             // Load latest information
@@ -648,11 +734,15 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => (c.id || c._id) == convId);
             if (conv) {
-                const currentConv = conv.channel == true
-                    ? state.channel.active
-                    : state.chat.active;
+                const currentConv =
+                    conv.channel == true
+                        ? state.channel.active
+                        : state.chat.active;
                 if (currentConv) {
-                    if (currentConv.id === conv.id || (currentConv._id && currentConv._id === conv._id)) {
+                    if (
+                        currentConv.id === conv.id ||
+                        (currentConv._id && currentConv._id === conv._id)
+                    ) {
                         // Already activated
                         return conv;
                     }
@@ -773,7 +863,10 @@ const moduleState = {
                         return res.data;
                     })
                     .then(messages => {
-                        if (!leftId && (messages.length == 0 || messages.length < top)) {
+                        if (
+                            !leftId &&
+                            (messages.length == 0 || messages.length < top)
+                        ) {
                             // Reached to end of history
                             conv.reachedFullHistories = true;
                         }
@@ -802,9 +895,16 @@ const moduleState = {
                             // Overide
                             conv.messages = messages;
                         } else {
-                            if (conv.messages.length > 0 && conv.messages[0].id < messages[0].id) {
+                            if (
+                                conv.messages.length > 0 &&
+                                conv.messages[0].id < messages[0].id
+                            ) {
                                 // (...] + [... new]
-                                conv.messages.splice(conv.messages.length, 0, ...messages);
+                                conv.messages.splice(
+                                    conv.messages.length,
+                                    0,
+                                    ...messages
+                                );
                             } else {
                                 // [... new] + [...)
                                 conv.messages.splice(0, 0, ...messages);
@@ -816,13 +916,63 @@ const moduleState = {
             }
             console.warn("Conversation Id is required");
         },
+        async getPinnedMessage({ state }, { convId, top, userId }) {
+            if (typeof convId == "number") {
+                const conv = state.channel.all
+                    .concat(state.chat.all)
+                    .find(c => c.id == convId);
+
+                if (!conv) {
+                    console.warn("Could not find conversation.", convId);
+                    return;
+                }
+
+                const filter = { top: top || 10, userId: userId };
+                if (conv.pinnedMessages && conv.pinnedMessages.length > 0) {
+                    filter.rightId = conv.pinnedMessages[0].id;
+                }
+
+                return await messageService
+                    .getPinned(parseInt(convId), filter)
+                    .then(res => {
+                        return res.data;
+                    })
+                    .then(pinnedMessages => {
+                        // Update message info
+                        const me = this.state.users.me;
+                        pinnedMessages.forEach(msg => {
+                            // Init required value
+                            msg.pinnedByMe = msg.pins.includes(me.id);
+                            this.dispatch("users/resolve", [msg.from.issuer])
+                                .then(users => {
+                                    if (users && users.length > 0) {
+                                        msg.from.issuer = users[0];
+                                    }
+                                })
+                                .catch(console.error);
+                        });
+
+                        if (!conv.pinnedMessage) {
+                            conv.pinnedMessages = pinnedMessages;
+                        } else {
+                            // [... new] + [...)
+                            conv.pinnedMessages.splice(0, 0, ...pinnedMessages);
+                        }
+
+                        return conv.pinnedMessages;
+                    });
+            }
+            console.warn("Conversation Id is required");
+        },
         async checkMessageQueue({ state, rootState, commit }) {
             const convList = state.channel.all.concat(state.chat.all);
             const confirmedMsqIds = [];
             const messageQueue = rootState.messageQueue;
 
             // Process all conversation messages first
-            const conversationList = messageQueue.filter(c => c.type === "conversation");
+            const conversationList = messageQueue.filter(
+                c => c.type === "conversation"
+            );
             for (let index = 0; index < conversationList.length; index++) {
                 const message = conversationList[index];
                 const payload = message.payload;
@@ -835,8 +985,12 @@ const moduleState = {
                         commit("removeConv", convId);
                         break;
                     default:
-                        this.dispatch("conversations/loadLatestConversation", convId)
-                            .catch(console.error).then((conv) => {
+                        this.dispatch(
+                            "conversations/loadLatestConversation",
+                            convId
+                        )
+                            .catch(console.error)
+                            .then(conv => {
                                 if (conv) {
                                     conv.isVerified = true;
                                 }
@@ -871,12 +1025,18 @@ const moduleState = {
                 const existingConv = convList.find(c => c.id === convId);
                 if (existingConv) {
                     if (existingConv.messages.length > 0) {
-                        input.leftId = existingConv.messages[existingConv.messages.length - 1].id;
+                        input.leftId =
+                            existingConv.messages[
+                                existingConv.messages.length - 1
+                            ].id;
                         input.top = 200;
                     }
 
                     // Load conversation content
-                    await this.dispatch("conversations/getConversationContent", input);
+                    await this.dispatch(
+                        "conversations/getConversationContent",
+                        input
+                    );
                 }
             }
 
@@ -894,7 +1054,10 @@ const moduleState = {
                         case "created":
                             {
                                 existingConv.meta.unreadMessages.push(payload);
-                                const unread = existingConv.channel == true ? convNotification.channel : convNotification.nonChannel;
+                                const unread =
+                                    existingConv.channel == true
+                                        ? convNotification.channel
+                                        : convNotification.nonChannel;
                                 unread[existingConv.id] = existingConv;
                             }
                             break;
@@ -985,6 +1148,29 @@ const moduleState = {
                 );
             }
             return;
+        },
+        async pinMessage({ commit, state }, { message }) {
+            const me = this.state.users.me;
+            const pinState =
+                !Array.isArray(message.pins) || !message.pins.includes(me.id);
+            const convId = message.to.conversation;
+
+            return await messageService
+                .pin(convId, message.id, pinState)
+                .then(res => {
+                    return res.data;
+                })
+                .then(newMsg => {
+                    commit("updateMessage", {
+                        convId,
+                        message: {
+                            id: message.id,
+                            pins: newMsg.pins,
+                        },
+                    });
+                    commit("updatePinStatus", newMsg);
+                    return newMsg;
+                });
         },
         async watchAllMessage({ commit, state, rootState }, convId) {
             const conv = state.channel.all

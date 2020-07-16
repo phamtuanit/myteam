@@ -6,17 +6,18 @@
                 >Pinned messages
             </v-subheader>
             <v-spacer></v-spacer>
-            <!-- <v-btn
+            <v-btn
                 fab
-                class="mr-3"
+                class="mr-3 btn-refresh"
                 rounded
                 icon
                 height="26"
                 width="26"
-                title="Clear all"
+                title="Refresh"
+                @click="onRefresh"
             >
-                <v-icon>mdi-minus</v-icon>
-            </v-btn> -->
+                <v-icon>mdi-refresh</v-icon>
+            </v-btn>
         </v-sheet>
         <v-progress-linear
             :active="loading"
@@ -26,27 +27,32 @@
         <!-- Messages -->
         <v-list class="py-0 px-0">
             <div class="friend-list-layout overflow-y-auto">
-                <template v-for="user in friendList">
+                <template v-for="msg in messages">
                     <div
-                        :key="user.id"
-                        @click="onAddChat(user)"
+                        :key="msg.id"
                         class="px-4 message-element"
-                        :value="user.id"
+                        :value="msg.id"
                     >
+                        <v-divider></v-divider>
                         <div class="d-flex flex-row py-2">
                             <UserAvatar
-                                :user-name="user.fullName"
-                                :user="user"
-                                online-effect
+                                v-if="typeof msg.from.issuer === 'object'"
+                                :user-name="msg.from.issuer.fullName"
+                                :user="msg.from.issuer"
                                 class="align-self-start mt-1"
                             />
                             <div class="flex-grow-1 align-self-stretch ml-3">
                                 <!-- Header -->
-                                <div class="header d-flex selection-disabled">
-                                    <span class="user-name subtitle-2">{{
-                                        getDisplayName(user)
-                                    }}</span>
-                                    <span class="time caption">07/15/2020</span>
+                                <div class="header center-y selection-disabled">
+                                    <span
+                                        class="user-name subtitle-2"
+                                        v-if="
+                                            typeof msg.from.issuer === 'object'
+                                        "
+                                        v-text="
+                                            getDisplayUserName(msg.from.issuer)
+                                        "
+                                    ></span>
                                     <v-spacer></v-spacer>
 
                                     <v-btn
@@ -71,22 +77,24 @@
                                         height="26"
                                         width="26"
                                         title="Unpin"
-                                        @click="onUnpin"
+                                        @click="onUnpin(msg)"
+                                        v-if="msg.pinnedByMe == true"
                                     >
                                         <v-icon class="action btn-unpin"
                                             >mdi-minus</v-icon
                                         >
                                     </v-btn>
                                 </div>
+                                <!-- Time -->
+                                <small
+                                    v-text="getDateTime(msg.created)"
+                                ></small>
 
                                 <!-- Content -->
-                                <v-card-text class="pa-0 message-text"
-                                    >Listen to your favorite artists and albums
-                                    whenever and wherever, online and offline.
-                                    With a simple conditional, you can easily
-                                    add supplementary text that is hidden until
-                                    opened.</v-card-text
-                                >
+                                <v-card-text
+                                    class="pa-0 message-text"
+                                    v-html="getMessageHtml(msg)"
+                                ></v-card-text>
                             </div>
                         </div>
                     </div>
@@ -102,10 +110,16 @@ import { mapState } from "vuex";
 import UserAvatar from "../../components/avatar/user-avatar.vue";
 export default {
     components: { UserAvatar },
+    props: {
+        conversation: {
+            type: Object,
+            default: () => ({}),
+        },
+    },
     data() {
         return {
             loading: false,
-            friendList: [],
+            messages: [],
         };
     },
     computed: {
@@ -113,19 +127,43 @@ export default {
             cachedUsers: state => state.users.all,
         }),
     },
+    created() {
+        this.onRefresh();
+    },
     mounted() {
         fillHeight("friend-list-layout", 0, this.$el);
         this.friendList = this.cachedUsers;
     },
+    destroyed() {
+        this.conversation.pinnedMessages.splice(0);
+    },
     methods: {
-        onUnpin(msg) {
-            this.$emit("unpin", msg);
+        onUnpin(message) {
+            this.$store
+                .dispatch("conversations/pinMessage", { message })
+                .catch(console.error);
         },
         onJump(msg) {
             this.$emit("jump", msg);
         },
-        getDisplayName(user) {
+        onRefresh() {
+            return this.$store
+                .dispatch("conversations/getPinnedMessage", {
+                    convId: this.conversation.id,
+                })
+                .then(() => {
+                    this.messages = this.conversation.pinnedMessages;
+                })
+                .catch(console.error);
+        },
+        getDisplayUserName(user) {
             return user.fullName || user.firstName + ", " + user.lastName;
+        },
+        getMessageHtml(msg) {
+            return msg.body.content;
+        },
+        getDateTime(date) {
+            return new Date(date).toLocaleString().substring(0, 16);
         },
     },
 };
@@ -161,6 +199,7 @@ export default {
 <style scoped>
 .pinned-message-list {
     max-width: 500px;
+    width: 350px;
 }
 
 .theme--light .message-text {
@@ -171,11 +210,23 @@ export default {
     color: rgba(255, 255, 255, 0.7);
 }
 
+.pinned-message-list >>> .message-text > p {
+    margin-bottom: 0;
+}
+
 .user-name::after {
     content: "\2022";
     padding-left: 5px;
     padding-right: 5px;
     color: hsl(0, 0%, 72%);
+}
+
+.btn-refresh {
+    opacity: 0.4;
+}
+
+.btn-refresh:hover {
+    opacity: 1;
 }
 
 .action {
