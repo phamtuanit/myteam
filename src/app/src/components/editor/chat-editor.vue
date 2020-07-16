@@ -264,15 +264,18 @@ export default {
             const rootEl = document.createElement("div");
             rootEl.innerHTML = content;
 
+            // Reset color and background
+            rootEl.children.forEach(el => {
+                el.style.color = "";
+                el.style.backgroundColor = "";
+            });
+
             // Format table
             const tableEls = rootEl.getElementsByTagName("table");
             if (tableEls && tableEls.length > 0) {
                 tableEls.forEach(tableEl => {
                     // Update table's width
                     tableEl.style.width = "100%";
-                    // Reset color and background
-                    tableEl.style.color = "";
-                    tableEl.style.backgroundColor = "";
                 });
             }
 
