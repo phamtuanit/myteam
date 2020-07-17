@@ -1,8 +1,8 @@
 <template>
     <div class="pinned-message fill-height d-flex flex-column">
         <!-- Search -->
-        <v-sheet class="pa-0 center-y no-border-radius">
-            <v-subheader class="ml-0 pinned-message--title selection-disabled"
+        <v-sheet class="pinned-message--title pa-0 center-y no-border-radius">
+            <v-subheader class="ml-0 selection-disabled"
                 >Pinned messages
             </v-subheader>
             <v-spacer></v-spacer>
@@ -63,7 +63,7 @@
                                     ></span>
                                     <v-spacer></v-spacer>
 
-                                    <v-btn
+                                    <!-- <v-btn
                                         fab
                                         class="mr-2"
                                         rounded
@@ -76,7 +76,7 @@
                                         <v-icon small class="action btn-jump"
                                             >mdi-ray-end-arrow</v-icon
                                         >
-                                    </v-btn>
+                                    </v-btn> -->
                                     <v-btn
                                         fab
                                         class="mr-1"

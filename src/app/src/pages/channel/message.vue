@@ -69,7 +69,7 @@
                                     <v-list-item-title>Quote</v-list-item-title>
                                 </v-list-item>
                                 <v-list-item @click="onPin" v-if="allowPinMessage">
-                                    <v-list-item-title>Pin</v-list-item-title>
+                                    <v-list-item-title v-text="isPinned == true ? 'Unpin' : 'Pin'"></v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-menu>
@@ -123,7 +123,7 @@ export default {
             user: {
                 fullName: "Unknow",
             },
-            allowPinMessage: false
+            allowPinMessage: false,
         };
     },
     computed: {
@@ -157,6 +157,12 @@ export default {
                 this.message.mentions.includes("all-users")
             );
         },
+        isPinned() {
+            if (!this.message.pins || this.message.pins.length == 0) {
+                return false;
+            }
+            return this.message.pins.includes(this.me.id);
+        }
     },
     created() {
         if (this.message.from.issuer) {
@@ -169,7 +175,7 @@ export default {
         }
     },
     mounted() {
-        const userRole = this.$store.state.users.me.role;
+        const userRole = this.me.role;
         this.allowPinMessage = typeof userRole === "number" && userRole >= 0 && userRole < 10;
     },
     methods: {
