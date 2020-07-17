@@ -1,8 +1,8 @@
 <template>
-    <div class="pinned-message-list fill-height d-flex flex-column">
+    <div class="pinned-message fill-height d-flex flex-column">
         <!-- Search -->
         <v-sheet class="pa-0 center-y no-border-radius">
-            <v-subheader class="ml-0 selection-disabled"
+            <v-subheader class="ml-0 pinned-message--title selection-disabled"
                 >Pinned messages
             </v-subheader>
             <v-spacer></v-spacer>
@@ -25,12 +25,12 @@
         ></v-progress-linear>
 
         <!-- Messages -->
-        <v-list class="py-0 px-0">
-            <div class="friend-list-layout overflow-y-auto">
+        <v-list class="pinned-messages-list py-0 px-0">
+            <div class="pinned-messages-content overflow-y-auto">
                 <template v-for="msg in messages">
                     <div
                         :key="msg.id"
-                        class="px-4 message-element"
+                        class="px-4 message-item pinned-message-item"
                         :value="msg.id"
                     >
                         <v-divider></v-divider>
@@ -51,6 +51,14 @@
                                         "
                                         v-text="
                                             getDisplayUserName(msg.from.issuer)
+                                        "
+                                    ></span>
+                                    <!-- Time -->
+                                    <span class="caption"
+                                        v-text="
+                                            getDateTime(
+                                                msg.created || msg.updated
+                                            )
                                         "
                                     ></span>
                                     <v-spacer></v-spacer>
@@ -85,14 +93,10 @@
                                         >
                                     </v-btn>
                                 </div>
-                                <!-- Time -->
-                                <small
-                                    v-text="getDateTime(msg.created)"
-                                ></small>
 
                                 <!-- Content -->
                                 <v-card-text
-                                    class="pa-0 message-text"
+                                    class="pa-0 message-text hl"
                                     v-html="getMessageHtml(msg)"
                                 ></v-card-text>
                             </div>
@@ -163,43 +167,31 @@ export default {
             return msg.body.content;
         },
         getDateTime(date) {
-            return new Date(date).toLocaleString().substring(0, 16);
+            if (date) {
+                return new Date(date).toLocaleDateString();
+            }
+
+            return "";
         },
     },
 };
 </script>
 
 <style scoped>
-#friend-list {
-    width: 250px;
+.pinned-message {
+    max-width: 20vw;
 }
 
-#friend-list >>> .v-text-field.v-text-field--solo .v-input__control {
-    min-height: 36px !important;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+.pinned-message .pinned-message--title {
+    min-width: 20vw;
 }
 
-#friend-list >>> .theme--dark.v-text-field--solo .v-input__control {
-    border: 1px solid rgba(255, 255, 255, 0.12);
+.pinned-messages-list {
+    height: 100%;
 }
 
-#friend-list >>> .v-list-item {
-    min-height: 48px;
-}
-
-/* Scroll */
-.friend-list-layout > div {
-    width: 100%;
-}
-
-.v-list-item__content {
-    max-width: 218px;
-}
-</style>
-<style scoped>
-.pinned-message-list {
-    max-width: 500px;
-    width: 350px;
+.pinned-messages-list >>> .message-text > p {
+    margin-bottom: 0;
 }
 
 .theme--light .message-text {
@@ -208,10 +200,6 @@ export default {
 
 .theme--dark .message-text {
     color: rgba(255, 255, 255, 0.7);
-}
-
-.pinned-message-list >>> .message-text > p {
-    margin-bottom: 0;
 }
 
 .user-name::after {
@@ -233,7 +221,7 @@ export default {
     opacity: 0.2;
 }
 
-.message-element:hover .action {
+.pinned-message-item:hover .action {
     opacity: 1;
 }
 </style>
