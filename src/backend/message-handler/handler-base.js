@@ -338,6 +338,7 @@ module.exports = class HandlerBase {
             histories: [],
             reactions: [],
             mentions: [],
+            pins: [],
         };
 
         message = this.processMessage(message);
@@ -527,6 +528,18 @@ module.exports = class HandlerBase {
      *
      */
     async pinMessage({ id, operation: status }) {
+        // Verify user
+        const { user } = this.ctx.meta;
+        const userRole = user.role;
+        const allowPinMessage = typeof userRole === "number" && userRole >= 0 && userRole < 10;
+        if (!allowPinMessage) {
+            throw new Errors.MoleculerClientError(
+                "You don't have permission to pin message.",
+                400
+            );
+        }
+
+
         const convCollId = this.getHistoryCollectionName(this.convId);
 
         // Get adapter
@@ -540,7 +553,6 @@ module.exports = class HandlerBase {
             );
         }
 
-        const user = this.ctx.meta.user;
         let latestMessage = existingMessage;
 
         if (!existingMessage.pins) {
