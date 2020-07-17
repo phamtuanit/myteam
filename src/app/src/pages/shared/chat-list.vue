@@ -2,8 +2,7 @@
     <v-sheet
         width="280px"
         min-width="280px"
-        class="pa-0 fill-height no-border-radius d-flex flex-column"
-        id="chat-list"
+        class="chat-list pa-0 fill-height no-border-radius d-flex flex-column"
     >
         <v-sheet
             height="57"
@@ -212,13 +211,13 @@ export default {
 };
 </script>
 
-<style scoped>
-#chat-list >>> .v-text-field--solo .v-input__control {
+<style>
+.chat-list >>> .v-text-field--solo .v-input__control {
     min-height: 36px !important;
     border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-#chat-list >>> .theme--dark.v-text-field--solo .v-input__control {
+.chat-list >>> .theme--dark.v-text-field--solo .v-input__control {
     border: 1px solid rgba(255, 255, 255, 0.12);
 }
 

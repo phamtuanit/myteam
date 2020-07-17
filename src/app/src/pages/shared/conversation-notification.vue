@@ -15,14 +15,14 @@
         </div>
         <div class="notification_container--float d-flex">
             <v-spacer></v-spacer>
-            <div v-show="allowScrollDown">
+            <div v-show="allowScrollDown && !editing">
                 <v-chip
                     class="ma-2"
-                    color="blue darken-1"
+                    color="orange darken-1"
                     outlined
                     @click="onReadMessage"
                 >
-                    <span class="ml-1">New message</span>
+                    <span class="ml-1">Jump to present</span>
                     <v-icon>mdi-chevron-double-down</v-icon>
                 </v-chip>
             </div>
@@ -78,16 +78,17 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .conversation-notification {
     position: relative;
 }
 
-.notification_container--float {
+.conversation-notification .notification_container--float {
     position: absolute;
     height: 40px;
     top: -46px;
     left: 0;
     right: 0;
+    z-index: 99;
 }
 </style>

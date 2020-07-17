@@ -28,11 +28,7 @@
         <v-list class="pinned-messages-list py-0 px-0">
             <div class="pinned-messages-content overflow-y-auto">
                 <template v-for="msg in messages">
-                    <PinnedMessage
-                        :key="msg.id"
-                        class="px-4"
-                        :message="msg"
-                    >
+                    <PinnedMessage :key="msg.id" class="px-4" :message="msg">
                     </PinnedMessage>
                 </template>
             </div>
@@ -61,7 +57,7 @@ export default {
         this.onRefresh();
     },
     mounted() {
-        fillHeight("friend-list-layout", 0, this.$el);
+        fillHeight("pinned-messages-content", 0, this.$el);
         this.friendList = this.cachedUsers;
     },
     destroyed() {
@@ -87,8 +83,9 @@ export default {
     max-width: 20vw;
 }
 
-.pinned-messages-list {
+.pinned-messages-list  {
     height: 100%;
+    max-height: 100%;
 }
 
 .pinned-messages .pinned-messages--title {

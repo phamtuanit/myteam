@@ -102,7 +102,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .couple-conversation {
     background: rgb(243, 242, 241);
 }

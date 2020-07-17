@@ -1,6 +1,6 @@
 <template>
     <v-container
-        class="fill-height bg-1"
+        class="login-screen fill-height bg-1"
         fluid
         id="login-screen"
     >

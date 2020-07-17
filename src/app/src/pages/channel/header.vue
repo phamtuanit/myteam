@@ -2,7 +2,7 @@
     <v-sheet
         height="57"
         min-height="57"
-        class="pa-0 no-border-radius pl-6 pr-3"
+        class="channel-header pa-0 no-border-radius pl-6 pr-3"
     >
         <div class="center-y" style="height: 100%;" v-show="conversation.id">
             <v-icon>mdi-pound</v-icon>
@@ -120,12 +120,12 @@ export default {
 </script>
 
 
-<style scoped>
-.btn-pin {
+<style>
+.channel-header .btn-pin {
     transform: rotateZ(45deg);
 }
 
-.btn-pin.pin-activated {
+.channel-header .btn-pin.pin-activated {
     transform: rotateZ(0deg);
 }
 </style>

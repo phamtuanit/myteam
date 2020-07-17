@@ -143,7 +143,7 @@ export default {
 @import "../assets/hightlight.css";
 </style>
 
-<style scoped>
+<style>
 #main-layout >>> .v-navigation-drawer .v-navigation-drawer__border {
     background-color: transparent !important;
     width: 0px;
