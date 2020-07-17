@@ -68,7 +68,7 @@
                                 <v-list-item @click="onQuote">
                                     <v-list-item-title>Quote</v-list-item-title>
                                 </v-list-item>
-                                <v-list-item @click="onPin">
+                                <v-list-item @click="onPin" v-if="allowPinMessage">
                                     <v-list-item-title>Pin</v-list-item-title>
                                 </v-list-item>
                             </v-list>
@@ -123,6 +123,7 @@ export default {
             user: {
                 fullName: "Unknow",
             },
+            allowPinMessage: false
         };
     },
     computed: {
@@ -166,6 +167,10 @@ export default {
                 })
                 .catch(console.error);
         }
+    },
+    mounted() {
+        const userRole = this.$store.state.users.me.role;
+        this.allowPinMessage = typeof userRole === "number" && userRole >= 0 && userRole < 10;
     },
     methods: {
         onReact(reaction) {
