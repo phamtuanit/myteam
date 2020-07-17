@@ -275,7 +275,8 @@ export default {
             if (tableEls && tableEls.length > 0) {
                 tableEls.forEach(tableEl => {
                     // Update table's width
-                    tableEl.style.width = "100%";
+                    tableEl.style.width = "auto";
+                    tableEl.style.maxWidth = "100%";
                 });
             }
 
