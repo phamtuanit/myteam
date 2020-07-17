@@ -117,19 +117,19 @@ div.v-subheader {
     padding-left: 0;
 }
 
-.message-item ul.todo-list * {
-    display: flex;
-    align-items: center;
+.message-item ul.todo-list li ul {
+    margin-left: 17px;
 }
 
 .message-item ul.todo-list label.todo-list__label input {
+    vertical-align: middle;
     position: relative;
     height: 16px;
     width: 16px;
 }
 
 .message-item .todo-list__label__description {
-    margin-left: 6px;
+    margin-left: 8px;
 }
 
 /* Blockquote */
