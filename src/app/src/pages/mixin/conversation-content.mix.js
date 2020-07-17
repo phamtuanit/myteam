@@ -27,6 +27,12 @@ export default {
         );
         setTimeout(this.scrollToBottom, 1000, this);
     },
+    destroyed() {
+        this.$refs.messageFeed.$el.removeEventListener(
+            "scroll",
+            this.handleScroll
+        );
+    },
     watch: {
         "unreadMessages"() {
             this.handleScroll();
@@ -90,14 +96,15 @@ export default {
         },
         handleScroll() {
             const el = this.$refs.messageFeed.$el;
-            if (el.scrollTop + el.clientHeight + 4 >= el.scrollHeight) {
+            if (el.scrollTop + el.clientHeight + 100 >= el.scrollHeight) {
                 this.allowReadMore = false;
                 return;
             }
 
-            this.allowReadMore = this.conversation.meta.unreadMessages.length > 0;
+            this.allowReadMore = true;
         },
         scrollToBottom() {
+            this.allowReadMore = false;
             const msgSheetEl = this.$refs.messageFeed.$el;
             scrollToBottom(msgSheetEl);
         },
