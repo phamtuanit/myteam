@@ -429,15 +429,6 @@ const moduleState = {
             }
 
             const me = this.state.users.me;
-            const resolveUser = () => {
-                this.dispatch("users/resolve", [message.from.issuer])
-                    .then(users => {
-                        if (users && users.length > 0) {
-                            message.from.issuer = users[0];
-                        }
-                    })
-                    .catch(console.error);
-            };
             if (message.pins && message.pins.length == 0) {
                 // Unpin => Remove if needed
                 if (
@@ -465,7 +456,6 @@ const moduleState = {
                         currMsg.pins = message.pins || currMsg.pins;
                         currMsg.body = message.body;
                     } else {
-                        resolveUser();
                         existingConv.pinnedMessages.push(message);
                     }
                 }
@@ -572,13 +562,13 @@ const moduleState = {
 
                 // Add message
                 commit("addConversation", conv);
-                // Load message in a channel
-                if (conv.channel !== true) {
-                    await this.dispatch(
-                        "conversations/getConversationContent",
-                        { convId: conv.id, top: 4 }
-                    );
-                }
+                // Load message in a chat
+                // if (conv.channel !== true) {
+                //     await this.dispatch(
+                //         "conversations/getConversationContent",
+                //         { convId: conv.id, top: 4 }
+                //     );
+                // }
             }
 
             // Confirm message in queue
@@ -943,13 +933,6 @@ const moduleState = {
                         pinnedMessages.forEach(msg => {
                             // Init required value
                             msg.pinnedByMe = msg.pins.includes(me.id);
-                            this.dispatch("users/resolve", [msg.from.issuer])
-                                .then(users => {
-                                    if (users && users.length > 0) {
-                                        msg.from.issuer = users[0];
-                                    }
-                                })
-                                .catch(console.error);
                         });
 
                         if (!conv.pinnedMessage) {
