@@ -47,7 +47,7 @@ module.exports = {
             // Configures the Access-Control-Allow-Methods CORS header. 
             methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
             // Configures the Access-Control-Allow-Headers CORS header.
-            allowedHeaders: [],
+            allowedHeaders: ["*"],
             // Configures the Access-Control-Expose-Headers CORS header.
             exposedHeaders: [],
             // Configures the Access-Control-Allow-Credentials CORS header.
@@ -73,7 +73,7 @@ module.exports = {
 
                 cors: {
                     origin: "*",
-                    methods: ["GET"],
+                    methods: ["GET", "POST", "OPTION"],
                     allowedHeaders: "*",
                     credentials: true,
                     maxAge: 3600,

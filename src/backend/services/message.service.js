@@ -79,6 +79,28 @@ module.exports = {
                     .commit();
             },
         },
+        getPinnedMessage: {
+            auth: true,
+            roles: [-1],
+            rest: "GET /pins",
+            params: {
+                conversation: { type: "number", convert: true },
+                user: { type: "string", optional: true },
+            },
+            async handler(ctx) {
+                const {
+                    conversation: conversationId,
+                    user: userId,
+                } = ctx.params;
+                const controller = this.controllerFactory.getController("html");
+
+                return await controller
+                    .setConversation(conversationId)
+                    .setContext(ctx)
+                    .getPinned({ userId })
+                    .commit();
+            },
+        },
         postMessage: {
             auth: true,
             roles: [-1],
@@ -188,6 +210,30 @@ module.exports = {
                     .then(cleanDbMark);
             },
         },
+        pinMessage: {
+            auth: true,
+            roles: [-1],
+            rest: "PUT /:id/pins",
+            params: {
+                conversation: { type: "number", convert: true },
+                id: { type: "number", convert: true },
+                status: { type: "boolean", convert: true, default: true },
+            },
+            async handler(ctx) {
+                const {
+                    conversation: conversationId,
+                    id: msgId,
+                    status,
+                } = ctx.params;
+                const controller = this.controllerFactory.getController("html");
+                return await controller
+                    .setConversation(conversationId)
+                    .setContext(ctx)
+                    .pin({ id: msgId, operation: status })
+                    .commit()
+                    .then(cleanDbMark);
+            },
+        },
     },
 
     /**
@@ -199,16 +245,13 @@ module.exports = {
      * Service created lifecycle event handler
      */
     created() {
-        this.controllerFactory = new HandlerFactory(
-            this.broker,
-            this.logger
-        );
+        this.controllerFactory = new HandlerFactory(this.broker, this.logger);
     },
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler

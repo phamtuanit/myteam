@@ -29,6 +29,12 @@ module.exports = class HandlerBase {
         return this;
     }
 
+    getPinned(message) {
+        this.message = message;
+        this.operation = "getPinned";
+        return this;
+    }
+
     add(message) {
         this.message = message;
         this.operation = "add";
@@ -47,6 +53,12 @@ module.exports = class HandlerBase {
         return this;
     }
 
+    pin(message) {
+        this.message = message;
+        this.operation = "pin";
+        return this;
+    }
+
     delete(message) {
         this.message = message;
         this.operation = "delete";
@@ -60,7 +72,8 @@ module.exports = class HandlerBase {
         switch (this.operation) {
             case "get":
                 return await this.getMessage().then(cleanDbMark);
-                break;
+            case "getPinned":
+                return await this.getPinnedMessage(this.message);
             case "add":
                 latestMessage = await this.addMessage(this.message).then(
                     cleanDbMark
@@ -74,6 +87,7 @@ module.exports = class HandlerBase {
                     body: latestMessage.body,
                     edited: latestMessage.edited,
                     histories: latestMessage.histories,
+                    mentions: latestMessage.mentions,
                     from: latestMessage.from,
                     to: latestMessage.to,
                 };
@@ -84,6 +98,17 @@ module.exports = class HandlerBase {
                     id: latestMessage.id,
                     updated: new Date().getTime(),
                     reactions: latestMessage.reactions,
+                    from: latestMessage.from,
+                    to: latestMessage.to,
+                };
+                break;
+            case "pin":
+                latestMessage = await this.pinMessage(this.message);
+                latestMessage = {
+                    id: latestMessage.id,
+                    updated: new Date().getTime(),
+                    body: latestMessage.body,
+                    pins: latestMessage.pins,
                     from: latestMessage.from,
                     to: latestMessage.to,
                 };
@@ -138,11 +163,14 @@ module.exports = class HandlerBase {
         const convInfo = this.convInfo;
         let act = "created";
         switch (this.operation) {
-            case "edit":
+            case "update":
                 act = "updated";
                 break;
             case "delete":
                 act = "removed";
+                break;
+            case "pin":
+                act = "pinned";
                 break;
             case "react":
                 act = "reacted";
@@ -252,6 +280,42 @@ module.exports = class HandlerBase {
             this.logger.error(error);
             throw new Errors.MoleculerServerError(error.message, 500);
         }
+    }
+
+    async getPinnedMessage({ userId, top, rightId }) {
+        const convId = this.convId;
+        const historyColl = this.getHistoryCollectionName(convId);
+        const dbCollection = await this.getDBCollection(historyColl);
+        const query = {};
+
+        if (rightId) {
+            // Less than rightId
+            query.id.$lt = rightId;
+        }
+
+        if (userId) {
+            query.pins = {
+                $in: userId,
+            };
+        } else {
+            query.pins = { $exists: true, $ne: [] };
+        }
+
+        let messages = [];
+        // Support get Top messages
+        messages = await dbCollection.collection
+            .find(query)
+            .sort({ $natural: -1 })
+            .limit(top || 10)
+            .toArray();
+        messages = messages.reverse();
+
+        return messages.map(msg => {
+            delete msg.mentions;
+            delete msg.histories;
+            delete msg.reactions;
+            return cleanDbMark(msg);
+        });
     }
 
     /**
@@ -456,6 +520,78 @@ module.exports = class HandlerBase {
         // 2. Delete record
         entity.deleted = new Date();
         return await dbCollection.removeById(entity._id);
+    }
+
+    /**
+     * Protect method
+     *
+     */
+    async pinMessage({ id, operation: status }) {
+        const convCollId = this.getHistoryCollectionName(this.convId);
+
+        // Get adapter
+        const dbCollection = await this.getDBCollection(convCollId);
+        const existingMessage = await dbCollection.findOne({ id: id });
+
+        if (!existingMessage) {
+            throw new Errors.MoleculerClientError(
+                "The message could not be found.",
+                404
+            );
+        }
+
+        const user = this.ctx.meta.user;
+        let latestMessage = existingMessage;
+
+        if (!existingMessage.pins) {
+            // Incase reactions is null
+            if (status == true) {
+                const update = {
+                    $set: {
+                        pins: [user.id],
+                    },
+                };
+
+                // Set pin
+                latestMessage = await dbCollection.updateById(
+                    existingMessage._id,
+                    update
+                );
+            }
+        } else {
+            const hasPinned =
+                existingMessage.pins.find((u) => u == user.id) != null;
+
+            if (status == true && hasPinned == false) {
+                // Incase user has never pinned - Add new
+                const update = {
+                    $push: {
+                        pins: user.id,
+                    },
+                };
+
+                // Add new one into reactions list
+                latestMessage = await dbCollection.updateById(
+                    existingMessage._id,
+                    update
+                );
+            } else if (hasPinned == true) {
+                // Incase user was reacted - remove
+                const update = {
+                    $pull: {
+                        pins: user.id,
+                    },
+                };
+
+                // Remove reaction
+                latestMessage = await dbCollection.updateById(
+                    existingMessage._id,
+                    update
+                );
+            }
+        }
+
+        return latestMessage;
     }
 
     /**
