@@ -29,6 +29,7 @@ module.exports = {
             auth: true,
             roles: [-1],
             rest: "GET /:id",
+            cache: true,
             params: {
                 id: "string",
             },

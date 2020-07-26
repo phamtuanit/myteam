@@ -42,38 +42,25 @@ module.exports = {
                 },
             },
             async handler(ctx) {
-                const { channel } = ctx.params;
-                const { user } = ctx.meta;
-                // Get adapter
-                const dbCollection = await this.getDBCollection(
-                    "conversations"
-                );
-
-                const newConvInfo = channel;
-                newConvInfo.id = new Date().getTime();
-                newConvInfo.creator = user.id;
-                newConvInfo.created = new Date();
-
-                const newConv = await dbCollection
-                    .insert(newConvInfo)
-                    .then(cleanDbMark);
-                this.logger.info("Added new conversation.", newConv.id);
+                // 1. Create conversation information
+                const convInfo = await this.createConversation(ctx).then(cleanDbMark);
 
                 // Inform all subscribers
                 const msgQueue = {
                     id: new Date().getTime(),
                     type: "conversation",
                     action: "created",
-                    payload: newConv,
+                    payload: convInfo,
                 };
-                if (newConv.subscribers && newConv.subscribers.length > 0) {
+
+                if (convInfo.subscribers && convInfo.subscribers.length > 0) {
                     // 2. Save information to user queue and send message to WS
                     for (
                         let index = 0;
-                        index < newConv.subscribers.length;
+                        index < convInfo.subscribers.length;
                         index++
                     ) {
-                        const subscriberId = newConv.subscribers[index];
+                        const subscriberId = convInfo.subscribers[index];
 
                         // 2.1 Save new information to DB of corresponding user cache
                         ctx.call("v1.messages-queue.pushMessageToQueue", {
@@ -90,9 +77,11 @@ module.exports = {
                 }
 
                 // Broadcast message
-                const eventName = `conversation.${newConv.id}.created`;
-                this.broker.broadcast(eventName, newConv).catch(this.logger.error);
-                return newConv;
+                const eventName = `conversation.${convInfo.id}.created`;
+                this.broker
+                    .broadcast(eventName, convInfo)
+                    .catch(this.logger.error);
+                return convInfo;
             },
         },
         getConversationById: {
@@ -443,6 +432,21 @@ module.exports = {
                     401
                 );
             }
+        },
+        async createConversation(ctx) {
+            const { user } = ctx.meta;
+            const { channel } = ctx.params;
+
+            const convInfo = channel;
+            convInfo.id = new Date().getTime();
+            convInfo.creator = user.id;
+            convInfo.created = new Date();
+
+            // Get adapter
+            const dbCollection = await this.getDBCollection("conversations");
+            const convEntity = await dbCollection.insert(convInfo);
+            this.logger.info("Added new conversation.", convEntity.id);
+            return convEntity;
         },
     },
 

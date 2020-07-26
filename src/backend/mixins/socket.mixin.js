@@ -53,18 +53,20 @@ module.exports = {
             this.broker
                 .call("v1.auth.verifyToken", { token })
                 .then((user) => {
-                    this.handleNewSocket(socket, user);
+                    socket.handshake.user = user;
+                    this.handleNewSocket(socket);
                 })
                 .catch((err) => {
                     this.logger.warn(
                         "WS >>> Incoming socket don't has valid access-token. Disconnecting...",
                         err.message
                     );
-                    socket.disconnect();
+                    socket.emit("unauthenticated");
+                    setTimeout(socket.disconnect, 100);
                 });
         },
-        handleNewSocket(socket, user) {
-            socket.handshake.user = user;
+        handleNewSocket(socket) {
+            const user = socket.handshake.user;
             const requiredRooms = [user.id, "live"];
             // Save socket
             this.sockets[user.id] = this.sockets[user.id] || {};
