@@ -5,7 +5,8 @@
         dark
         app
         mini-variant-width="65"
-        class="left-drawer bg-1"
+        id="left-drawer"
+        class="bg-1"
     >
         <!-- Self Avatar -->
         <v-list-item class="px-0 mt-2 mb-1 mx-auto">
@@ -263,8 +264,13 @@ export default {
 };
 </script>
 
-<style scoped>
-.user-avatar {
+<style>
+#left-drawer .user-avatar {
     cursor: pointer;
+}
+
+#left-drawer.v-navigation-drawer .v-navigation-drawer__border {
+    background-color: transparent !important;
+    width: 0px;
 }
 </style>

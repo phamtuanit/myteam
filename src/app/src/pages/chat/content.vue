@@ -221,11 +221,22 @@ export default {
 };
 </script>
 
-<style lang="css" scoped>
+<style>
 .chat-box {
     height: 100vh;
 }
+.chat-box .notification,
+.chat-box .chat-editor {
+    margin-left: 60px;
+    margin-right: 14px;
+}
 
+.chat-box .message-sheet {
+    position: relative;
+}
+</style>
+
+<style lang="css" scoped>
 /* Message aligment */
 .message-sheet
     >>> .message-item:not(:first-of-type)
@@ -296,15 +307,5 @@ export default {
 .message-sheet >>> .message-item .message-item__content {
     padding-top: 2px;
     padding-bottom: 2px;
-}
-
-.chat-box >>> .notification,
-.chat-box >>> .chat-editor {
-    margin-left: 60px;
-    margin-right: 14px;
-}
-
-.message-sheet {
-    position: relative;
 }
 </style>

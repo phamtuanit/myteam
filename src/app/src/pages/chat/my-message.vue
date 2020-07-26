@@ -113,8 +113,8 @@ export default {
 };
 </script>
 
-<style scoped>
-.message-item__content-header {
+<style>
+.message-item.my-message .message-item__content-header {
     position: relative;
     display: flex;
     align-items: center;
@@ -122,7 +122,7 @@ export default {
     -webkit-box-flex: 1;
 }
 
-.message-item__content--card::after {
+.message-item.my-message .message-item__content--card::after {
     content: "";
     position: absolute;
     background-color: #1e88e5;
@@ -133,11 +133,11 @@ export default {
     border-radius: 0 4px 4px 0;
 }
 
-.message-error .message-item__content--card::after {
+.message-item.my-message.message-error .message-item__content--card::after {
     background-color: red;
 }
 
-.message-item__content--card .message-item__content-text {
+.message-item.my-message .message-item__content--card .message-item__content-text {
     padding-bottom: 2px !important;
 }
 

@@ -221,20 +221,18 @@ export default {
 };
 </script>
 
-<style lang="css" scoped>
+<style lang="css">
 .conversation-content {
     height: 100%;
     width: 100%;
 }
 
-.conversation-content >>> .notification,
-.channel_input {
+.conversation-content .notification,
+.conversation-content .channel_input {
     margin-left: 60px;
     margin-right: 58px;
 }
-</style>
 
-<style lang="css">
 .channel-message-item:first-of-type .message-item__content-separator,
 .conversation-loading + .channel-message-item .message-item__content-separator {
     display: none;

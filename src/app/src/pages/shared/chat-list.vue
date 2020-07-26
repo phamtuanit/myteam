@@ -212,12 +212,12 @@ export default {
 </script>
 
 <style>
-.chat-list >>> .v-text-field--solo .v-input__control {
+.chat-list .v-text-field--solo .v-input__control {
     min-height: 36px !important;
     border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-.chat-list >>> .theme--dark.v-text-field--solo .v-input__control {
+.chat-list .theme--dark.v-text-field--solo .v-input__control {
     border: 1px solid rgba(255, 255, 255, 0.12);
 }
 

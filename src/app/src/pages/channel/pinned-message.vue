@@ -114,7 +114,7 @@ export default {
 </script>
 
 <style>
-.pinned-message-item >>> .message-text > p {
+.pinned-message-item .message-text > p {
     margin-bottom: 0;
 }
 

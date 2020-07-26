@@ -162,8 +162,8 @@ export default {
 };
 </script>
 
-<style scoped>
-.message-item__content-footer {
+<style>
+.message-item.your-message .message-item__content-footer {
     position: relative;
     display: flex;
     align-items: center;
@@ -171,7 +171,7 @@ export default {
     -webkit-box-flex: 1;
 }
 
-.custom-align {
+.message-item.your-message .custom-align {
     position: absolute;
     display: flex;
     align-items: center;
@@ -181,7 +181,7 @@ export default {
 }
 
 /* Card header */
-.message-item__content-header {
+.message-item.your-message .message-item__content-header {
     position: relative;
     display: flex;
     align-items: center;
@@ -189,13 +189,13 @@ export default {
     -webkit-box-flex: 1;
 }
 
-.reactions-emojis:hover + .reactions-panel {
+.message-item.your-message .reactions-emojis:hover + .reactions-panel {
     transition: all 0.5s ease-out;
     opacity: 0;
 }
 
 /* Reactions */
-.message-item__content-footer >>> .reactions-panel {
+.message-item.your-message .message-item__content-footer .reactions-panel {
     position: absolute;
     visibility: hidden;
     bottom: 0;
@@ -203,20 +203,20 @@ export default {
     right: -10px;
 }
 
-.message-item__content:hover >>> .reactions-panel {
+.message-item.your-message .message-item__content:hover .reactions-panel {
     transition: all 0.2s ease-in;
     visibility: visible;
     right: -30px;
 }
 
-.user-name::after {
+.message-item.your-message .user-name::after {
     content: "\2022";
     padding-left: 5px;
     padding-right: 5px;
     color: hsl(0, 0%, 72%);
 }
 
-.theme--light .message-item__content--card .message-item__content-text {
+.message-item.your-message.theme--light .message-item__content-text {
     color: rgba(0, 0, 0, 0.8);
 }
 </style>

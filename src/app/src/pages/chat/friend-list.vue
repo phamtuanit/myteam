@@ -172,16 +172,16 @@ export default {
     width: 250px;
 }
 
-.friend-list >>> .v-text-field.v-text-field--solo .v-input__control {
+.friend-list .v-text-field.v-text-field--solo .v-input__control {
     min-height: 36px !important;
     border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-.friend-list >>> .theme--dark.v-text-field--solo .v-input__control {
+.friend-list .theme--dark.v-text-field--solo .v-input__control {
     border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.friend-list >>> .v-list-item {
+.friend-list .v-list-item {
     min-height: 48px;
 }
 

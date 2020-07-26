@@ -49,7 +49,6 @@ export default {
 
         this.initialize();
     },
-    mounted() {},
     destroyed() {
         clearTimeout(this.timmer);
     },
@@ -138,8 +137,6 @@ export default {
     },
 };
 </script>
-
-<style scoped></style>
 
 <style>
 /* spinner https://icons8.com/cssload/en/spinners*/

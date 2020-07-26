@@ -134,7 +134,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .conversation-item {
     display: flex;
     align-items: center;
@@ -154,13 +154,13 @@ export default {
     min-height: 36px;
 }
 
-.has-new-message {
+.conversation-item.has-new-message {
     position: relative;
 }
 
-.has-new-message::after {
+.conversation-item.has-new-message::after {
     animation: all 0.2s linear;
-    animation: opacity 0.2s linear;
+    animation: conversation-item-opacity 0.2s linear;
     content: "";
     position: absolute;
     background-color: var(--primary-color-2);
@@ -170,7 +170,7 @@ export default {
     top: -0;
 }
 
-@keyframes opacity {
+@keyframes conversation-item-opacity {
     0% {
         opacity: 0;
     }
@@ -179,45 +179,23 @@ export default {
     }
 }
 
-.has-new-message::after {
+.conversation-item.has-new-message::after {
     background-color: #1e88e5;
 }
 
-.content__text {
+.conversation-item .content__text {
     opacity: 0.7;
-}
-
-.has-new-message .content__text {
-    animation: all 0.2s linear;
-    opacity: 1;
-}
-
-.v-list-item.v-item--active .content__text {
-    animation: all 0.2s linear;
-    opacity: 1;
-}
-
-.has-new-message >>> .v-icon {
-    animation: blink 1s linear infinite;
-    color: inherit;
-}
-
-@keyframes blink {
-    0% {
-        opacity: 0.6;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.1);
-    }
-    100% {
-        opacity: 0.6;
-        transform: scale(1);
-    }
-}
-
-.content__text {
     max-width: 218px;
 }
+
+.conversation-item.has-new-message .content__text {
+    animation: all 0.2s linear;
+    opacity: 1;
+}
+
+.conversation-item.v-list-item.v-item--active .content__text {
+    animation: all 0.2s linear;
+    opacity: 1;
+}
+
 </style>
