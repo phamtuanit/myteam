@@ -1,10 +1,3 @@
-const Vuex = require("vuex");
-const Vue = require("vue").default;
-const sysConfig = require("../conf/system.json");
-const createLogger = require("vuex/dist/logger");
-const conversationModule = require("./modules/conversation.js");
-const userModule = require("./modules/user");
-
 // Setup IoC
 const ServiceLocator = require("../plugins/service-locator.js");
 window.IoC = window.ServiceLocator = new ServiceLocator();
@@ -13,6 +6,12 @@ window.IoC = window.ServiceLocator = new ServiceLocator();
 const eventBus = new (require("../plugins/emitter"))();
 window.IoC.register("bus", eventBus);
 
+const Vuex = require("vuex");
+const Vue = require("vue").default;
+const sysConfig = require("../conf/system.json");
+const createLogger = require("vuex/dist/logger");
+const conversationModule = require("./modules/conversation.js");
+const userModule = require("./modules/user");
 const appStateMap = require("./app-state.js");
 
 const plugins = [];

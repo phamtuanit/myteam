@@ -85,7 +85,7 @@ Service.prototype = {
                 });
             }
         } else {
-            this.locker = Promise.reject("No token found");
+            this.locker = Promise.reject(new Error("No token found"));
         }
 
         return await this.locker;
@@ -108,7 +108,7 @@ Service.prototype = {
                         );
                         return resole(data.token.access);
                     } else {
-                        reject("Could not get access token");
+                        reject(new Error("Could not get access token"));
                     }
                 })
                 .catch(err => {
@@ -138,7 +138,7 @@ Service.prototype = {
                         );
                         resole(data.token.access);
                     } else {
-                        reject("Could not get access token");
+                        reject(new Error("Could not get access token"));
                     }
                 })
                 .catch(err => {

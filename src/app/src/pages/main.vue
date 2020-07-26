@@ -31,14 +31,22 @@ export default {
             this.updateTitle();
         },
     },
+    created() {
+        this.eventBus = window.IoC.get("bus");
+    },
     mounted() {
         this.me = this.$store.state.users.me;
         this.notification = window.IoC.get("notification");
-
-        const eventBus = window.IoC.get("bus");
-        eventBus.on("messages", this.onNewMessage);
+        // Listen message from server to update title
+        this.eventBus.on("messages", this.onNewMessage);
+        // Listen socket connection failed
+        this.eventBus.on("socket:unauthenticated", this.onSWUnauthenticated);
 
         this.updateTitle();
+    },
+    destroyed() {
+        this.eventBus.off("messages", this.onNewMessage);
+        this.eventBus.off("socket:unauthenticated", this.onSWUnauthenticated);
     },
     methods: {
         updateTitle() {
@@ -135,17 +143,21 @@ export default {
                     break;
             }
         },
+        onSWUnauthenticated() {
+            const auth = window.IoC.get("auth");
+            auth.verifyToken()
+                .then(() => {
+                    window.IoC.get("socket").connect();
+                })
+                .catch(() => {
+                    console.warn("Could not verify token");
+                    location.reload();
+                });
+        },
     },
 };
 </script>
 
 <style lang="css">
 @import "../assets/hightlight.css";
-</style>
-
-<style>
-#main-layout >>> .v-navigation-drawer .v-navigation-drawer__border {
-    background-color: transparent !important;
-    width: 0px;
-}
 </style>

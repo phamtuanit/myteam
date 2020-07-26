@@ -8,13 +8,13 @@ class Socket {
      * Constructor
      * @param {*} path
      */
-    constructor(baseUri, path, retryTimes = 10) {
+    constructor(baseUri, path) {
         this.baseUri = baseUri;
         this.path = path;
-        this.retryTimes = retryTimes;
         this.io = null;
         this.subscribers = {};
         this.rooms = [];
+        this.lastError = null;
 
         this.authSvr = window.IoC.get("auth");
         this.eventBus = window.IoC.get("bus");
@@ -102,6 +102,7 @@ class Socket {
      */
     registerEvents() {
         this.io.on("connect", () => {
+            this.lastError = null;
             console.info("Socket connection is available now.");
             // Join to given room
             this.rooms.forEach(room => {
@@ -112,13 +113,21 @@ class Socket {
 
         this.io.on("connect_error", error => {
             console.error("Socket connection is interrupted.", error);
-            this.eventBus.emit("socket:error", error, this);
         });
 
         this.io.on("disconnect", reason => {
-            console.error("Socket connection is disconnected.", reason);
+            this.failedTimes++;
+            console.warn("Socket connection is disconnected.", reason);
             this.eventBus.emit("socket:disconnect", reason, this);
-            this.connect();
+
+            if (this.lastError !== "unauthenticated") {
+                this.connect();
+            }
+        });
+
+        this.io.on("unauthenticated", () => {
+            this.lastError = "unauthenticated";
+            this.eventBus.emit("socket:unauthenticated", this);
         });
 
         // Register message handler
