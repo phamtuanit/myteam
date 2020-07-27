@@ -13,6 +13,7 @@ REDIS_DB_CONF=$REDIS_DB_PATH/redis.conf
 # 1 - Setup ENV
 start mongod.exe --dbpath=$MONGO_DB_PATH  --bind_ip_all
 
+cd $REDIS_DB_PATH
 redis-server.exe $REDIS_DB_CONF
 
 # 2 - Sart all services
