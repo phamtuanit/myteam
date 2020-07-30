@@ -38,3 +38,6 @@ In the terminal, try the following commands:
 - `npm run lint`: Run ESLint
 - `npm run ci`: Run continuous test mode with watching
 - `npm test`: Run tests & generate coverage report
+
+## Debug
+`node --inspect=0.0.0.0:9229 node_modules/moleculer/bin/moleculer-runner services`
