@@ -1163,7 +1163,7 @@ const moduleState = {
                 const me = rootState.users.me;
                 const msgIds = conv.meta.unreadMessages.map(m => m.id);
                 // Send request to server to delete unread-message
-                const deletedCount = await messageQueueSvr.confirmPayload(
+                const deletedCount = await messageQueueSvr.confirm(
                     me.id,
                     msgIds
                 );
