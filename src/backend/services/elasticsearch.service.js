@@ -23,8 +23,7 @@ module.exports = {
                 criterial: {
                     type: "object",
                     props: {
-                        text: { type: "string" },
-                        query: { type: "object", optional: true},
+                        query: { type: "object"},
                     },
                 }
             },
@@ -35,42 +34,51 @@ module.exports = {
                 const { conversation: convId, criterial } = ctx.params;
                 const query = {};
 
-                if (criterial.text) {
+                if (criterial.query.text) {
                     const textQuery = {
                         bool: {
                             should: [
                                 {
                                     match: {
-                                        "body.html": criterial.text,
+                                        "body.html": criterial.query.text,
                                     },
                                 },
                                 {
                                     match: {
-                                        "body.text": criterial.text,
+                                        "body.text": criterial.query.text,
                                     },
                                 },
                             ],
                         },
                     };
 
+                    delete criterial.query.text;
+
                     // Assign text query
                     Object.assign(query, textQuery);
                 }
 
                 // Assign user's query
-                criterial.query && Object.assign(query, criterial.query);
+                Object.assign(query, criterial.query);
 
                 // Execute query
                 const esIndex = this.getESConvIndex(convId);
-                const response = await this.es.search({
-                    index: esIndex,
-                    body: {
-                        query: query,
-                    },
-                });
+                let response;
+                try {
+                    response = await this.es.search({
+                        index: esIndex,
+                        body: {
+                            query: query,
+                        },
+                    });
+                    response = response.body;
+                } catch (error) {
+                    this.logger.error("Could not search with ES.", error);
+                    throw new Error(error.message);
+                }
 
-                if (response.body.hits && response.body.hits.hits) {
-                    const result = response.body.hits;
+                if (response.hits && response.hits.hits) {
+                    const result = response.hits;
                     // Flat result
                     result.hits = result.hits.map(item => {
                         return item._source;
