@@ -1,6 +1,6 @@
 import Axios from "axios";
 const Service = function service() {
-    this.name = "messages-queue/";
+    this.name = "user-queue/";
 };
 
 Service.prototype.getAll = function (userId) {
@@ -23,7 +23,7 @@ Service.prototype.confirm = function (userId, ids) {
         if (Array.isArray(ids)) {
             idQr = ids.join(",");
         }
-        return Axios.put(this.name + userId + "/messages?id=" + idQr);
+        return Axios.put(this.name + userId + "/messages?ids=" + idQr);
     }
     return Promise.reject("Data is invalid");
 };
@@ -34,7 +34,7 @@ Service.prototype.confirmPayload = function (userId, payloadIds) {
         if (Array.isArray(payloadIds)) {
             idQr = payloadIds.join(",");
         }
-        return Axios.put(this.name + userId + "/messages?payload-id=" + idQr);
+        return Axios.put(this.name + userId + "/messages?ids=" + idQr);
     }
     return Promise.reject("Data is invalid");
 };
