@@ -2,5 +2,15 @@
     "mongodb": {
         "uri": "mongodb://localhost:27017",
         "dbName": "myteam"
+    },
+    "elasticsearch": {
+        "uri": "http://localhost:9200",
+        "conv-history-template": "conv-history-"
+    },
+    "redis": {
+        "uri": "redis://localhost:6379",
+        "cache": "/cache",
+        "bus": "/bus",
+        "transport": "/transport"
     }
 }
