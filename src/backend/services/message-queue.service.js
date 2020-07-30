@@ -8,7 +8,7 @@ const { cleanDbMark } = require("../utils/entity");
  */
 
 module.exports = {
-    name: "messages-queue",
+    name: "user-queue",
     version: 1,
     settings: {},
     dependencies: ["v1.auth", "v1.messages", "v1.conversations"],
@@ -17,27 +17,7 @@ module.exports = {
     /**
      * Events
      */
-    events: {
-        // message-queue.[userId].message.confirmed
-        async "message-queue.*.message.confirmed"(payload, sender, event) {
-            const [, userId] = event.split(".");
-
-            try {
-                const queueId = `msg-queue-${userId}`;
-                const dbCollection = await this.getDBCollection(queueId);
-
-                const filter = {
-                    id: {
-                        $lte: payload.id
-                    }
-                };
-                return await dbCollection.removeMany(filter);
-            } catch (error) {
-                this.logger.error("Could not remove message.", error);
-                throw error;
-            }
-        },
-    },
+    events: {},
 
     actions: {
         confirmMessage: {
@@ -46,43 +26,78 @@ module.exports = {
             rest: "PUT /:userId/messages",
             params: {
                 userId: "string",
-                id: { type: "string", optional: true },
-                payloadId: { type: "string", optional: true }
+                ids: { type: "string", optional: true },
             },
             async handler(ctx) {
-                const { userId, id } = ctx.params;
-                const payloadId = ctx.params["payload-id"] || ctx.params.payloadId;
+                const { userId } = ctx.params;
+                let { ids } = ctx.params;
 
                 this.verifyUser(ctx, userId);
 
                 const filter = {};
 
-                if (id) {
-                    let ids = id.split(",");
-                    ids = ids.map(s => new Number(s).valueOf());
-                    filter.id = {
+                if (ids) {
+                    ids = ids.split(",");
+                    ids = ids.map((s) => new Number(s).valueOf());
+                    filter["payload.id"] = {
                         $in: ids,
                     };
                 }
 
-                if (payloadId) {
-                    let payloadIds = payloadId.split(",");
-                    payloadIds = payloadIds.map(s => new Number(s).valueOf());
-                    filter["payload.id"] = {
-                        $in: payloadIds,
-                    };
-                }
-
-                if (!id && !payloadId) {
-                    throw new Errors.MoleculerClientError("id or payload id is required.", 400);
+                if (!ids) {
+                    throw new Errors.MoleculerClientError(
+                        "Ids or payload id is required.",
+                        400
+                    );
                 }
 
                 try {
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
-                    return await dbCollection.removeMany(filter);
+                    const res = await dbCollection.removeMany(filter);
+
+                    // Emit event to live user
+                    // const eventName = `user-queue.confirmed`;
+                    // this.broker.broadcast(eventName, {ids, ids: ids}).catch(this.logger.error);
+
+                    return res;
                 } catch (error) {
-                    this.logger.error("Could not remove message in queue.", error);
+                    this.logger.error(
+                        "Could not remove message in queue.",
+                        error
+                    );
+                    throw error;
+                }
+            },
+        },
+        cleanQueue: {
+            visibility: "public",
+            roles: [-1],
+            params: {
+                userId: "string",
+                lastId: "number"
+            },
+            async handler(ctx) {
+                const { userId, lastId } = ctx.params;
+                try {
+                    const queueId = `msg-queue-${userId}`;
+                    const dbCollection = await this.getDBCollection(queueId);
+
+                    const filter = {
+                        id: {
+                            $lte: lastId,
+                        },
+                    };
+
+                    const res = await dbCollection.removeMany(filter);
+
+                    // Emit event to live user
+                    // const eventName = `user-queue.confirmed`;
+                    // this.broker.broadcast(eventName, { userId, lastId: lastId }).catch(this.logger.error);
+
+                    return res;
+                } catch (error) {
+                    this.logger.error("Could not clean message-queue.", userId, error);
                     throw error;
                 }
             },
@@ -141,30 +156,29 @@ module.exports = {
                             props: {
                                 id: { type: "number", convert: true },
                             },
-                        }
+                        },
                     },
                 },
             },
             async handler(ctx) {
                 const { userId, message } = ctx.params;
+                const msgEntity = cleanDbMark({ ...message });
 
                 try {
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
-                    const res = await dbCollection.insert(cleanDbMark(message)).then(cleanDbMark);
+                    const res = await dbCollection.insert(msgEntity);
 
                     // Emit event to live user
-                    const eventName = `message-queue.${userId}.message.${message.action}`;
-                    this.broker
-                        .broadcast(eventName, cleanDbMark(message))
-                        .then(() => {
-                            this.logger.info("Published message to user-queue.", queueId, message.id);
-                        })
-                        .catch(this.logger.error);
-
+                    const eventName = `user-queue.${msgEntity.action}`;
+                    this.broker.broadcast(eventName, {userId, payload: msgEntity}).catch(this.logger.error);
                     return res;
                 } catch (error) {
-                    this.logger.error("Could not store message to queue.", error);
+                    this.logger.error(
+                        "Could not store message to queue.",
+                        msgEntity.id,
+                        error
+                    );
                     throw error;
                 }
             },
@@ -178,23 +192,26 @@ module.exports = {
         verifyUser(ctx, userId) {
             const { user } = ctx.meta;
             if (user.id != userId) {
-                throw new Errors.MoleculerClientError("It is not your queue.", 401);
+                throw new Errors.MoleculerClientError(
+                    "It is not your queue.",
+                    401
+                );
             }
-        }
+        },
     },
 
     /**
      * Service created lifecycle event handler
      */
-    created() { },
+    created() {},
 
     /**
      * Service started lifecycle event handler
      */
-    started() { },
+    started() {},
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() { },
+    stopped() {},
 };

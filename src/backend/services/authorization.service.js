@@ -20,7 +20,13 @@ module.exports = {
             },
             async handler(ctx) {
                 const { target: action } = ctx.params;
-                // -1: Allow all traffics
+                /* -1: Allow all traffics
+                    0: Admin
+                    2: Creator
+                    3: External App
+                    4: Contributor
+                    10: Normal member
+                */
                 if (
                     action.roles &&
                     Array.isArray(action.roles) &&

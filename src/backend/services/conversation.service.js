@@ -63,7 +63,7 @@ module.exports = {
                         const subscriberId = convInfo.subscribers[index];
 
                         // 2.1 Save new information to DB of corresponding user cache
-                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                        ctx.call("v1.user-queue.pushMessageToQueue", {
                             userId: subscriberId,
                             message: msgQueue,
                         }).catch((error) => {
@@ -244,7 +244,7 @@ module.exports = {
                     // 2. Save information to user queue and send message to WS
                     subscribers.forEach((subscriberId) => {
                         // 2.1 Save new information to DB of corresponding user cache
-                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                        ctx.call("v1.user-queue.pushMessageToQueue", {
                             userId: subscriberId,
                             message: msgQueue,
                         }).catch((error) => {
@@ -320,7 +320,7 @@ module.exports = {
                     // 2. Save information to user queue and send message to WS
                     subscribers.forEach((subscriberId) => {
                         // 2.1 Save new information to DB of corresponding user cache
-                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                        ctx.call("v1.user-queue.pushMessageToQueue", {
                             userId: subscriberId,
                             message: msgQueue,
                         }).catch((error) => {
@@ -394,7 +394,7 @@ module.exports = {
                         const subscriberId = existingConv.subscribers[index];
 
                         // 2.1 Save new information to DB of corresponding user cache
-                        ctx.call("v1.messages-queue.pushMessageToQueue", {
+                        ctx.call("v1.user-queue.pushMessageToQueue", {
                             userId: subscriberId,
                             message: msgQueue,
                         }).catch((error) => {

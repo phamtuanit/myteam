@@ -3,7 +3,6 @@ module.exports = {
     name: "socket",
 
     settings: {
-        // port: 3000,
         server: true,
         io: {
             path: "chat-io",
@@ -28,9 +27,10 @@ module.exports = {
             this.logger.debug("WS >>> Broadcast message to all of user.");
             this.io.to("live").emit("live", status, data, event);
         },
-        // message-queue.[userId].message.*
-        "message-queue.*.message.*"(message, sender, event) {
-            const [, userId, resource, act] = event.split(".");
+        // user-queue.*
+        "user-queue.*"(data, sender, event) {
+            const [, act] = event.split(".");
+            const { userId, payload: message } = data;
             this.logger.info(
                 "WS >>> Receiving a message from user-queue.",
                 userId,
@@ -40,9 +40,7 @@ module.exports = {
             if (socketDict && Object.keys(socketDict).length > 0) {
                 message.event = event;
                 // To private user room
-                this.io
-                    .to(userId)
-                    .emit(message.type || resource, act, message, event);
+                this.io.to(userId).emit(message.type || "message", act, message, event);
             }
         },
     },
@@ -136,8 +134,15 @@ module.exports = {
 
             const userId = socket.handshake.user.id;
             if (userId) {
-                const event = `message-queue.${userId}.message.confirmed`;
-                this.broker.emit(event, info, ["messages-queue"]);
+                this.broker
+                    .call("v1.user-queue.cleanQueue", { userId, lastId: info.id })
+                    .catch((error) => {
+                        this.logger.error(
+                            "Could not clean message-queue.",
+                            userId,
+                            error
+                        );
+                    });
             }
         },
     },

@@ -148,10 +148,6 @@ module.exports = class HandlerBase {
             );
         }
 
-        if (!convInfo) {
-            throw new Error("Conversation not found");
-        }
-
         this.convInfo = convInfo;
     }
 
@@ -181,7 +177,7 @@ module.exports = class HandlerBase {
         }
 
         // Store information to message queue
-        if (convInfo.subscribers && convInfo.subscribers.length > 0) {
+        if (Array.isArray(convInfo.subscribers) && convInfo.subscribers.length > 0) {
             const msgQueue = {
                 id: new Date().getTime(),
                 type: "message",
@@ -194,7 +190,7 @@ module.exports = class HandlerBase {
                 const subscriberId = convInfo.subscribers[index];
 
                 // Store information to message queue
-                ctx.call("v1.messages-queue.pushMessageToQueue", {
+                ctx.call("v1.user-queue.pushMessageToQueue", {
                     userId: subscriberId,
                     message: msgQueue,
                 }).catch((error) => {
@@ -208,7 +204,7 @@ module.exports = class HandlerBase {
         }
 
         // Broadcast message
-        const eventName = `message.${message.id}.${act}`;
+        const eventName = `messages.${act}`;
         this.broker.emit(eventName, message).catch(this.logger.error);
     }
 
