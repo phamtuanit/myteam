@@ -1,0 +1,75 @@
+GET /conv-history-0/_search?q=body.text:hi
+
+GET /conv-history-0/_search?q=body.html:hi
+
+POST /conv-history-0/_search
+{
+  "query": {
+    "match": {
+      "body.html": "Hi"
+    }
+  }
+}
+
+POST /conv-history-0/_search
+{
+  "sort": {
+    "_score": "desc"
+  },
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "body.html": "Hi"
+          }
+        },
+        {
+          "match": {
+            "body.text": "Hi"
+          }
+        }
+        ]
+      }
+    }
+}
+
+POST /conv-history-1588134917109/_search
+{
+  "sort": {
+    "_score": "desc"
+  },
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "body.html": "ok"
+          }
+        }
+        ]
+      }
+    }
+}
+
+DELETE /conv-history-0
+
+PUT /conv-history-0/_doc/1
+{
+  "id": 123456,
+  "created": "2020-07-29T12:10:30Z",
+  "issuer": "tuanp",
+  "body": {
+    "text": "Hi there!"
+  }
+}
+
+PUT /conv-history-0/_doc/2
+{
+  "id": 123457,
+  "created": "2020-07-29T12:11:30Z",
+  "issuer": "tuanp",
+  "body": {
+    "html": "<p><strong>Hi</strong> there!</p>"
+  }
+}

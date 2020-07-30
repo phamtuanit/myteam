@@ -1,0 +1,56 @@
+GET _template/conv-history
+
+PUT _template/conv-history
+{
+   "index_patterns":[
+      "conv-history-*"
+   ],
+   "order":1,
+   "settings":{
+     "index":{
+         "number_of_shards":1,
+         "number_of_replicas":1
+      },
+      "analysis":{
+         "analyzer":{
+            "htmltrip-analyzer":{
+               "type":"custom",
+               "tokenizer":"standard",
+               "char_filter":[
+                  "html_strip"
+               ],
+              "filter" : ["lowercase"]
+            }
+         }
+      }
+   },
+   "mappings" : {
+     "dynamic" : true,
+     "properties":{
+            "id":{
+               "type":"keyword",
+               "index":false
+            },
+            "created":{
+               "type":"date"
+            },
+            "issuer":{
+               "type":"text"
+            },
+            "body":{
+               "properties":{
+                  "html":{
+                     "type":"text",
+                     "analyzer":"htmltrip-analyzer"
+                  },
+                  "text":{
+                     "type":"text"
+                  },
+                  "type":{
+                     "type":"keyword"
+                  }
+               }
+            }
+         }
+   }
+}
