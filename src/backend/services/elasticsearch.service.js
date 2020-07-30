@@ -2,7 +2,6 @@
 const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
 const dbConf = require("../conf/db.json");
-const { cleanDbMark } = require("../utils/entity");
 const { Client: ESClient } = require('@elastic/elasticsearch');
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
