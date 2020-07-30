@@ -225,6 +225,7 @@ export default {
 .chat-box {
     height: 100vh;
 }
+
 .chat-box .notification,
 .chat-box .chat-editor {
     margin-left: 60px;
