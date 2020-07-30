@@ -6,4 +6,4 @@ SET ELASTIC_DB_PATH=%DB_PATH%\elasticsearch
 SET ELASTIC_DB_LOG_PATH=%DB_PATH%\logs\elasticsearch
 
 echo Setting up elasticsearch: %ELASTIC_DB_PATH%
-elasticsearch -E path.data=%ELASTIC_DB_PATH% -E path.logs=%ELASTIC_DB_LOG_PATH%
+elasticsearch -E network.host=0.0.0.0 -E cluster.name=my-team  -E node.name=node-248-1 -E cluster.initial_master_nodes=["node-248-1"] -E path.data=%ELASTIC_DB_PATH% -E path.logs=%ELASTIC_DB_LOG_PATH%
