@@ -1,0 +1,18 @@
+GET /_snapshot/myteam-es/snapshot_20200731_1509
+
+PUT /_snapshot/myteam-es
+{
+  "type": "fs",
+  "settings": {
+    "location": "my-team-1",
+    "compress": true
+  }
+}
+
+PUT /_snapshot/myteam-es/snapshot_20200731_1509?wait_for_completion=true
+{
+  "metadata": {
+    "taken_by": "tuanp",
+    "taken_because": "After transfering from MongoDB"
+  }
+}
