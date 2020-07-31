@@ -77,6 +77,7 @@ module.exports = {
                     );
 
                     if (latestUserInfo) {
+                        Object.assign(latestUserInfo, user);
                         user = latestUserInfo;
                     }
 

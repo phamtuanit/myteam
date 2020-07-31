@@ -36,7 +36,7 @@ module.exports = {
             async handler(ctx) {
                 const { id } = ctx.params;
                 const dbCollection = await this.getDBCollection("users");
-                return dbCollection.findOne({ id }).then(cleanDbMark);
+                return await dbCollection.findOne({ id }).then(cleanDbMark);
             },
         },
         getUser: {
@@ -113,6 +113,7 @@ module.exports = {
     events: {
         // user.disconnected
         "user.login"(user) {
+            this.broker.cacher.clean("*.users.*");
             return this.addOrUpdateUser(user);
         },
     },
