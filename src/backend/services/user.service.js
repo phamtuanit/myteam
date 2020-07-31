@@ -113,7 +113,7 @@ module.exports = {
     events: {
         // user.disconnected
         "user.login"(user) {
-            this.broker.cacher.clean("*.users.*");
+            this.broker.cacher.clean(`*.users.*${user.id}*`);
             return this.addOrUpdateUser(user);
         },
     },
