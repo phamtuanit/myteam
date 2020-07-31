@@ -135,8 +135,10 @@ module.exports = {
                     return entity;
                 });
             } else {
-                if (typeof existingUser.role == "undefined") {
+                if (typeof existingUser.role === "undefined") {
                     user.role = 10; // Normal member. TODO: to be delete when all users has role
+                } else {
+                    delete user.role;
                 }
 
                 user.updated = new Date();
