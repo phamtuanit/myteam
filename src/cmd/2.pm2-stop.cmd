@@ -1,4 +1,3 @@
 cd /d %~dp0
-cd ../
 
-pm2 stop ./cmd/ecosystem.config.js
+pm2 stop ./ecosystem.config.js
