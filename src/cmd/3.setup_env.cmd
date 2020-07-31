@@ -18,6 +18,6 @@ start "myteam-redis" redis-server.exe %REDIS_DB_CONF%
 SET ELASTIC_DB_PATH=%DB_PATH%\elasticsearch
 SET ELASTIC_DB_LOG_PATH=%DB_PATH%\logs\elasticsearch
 echo Setting up elasticsearch: %ELASTIC_DB_PATH=%
-elasticsearch.bat -E path.data=%ELASTIC_DB_PATH% -E path.logs=%ELASTIC_DB_LOG_PATH%
+start %~dp04.start-elasticsearch.cmd
 
 #exit
