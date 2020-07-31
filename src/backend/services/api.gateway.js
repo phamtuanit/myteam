@@ -17,6 +17,7 @@ console.info("ENV:", process.env);
 
 module.exports = {
     name: "api",
+    dependencies: ["v1.auth", "v1.authorization", "v1.live"],
     mixins: [SocketService, ApiGateway],
 
     // More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
