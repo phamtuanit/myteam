@@ -114,6 +114,7 @@ module.exports = {
                         throw new MoleculerClientError("Token is expired");
                     }
 
+                    const user = decoded.data;
                     const latestUserInfo = await ctx.call(
                         "v1.users.getUserById",
                         {
@@ -123,7 +124,7 @@ module.exports = {
                     const userToken = this.getUserToken(latestUserInfo);
                     return userToken;
                 } catch (error) {
-                    this.logger.error(error);
+                    this.logger.error(error, );
                     error.code = 401;
                     throw error;
                 }
