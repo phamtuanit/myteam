@@ -1,56 +1,77 @@
-GET /conv-history-0/_search?q=body.text:hi
+DELETE /conv-history-*
 
-GET /conv-history-0/_search?q=body.html:hi
+GET /conv-history-1588579604801/_doc/1593687627428?_source
 
-POST /conv-history-0/_search
+GET /conv-history-*/_search?allow_no_indices=true&pretty=true
 {
   "query": {
     "match": {
-      "body.html": "Hi"
+      "body.html": "ok"
     }
   }
 }
 
-POST /conv-history-0/_search
+GET /conv-history-1588579604801/_search?q=body.html:Vãi
+
+POST  /conv-history-1588579604801/_search?size=2
 {
-  "sort": {
-    "_score": "desc"
-  },
-  "query": {
-    "bool": {
-      "should": [
-        {
-          "match": {
-            "body.html": "Hi"
-          }
-        },
-        {
-          "match": {
-            "body.text": "Hi"
-          }
-        }
-        ]
+   "query":{
+      "query_string":{
+         "query":"ok"
       }
-    }
+   }
 }
 
-POST /conv-history-1588134917109/_search
+GET /conv-history-1588579604801/_stats
+
+GET /conv-history-1588579604801/_search?q=body.html:ok&sort=id
+
+POST  /conv-history-1588579604801/_search?size=2
 {
-  "sort": {
-    "_score": "desc"
-  },
-  "query": {
-    "bool": {
-      "should": [
-        {
-          "match": {
-            "body.html": "ok"
-          }
-        }
-        ]
+   "query":{
+      "query_string":{
+         "query":"ok"
       }
-    }
+   },
+   "aggs":{
+      "avg_fees":{"avg":{"field":"id"}}
+   }
 }
+
+GET /conv-history-1588579604801/_search?filter_path=hits.hits
+{
+  "query": {
+    "match": {
+      "body.html": "ok"
+    }
+  }
+}
+
+GET /conv-history-1588579604801/_search?_source_includes=body,id
+{
+  "query": {
+    "match": {
+      "body.html": "ok"
+    }
+  }
+}
+
+GET /conv-history-0/_search?q=body.text:hi
+
+GET /conv-history-1588579604801/_doc/1596006867822?_source
+
+POST /conv-history-1588579604801/_update/1596006867822
+{
+  "script" : {
+      "source": "ctx._source.body.text = ctx._source.body.html + params.text",
+      "lang": "painless",
+      "params" : {
+         "text" : "<br/>"
+      }
+   }
+}
+
+
 
 DELETE /conv-history-0
 
