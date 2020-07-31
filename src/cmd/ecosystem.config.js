@@ -2,7 +2,7 @@ module.exports = {
     apps: [
         {
             name: "myteam-services",
-            cwd: "./backend",
+            cwd: "../backend",
             script: "./node_modules/moleculer/bin/moleculer-runner.js",
             args: ["--instances=2", "services/*.service.js"],
             out_file: "../logs/myteam-services.logs",
@@ -10,7 +10,7 @@ module.exports = {
         },
         {
             name: "myteam-gateway",
-            cwd: "./backend",
+            cwd: "../backend",
             script: "./node_modules/moleculer/bin/moleculer-runner.js",
             args: ["services/*.gateway.js"],
             out_file: "../logs/myteam-gateway.logs",

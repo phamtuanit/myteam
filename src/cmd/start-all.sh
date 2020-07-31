@@ -14,7 +14,7 @@ ELASTIC_DB_LOG_PATH=$DB_PATH/logs/elasticsearch
 
 start mongod.exe --dbpath=$MONGO_DB_PATH  --bind_ip_all
 
-start elasticsearch.bat -E path.data=$ELASTIC_DB_PATH -E path.logs=$ELASTIC_DB_LOG_PATH
+start elasticsearch -E network.host=0.0.0.0 -E cluster.name=my-team  -E node.name=node-248-1 -E cluster.initial_master_nodes=["node-248-1"] -E path.data=$ELASTIC_DB_PATH -E path.logs=$ELASTIC_DB_LOG_PATH
 
 cd $REDIS_DB_PATH
 redis-server.exe $REDIS_DB_CONF
