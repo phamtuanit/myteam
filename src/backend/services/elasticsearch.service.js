@@ -11,7 +11,7 @@ module.exports = {
     name: "elasticsearch",
     version: 1,
     settings: {},
-    dependencies: ["v1.messages"],
+    dependencies: ["v1.auth", "v1.authorization", "v1.messages"],
     mixins: [DBCollectionService],
     actions: {
         search: {

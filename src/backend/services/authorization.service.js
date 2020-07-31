@@ -10,7 +10,7 @@ module.exports = {
     name: "authorization",
     version: 1,
     settings: {},
-    dependencies: ["v1.auth"],
+    dependencies: ["v1.auth", "v1.users"],
     mixins: [],
     actions: {
         canAccess: {

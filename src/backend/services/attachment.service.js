@@ -13,7 +13,7 @@ module.exports = {
     name: "attachments",
     version: 1,
     settings: {},
-    dependencies: ["v1.auth"],
+    dependencies: ["v1.auth", "v1.authorization"],
     mixins: [],
     actions: {
         getFile: {

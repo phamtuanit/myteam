@@ -11,7 +11,7 @@ module.exports = {
     name: "user-queue",
     version: 1,
     settings: {},
-    dependencies: ["v1.auth", "v1.messages", "v1.conversations"],
+    dependencies: ["v1.auth", "v1.authorization"],
     mixins: [DBCollectionService],
 
     /**

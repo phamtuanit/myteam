@@ -11,11 +11,11 @@ module.exports = {
     name: "conversations",
     version: 1,
     settings: {},
-    dependencies: ["v1.auth"],
+    dependencies: ["v1.auth", "v1.authorization", "v1.user-queue"],
     mixins: [DBCollectionService],
 
     events: {
-        async "conversation.*.updated|removed|created"(/*payload, sender, event*/) {
+        async "conversation.*.updated|removed|created"() {
             // Clear all cache entries which keys start with `users.`
             this.broker.cacher.clean("*.conversations.*");
         },
