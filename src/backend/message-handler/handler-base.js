@@ -222,17 +222,17 @@ module.exports = class HandlerBase {
                 message = await dbCollection.findOne({ id: id });
                 message = [message];
             } else {
-                const { top, rightId, leftId } = ctx.params;
+                const { top, after, before } = ctx.params;
                 const query = { id: {} };
 
-                if (rightId) {
-                    // Less than rightId
-                    query.id.$lt = rightId;
+                if (after) {
+                    // Less than after
+                    query.id.$lt = after;
                 }
 
-                if (leftId) {
-                    // More than rightId
-                    query.id.$gt = leftId;
+                if (before) {
+                    // More than after
+                    query.id.$gt = before;
                 }
 
                 if (Object.keys(query.id).length == 0) {
@@ -278,15 +278,15 @@ module.exports = class HandlerBase {
         }
     }
 
-    async getPinnedMessage({ userId, top, rightId }) {
+    async getPinnedMessage({ userId, top, after }) {
         const convId = this.convId;
         const historyColl = this.getHistoryCollectionName(convId);
         const dbCollection = await this.getDBCollection(historyColl);
         const query = {};
 
-        if (rightId) {
-            // Less than rightId
-            query.id.$lt = rightId;
+        if (after) {
+            // Less than after
+            query.id.$lt = after;
         }
 
         if (userId) {

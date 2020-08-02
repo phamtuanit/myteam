@@ -19,7 +19,7 @@ module.exports = {
      * Events
      */
     events: {
-        async "conversation.*.removed"(payload, sender, event, ctx) {
+        async "conversation.*.removed"(payload, sender, event) {
             const [, convId, act] = event.split(".");
             const convCollId = this.getHistoryCollectionName(convId);
 
@@ -43,8 +43,8 @@ module.exports = {
             params: {
                 conversation: { type: "number", convert: true },
                 limit: { type: "number", optional: true, convert: true },
-                rightId: { type: "number", optional: true, convert: true },
-                leftId: { type: "number", optional: true, convert: true },
+                after: { type: "number", optional: true, convert: true },
+                before: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
                 top: { type: "number", optional: true, convert: true },
                 sort: { type: "array", optional: true },

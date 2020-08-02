@@ -768,7 +768,7 @@ const moduleState = {
                 return conv;
             }
         },
-        async sendMessage({ commit, state }, { convId, body }) {
+        async sendMessage({ state }, { convId, body }) {
             if (!convId) {
                 console.warn("convId is required.");
                 return;
@@ -782,16 +782,9 @@ const moduleState = {
                 return;
             }
 
-            return await messageService.create(conv.id, body).then(res => {
-                // const payload = {
-                //     convId: conv.id,
-                //     message: res.data,
-                // };
-                // commit("addMessage", payload);
-                return res.data;
-            });
+            return await messageService.create(conv.id, body);
         },
-        async updateMessage({ commit, state }, { convId, id, body }) {
+        async updateMessage({ state }, { convId, id, body }) {
             if (!convId) {
                 console.warn("convId is required.");
                 return;
@@ -805,14 +798,7 @@ const moduleState = {
                 return;
             }
 
-            return await messageService.update(conv.id, id, body).then(res => {
-                // const payload = {
-                //     convId: conv.id,
-                //     message: res.data,
-                // };
-                // commit("addMessage", payload);
-                return res.data;
-            });
+            return await messageService.update(conv.id, id, body);
         },
         async deleteMessage({ commit }, message) {
             const convId = message.to.conversation;
@@ -827,7 +813,7 @@ const moduleState = {
                 return msg.id;
             }
         },
-        async getConversationContent({ state }, { convId, top, leftId }) {
+        async getConversationContent({ state }, { convId, top, before }) {
             if (typeof convId == "number") {
                 const conv = state.channel.all
                     .concat(state.chat.all)
@@ -839,12 +825,12 @@ const moduleState = {
 
                 top = top || 10;
                 const filter = { top };
-                if (!leftId && conv.messages.length > 0) {
-                    filter.rightId = conv.messages[0].id;
+                if (!before && conv.messages.length > 0) {
+                    filter.after = conv.messages[0].id;
                 }
 
-                if (leftId) {
-                    filter.leftId = leftId;
+                if (before) {
+                    filter.before = before;
                 }
 
                 return await messageService
@@ -854,7 +840,7 @@ const moduleState = {
                     })
                     .then(messages => {
                         if (
-                            !leftId &&
+                            !before &&
                             (messages.length == 0 || messages.length < top)
                         ) {
                             // Reached to end of history
@@ -882,7 +868,7 @@ const moduleState = {
                         });
 
                         if (conv.messages == null) {
-                            // Overide
+                            // Overwrite
                             conv.messages = messages;
                         } else {
                             if (
@@ -919,7 +905,7 @@ const moduleState = {
 
                 const filter = { top: top || 10, userId: userId };
                 if (conv.pinnedMessages && conv.pinnedMessages.length > 0) {
-                    filter.rightId = conv.pinnedMessages[0].id;
+                    filter.after = conv.pinnedMessages[0].id;
                 }
 
                 return await messageService
@@ -1008,11 +994,9 @@ const moduleState = {
                 const existingConv = convList.find(c => c.id === convId);
                 if (existingConv) {
                     if (existingConv.messages.length > 0) {
-                        input.leftId =
-                            existingConv.messages[
-                                existingConv.messages.length - 1
-                            ].id;
-                        input.top = 200;
+                        const lastMessage = existingConv.messages[existingConv.messages.length - 1].id;
+                        input.before = lastMessage;
+                        delete input.top;
                     }
 
                     // Load conversation content
@@ -1132,7 +1116,7 @@ const moduleState = {
             }
             return;
         },
-        async pinMessage({ commit, state }, { message }) {
+        async pinMessage({ commit }, { message }) {
             const me = this.state.users.me;
             const pinState =
                 !Array.isArray(message.pins) || !message.pins.includes(me.id);

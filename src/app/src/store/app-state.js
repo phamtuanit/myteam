@@ -172,7 +172,7 @@ module.exports = {
         commit("setAppState", "finished");
         commit("setInitialization", true);
         console.info("Application is ready");
-        informApplication();
+        // informApplication();
     },
 };
 
