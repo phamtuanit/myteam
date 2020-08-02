@@ -9,6 +9,7 @@ class Socket {
      * @param {*} path
      */
     constructor(baseUri, path) {
+        this.version = 2;
         this.baseUri = baseUri;
         this.path = path;
         this.io = null;
@@ -88,6 +89,7 @@ class Socket {
                     path: this.path,
                     query: {
                         token: token,
+                        version: this.version
                     },
                 });
 
@@ -128,6 +130,10 @@ class Socket {
         this.io.on("unauthenticated", () => {
             this.lastError = "unauthenticated";
             this.eventBus.emit("socket:unauthenticated", this);
+        });
+
+        this.io.on("system", (event, ...args) => {
+            this.eventBus.emit("server:" + event, event, ...args);
         });
 
         // Register message handler

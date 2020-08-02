@@ -40,13 +40,16 @@ export default {
         // Listen message from server to update title
         this.eventBus.on("messages", this.onNewMessage);
         // Listen socket connection failed
-        this.eventBus.on("socket:unauthenticated", this.onSWUnauthenticated);
+        this.eventBus.on("socket:unauthenticated", this.onWSUnauthenticated);
+        // Listen server request
+        this.eventBus.on("server:incompatible", this.onReloadApp);
 
         this.updateTitle();
     },
     destroyed() {
         this.eventBus.off("messages", this.onNewMessage);
-        this.eventBus.off("socket:unauthenticated", this.onSWUnauthenticated);
+        this.eventBus.off("socket:unauthenticated", this.onWSUnauthenticated);
+        this.eventBus.off("server:incompatible", this.onReloadApp);
     },
     methods: {
         updateTitle() {
@@ -143,7 +146,7 @@ export default {
                     break;
             }
         },
-        onSWUnauthenticated() {
+        onWSUnauthenticated() {
             const auth = window.IoC.get("auth");
             auth.verifyToken()
                 .then(() => {
@@ -154,6 +157,9 @@ export default {
                     location.reload();
                 });
         },
+        onReloadApp() {
+            location.reload();
+        }
     },
 };
 </script>

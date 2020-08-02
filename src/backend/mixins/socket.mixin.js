@@ -3,6 +3,7 @@ module.exports = {
     name: "socket",
 
     settings: {
+        version: 2,
         server: true,
         io: {
             path: "chat-io",
@@ -14,7 +15,7 @@ module.exports = {
      */
     events: {
         // user.[userId].status.*
-        "user.*.status.*"(data, sender, event, ctx) {
+        "user.*.status.*"(data, sender, event) {
             const userId = data.user ? data.user.id : undefined;
             const status = data.status;
             data.event = event;
@@ -48,11 +49,20 @@ module.exports = {
     methods: {
         onConnected(socket) {
             let token = socket.handshake.query.token;
+            let clientVersion = socket.handshake.query.version;
             this.broker
                 .call("v1.auth.verifyToken", { token })
                 .then((user) => {
                     socket.handshake.user = user;
                     this.handleNewSocket(socket);
+                })
+                .then(() => {
+                    const serverVer = this.settings.version;
+                    if (!clientVersion || parseInt(clientVersion) < serverVer) {
+                        setTimeout(() => {
+                            socket.emit("system", "incompatible", serverVer);
+                        }, 1000);
+                    }
                 })
                 .catch((err) => {
                     this.logger.warn(
