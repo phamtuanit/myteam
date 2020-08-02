@@ -216,13 +216,19 @@ module.exports = class HandlerBase {
         const dbCollection = await this.getDBCollection(historyColl);
         let message = null;
 
+        const cleanEntity = function clean(record) {
+            if (history !== true) {
+                delete record.histories;
+            }
+            return cleanDbMark(record);
+        };
+
         try {
             if (id != null && id != undefined && id != null) {
                 // Get specified message
-                message = await dbCollection.findOne({ id: id });
-                message = [message];
+                return await dbCollection.findOne({ id: id }).then(cleanDbMark);
             } else {
-                const { top, after, before } = ctx.params;
+                const { top, after, before, around, limit } = ctx.params;
                 const query = { id: {} };
 
                 if (after) {
@@ -239,14 +245,41 @@ module.exports = class HandlerBase {
                     delete query.id;
                 }
 
-                // Support get Top messages
-                if (top) {
-                    message = await dbCollection.collection
+                if (around && limit) {
+                    const left = await dbCollection.collection
+                        .find({ id: { $lte: around } })
+                        .sort({ $natural: -1 })
+                        .limit(limit + 1)
+                        .toArray()
+                        .then((res) => {
+                            return res.reverse().map(cleanEntity);
+                        });
+                    const right = await dbCollection.collection
+                        .find({ id: { $gt: around } })
+                        .sort({ $natural: -1 })
+                        .limit(limit)
+                        .toArray()
+                        .then((res) => {
+                            return res.reverse().map(cleanEntity);
+                        });
+
+                    const center = left[left.length - 1];
+                    left.splice(left.length - 1, 1);
+                    return {
+                        left,
+                        center,
+                        right,
+                    };
+                } else if (top) {
+                    // Support get Top messages
+                    return await dbCollection.collection
                         .find(query)
                         .sort({ $natural: -1 })
                         .limit(top)
-                        .toArray();
-                    message = message.reverse();
+                        .toArray()
+                        .then((res) => {
+                            return res.reverse().map(cleanEntity);
+                        });
                 } else {
                     // The other cases
                     const { limit, sort, offset } = ctx.params;
@@ -261,17 +294,11 @@ module.exports = class HandlerBase {
                         }
                     });
 
-                    message = await dbCollection.find(filter);
+                    return await dbCollection.find(filter).then((res) => {
+                        return res.map(cleanEntity);
+                    });
                 }
             }
-
-            // Correct output
-            return message.map((record) => {
-                if (history != true) {
-                    delete record.histories;
-                }
-                return cleanDbMark(record);
-            });
         } catch (error) {
             this.logger.error(error);
             throw new Errors.MoleculerServerError(error.message, 500);
@@ -306,7 +333,7 @@ module.exports = class HandlerBase {
             .toArray();
         messages = messages.reverse();
 
-        return messages.map(msg => {
+        return messages.map((msg) => {
             delete msg.mentions;
             delete msg.histories;
             delete msg.reactions;
@@ -534,7 +561,6 @@ module.exports = class HandlerBase {
                 400
             );
         }
-
 
         const convCollId = this.getHistoryCollectionName(this.convId);
 
