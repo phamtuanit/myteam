@@ -10,6 +10,11 @@ function handleWSMessage(socket, state, commit, act, data) {
     const convId = message.to.conversation;
     const me = this.state.users.me;
 
+    if (!message) {
+        console.error("Receive a message without payload.", data.id);
+        return;
+    }
+
     // Send confirm message
     const confirmMsgFn = function confirm() {
         socket.emit("confirm", {
@@ -47,9 +52,7 @@ function handleWSMessage(socket, state, commit, act, data) {
     // Handle event
     switch (act) {
         case "created":
-            if (!data.payload || !data.payload) {
-                break;
-            } else {
+            {
                 const existingConv = findConv();
 
                 // Change temp conversation to rea;
@@ -60,19 +63,10 @@ function handleWSMessage(socket, state, commit, act, data) {
                 }
 
                 if (existingConv) {
-                    commit("addMessage", {
-                        convId: existingConv.id,
-                        message,
-                    });
+                    commit("addMessage", { convId: existingConv.id, message });
                 } else {
-                    // Incase no chat in cache.
-                    this.dispatch("conversations/loadConversation", convId)
-                        .then(chat => {
-                            if (chat) {
-                                commit("addMessage", { convId, message });
-                            }
-                        })
-                        .catch(console.error);
+                    // Incase no conversation in cache.
+                    this.dispatch("conversations/loadConversation", convId).catch(console.error);
                 }
 
                 // Config message
@@ -80,8 +74,8 @@ function handleWSMessage(socket, state, commit, act, data) {
                 if (message.from && message.from.issuer == me.id) {
                     confirmMsgFn();
                 }
+                break;
             }
-            break;
         case "pinned":
             commit("updateMessage", {
                 convId,
@@ -341,16 +335,11 @@ const moduleState = {
                     pushToUnread(message);
                     eventBus.emit("messages", "added", conv, message);
                 } else {
-                    const foundMessage = conv.messages.find(
-                        i => i.id == message.id
-                    );
+                    const foundMessage = conv.messages.find(i => i.id == message.id);
                     if (!foundMessage) {
                         // Remove oldest message
                         if (conv.messages.length >= MAX_MESSAGES) {
-                            conv.messages.splice(
-                                0,
-                                conv.messages.length - MAX_MESSAGES + 1
-                            );
+                            conv.messages.splice(0, conv.messages.length - MAX_MESSAGES + 1);
                             conv.reachedFullHistories = false;
                         }
 
@@ -562,13 +551,6 @@ const moduleState = {
 
                 // Add message
                 commit("addConversation", conv);
-                // Load message in a chat
-                // if (conv.channel !== true) {
-                //     await this.dispatch(
-                //         "conversations/getConversationContent",
-                //         { convId: conv.id, top: 4 }
-                //     );
-                // }
             }
 
             // Confirm message in queue
@@ -814,12 +796,13 @@ const moduleState = {
             }
         },
         async getConversationContent({ state }, { convId, top, before }) {
-            if (typeof convId == "number") {
+            if (typeof convId === "number") {
                 const conv = state.channel.all
                     .concat(state.chat.all)
                     .find(c => c.id == convId);
 
                 if (!conv) {
+                    console.warn("The conversation could not be found.", convId);
                     return;
                 }
 
@@ -839,10 +822,7 @@ const moduleState = {
                         return res.data;
                     })
                     .then(messages => {
-                        if (
-                            !before &&
-                            (messages.length == 0 || messages.length < top)
-                        ) {
+                        if (!before && (messages.length == 0 || messages.length < top)) {
                             // Reached to end of history
                             conv.reachedFullHistories = true;
                         }
@@ -852,6 +832,7 @@ const moduleState = {
                         }
 
                         if (!conv.meta) {
+                            // Update default data
                             conv.meta = {
                                 unreadMessages: [],
                             };
@@ -871,10 +852,8 @@ const moduleState = {
                             // Overwrite
                             conv.messages = messages;
                         } else {
-                            if (
-                                conv.messages.length > 0 &&
-                                conv.messages[0].id < messages[0].id
-                            ) {
+                            // Merge messages
+                            if (conv.messages.length > 0 && conv.messages[0].id < messages[0].id) {
                                 // (...] + [... new]
                                 conv.messages.splice(
                                     conv.messages.length,

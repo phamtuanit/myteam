@@ -214,7 +214,6 @@ module.exports = class HandlerBase {
         const conversation = this.convId;
         const historyColl = this.getHistoryCollectionName(conversation);
         const dbCollection = await this.getDBCollection(historyColl);
-        let message = null;
 
         const cleanEntity = function clean(record) {
             if (history !== true) {
