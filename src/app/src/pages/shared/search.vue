@@ -17,7 +17,7 @@
                 clear-icon="mdi-close"
                 color="color-2"
                 class="search-box"
-                @keyup.esc="searchText = ''"
+                @keyup.esc="onDiscardSearch"
                 @keyup.enter="onSearch"
             ></v-text-field>
         </v-sheet>
@@ -26,18 +26,6 @@
         <div class="filter-panel pa-0 ma-0 center-y justify-sm-space-between">
             <v-subheader class="pl-3 pr-2 selection-disabled">Filters</v-subheader>
             <div class="spacer"></div>
-
-            <!-- Add btn -->
-            <v-btn
-                icon
-                fab
-                class="ml-1 mr-3"
-                rounded
-                height="26"
-                width="26"
-            >
-                <v-icon :size="20">mdi-plus</v-icon>
-            </v-btn>
         </div>
         <v-divider></v-divider>
 
@@ -85,6 +73,20 @@ export default {
     },
     created() {
         this.searchLocker = Promise.resolve();
+        this.criterials = {
+            conversation: 0,
+            sort : [
+                    {
+                        "created" :
+                        {"order" : "asc"}
+                        }
+            ],
+            criterial: {
+                query: {
+                    text: "",
+                }
+            }
+        };
     },
     mounted() {
         fillHeight("search-message-content", 4, this.$el);
@@ -92,6 +94,13 @@ export default {
     methods: {
         onSelect(msg) {
             this.selectedMsg = msg;
+        },
+        onDiscardSearch() {
+            if (!this.searchText) {
+                this.$emit("close");
+                return;
+            }
+            this.searchText = '';
         },
         onSearch() {
             this.searchLocker.finally(this.search);
@@ -112,15 +121,9 @@ export default {
             }
 
             // Request searching
-            const criterial = {
-                conversation: convId,
-                criterial: {
-                    query: {
-                    text: this.searchText
-                    }
-                }
-            };
-            this.searchLocker = searchSvr.search(criterial).then(res => {
+            this.criterials.conversation = convId;
+            this.criterials.criterial.query.text = this.searchText;
+            this.searchLocker = searchSvr.search(this.criterials).then(res => {
                 this.messageList = res.data.results;
             })
         },

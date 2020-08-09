@@ -48,7 +48,7 @@
             </v-tabs-items>
         </div>
         <v-expand-x-transition v-if="activeSearch">
-            <SearchContext></SearchContext>
+            <SearchContext @close="activeSearch = false"></SearchContext>
         </v-expand-x-transition>
 
         <ChannelSetting
