@@ -2,7 +2,7 @@
     <v-sheet
         height="57"
         min-height="57"
-        class="channel-header pa-0 no-border-radius pl-6 pr-3"
+        class="channel-header pa-0 no-border-radius pl-6 pr-0"
     >
         <div class="center-y" style="height: 100%;" v-show="conversation.id">
             <v-icon>mdi-pound</v-icon>
@@ -12,6 +12,7 @@
             ></v-list-item-title>
 
             <v-spacer></v-spacer>
+            <slot name="commands"></slot>
             <!-- Pinned message -->
             <v-btn icon small class="mr-2 btn-pin" :class="state.activePinnedMessages == true ? 'pin-activated' : ''" @click="onPin">
                 <v-icon small v-text="state.activePinnedMessages == true ? 'mdi-pin' : 'mdi-pin-off-outline'"></v-icon>
@@ -19,7 +20,7 @@
             <!-- Setting -->
             <v-menu offset-y right>
                 <template v-slot:activator="{ on }">
-                    <v-btn icon small v-on="on" class="mx-auto">
+                    <v-btn icon small v-on="on" class="mx-auto mr-2">
                         <v-icon small>mdi-dots-vertical</v-icon>
                     </v-btn>
                 </template>

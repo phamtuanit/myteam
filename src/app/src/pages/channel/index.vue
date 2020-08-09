@@ -15,7 +15,13 @@
         <!-- Conversation content container -->
         <div class="flex-grow-1 d-flex flex-column">
             <!-- Header -->
-            <Header :conversation="activeConvItem.value || {}" @pin="onPin" :state="activeConvItem.state || {}"></Header>
+            <Header :conversation="activeConvItem.value || {}" @pin="onPin" :state="activeConvItem.state || {}">
+                <template slot="commands">
+                    <v-btn icon small class="mr-2" @click="onSearch">
+                        <v-icon size="20" v-text="activeSearch == true ? 'mdi-magnify-minus-outline' : 'mdi-magnify'"></v-icon>
+                    </v-btn>
+                </template>
+            </Header>
             <v-divider></v-divider>
 
             <!-- Conversation content -->
@@ -41,6 +47,9 @@
                 </v-tab-item>
             </v-tabs-items>
         </div>
+        <v-expand-x-transition v-if="activeSearch">
+            <SearchContext></SearchContext>
+        </v-expand-x-transition>
 
         <ChannelSetting
             :display="isAdding"
@@ -52,6 +61,7 @@
 
 <script>
 import ChatList from "../shared/chat-list";
+import SearchContext from "../shared/search";
 import ChatContent from "./content.vue";
 import ChannelSetting from "./channel-setting.vue";
 import Header from "./header.vue";
@@ -62,6 +72,7 @@ export default {
     name: "channel-main",
     components: {
         ChatList,
+        SearchContext,
         ChatContent,
         ChannelSetting,
         Header,
@@ -76,7 +87,8 @@ export default {
             activeConvItem: {
                 value: null,
                 state: null
-            }
+            },
+            activeSearch: true,
         };
     },
     computed: {
@@ -162,6 +174,9 @@ export default {
         },
         getActiveConv() {
             return this.conversations.find(cn => cn.id === this.currentConvId);
+        },
+        onSearch() {
+            this.activeSearch = !this.activeSearch;
         }
     },
 };
