@@ -61,6 +61,8 @@ export default {
             searchText: null,
             messageList: [],
             selectedMsg: null,
+            searchResult: undefined,
+            isReachedEnd: true,
         };
     },
     computed: {
@@ -73,15 +75,15 @@ export default {
     },
     created() {
         this.searchLocker = Promise.resolve();
-        this.criterials = {
+        this.filters = {
             conversation: 0,
-            sort : [
-                    {
-                        "created" :
-                        {"order" : "asc"}
+            criterials: {
+                size: 10,
+                sort : [{
+                        created : {
+                            order : "asc"
                         }
-            ],
-            criterial: {
+                }],
                 query: {
                     text: "",
                 }
@@ -121,12 +123,21 @@ export default {
             }
 
             // Request searching
-            this.criterials.conversation = convId;
-            this.criterials.criterial.query.text = this.searchText;
-            this.searchLocker = searchSvr.search(this.criterials).then(res => {
-                this.messageList = res.data.results;
+            this.filters.conversation = convId;
+            this.filters.criterials.query.text = this.searchText;
+            this.searchLocker = searchSvr.search(this.filters)
+            .then(res => {
+                this.updateSearchState(res.data);
+                return res.data;
+            })
+            .then(data => {
+                this.messageList = data.results;
             })
         },
+        updateSearchState(res) {
+            this.searchResult = res;
+            this.isReachedEnd = !this.searchText || !this.searchResult || this.messageList.length === this.searchResult.total.value;
+        }
     },
 };
 </script>

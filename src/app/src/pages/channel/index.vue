@@ -18,7 +18,7 @@
             <Header :conversation="activeConvItem.value || {}" @pin="onPin" :state="activeConvItem.state || {}">
                 <template slot="commands">
                     <v-btn icon small class="mr-2" @click="onSearch" :title="activeSearch == true ? 'Close' : 'Search'">
-                        <v-icon size="21" v-text="activeSearch == true ? 'mdi-magnify-close' : 'mdi-magnify'"></v-icon>
+                        <v-icon size="21" v-text="activeSearch == true ? 'mdi-magnify-minus-outline' : 'mdi-magnify'"></v-icon>
                     </v-btn>
                 </template>
             </Header>
