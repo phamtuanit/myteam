@@ -22,10 +22,7 @@
                     class="caption"
                     style="line-height: 0.8rem;"
                     :class="{ 'font-weight-bold': hasNewMessage }"
-                    v-text="
-                        recentMessage ||
-                            (conversation._isTemp == true && 'Draft')
-                    "
+                    v-text=" recentMessage || (conversation._isTemp == true && 'Draft')"
                 ></v-list-item-subtitle>
             </v-list-item-content>
         </template>
