@@ -51,8 +51,10 @@
 
 <script>
 import UserAvatar from "../../components/avatar/user-avatar.vue";
+import mixin from "../../mixin/img-zoom.mix.js";
 export default {
     components: { UserAvatar },
+    mixins: [mixin],
     props: {
         message: {
             type: Object,
@@ -92,6 +94,11 @@ export default {
             this.$emit("jump", this.message);
         },
         getDisplayUserName() {
+            const me = this.$store.state.users.me;
+            if (me.id === this.user.id) {
+                return "Me";
+            }
+
             return (
                 this.user.fullName ||
                 this.user.firstName + ", " + this.user.lastName

@@ -114,10 +114,11 @@ import ReactionEmoji from "../../components/message-emoji.vue";
 import Reaction from "../../components/message-reaction.vue";
 
 import { mapState } from "vuex";
-import mixin from "../../mixin/message.mix.js";
+import messageMixin from "../../mixin/message.mix.js";
+import imgZoomMixin from "../../mixin/img-zoom.mix.js";
 export default {
     components: { UserAvatar, ReactionEmoji, Reaction },
-    mixins: [mixin],
+    mixins: [messageMixin, imgZoomMixin],
     data() {
         return {
             user: {
