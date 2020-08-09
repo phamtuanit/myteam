@@ -49,21 +49,24 @@
         <!-- Messages -->
         <v-list class="search-message-list py-0 px-0">
             <div class="search-message-content overflow-y-auto">
-                <!-- <template v-for="msg in messages">
-                    <PinnedMessage :key="msg.id" class="px-4" :message="msg">
-                    </PinnedMessage>
-                </template> -->
+                <template v-for="msg in messageList">
+                    <MessageItem :key="msg.id" class="px-4" :message="msg">
+                    </MessageItem>
+                </template>
             </div>
         </v-list>
     </div>
 </template>
 
 <script>
+import { mapState } from "vuex";
 import { fillHeight } from "../../utils/layout.js";
+import MessageItem from "./search-message-item.vue";
 import UserAvatar from "../../components/avatar/user-avatar.vue";
+const searchSvr = new (require("../../services/message-search.service.js").default)();
 export default {
     props: {},
-    components: { UserAvatar },
+    components: { UserAvatar, MessageItem },
     data() {
         return {
             loading: false,
@@ -72,20 +75,26 @@ export default {
             selectedMsg: null,
         };
     },
+    computed: {
+        ...mapState({
+            allConv: state => state.conversations.channel.all,
+            activatedConv: state => state.conversations.channel.active,
+        }),
+    },
     watch: {
     },
     created() {
         this.searchLocker = Promise.resolve();
     },
     mounted() {
-        fillHeight("search-messages-list", 0, this.$el);
+        fillHeight("search-message-content", 4, this.$el);
     },
     methods: {
         onSelect(msg) {
             this.selectedMsg = msg;
         },
         onSearch() {
-            this.searchLocker.then(this.search);
+            this.searchLocker.finally(this.search);
         },
         search() {
             if (!this.searchText) {
@@ -94,13 +103,26 @@ export default {
                 return;
             }
 
+            // Build conversation id
+            let convId;
+            if (this.activatedConv && this.activatedConv.id) {
+                convId = this.activatedConv.id;
+            } else if (this.allConv.length > 0) {
+                convId = this.allConv[0].id;
+            }
+
             // Request searching
-            this.searchLocker = new Promise(resolve => {
-                // Call search API
-                resolve([]);
-            }).then(list => {
-                this.messageList = list;
-            });
+            const criterial = {
+                conversation: convId,
+                criterial: {
+                    query: {
+                    text: this.searchText
+                    }
+                }
+            };
+            this.searchLocker = searchSvr.search(criterial).then(res => {
+                this.messageList = res.data.results;
+            })
         },
     },
 };
@@ -116,9 +138,4 @@ export default {
     min-width: 20vw;
     box-sizing: border-box;
 }
-
-/* .search-message-list  {
-    height: 100%;
-    max-height: 100%;
-} */
 </style>

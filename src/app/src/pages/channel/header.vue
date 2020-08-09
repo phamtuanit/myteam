@@ -14,20 +14,21 @@
             <v-spacer></v-spacer>
             <slot name="commands"></slot>
             <!-- Pinned message -->
-            <v-btn icon small class="mr-2 btn-pin" :class="state.activePinnedMessages == true ? 'pin-activated' : ''" @click="onPin">
+            <v-btn icon small class="mr-2 btn-pin" title="Pin messages"
+                :class="state.activePinnedMessages == true ? 'pin-activated' : ''" @click="onPin">
                 <v-icon small v-text="state.activePinnedMessages == true ? 'mdi-pin' : 'mdi-pin-off-outline'"></v-icon>
             </v-btn>
             <!-- Setting -->
             <v-menu offset-y right>
                 <template v-slot:activator="{ on }">
-                    <v-btn icon small v-on="on" class="mx-auto mr-2">
+                    <v-btn icon small v-on="on" class="mx-auto mr-2" title="Settings">
                         <v-icon small>mdi-dots-vertical</v-icon>
                     </v-btn>
                 </template>
                 <v-list class="menus">
                     <template v-if="conversation.creator === me.id">
                         <v-list-item @click="onSetting">
-                            <v-list-item-title>Setting</v-list-item-title>
+                            <v-list-item-title>Settings</v-list-item-title>
                         </v-list-item>
                         <v-list-item @click="onDelete">
                             <v-list-item-title class="red--text"
