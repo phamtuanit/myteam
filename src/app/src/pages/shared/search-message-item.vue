@@ -97,7 +97,8 @@ export default {
         getDateTime() {
             const date = this.message.created;
             if (date) {
-                return new Date(date).toLocaleDateString();
+                const day = new Date(date);
+                return day.toLocaleDateString() + " " + day.getHours() + ":" + day.getMinutes();
             }
 
             return "N/A";
