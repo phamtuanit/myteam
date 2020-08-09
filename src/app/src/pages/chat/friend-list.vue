@@ -19,6 +19,7 @@
                 clearable
                 clear-icon="mdi-close"
                 color="color-2"
+                class="search-box"
                 @keyup.esc="searchText = ''"
             ></v-text-field>
         </v-sheet>
@@ -170,15 +171,6 @@ export default {
 <style>
 .friend-list {
     width: 250px;
-}
-
-.friend-list .v-text-field.v-text-field--solo .v-input__control {
-    min-height: 36px !important;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.friend-list .theme--dark.v-text-field--solo .v-input__control {
-    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .friend-list .v-list-item {

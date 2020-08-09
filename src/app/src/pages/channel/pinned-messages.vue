@@ -28,6 +28,7 @@
         <v-list class="pinned-messages-list py-0 px-0">
             <div class="pinned-messages-content overflow-y-auto">
                 <template v-for="msg in messages">
+                    <v-divider :key="msg.id + '-divider'"></v-divider>
                     <PinnedMessage :key="msg.id" class="px-4" :message="msg">
                     </PinnedMessage>
                 </template>

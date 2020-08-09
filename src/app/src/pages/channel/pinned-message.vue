@@ -1,6 +1,5 @@
 <template>
     <div class="message-item pinned-message-item">
-        <v-divider></v-divider>
         <div class="d-flex flex-row py-2">
             <UserAvatar :user="user" class="align-self-start mt-1" />
             <div class="flex-grow-1 align-self-stretch ml-3">

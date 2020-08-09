@@ -1,8 +1,6 @@
 <template>
-    <v-sheet
-        width="280px"
-        min-width="280px"
-        class="chat-list pa-0 fill-height no-border-radius d-flex flex-column"
+    <div
+        class="conversation-panel app-content pa-0 fill-height no-border-radius d-flex flex-column"
     >
         <v-sheet
             height="57"
@@ -20,6 +18,7 @@
                 clearable
                 clear-icon="mdi-close"
                 color="color-2"
+                class="search-box"
                 @keyup.esc="searchText = ''"
             ></v-text-field>
         </v-sheet>
@@ -62,7 +61,7 @@
                 />
             </v-list-item-group>
         </v-list>
-    </v-sheet>
+    </div>
 </template>
 
 <script>
@@ -212,16 +211,9 @@ export default {
 </script>
 
 <style>
-.chat-list .v-text-field--solo .v-input__control {
-    min-height: 36px !important;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.chat-list .theme--dark.v-text-field--solo .v-input__control {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.v-item-group.v-list-item-group {
-    width: 100%;
+.conversation-panel {
+    min-width: 288px;
+    max-width: 288px;
+    box-sizing: border-box;
 }
 </style>
