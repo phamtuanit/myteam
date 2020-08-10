@@ -20,9 +20,11 @@ module.exports = {
             rest: "POST /search",
             params: {
                 conversation: { type: "number", convert: true },
-                criterial: {
+                criterials: {
                     type: "object",
                     props: {
+                        size: { type: "number", convert: true, optional: true },
+                        sort: { type: "array", optional: true},
                         query: { type: "object"},
                     },
                 }
@@ -31,35 +33,31 @@ module.exports = {
                 // Need to verify user and conversation first
                 await this.verifyUser(ctx);
 
-                const { conversation: convId, criterial } = ctx.params;
-                const query = {};
+                const { conversation: convId, criterials } = ctx.params;
 
-                if (criterial.query.text) {
+                if (criterials.query.text) {
                     const textQuery = {
                         bool: {
                             should: [
                                 {
                                     match: {
-                                        "body.html": criterial.query.text,
+                                        "body.html": criterials.query.text,
                                     },
                                 },
                                 {
                                     match: {
-                                        "body.text": criterial.query.text,
+                                        "body.text": criterials.query.text,
                                     },
                                 },
                             ],
                         },
                     };
 
-                    delete criterial.query.text;
+                    delete criterials.query.text;
 
                     // Assign text query
-                    Object.assign(query, textQuery);
+                    Object.assign(criterials.query, textQuery);
                 }
-
-                // Assign user's query
-                Object.assign(query, criterial.query);
 
                 // Execute query
                 const esIndex = this.getESConvIndex(convId);
@@ -67,9 +65,7 @@ module.exports = {
                 try {
                     response = await this.es.search({
                         index: esIndex,
-                        body: {
-                            query: query,
-                        },
+                        body: criterials,
                     });
                     response = response.body;
                 } catch (error) {
@@ -81,7 +77,10 @@ module.exports = {
                     const result = response.hits;
                     // Flat result
                     result.hits = result.hits.map(item => {
-                        return item._source;
+                        const res = item._source;
+                        res._index = item._index;
+                        res._highlight = item.highlight;
+                        return res;
                     });
 
                     return {
