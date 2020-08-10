@@ -1,9 +1,8 @@
 <template>
-    <div class="search-message-panel app-content pa-0 fill-height d-flex flex-column border border-yl">
-        <v-sheet
-            height="57"
-            class="pa-0 center-y no-border-radius px-3"
-        >
+    <div
+        class="search-message-panel app-content pa-0 fill-height d-flex flex-column border border-yl"
+    >
+        <v-sheet height="57" class="pa-0 center-y no-border-radius px-3">
             <!-- Search -->
             <v-text-field
                 v-model="searchText"
@@ -24,7 +23,9 @@
         <v-divider></v-divider>
 
         <div class="filter-panel pa-0 ma-0 center-y justify-sm-space-between">
-            <v-subheader class="pl-3 pr-2 selection-disabled">Filters</v-subheader>
+            <v-subheader class="pl-3 pr-2 selection-disabled"
+                >Filters</v-subheader
+            >
             <div class="spacer"></div>
         </div>
         <v-divider></v-divider>
@@ -71,23 +72,29 @@ export default {
             activatedConv: state => state.conversations.channel.active,
         }),
     },
-    watch: {
-    },
+    watch: {},
     created() {
         this.searchLocker = Promise.resolve();
         this.filters = {
             conversation: 0,
             criterials: {
                 size: 20,
-                sort: [{
-                    created : {
-                        order : "asc"
-                    }
-                }],
+                sort: [
+                    {
+                        _score: {
+                            order: "desc",
+                        },
+                    },
+                    {
+                        created: {
+                            order: "asc",
+                        },
+                    },
+                ],
                 query: {
                     text: "",
-                }
-            }
+                },
+            },
         };
     },
     mounted() {
@@ -102,7 +109,7 @@ export default {
                 this.$emit("close");
                 return;
             }
-            this.searchText = '';
+            this.searchText = "";
         },
         onSearch() {
             this.searchLocker.finally(this.search);
@@ -125,26 +132,34 @@ export default {
             // Request searching
             this.filters.conversation = convId;
             this.filters.criterials.query.text = this.searchText;
-            this.searchLocker = searchSvr.search(this.filters)
-            .then(res => {
-                this.updateSearchState(res.data);
-                return res.data;
-            })
-            .then(data => {
-                this.messageList = data.results;
-            })
+            this.loading = true;
+            this.searchLocker = searchSvr
+                .search(this.filters)
+                .finally(() => {
+                    this.loading = false;
+                })
+                .then(res => {
+                    this.updateSearchState(res.data);
+                    return res.data;
+                })
+                .then(data => {
+                    this.messageList = data.results;
+                });
         },
         updateSearchState(res) {
             this.searchResult = res;
-            this.isReachedEnd = !this.searchText || !this.searchResult || this.messageList.length === this.searchResult.total.value;
-        }
+            this.isReachedEnd =
+                !this.searchText ||
+                !this.searchResult ||
+                this.messageList.length === this.searchResult.total.value;
+        },
     },
 };
 </script>
 
 <style>
 .search-message-panel {
-    max-width: 20vw; 
+    max-width: 20vw;
     box-sizing: border-box;
 }
 
