@@ -12,13 +12,8 @@
             ></v-list-item-title>
 
             <v-spacer></v-spacer>
+            <!-- Menu slot -->
             <slot name="commands-before"></slot>
-            <!-- Pinned message -->
-            <v-btn icon small class="mr-2 btn-pin" title="Pin messages"
-                :class="state.activePinnedMessages == true ? 'pin-activated' : ''" @click="onPin">
-                <v-icon small v-text="state.activePinnedMessages == true ? 'mdi-pin' : 'mdi-pin-off-outline'"></v-icon>
-            </v-btn>
-            <slot name="commands-after"></slot>
             <!-- Setting -->
             <v-menu offset-y right>
                 <template v-slot:activator="{ on }">
@@ -47,6 +42,8 @@
                     </v-list-item>
                 </v-list>
             </v-menu>
+            <!-- Menu slot -->
+            <slot name="commands-after"></slot>
 
             <!-- Dialog -->
             <ChannelSetting
@@ -65,10 +62,6 @@ import { mapState } from "vuex";
 export default {
     props: {
         conversation: {
-            type: Object,
-            default: () => ({}),
-        },
-        state: {
             type: Object,
             default: () => ({}),
         },
@@ -115,9 +108,6 @@ export default {
                 )
                 .catch(console.error);
         },
-        onPin() {
-            this.$emit("pin", this.conversation);
-        }
     },
 };
 </script>

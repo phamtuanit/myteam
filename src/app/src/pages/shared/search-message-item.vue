@@ -92,13 +92,29 @@ export default {
             );
         },
         getMessageHtml() {
-            return this.message.body.html;
+            let html = this.message.body.html || this.message.body.text;
+            const foundStr = this.message._highlight["body.html"][0];
+            if (foundStr) {
+                const el = document.createElement("div");
+                el.innerHTML = foundStr;
+                el.innerHTML = el.innerText;
+                const rawStr = el.innerHTML;
+                html = html.replace(new RegExp(rawStr, "g"), foundStr);
+            }
+
+            return html;
         },
         getDateTime() {
             const date = this.message.created;
             if (date) {
                 const day = new Date(date);
-                return day.toLocaleDateString() + " " + day.getHours() + ":" + day.getMinutes();
+                return (
+                    day.toLocaleDateString() +
+                    " " +
+                    day.getHours() +
+                    ":" +
+                    day.getMinutes()
+                );
             }
 
             return "N/A";

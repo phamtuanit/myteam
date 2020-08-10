@@ -179,6 +179,17 @@ div.v-subheader {
     cursor: pointer;
 }
 
+.message-item em {
+    background: rgba(0, 0, 0, 0.12);
+    padding-left: 3px;
+    padding-right: 3px;
+    border-radius: 3px;
+}
+
+.theme--dark .message-item em {
+    background: rgba(255, 255, 255, 0.12);
+}
+
 /* Image modal */
 .message-item figure > img:hover {
     opacity: 0.7;
@@ -188,7 +199,7 @@ div.v-subheader {
 /* Search box */
 .search-box.v-text-field--solo .v-input__control {
     min-height: 36px !important;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid #0000001f;
 }
 
 .search-box.theme--dark.v-text-field--solo .v-input__control {
@@ -199,4 +210,9 @@ div.v-subheader {
 
 .v-item-group.v-list-item-group {
     width: 100%;
+}
+
+/* Menu */
+.v-card.no-box-shadow div {
+    box-shadow: unset !important;
 }

@@ -15,10 +15,19 @@
         <!-- Conversation content container -->
         <div class="flex-grow-1 d-flex flex-column">
             <!-- Header -->
-            <Header :conversation="activeConvItem.value || {}" @pin="onPin" :state="activeConvItem.state || {}">
-                <template slot="commands-after">
-                    <v-btn icon small class="mr-2" @click="onSearch" :title="activeSearch == true ? 'Close' : 'Search'">
-                        <v-icon size="21" v-text="activeSearch == true ? 'mdi-magnify-minus-outline' : 'mdi-magnify'"></v-icon>
+            <Header :conversation="activeConvItem.value || {}">
+                <template slot="commands-before">
+                    <!-- Pinned message -->
+                    <v-btn icon small class="mr-2 btn-pin" title="Pin messages"
+                        :class="currentConvState.activePinnedMessages == true ? 'pin-activated' : ''" @click="onPin">
+                        <v-icon small v-text="currentConvState.activePinnedMessages == true ? 'mdi-pin' : 'mdi-pin-off-outline'"></v-icon>
+                    </v-btn>
+                    <!-- Search -->
+                    <v-btn icon small class="mr-2"
+                            v-show="!activeSearch"
+                            title="Search"
+                            @click="onSearch" >
+                        <v-icon size="21">mdi-magnify</v-icon>
                     </v-btn>
                 </template>
             </Header>
@@ -86,7 +95,7 @@ export default {
             conversations: [],
             activeConvItem: {
                 value: null,
-                state: null
+                state: {}
             },
             activeSearch: false,
         };
@@ -96,6 +105,12 @@ export default {
             allConv: state => state.conversations.channel.all,
             activatedConv: state => state.conversations.channel.active,
         }),
+        currentConvState() {
+            if (this.activeConvItem && this.activeConvItem.state) {
+                return this.activeConvItem.state;
+            }
+            return {};
+        }
     },
     watch: {
         activatedConv() {
@@ -122,8 +137,8 @@ export default {
                 .catch(console.error);
         },
         onPin() {
-            if (this.activeConvItem && this.activeConvItem.state) {
-                this.activeConvItem.state.activePinnedMessages = !this.activeConvItem.state.activePinnedMessages;
+            if (this.currentConvState) {
+                this.currentConvState.activePinnedMessages = !this.currentConvState.activePinnedMessages;
             }
         },
         updateData() {
