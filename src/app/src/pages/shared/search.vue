@@ -78,11 +78,11 @@ export default {
         this.filters = {
             conversation: 0,
             criterials: {
-                size: 10,
-                sort : [{
-                        created : {
-                            order : "asc"
-                        }
+                size: 20,
+                sort: [{
+                    created : {
+                        order : "asc"
+                    }
                 }],
                 query: {
                     text: "",

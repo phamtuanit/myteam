@@ -16,7 +16,7 @@
         <div class="flex-grow-1 d-flex flex-column">
             <!-- Header -->
             <Header :conversation="activeConvItem.value || {}" @pin="onPin" :state="activeConvItem.state || {}">
-                <template slot="commands">
+                <template slot="commands-after">
                     <v-btn icon small class="mr-2" @click="onSearch" :title="activeSearch == true ? 'Close' : 'Search'">
                         <v-icon size="21" v-text="activeSearch == true ? 'mdi-magnify-minus-outline' : 'mdi-magnify'"></v-icon>
                     </v-btn>
@@ -88,7 +88,7 @@ export default {
                 value: null,
                 state: null
             },
-            activeSearch: true,
+            activeSearch: false,
         };
     },
     computed: {

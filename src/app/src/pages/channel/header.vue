@@ -12,12 +12,13 @@
             ></v-list-item-title>
 
             <v-spacer></v-spacer>
-            <slot name="commands"></slot>
+            <slot name="commands-before"></slot>
             <!-- Pinned message -->
             <v-btn icon small class="mr-2 btn-pin" title="Pin messages"
                 :class="state.activePinnedMessages == true ? 'pin-activated' : ''" @click="onPin">
                 <v-icon small v-text="state.activePinnedMessages == true ? 'mdi-pin' : 'mdi-pin-off-outline'"></v-icon>
             </v-btn>
+            <slot name="commands-after"></slot>
             <!-- Setting -->
             <v-menu offset-y right>
                 <template v-slot:activator="{ on }">
