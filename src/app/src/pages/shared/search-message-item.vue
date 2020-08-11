@@ -93,11 +93,11 @@ export default {
         },
         getMessageHtml() {
             let html = this.message.body.html || this.message.body.text;
-            const foundHtml = this.message._highlight["body.html"][0];
-            if (foundHtml) {
+            const foundHtmls = this.message._highlight["body.html"];
+            foundHtmls.forEach(foundHtml => {
                 let foundStr = foundHtml.replace(new RegExp("<em>|</em>", "g"), "");
-                html = html.replace(new RegExp(foundStr, "g"), foundHtml);
-            }
+                html = html.replace(foundStr, foundHtml);
+            });
 
             return html;
         },
