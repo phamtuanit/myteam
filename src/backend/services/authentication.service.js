@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 
-const keyPath = path.resolve(__dirname, "../keys/server.private.pem");
+const keyPath = path.resolve(__dirname, "../ssl/jwt.private.pem");
 const privateKey = fs.readFileSync(keyPath);
 
 const authConf = require("../conf/auth.json");
