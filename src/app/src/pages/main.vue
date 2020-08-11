@@ -185,12 +185,18 @@ export default {
                 document.body.appendChild(this.imgZoomModal);
             }
             document.body.addEventListener("keyup", this.onDocumentKeyup);
+
+            // Get the <span> element that closes the modal
+            const closeBtn = this.imgZoomModal.getElementsByClassName("image-modal_close")[0];
+
+            // When the user clicks on <span> (x), close the modal
+            closeBtn.onclick = function() {
+                this.imgZoomModal.style.display = "none";
+            };
         },
         onDocumentKeyup(e) {
             const modal = this.imgZoomModal;
-            if ((e.key === "Escape" || e.keyCode == 27) &&
-                modal.style.display && modal.style.display !== "none"
-            ) {
+            if ((e.key === "Escape" || e.keyCode == 27) && modal.style.display && modal.style.display !== "none") {
                 modal.style.display = "none";
                 e.stopPropagation();
             }
