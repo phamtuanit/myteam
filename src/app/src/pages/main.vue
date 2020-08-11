@@ -33,6 +33,7 @@ export default {
     },
     created() {
         this.eventBus = window.IoC.get("bus");
+        this.setupZoomModal();
     },
     mounted() {
         this.me = this.$store.state.users.me;
@@ -50,6 +51,10 @@ export default {
         this.eventBus.off("messages", this.onNewMessage);
         this.eventBus.off("socket:unauthenticated", this.onWSUnauthenticated);
         this.eventBus.off("server:incompatible", this.onReloadApp);
+
+        if (this.imgZoomModal) {
+            document.body.removeEventListener("keyup", this.onDocumentKeyup);
+        }
     },
     methods: {
         updateTitle() {
@@ -159,7 +164,23 @@ export default {
         },
         onReloadApp() {
             location.reload();
-        }
+        },
+        setupZoomModal() {
+            const modals = document.body.getElementsByClassName("image-modal");
+            if (modals.length > 0) {
+                this.imgZoomModal = modals[0];
+                document.body.addEventListener("keyup", this.onDocumentKeyup);
+            }
+        },
+        onDocumentKeyup(e) {
+            const modal = this.imgZoomModal;
+            if ((e.key === "Escape" || e.keyCode == 27) &&
+                modal.style.display && modal.style.display !== "none"
+            ) {
+                modal.style.display = "none";
+                e.stopPropagation();
+            }
+        },
     },
 };
 </script>

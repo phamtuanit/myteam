@@ -1,12 +1,3 @@
-const IMAGE_ZOOM_MODAL_TEMPLATE = `
-        <div class="image-modal">
-            <!-- The Close Button -->
-            <span class="image-modal_close">&times;</span>
-
-            <!-- Modal Content (The Image) -->
-            <img class="image-modal_content"/>
-        </div>
-`;
 export default {
     props: {
         message: {
@@ -25,13 +16,8 @@ export default {
             this.$nextTick(this.supportZoomImage);
         }
     },
-    created() {
-        this.setupZoomModal();
-    },
     mounted() {
         this.$nextTick(this.supportZoomImage);
-    },
-    destroyed() {
     },
     methods: {
         supportZoomImage() {
@@ -60,26 +46,6 @@ export default {
             closeBtn.onclick = function () {
                 modal.style.display = "none";
             };
-        },
-        setupZoomModal() {
-            const modals = document.body.getElementsByClassName("image-modal");
-            if (modals.length <= 0) {
-                const el = document.createElement("div");
-                el.innerHTML = IMAGE_ZOOM_MODAL_TEMPLATE;
-                const modal = el.firstElementChild;
-                document.body.appendChild(modal);
-
-                document.body.addEventListener("keyup", function (e) {
-                    if (
-                        (e.key === "Escape" || e.keyCode == 27) &&
-                        modal.style.display &&
-                        modal.style.display !== "none"
-                    ) {
-                        modal.style.display = "none";
-                        e.stopPropagation();
-                    }
-                });
-            }
-        },
+        }
     },
 };
