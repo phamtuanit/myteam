@@ -147,7 +147,7 @@ export default {
 
 .infinity-scroll {
     position: absolute;
-    z-index: 99;
+    z-index: 9;
 }
 
 .infinity-scroll--top {

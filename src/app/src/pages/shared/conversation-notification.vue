@@ -89,6 +89,6 @@ export default {
     top: -46px;
     left: 0;
     right: 0;
-    z-index: 99;
+    z-index: 9;
 }
 </style>
