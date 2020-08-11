@@ -76,9 +76,9 @@
             </v-btn>
         </div>
         <v-divider></v-divider>
-
+        <!-- Loading -->
         <v-progress-linear
-            :active="loading"
+            :active="isLoading"
             :indeterminate="true"
         ></v-progress-linear>
 
@@ -89,6 +89,7 @@
                     <MessageItem :key="msg.id" class="px-4" :message="msg">
                     </MessageItem>
                 </template>
+                <div class="loading-element" v-intersect="{ handler: onLoadingElIntersect, options: { rootMargin: '200px 0px 200px 0px'}}"></div>
             </div>
         </v-list>
     </div>
@@ -129,7 +130,7 @@ export default {
     components: { UserAvatar, MessageItem },
     data() {
         return {
-            loading: false,
+            isLoading: false,
             searchText: null,
             messageList: [],
             selectedMsg: null,
@@ -138,6 +139,7 @@ export default {
             dateRange: [],
             filterPhrase: false,
             displayFilterDialog: false,
+            hasScrollBar: false,
         };
     },
     computed: {
@@ -149,7 +151,6 @@ export default {
             return this.dateRange.join(" ~ ");
         },
     },
-    watch: {},
     created() {
         this.searchLocker = Promise.resolve();
         this.filters = {
@@ -196,7 +197,7 @@ export default {
             // Filter type
             this.filterMatch.type = this.filterPhrase ? "phrase" : "best_fields";
 
-            this.search();
+            this.searchLocker.finally(this.search);
         },
         onSearch() {
             this.searchLocker.finally(this.search);
@@ -204,10 +205,17 @@ export default {
         onClose() {
             this.$emit("close");
         },
+        onLoadingElIntersect([ent]) {
+            this.hasScrollBar = ent.isIntersecting;
+            if (ent.isIntersecting == true && this.isReachedEnd == false) {
+                this.searchLocker.finally(this.loadMore);
+            }
+        },
         search() {
             if (!this.searchText) {
                 this.searchLocker = Promise.resolve();
                 this.messageList = [];
+                this.updateSearchState();
                 return;
             }
 
@@ -222,21 +230,47 @@ export default {
             // Request searching
             this.filters.conversation = convId;
             this.filterMatch.query = this.searchText;
-            this.loading = true;
+            this.filters.criterials.from = 0;
+            this.isLoading = true;
             this.updateSearchState();
             this.searchLocker = searchSvr
                 .search(this.filters)
                 .finally(() => {
-                    this.loading = false;
+                    this.isLoading = false;
                     this.messageList = [];
                 })
                 .then(res => {
+                    this.messageList = res.data.results;
                     this.updateSearchState(res.data);
-                    return res.data;
-                })
-                .then(data => {
-                    this.messageList = data.results;
+                    this.confirmContent();
                 });
+        },
+        loadMore() {
+            if (this.isReachedEnd) {
+                return;
+            }
+
+            this.filters.criterials.from = this.messageList.length;
+            this.isLoading = true;
+            this.searchLocker = searchSvr
+                .search(this.filters)
+                .finally(() => {
+                    this.isLoading = false;
+                })
+                .then(res => {
+                    // Append result
+                    this.messageList.splice(this.messageList.length - 1, 0, ...res.data.results);
+                    this.updateSearchState(res.data);
+                    this.confirmContent();
+                });
+        },
+        confirmContent() {
+            // If current data is short, need to load more
+            this.$nextTick(() => {
+                if (!this.hasScrollBar) {
+                    this.searchLocker.finally(this.loadMore);
+                }
+            });
         },
         updateSearchState(res) {
             if (res) {
@@ -263,5 +297,11 @@ export default {
 .search-message-panel .filter-panel {
     min-width: 20vw;
     box-sizing: border-box;
+}
+
+.search-message-panel .loading-element {
+    height: 2px;
+    width: 100%;
+    background-color: transparent;
 }
 </style>
