@@ -180,14 +180,10 @@ div.v-subheader {
 }
 
 .message-item em {
-    background: rgba(0, 0, 0, 0.12);
-    padding-left: 3px;
-    padding-right: 3px;
-    border-radius: 3px;
-}
-
-.theme--dark .message-item em {
-    background: rgba(255, 255, 255, 0.12);
+    background: #65b6fd98;
+    padding-left: 1px;
+    padding-right: 1px;
+    border-radius: 2px;
 }
 
 /* Image modal */

@@ -12,6 +12,15 @@ import RouterView from "../components/router-view/keep-alive-view.vue";
 import { mapState } from "vuex";
 
 const BASE_WEB_TITLE = "My Team";
+const IMAGE_ZOOM_MODAL_TEMPLATE = `
+        <div class="image-modal">
+            <!-- The Close Button -->
+            <span class="image-modal_close">&times;</span>
+
+            <!-- Modal Content (The Image) -->
+            <img class="image-modal_content"/>
+        </div>
+`;
 export default {
     components: { LeftDrawer, RouterView },
     data() {
@@ -169,8 +178,13 @@ export default {
             const modals = document.body.getElementsByClassName("image-modal");
             if (modals.length > 0) {
                 this.imgZoomModal = modals[0];
-                document.body.addEventListener("keyup", this.onDocumentKeyup);
+            } else {
+                const el = document.createElement("div");
+                el.innerHTML = IMAGE_ZOOM_MODAL_TEMPLATE;
+                this.imgZoomModal = el.firstElementChild;
+                document.body.appendChild(this.imgZoomModal);
             }
+            document.body.addEventListener("keyup", this.onDocumentKeyup);
         },
         onDocumentKeyup(e) {
             const modal = this.imgZoomModal;

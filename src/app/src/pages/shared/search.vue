@@ -136,7 +136,7 @@ export default {
             searchResult: undefined,
             isReachedEnd: true,
             dateRange: [],
-            filterPhrase: true,
+            filterPhrase: false,
             displayFilterDialog: false,
         };
     },
@@ -176,7 +176,7 @@ export default {
         },
         onClearFilter() {
             this.dateRange = [];
-            this.filterPhrase = true;
+            this.filterPhrase = false;
         },
         onFilter() {
             this.displayFilterDialog = false;
@@ -228,6 +228,7 @@ export default {
                 .search(this.filters)
                 .finally(() => {
                     this.loading = false;
+                    this.messageList = [];
                 })
                 .then(res => {
                     this.updateSearchState(res.data);
@@ -247,7 +248,6 @@ export default {
             } else {
                 this.searchResult = null;
                 this.isReachedEnd = true;
-                this.messageList = [];
             }
         },
     },

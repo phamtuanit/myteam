@@ -7,7 +7,7 @@ const { styles } = require("@ckeditor/ckeditor5-dev-utils");
 module.exports = {
     configureWebpack: {
         devtool: "source-map",
-        target: "electron-renderer",
+        // target: "electron-renderer",
         plugins: [
             // CKEditor needs its own plugin to be built using webpack.
             new CKEditorWebpackPlugin({
