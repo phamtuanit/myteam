@@ -37,8 +37,8 @@ module.exports = {
 
         // HTTPS server with certificate
         https: sysConf.ssl.enabled ? {
-            key: fs.readFileSync(path.join(__dirname, "../ssl",  "myteam.key")),
-            cert: fs.readFileSync(path.join(__dirname, "../ssl", "myteam.cer")),
+            key: fs.readFileSync(path.join(__dirname, "../ssl",  "ssl.key")),
+            cert: fs.readFileSync(path.join(__dirname, "../ssl", "ssl.cer")),
         } : null,
 
         // Global CORS settings for all routes
