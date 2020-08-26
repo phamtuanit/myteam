@@ -76,7 +76,7 @@
                     :key="menu.key"
                     :value="menu"
                     :input-value="menu == activatedMenu"
-                    class="px-0 my-0 pb-3 pt-3"
+                    class="px-0 my-0 pb-1 pt-1"
                     @click="onActivateMenu(menu)"
                 >
                     <v-badge

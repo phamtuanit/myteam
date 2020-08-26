@@ -31,7 +31,6 @@
 <script>
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { renderGrid } from "@giphy/js-components";
-import { debounce } from "../../utils/function.js";
 import config from "../../conf/system.json";
 
 const gf = new GiphyFetch(config.giphy.key);
