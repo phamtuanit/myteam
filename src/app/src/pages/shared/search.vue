@@ -290,12 +290,12 @@ export default {
 
 <style>
 .search-message-panel {
-    max-width: 20vw;
+    max-width: 25vw;
     box-sizing: border-box;
 }
 
 .search-message-panel .filter-panel {
-    min-width: 20vw;
+    min-width: 25vw;
     box-sizing: border-box;
 }
 
