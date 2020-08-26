@@ -1,8 +1,8 @@
 <template>
-    <v-content id="main-layout" class="main-view">
+    <v-main id="main-layout" class="main-view">
         <LeftDrawer></LeftDrawer>
         <RouterView :key="$route.name" />
-    </v-content>
+    </v-main>
 </template>
 
 <script>
@@ -190,7 +190,7 @@ export default {
             const closeBtn = this.imgZoomModal.getElementsByClassName("image-modal_close")[0];
 
             // When the user clicks on <span> (x), close the modal
-            closeBtn.onclick = function() {
+            closeBtn.onclick = () => {
                 this.imgZoomModal.style.display = "none";
             };
         },

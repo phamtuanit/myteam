@@ -315,6 +315,6 @@ div:not(.message-item--deleted)
 }
 
 .mark-item.rounded {
-    border-radius: 50%;
+    border-radius: 50% !important;
 }
 </style>
