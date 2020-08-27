@@ -61,9 +61,10 @@
 
 <script>
 import ReactionEmoji from "../../components/message-emoji.vue";
-import mixin from "../../mixin/message.mix.js";
+import messageMixin from "../../mixin/message.mix.js";
+import imgZoomMixin from "../../mixin/img-zoom.mix.js";
 export default {
-    mixins: [mixin],
+    mixins: [messageMixin, imgZoomMixin],
     components: { ReactionEmoji },
     data() {
         return {
