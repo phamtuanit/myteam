@@ -3,10 +3,11 @@ module.exports = {
     name: "socket",
 
     settings: {
-        version: 2,
+        version: 3,
         server: true,
         io: {
-            path: "chat-io",
+            path: "/chat-io",
+            secure: true,
         },
     },
 
@@ -164,9 +165,7 @@ module.exports = {
             this.logger.error("WS >>> Server is required for Socket-IO.");
             return;
         }
-        this.io = io(this.server, {
-            path: this.settings.io.path || "chat-io",
-        });
+        this.io = io(this.server, this.settings.io);
         this.io.on("connection", this.onConnected);
     },
 

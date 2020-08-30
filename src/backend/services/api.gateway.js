@@ -31,9 +31,8 @@ module.exports = {
         // Global Express middleware. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
         use: [],
 
-        io: {
-            path: "/chat-io",
-        },
+        // Use HTTP2 server
+        http2: false,
 
         // HTTPS server with certificate
         https: sysConf.ssl.enabled ? {
