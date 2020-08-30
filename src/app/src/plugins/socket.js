@@ -9,7 +9,7 @@ class Socket {
      * @param {*} path
      */
     constructor(baseUri, path) {
-        this.version = 2;
+        this.version = 3;
         this.baseUri = baseUri;
         this.path = path;
         this.io = null;
@@ -87,6 +87,7 @@ class Socket {
             .then(token => {
                 this.io = socket(this.baseUri, {
                     path: this.path,
+                    secure: true,
                     query: {
                         token: token,
                         version: this.version
