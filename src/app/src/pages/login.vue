@@ -1,36 +1,14 @@
 <template>
-    <v-container
-        class="login-screen fill-height bg-1"
-        fluid
-        id="login-screen"
-    >
-        <div
-            align="center"
-            justify="center"
-            class="mx-auto"
-        >
-            <v-card
-                :loading="loading"
-                max-width="400"
-                light
-                class="pb-2"
-            >
-                <v-img
-                    height="200"
-                    src="@/assets/images/mountain.jpg"
-                >
-                    <v-container class="fill-height">
-                        <v-row
-                            align="center"
-                            justify="center"
-                            class="mx-0 my-auto white--text"
-                        >
-                            <v-img
-                                max-height="100"
-                                src="@/assets/images/banner.png"
-                            ></v-img>
-                        </v-row>
-                    </v-container>
+    <v-container class="login-screen fill-height bg-1" fluid id="login-screen">
+        <div align="center" justify="center" class="mx-auto">
+            <v-card :loading="loading" max-width="400" light>
+                <v-img height="200" src="@/assets/images/mountain.jpg">
+                    <div class="px-2 white--text center-y fill-height">
+                        <v-img
+                            max-width="100%"
+                            src="@/assets/images/banner.png"
+                        ></v-img>
+                    </div>
                 </v-img>
 
                 <v-card-text>
@@ -62,7 +40,8 @@
                         @click="login"
                         :disabled="loading"
                         class="btn-login color-1"
-                    >Login</v-btn>
+                        >Login</v-btn
+                    >
                 </v-card-actions>
             </v-card>
         </div>
