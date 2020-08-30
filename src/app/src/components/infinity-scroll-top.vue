@@ -11,8 +11,7 @@
             <v-btn
                 icon
                 rounded
-                class="my-2"
-                color="orange darken-1"
+                class="my-2 color-1"
                 :loading="isLoading"
                 v-if="!scrollBar"
                 title="Load more"

@@ -97,7 +97,7 @@
         <div class="message-item__mark">
             <div class="message-item__mark-container">
                 <div
-                    class="mark-item rounded orange darken-1"
+                    class="mark-item rounded bg-1"
                     icon
                     v-if="isMentionMe"
                 >

@@ -44,6 +44,12 @@ body::-webkit-scrollbar {
     width: 100%;
 }
 
+.center-y {
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+}
+
 /* Background */
 .theme--light .app-content {
     background: #FFFFFF;
@@ -87,13 +93,6 @@ body::-webkit-scrollbar {
 /* Minimize height */
 div.v-subheader {
     height: 40px;
-}
-
-/* Header */
-.center-y {
-    display: flex;
-    align-items: center;
-    -webkit-box-align: center;
 }
 
 /* Menus */

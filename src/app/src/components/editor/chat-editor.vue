@@ -34,7 +34,7 @@
                     @click="showToolBar = !showToolBar"
                     title="Format (ESC)"
                 >
-                    <v-icon size="18" :color="showToolBar ? 'orange' : ''"
+                    <v-icon size="18" :class="showToolBar ? 'color-1' : ''"
                         >mdi-format-letter-case-upper</v-icon
                     >
                 </v-btn>
@@ -45,7 +45,7 @@
                 <v-btn
                     icon
                     :loading="isSending"
-                    :color="isSending ? 'orange' : ''"
+                    :class="isSending ? 'color-1' : ''"
                     @click="onSend"
                     title="Send (Enter)"
                 >

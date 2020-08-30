@@ -4,7 +4,7 @@
             class="notification_container--fixed pa-1 center-y"
             v-show="editing"
         >
-            <v-chip color="orange darken-1" outlined @click="onScrollToOrigin">
+            <v-chip class="color-1 border-color-1" outlined @click="onScrollToOrigin">
                 <v-icon>mdi-chevron-double-up</v-icon>
                 <span class="ml-1">Editing message</span>
             </v-chip>
@@ -17,8 +17,7 @@
             <v-spacer></v-spacer>
             <div v-show="allowScrollDown && !editing">
                 <v-chip
-                    class="ma-2"
-                    color="orange darken-1"
+                    class="ma-2 color-1 border-color-1"
                     outlined
                     @click="onReadMessage"
                 >

@@ -17,8 +17,8 @@
     --ck-color-toolbar-border: #fff;
     --ck-color-toolbar-background: #fff;
     --ck-color-panel-background: #fff;
-    --ck-color-widget-hover-border: #fb8c00;
-    --ck-color-base-action: #e47f04;
+    --ck-color-widget-hover-border: var(--primary-color-2);
+    --ck-color-base-action: var(--primary-color);
     
     /* Mention */
     --ck-color-mention-background: transparent;
@@ -153,8 +153,8 @@ body[data-theme-dark="true"] .ck.ck-form .ck.ck-toolbar.ck-toolbar_compact {
 }
 
 .ck-content .todo-list .todo-list__label > input[checked]:before {
-    background: #e47f04;
-    border-color: #e47f04;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 /* Panel / From */
