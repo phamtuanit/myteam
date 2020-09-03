@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #e47f04;
+    --primary-color: #F57C00;
     --primary-color-2: #fb8c00;
 }
 
@@ -21,7 +21,6 @@
     caret-color: var(--primary-color-2) !important;
 }
 
-.color-2--text {
-    color: var(--primary-color-2) !important;
-    caret-color: var(--primary-color-2) !important;
+.border-color-1 {
+    border-color: var(--primary-color) !important;
 }
