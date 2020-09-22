@@ -29,7 +29,7 @@
             <div class="pinned-messages-content overflow-y-auto">
                 <template v-for="msg in messages">
                     <v-divider :key="msg.id + '-divider'"></v-divider>
-                    <PinnedMessage :key="msg.id" class="px-4" :message="msg">
+                    <PinnedMessage :key="msg.id" class="px-4" :message="msg" @quote="onQuote" @copy="onCopy">
                     </PinnedMessage>
                 </template>
             </div>
@@ -74,6 +74,12 @@ export default {
                     this.messages = this.conversation.pinnedMessages;
                 })
                 .catch(console.error);
+        },
+        onQuote(message) {
+            this.$emit("quote", message);
+        },
+        onCopy(message) {
+            this.$emit("copy", message);
         },
     },
 };

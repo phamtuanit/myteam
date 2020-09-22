@@ -23,6 +23,7 @@
                 @dereact="onDereact"
                 @delete="onDeleteMessage"
                 @quote="onQuote"
+                @copy="onCopy"
                 @edit="onEditMessage"
                 @pin="onPin"
             >
@@ -87,6 +88,10 @@ export default {
             cachedUsers: state => state.users.all,
             me: state => state.users.me,
         }),
+    },
+    mounted() {
+        this.$on("quote", this.onQuote);
+        this.$on("copy", this.onCopy);
     },
     methods: {
         onSendMessage(html) {

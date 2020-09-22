@@ -47,10 +47,10 @@
                 >
                     <div class="conversation-context-container d-flex flex-grow">
                         <!-- Message content and input -->
-                        <ChatContent :conversation="conv.value" class="flex-grow-1"></ChatContent>
+                        <ChatContent :conversation="conv.value" class="flex-grow-1" ref="conversationcontent"></ChatContent>
                         <!-- Pinned messages -->
                         <v-expand-x-transition v-if="conv.state.activePinnedMessages == true">
-                            <PinnedMessages :conversation="conv.value"></PinnedMessages>
+                            <PinnedMessages :conversation="conv.value" @quote="onQuote" @copy="onCopy"></PinnedMessages>
                         </v-expand-x-transition>
                     </div>
                 </v-tab-item>
@@ -139,6 +139,16 @@ export default {
         onPin() {
             if (this.currentConvState) {
                 this.currentConvState.activePinnedMessages = !this.currentConvState.activePinnedMessages;
+            }
+        },
+        onQuote(message) {
+            if (this.$refs.conversationcontent && this.$refs.conversationcontent[0]) {
+                this.$refs.conversationcontent[0].$emit("quote", message);
+            }
+        },
+        onCopy(message) {
+            if (this.$refs.conversationcontent && this.$refs.conversationcontent[0]) {
+                this.$refs.conversationcontent[0].$emit("copy", message);
             }
         },
         updateData() {

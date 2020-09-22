@@ -82,6 +82,17 @@ export default {
 
             this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
         },
+        onCopy(message) {
+            this.onRead();
+            if (
+                !message ||
+                !message.body.content ||
+                (message.body.type != null && message.body.type != "html")
+            ) {
+                return;
+            }
+            this.newMessage = message.body.content;
+        },
         onRead() {
             const conv = this.conversation;
             if (conv && this.unreadMessages.length > 0) {

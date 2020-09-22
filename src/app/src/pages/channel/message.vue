@@ -53,9 +53,18 @@
                                 </v-btn>
                             </template>
                             <v-list class="menus">
+                                <v-list-item @click="onQuote">
+                                    <v-list-item-title>Quote</v-list-item-title>
+                                </v-list-item>
+                                <v-list-item @click="onCopy">
+                                    <v-list-item-title>Copy</v-list-item-title>
+                                </v-list-item>
+                                <v-list-item @click="onPin" v-if="allowPinMessage">
+                                    <v-list-item-title v-text="isPinned == true ? 'Unpin' : 'Pin'"></v-list-item-title>
+                                </v-list-item>
                                 <template v-if="isMyMessage">
                                     <v-list-item @click="onEdit">
-                                        <v-list-item-title
+                                        <v-list-item-title class="color-1"
                                             >Edit</v-list-item-title
                                         >
                                     </v-list-item>
@@ -65,12 +74,6 @@
                                         >
                                     </v-list-item>
                                 </template>
-                                <v-list-item @click="onQuote">
-                                    <v-list-item-title>Quote</v-list-item-title>
-                                </v-list-item>
-                                <v-list-item @click="onPin" v-if="allowPinMessage">
-                                    <v-list-item-title v-text="isPinned == true ? 'Unpin' : 'Pin'"></v-list-item-title>
-                                </v-list-item>
                             </v-list>
                         </v-menu>
                     </div>
@@ -191,6 +194,9 @@ export default {
         },
         onQuote() {
             this.$emit("quote", this.message);
+        },
+        onCopy() {
+            this.$emit("copy", this.message);
         },
         onEdit() {
             this.$emit("edit", this.message);

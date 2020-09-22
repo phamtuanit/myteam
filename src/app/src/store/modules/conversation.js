@@ -413,12 +413,12 @@ const moduleState = {
                 .concat(state.chat.all)
                 .find(c => c.id == convId);
 
-            if (!existingConv) {
+            if (!existingConv || !Array.isArray(message.pins)) {
                 return;
             }
 
             const me = this.state.users.me;
-            if (message.pins && message.pins.length == 0) {
+            if (message.pins.length == 0) {
                 // Unpin => Remove if needed
                 if (
                     existingConv.pinnedMessages &&
@@ -819,7 +819,7 @@ const moduleState = {
                 return await messageService
                     .get(parseInt(convId), filter)
                     .then(res => {
-                        return res.data;
+                        return res.data || [];
                     })
                     .then(messages => {
                         if (!before && (messages.length == 0 || messages.length < top)) {
@@ -1000,11 +1000,18 @@ const moduleState = {
                         case "created":
                             {
                                 existingConv.meta.unreadMessages.push(payload);
-                                const unread =
-                                    existingConv.channel == true
-                                        ? convNotification.channel
-                                        : convNotification.nonChannel;
+                                const unread = existingConv.channel == true
+                                                ? convNotification.channel
+                                                : convNotification.nonChannel;
                                 unread[existingConv.id] = existingConv;
+
+                                // Re-oder conversation
+                                const convList = existingConv.channel == true
+                                                ? state.channel.all
+                                                : state.chat.all;
+                                const convIndex = convList.findIndex(c => c.id === convId);
+                                convList.splice(convIndex, 1);
+                                convList.unshift(existingConv); // Add to top of aray
                             }
                             break;
                         case "reacted":

@@ -37,6 +37,21 @@
                     >
                         <v-icon class="action btn-unpin">mdi-minus</v-icon>
                     </v-btn>
+                    <v-menu left>
+                        <template v-slot:activator="{ on }">
+                            <v-btn icon small v-on="on" class="ml-1 mr-0">
+                                <v-icon small>mdi-dots-vertical</v-icon>
+                            </v-btn>
+                        </template>
+                        <v-list class="menus">
+                            <v-list-item @click="onQuote">
+                                <v-list-item-title>Quote</v-list-item-title>
+                            </v-list-item>
+                            <v-list-item @click="onCopy">
+                                <v-list-item-title>Copy</v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
                 </div>
 
                 <!-- Content -->
@@ -92,6 +107,12 @@ export default {
         },
         onJump() {
             this.$emit("jump", this.message);
+        },
+        onQuote() {
+            this.$emit("quote", this.message);
+        },
+        onCopy() {
+            this.$emit("copy", this.message);
         },
         getDisplayUserName() {
             const me = this.$store.state.users.me;
