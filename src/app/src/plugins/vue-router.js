@@ -1,5 +1,7 @@
 import VueRouter from "vue-router";
 import Preparation from "../pages/preparation.vue";
+import Main from "../pages/main.vue";
+import Chat from "../pages/chat/index.vue";
 
 export default function init(store) {
     VueRouter.prototype.updateQuery = function update(query) {
@@ -22,12 +24,12 @@ export default function init(store) {
             {
                 path: "/app",
                 name: "app",
-                component: () => import(/* webpackPreload: true*/ "../pages/main.vue"),
+                component: Main,
                 children: [
                     {
                         name: "app-chat",
                         path: "chat",
-                        component: () => import(/* webpackPreload: true */ "../pages/chat/index.vue"),
+                        component: Chat,
                     },
                     {
                         name: "app-channel",
