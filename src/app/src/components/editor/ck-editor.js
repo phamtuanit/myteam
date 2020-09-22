@@ -48,6 +48,7 @@ import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleu
 // import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 
 import Link from '@ckeditor/ckeditor5-link/src/link';
+// import AutoLink from '@ckeditor/ckeditor5-link/src/autolink';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 
 export default class Editor extends ClassicEditor { }
@@ -55,6 +56,7 @@ export default class Editor extends ClassicEditor { }
 // Plugins to include in the build.
 Editor.builtinPlugins = [
     Link,
+    // AutoLink,
     Image,
     ImageToolbar,
     ImageStyle,
@@ -147,13 +149,20 @@ ClassicEditor.defaultConfig = {
             extra: [
                 // Add some custom transformations – e.g. for emojis.
                 { from: ":)", to: "🙂" },
+                { from: ":D", to: "😀" },
                 { from: ":(", to: "😂" },
                 { from: "<3", to: "😍" },
+                { from: ":x", to: "☠" },
                 { from: ":tada", to: "🎉" },
+                { from: ":*", to: "🌸" },
                 { from: "zzz", to: "💤" },
                 { from: ":+1", to: "👍" },
+                { from: ":like", to: "👍" },
                 { from: "8=>", to: "🖕" },
-                { from: "())", to: "🍑" }
+                { from: "())", to: "🍑" },
+                { from: "|^", to: "↑" },
+                { from: "|v", to: "↓" },
+                { from: ":dot", to: "⋅" },
             ],
             remove: [
                 "quotesPrimary",

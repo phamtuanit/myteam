@@ -65,7 +65,7 @@ import Giphy from "../giphy/giphy.vue";
 import MyEnter from "./plugins/enter";
 import MyMention from "./plugins/mention";
 import ClassicEditor from "./ck-editor.js";
-import plainTextToHtml from "@ckeditor/ckeditor5-clipboard/src/utils/plaintexttohtml";
+// import plainTextToHtml from "@ckeditor/ckeditor5-clipboard/src/utils/plaintexttohtml";
 import normalizeclipboarddata from "@ckeditor/ckeditor5-clipboard/src/utils/normalizeclipboarddata";
 
 ClassicEditor.builtinPlugins.push(MyEnter, MyMention);
@@ -152,7 +152,8 @@ export default {
                 let imageEl = `<img id="gif-${gif.id}" class="image image-gif" alt="${alt}"  data-author="${author}" `;
                 imageEl += `src="${gif.images.downsized_medium.url}" data-original-src="${gif.images.original.url}" data-preview-src="${gif.images.preview_gif.url}"></img>`;
                 const figureEl = `<figure class="image gif">${imageEl}</figure>`;
-                this.$emit("send", figureEl);
+                this.writeText(figureEl);
+                // this.$emit("send", figureEl);
             }
         },
         onSelectEmoji(emoji) {
@@ -213,6 +214,7 @@ export default {
             editor.model.change(writer => {
                 const insertPosition = editor.model.document.selection.getLastPosition();
                 writer.insertText(text, insertPosition);
+                this.editorInstance.editing.view.scrollToTheSelection();
             });
         },
         changePluginStatus() {
@@ -238,24 +240,18 @@ export default {
             let content = dataTransfer.getData("text/html");
             if (content) {
                 content = this.reformatHtml(content);
-            } else {
-                content = dataTransfer.getData("text/plain");
-                if (content) {
-                    content = plainTextToHtml(content);
-                }
+                const viewContent = htmlProcessor.toView(content);
+
+                // Just like the clipboard feature, trigger the inputTransformation event
+                // to allow further processing of the content.
+                clipboardPlugin.fire("inputTransformation", {
+                    content: viewContent,
+                    dataTransfer,
+                });
+
+                this.editorInstance.editing.view.scrollToTheSelection();
+                evt.stop();
             }
-
-            const viewContent = htmlProcessor.toView(content);
-
-            // Just like the clipboard feature, trigger the inputTransformation event
-            // to allow further processing of the content.
-            clipboardPlugin.fire("inputTransformation", {
-                content: viewContent,
-                dataTransfer,
-            });
-
-            this.editorInstance.editing.view.scrollToTheSelection();
-            evt.stop();
         },
         reformatHtml(html) {
             let content = normalizeclipboarddata(html)
@@ -270,17 +266,23 @@ export default {
                 el.style.backgroundColor = "";
             });
 
+            const removeTableStyle = function(el) {
+                // Update table's width
+                el.removeAttribute("style");
+
+                const acceptedEls = ["TABLE", "TBODY", "THEAD", "TH", "TD", "TR"];
+                if (acceptedEls.includes(el.nodeName)) {
+                    el.children.forEach(removeTableStyle);
+                }
+            };
+
             // Format table
             const tableEls = rootEl.getElementsByTagName("table");
             if (tableEls && tableEls.length > 0) {
-                tableEls.forEach(tableEl => {
-                    // Update table's width
-                    tableEl.style.width = "auto";
-                    tableEl.style.maxWidth = "100%";
-                });
+                tableEls.forEach(removeTableStyle);
             }
 
-            return rootEl.innerHTML;
+            return rootEl.innerHTML.trim();
         },
     },
 };
