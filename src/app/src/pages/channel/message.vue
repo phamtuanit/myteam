@@ -101,7 +101,7 @@
             <div class="message-item__mark-container">
                 <div
                     class="mark-item rounded bg-1"
-                    icon
+                    icon title="You were mentioned"
                     v-if="isMentionMe"
                 >
                     <v-icon small color="white">mdi-at</v-icon>

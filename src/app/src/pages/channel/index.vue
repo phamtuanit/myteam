@@ -47,7 +47,7 @@
                 >
                     <div class="conversation-context-container d-flex flex-grow">
                         <!-- Message content and input -->
-                        <ChatContent :conversation="conv.value" class="flex-grow-1" ref="conversationcontent"></ChatContent>
+                        <ChatContent :conversation="conv.value" class="flex-grow-1" :ref="'refConv-' + conv.id"></ChatContent>
                         <!-- Pinned messages -->
                         <v-expand-x-transition v-if="conv.state.activePinnedMessages == true">
                             <PinnedMessages :conversation="conv.value" @quote="onQuote" @copy="onCopy"></PinnedMessages>
@@ -57,7 +57,7 @@
             </v-tabs-items>
         </div>
         <v-expand-x-transition v-if="activeSearch">
-            <SearchContext @close="activeSearch = false"></SearchContext>
+            <SearchContext @close="activeSearch = false" @quote="onQuote" @copy="onCopy"></SearchContext>
         </v-expand-x-transition>
 
         <ChannelSetting
@@ -142,14 +142,21 @@ export default {
             }
         },
         onQuote(message) {
-            if (this.$refs.conversationcontent && this.$refs.conversationcontent[0]) {
-                this.$refs.conversationcontent[0].$emit("quote", message);
+            const ref = this.getConvReference(this.currentConvId);
+            if (ref) {
+                ref.$emit("quote", message);
             }
         },
         onCopy(message) {
-            if (this.$refs.conversationcontent && this.$refs.conversationcontent[0]) {
-                this.$refs.conversationcontent[0].$emit("copy", message);
+            const ref = this.getConvReference(this.currentConvId);
+            if (ref) {
+                ref.$emit("copy", message);
             }
+        },
+        getConvReference(id) {
+            const refName = 'refConv-' + id;
+            const refs = this.$refs[refName];
+            return refs && refs[0];
         },
         updateData() {
             if (this.activatedConv) {

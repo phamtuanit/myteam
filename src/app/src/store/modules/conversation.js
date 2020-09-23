@@ -879,20 +879,21 @@ const moduleState = {
 
                 if (!conv) {
                     console.warn("Could not find conversation.", convId);
-                    return;
+                    return [];
                 }
 
-                const filter = { top: top || 10, userId: userId };
+                const filter = { top: top || 10, user: userId };
                 if (conv.pinnedMessages && conv.pinnedMessages.length > 0) {
-                    filter.after = conv.pinnedMessages[0].id;
+                    filter.after = conv.pinnedMessages[conv.pinnedMessages.length - 1].id;
                 }
 
                 return await messageService
                     .getPinned(parseInt(convId), filter)
                     .then(res => {
-                        return res.data;
+                        return res.data || [];
                     })
                     .then(pinnedMessages => {
+                        pinnedMessages.reverse();
                         // Update message info
                         const me = this.state.users.me;
                         pinnedMessages.forEach(msg => {
@@ -900,14 +901,14 @@ const moduleState = {
                             msg.pinnedByMe = msg.pins.includes(me.id);
                         });
 
-                        if (!conv.pinnedMessage) {
+                        if (!conv.pinnedMessages) {
                             conv.pinnedMessages = pinnedMessages;
                         } else {
-                            // [... new] + [...)
-                            conv.pinnedMessages.splice(0, 0, ...pinnedMessages);
+                            // (...] + [... new]
+                            conv.pinnedMessages.push(...pinnedMessages);
                         }
 
-                        return conv.pinnedMessages;
+                        return pinnedMessages;
                     });
             }
             console.warn("Conversation Id is required");

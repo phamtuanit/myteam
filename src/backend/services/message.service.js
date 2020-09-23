@@ -87,18 +87,20 @@ module.exports = {
             params: {
                 conversation: { type: "number", convert: true },
                 user: { type: "string", optional: true },
+                top: { type: "number", convert: true, optional: true },
+                before: { type: "number", convert: true, optional: true },
+                after: { type: "number", convert: true, optional: true },
             },
             async handler(ctx) {
                 const {
                     conversation: conversationId,
-                    user: userId,
                 } = ctx.params;
                 const controller = this.controllerFactory.getController("html");
 
                 return await controller
                     .setConversation(conversationId)
                     .setContext(ctx)
-                    .getPinned({ userId })
+                    .getPinned()
                     .commit();
             },
         },

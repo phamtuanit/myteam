@@ -296,6 +296,7 @@ module.exports = {
                     return user;
                 } catch (err) {
                     this.logger.error(err.message);
+                    throw new Errors.UnAuthorizedError(Errors.ERR_INVALID_TOKEN);
                 }
             }
 

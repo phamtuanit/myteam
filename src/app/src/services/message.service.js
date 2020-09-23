@@ -76,13 +76,21 @@ Service.prototype.pin = function(convId, msgId, status) {
     return Promise.reject("Data is invalid", convId, msgId, status);
 };
 
-Service.prototype.getPinned = function(convId, { userId }) {
+Service.prototype.getPinned = function(convId, filter) {
     if (typeof convId == "number") {
-        return Axios.get(
-            this.name + `pins?conversation=${convId}${userId ? "&user" + userId : ""}`
-        );
+        const queries = Object.keys(filter).map(key => {
+            const val = filter[key];
+            if (val) {
+                return `${key}=${val}`;
+            }
+            return null;
+        });
+
+        queries.unshift(`?conversation=${convId}`);
+        const queryStr = queries.join("&");
+        return Axios.get(this.name + "pins" + queryStr);
     }
-    return Promise.reject("Data is invalid", convId, userId);
+    return Promise.reject("Data is invalid", convId, filter);
 };
 
 Service.prototype.delete = function(convId, msgId) {

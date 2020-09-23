@@ -32,6 +32,7 @@
                     <PinnedMessage :key="msg.id" class="px-4" :message="msg" @quote="onQuote" @copy="onCopy">
                     </PinnedMessage>
                 </template>
+                <div class="loading-element" v-intersect="{ handler: onLoadingElIntersect, options: { rootMargin: '200px 0px 200px 0px'}}"></div>
             </div>
         </v-list>
     </div>
@@ -52,6 +53,8 @@ export default {
         return {
             loading: false,
             messages: [],
+            isAllItemsDisplayed: false,
+            isReachedEnd: true,
         };
     },
     created() {
@@ -65,21 +68,57 @@ export default {
         this.conversation.pinnedMessages.splice(0);
     },
     methods: {
-        onRefresh() {
-            return this.$store
-                .dispatch("conversations/getPinnedMessage", {
-                    convId: this.conversation.id,
-                })
-                .then(() => {
-                    this.messages = this.conversation.pinnedMessages;
-                })
-                .catch(console.error);
+        onLoadingElIntersect([ent]) {
+            this.isAllItemsDisplayed = ent.isIntersecting;
+            if (this.messages.length > 0 && this.isAllItemsDisplayed && this.isReachedEnd == false) {
+                this.locker.finally(this.loadMore);
+            }
         },
         onQuote(message) {
             this.$emit("quote", message);
         },
         onCopy(message) {
             this.$emit("copy", message);
+        },
+        onRefresh() {
+            this.conversation.pinnedMessages.splice(0);
+            this.isReachedEnd = false;
+            this.locker = this.$store
+                .dispatch("conversations/getPinnedMessage", {
+                    convId: this.conversation.id,
+                }, { top: 10 })
+                .then(() => {
+                    this.messages = this.conversation.pinnedMessages;
+                    this.isReachedEnd = this.messages.length == 0 || this.messages.length < 10;
+                    this.confirmContent();
+                })
+                .catch(console.error);
+        },
+        loadMore() {
+            if (this.isReachedEnd) {
+                return;
+            }
+            this.locker = this.$store
+                .dispatch("conversations/getPinnedMessage", {
+                    convId: this.conversation.id,
+                }, { top: 10 })
+                .then((messages) => {
+                    this.isReachedEnd = messages.length == 0 || messages.length < 10;
+                    this.confirmContent();
+                })
+                .catch(console.error);
+        },
+        confirmContent() {
+            if (this.isReachedEnd) {
+                return;
+            }
+
+            // If current data is short, need to load more
+            setTimeout(() => {
+                if (this.isAllItemsDisplayed) {
+                    this.locker.finally(this.loadMore);
+                }
+            }, 500);
         },
     },
 };

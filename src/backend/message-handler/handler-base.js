@@ -73,7 +73,7 @@ module.exports = class HandlerBase {
             case "get":
                 return await this.getMessage().then(cleanDbMark);
             case "getPinned":
-                return await this.getPinnedMessage(this.message);
+                return await this.getPinnedMessage();
             case "add":
                 latestMessage = await this.addMessage(this.message).then(
                     cleanDbMark
@@ -236,7 +236,7 @@ module.exports = class HandlerBase {
                 }
 
                 if (before) {
-                    // More than after
+                    // More than before
                     query.id.$gt = before;
                 }
 
@@ -304,15 +304,25 @@ module.exports = class HandlerBase {
         }
     }
 
-    async getPinnedMessage({ userId, top, after }) {
+    async getPinnedMessage() {
+        const { user: userId, top, after, before } = this.ctx.params;
         const convId = this.convId;
         const historyColl = this.getHistoryCollectionName(convId);
         const dbCollection = await this.getDBCollection(historyColl);
-        const query = {};
+        const query = { id: {} };
 
         if (after) {
             // Less than after
             query.id.$lt = after;
+        }
+
+        if (before) {
+            // More than before
+            query.id.$gt = before;
+        }
+
+        if (Object.keys(query.id).length == 0) {
+            delete query.id;
         }
 
         if (userId) {

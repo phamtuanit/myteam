@@ -51,7 +51,7 @@ module.exports = {
                     this.logger.debug("Logged in user:", user.id);
                     return user;
                 } catch (error) {
-                    this.logger.warn(error);
+                    this.logger.info(error);
                     error.code = 401;
                     throw error;
                 }

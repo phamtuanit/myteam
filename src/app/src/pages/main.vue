@@ -30,6 +30,7 @@ export default {
         ...mapState({
             chatUnread: state => state.conversations.chat.unread,
             channelUread: state => state.conversations.channel.unread,
+            me: state => state.users.me,
         }),
     },
     watch: {
@@ -45,7 +46,6 @@ export default {
         this.setupZoomModal();
     },
     mounted() {
-        this.me = this.$store.state.users.me;
         this.notification = window.IoC.get("notification");
         // Listen message from server to update title
         this.eventBus.on("messages", this.onNewMessage);
@@ -69,7 +69,7 @@ export default {
         updateTitle() {
             if (this.chatUnread.length > 0 || this.channelUread.length > 0) {
                 // Update website title
-                document.title = `${BASE_WEB_TITLE} \ud83d\udc8c You have new message`;
+                document.title = `${BASE_WEB_TITLE} \ud83d\udc8c New messages`;
             } else {
                 document.title = BASE_WEB_TITLE;
             }
@@ -107,11 +107,14 @@ export default {
                                 if (Array.isArray(users) && users.length > 0) {
                                     userName = users[0].fullName || userName;
                                 }
-                                let notifyTitle = `New message from ${userName}`;
+                                let notifyTitle = `A message from ${userName}`;
 
                                 if (conv.channel == true) {
-                                    notifyTitle =
-                                        `#${conv.name} \u2022 ` + notifyTitle;
+                                    let subMsg = `a message from ${userName}`;
+                                    if (message.mentions && message.mentions.includes(this.me.id)) {
+                                        subMsg = "you were mentioned";
+                                    }
+                                    notifyTitle = `#${conv.name} \u2022 ${subMsg}`;
                                 }
                                 const notification = this.notification.notify(
                                     notifyTitle,
