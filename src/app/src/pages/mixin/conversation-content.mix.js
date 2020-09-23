@@ -79,8 +79,21 @@ export default {
             ) {
                 return;
             }
-
             this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
+
+            const userId = message.from.issuer;
+            if (this.$store.state.users.me.id !== userId) {
+                this.$store.dispatch("users/resolve", [userId])
+                .then(users => {
+                    let userName = userId;
+                    if (Array.isArray(users) && users.length > 0) {
+                        userName = users[0].fullName || userName;
+                    }
+
+                    const mention = `<p><span class="mention user-mention" data-mention="@${userName}" data-user-id="${userId}">@${userName} </span></p>`;
+                    this.newMessage = `<blockquote data-author="${userId}" data-author-name="${userName}">${message.body.content}</blockquote>` + mention;
+                });
+            }
         },
         onCopy(message) {
             this.onRead();

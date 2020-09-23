@@ -172,6 +172,7 @@ export default {
                 });
         },
         sendMessage(html) {
+            html = html.trim().replace("<p>&nbsp;</p>", "");
             const convId = this.conversation.id;
             // Send message
             const msg = {
