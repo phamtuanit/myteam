@@ -85,8 +85,11 @@
         <!-- Messages -->
         <v-list class="search-message-list py-0 px-0">
             <div class="search-message-content overflow-y-auto">
-                <template v-for="msg in messageList">
-                    <MessageItem :key="msg.id" class="px-4" :message="msg">
+                <template v-for="(msg, index) in messageList">
+                    <MessageItem :key="msg.id" class="px-4" :message="msg" @quote="onQuote" @copy="onCopy">
+                        <template v-if="index > 0" v-slot:before>
+                            <v-divider class="separator"></v-divider>
+                        </template>
                     </MessageItem>
                 </template>
                 <div class="loading-element" v-intersect="{ handler: onLoadingElIntersect, options: { rootMargin: '200px 0px 200px 0px'}}"></div>
@@ -211,6 +214,16 @@ export default {
                 this.searchLocker.finally(this.loadMore);
             }
         },
+        onQuote(message) {
+            const rawMsg = {...message};
+            rawMsg.body.content = rawMsg.body.html;
+            this.$emit("quote", message);
+        },
+        onCopy(message) {
+            const rawMsg = {...message};
+            rawMsg.body.content = rawMsg.body.html;
+            this.$emit("copy", rawMsg);
+        },
         search() {
             if (!this.searchText) {
                 this.searchLocker = Promise.resolve();
@@ -298,6 +311,10 @@ export default {
     min-width: 25vw;
     box-sizing: border-box;
 }
+
+ .search-message-panel .search-message-content .separator {
+     margin-left: 40px;
+ }
 
 .search-message-panel .loading-element {
     height: 2px;

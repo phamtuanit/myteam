@@ -1,5 +1,6 @@
 <template>
     <div class="message-item search-message-item">
+        <slot name="before"></slot>
         <div class="d-flex flex-row py-2">
             <UserAvatar :user="user" class="align-self-start mt-1" />
             <div class="flex-grow-1 align-self-stretch ml-3">
@@ -10,9 +11,8 @@
                     <span class="caption" v-text="time"></span>
                     <v-spacer></v-spacer>
 
-                    <v-btn
+                    <!-- <v-btn
                         fab
-                        class="mr-2"
                         rounded
                         icon
                         height="26"
@@ -23,7 +23,22 @@
                         <v-icon small class="action btn-jump"
                             >mdi-ray-end-arrow</v-icon
                         >
-                    </v-btn>
+                    </v-btn> -->
+                    <v-menu left>
+                        <template v-slot:activator="{ on }">
+                            <v-btn icon small v-on="on" class="action ml-1 mr-2">
+                                <v-icon small>mdi-dots-vertical</v-icon>
+                            </v-btn>
+                        </template>
+                        <v-list class="menus">
+                            <v-list-item @click="onQuote">
+                                <v-list-item-title>Quote</v-list-item-title>
+                            </v-list-item>
+                            <v-list-item @click="onCopy">
+                                <v-list-item-title>Copy</v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
                 </div>
 
                 <!-- Content -->
@@ -79,6 +94,12 @@ export default {
         },
         onJump() {
             this.$emit("jump", this.message);
+        },
+        onQuote() {
+            this.$emit("quote", this.message);
+        },
+        onCopy() {
+            this.$emit("copy", this.message);
         },
         getDisplayUserName() {
             const me = this.$store.state.users.me;
