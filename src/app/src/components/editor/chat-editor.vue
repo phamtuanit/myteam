@@ -264,9 +264,11 @@ export default {
             }
         },
         formatClipboardData(evt, data) {
+            const editor = this.editorInstance;
             const clipboardPlugin = this.clipboardPlugin;
             const htmlProcessor = clipboardPlugin._htmlDataProcessor;
             const dataTransfer = data.dataTransfer;
+            // Check HTML
             let content = dataTransfer.getData("text/html");
             if (content) {
                 content = this.reformatHtml(content);
@@ -279,8 +281,9 @@ export default {
                     dataTransfer,
                 });
 
-                this.editorInstance.editing.view.scrollToTheSelection();
+                editor.editing.view.scrollToTheSelection();
                 evt.stop();
+                return;
             }
         },
         reformatHtml(html) {

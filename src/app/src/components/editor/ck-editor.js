@@ -24,10 +24,6 @@ import IndentBlock from "@ckeditor/ckeditor5-indent/src/indentblock.js";
 import Mention from "@ckeditor/ckeditor5-mention/src/mention.js";
 import Strikethrough from "@ckeditor/ckeditor5-basic-styles/src/strikethrough.js";
 import Underline from "@ckeditor/ckeditor5-basic-styles/src/underline.js";
-// import SpecialCharactersEssentials from "@ckeditor/ckeditor5-special-characters/src/specialcharactersessentials.js";
-// Package.js: "@ckeditor/ckeditor5-special-characters": "^18.0.0",
-// import SpecialCharacters from "@ckeditor/ckeditor5-special-characters/src/specialcharacters.js";
-// import Essentials from "@ckeditor/ckeditor5-essentials/src/essentials.js";
 import Paragraph from "@ckeditor/ckeditor5-paragraph/src/paragraph.js";
 import TextTransformation from "@ckeditor/ckeditor5-typing/src/texttransformation";
 
@@ -45,10 +41,9 @@ import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter";
-// import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 
 import Link from '@ckeditor/ckeditor5-link/src/link';
-// import AutoLink from '@ckeditor/ckeditor5-link/src/autolink';
+import AutoLink from './plugins/autolink';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 
 export default class Editor extends ClassicEditor { }
@@ -56,14 +51,13 @@ export default class Editor extends ClassicEditor { }
 // Plugins to include in the build.
 Editor.builtinPlugins = [
     Link,
-    // AutoLink,
+    AutoLink,
     Image,
     ImageToolbar,
     ImageStyle,
     ImageResize,
     ImageUpload,
     SimpleUploadAdapter,
-    // Base64UploadAdapter,
     Clipboard,
     ShiftEnter,
     Typing,
@@ -87,9 +81,6 @@ Editor.builtinPlugins = [
     Mention,
     Strikethrough,
     Underline,
-    // SpecialCharactersEssentials,
-    // SpecialCharacters,
-    // Essentials,
     Paragraph,
     TextTransformation,
     MediaEmbed,
