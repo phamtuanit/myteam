@@ -50,6 +50,7 @@
             :id="conversation.id"
             :mention="mention"
             :sending="sending"
+            placeholder="Start a new conversation. Type @ to mention someone."
             @send="onSendMessage"
         ></ChatEditor>
     </div>

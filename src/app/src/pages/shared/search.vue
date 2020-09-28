@@ -217,11 +217,13 @@ export default {
         onQuote(message) {
             const rawMsg = {...message};
             rawMsg.body.content = rawMsg.body.html;
-            this.$emit("quote", message);
+            rawMsg.from = { issuer: message.issuer, };
+            this.$emit("quote", rawMsg);
         },
         onCopy(message) {
             const rawMsg = {...message};
             rawMsg.body.content = rawMsg.body.html;
+            rawMsg.from = { issuer: message.issuer, };
             this.$emit("copy", rawMsg);
         },
         search() {

@@ -90,7 +90,7 @@ export default {
                         userName = users[0].fullName || userName;
                     }
 
-                    const mention = `<p><span class="mention user-mention" data-mention="@${userName}" data-user-id="${userId}">@${userName} </span></p>`;
+                    const mention = `<p><span class="mention user-mention" data-mention="@${userName}" data-user-id="${userId}">@${userName} </span> </p>`;
                     this.newMessage = `<blockquote data-author="${userId}" data-author-name="${userName}">${message.body.content}</blockquote>` + mention;
                 });
             }

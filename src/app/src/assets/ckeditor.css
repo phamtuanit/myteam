@@ -200,3 +200,14 @@ figure table {
 .ck-content .mention {
     padding-right: 2px;
 }
+
+/* Placeholder */
+.chat-editor p.ck-placeholder {
+    margin-top: 9px !important;
+    font-size: 14px;
+}
+
+.chat-editor .chat-editor-expanded p.ck-placeholder {
+    margin-top: var(--ck-spacing-large) !important;
+    font-size: unset;
+}

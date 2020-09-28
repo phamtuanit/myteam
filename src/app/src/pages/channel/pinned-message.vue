@@ -31,15 +31,14 @@
                         icon
                         height="26"
                         width="26"
-                        title="Unpin"
                         @click="onUnpin()"
                         v-if="message.pinnedByMe == true"
                     >
-                        <v-icon class="action btn-unpin">mdi-minus</v-icon>
+                        <v-icon class="action btn-more">mdi-minus</v-icon>
                     </v-btn>
                     <v-menu left>
                         <template v-slot:activator="{ on }">
-                            <v-btn icon small v-on="on" class="ml-1 mr-0">
+                            <v-btn icon small v-on="on" class="action ml-1 mr-0">
                                 <v-icon small>mdi-dots-vertical</v-icon>
                             </v-btn>
                         </template>

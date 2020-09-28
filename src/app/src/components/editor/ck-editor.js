@@ -162,6 +162,7 @@ ClassicEditor.defaultConfig = {
                 { from: "())", to: "🍑" },
                 { from: "|^", to: "↑" },
                 { from: "|v", to: "↓" },
+                { from: "=>", to: "⇒" },
                 { from: ":dot", to: "⋅" },
             ],
             remove: [

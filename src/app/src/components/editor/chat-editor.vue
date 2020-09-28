@@ -38,6 +38,16 @@
                         >mdi-format-letter-case-upper</v-icon
                     >
                 </v-btn>
+                <!-- Erase -->
+                <v-btn
+                    icon :disabled="!internalValue"
+                    @click="onErase"
+                    title="Erase (Ctrl + Del)"
+                >
+                    <v-icon size="18" color="red"
+                        >mdi-eraser</v-icon
+                    >
+                </v-btn>
             </div>
             <!-- End -->
             <div class="d-flex flex-align-end">
@@ -65,7 +75,6 @@ import Giphy from "../giphy/giphy.vue";
 import MyEnter from "./plugins/enter";
 import MyMention from "./plugins/mention";
 import ClassicEditor from "./ck-editor.js";
-// import plainTextToHtml from "@ckeditor/ckeditor5-clipboard/src/utils/plaintexttohtml";
 import normalizeclipboarddata from "@ckeditor/ckeditor5-clipboard/src/utils/normalizeclipboarddata";
 
 ClassicEditor.builtinPlugins.push(MyEnter, MyMention);
@@ -88,6 +97,10 @@ export default {
             type: Boolean,
             default: false,
         },
+        placeholder: {
+            type: String,
+            default: "Start new conversation.",
+        }
     },
     components: { EmojiButton, Editor, Giphy },
     data() {
@@ -98,6 +111,7 @@ export default {
             emojiPopup: false,
             isSending: this.sending,
             editorConfig: {
+                placeholder: this.placeholder,
                 simpleUpload: {
                     id: this.id,
                 },
@@ -143,8 +157,7 @@ export default {
                 if (gif.title) {
                     const titleArr = gif.title.split("GIF");
                     alt = (titleArr[0] && titleArr[0].trim()) || "gif";
-                    author =
-                        titleArr.length > 1 && titleArr[1]
+                    author = titleArr.length > 1 && titleArr[1]
                             ? titleArr[1].trim()
                             : "giphy";
                 }
@@ -152,8 +165,7 @@ export default {
                 let imageEl = `<img id="gif-${gif.id}" class="image image-gif" alt="${alt}"  data-author="${author}" `;
                 imageEl += `src="${gif.images.downsized_medium.url}" data-original-src="${gif.images.original.url}" data-preview-src="${gif.images.preview_gif.url}"></img>`;
                 const figureEl = `<figure class="image gif">${imageEl}</figure>`;
-                this.writeText(figureEl);
-                // this.$emit("send", figureEl);
+                this.writeHtml(figureEl);
             }
         },
         onSelectEmoji(emoji) {
@@ -187,6 +199,15 @@ export default {
                 }
             );
 
+            // Erase
+            this.editorInstance.keystrokes.set(
+                "Ctrl+Delete",
+                (data, cancel) => {
+                    cancel();
+                    this.onErase();
+                }
+            );
+
             // Handle clipboard input
             this.clipboardPlugin = this.editorInstance.plugins.get("Clipboard");
             this.editorInstance.editing.view.document.on(
@@ -198,6 +219,9 @@ export default {
         },
         onSend() {
             this.$emit("send", this.internalValue);
+        },
+        onErase() {
+            this.editorInstance.setData("");
         },
         triggerSendEvent() {
             const currVal = this.editorInstance.getData();
@@ -216,6 +240,12 @@ export default {
                 writer.insertText(text, insertPosition);
                 this.editorInstance.editing.view.scrollToTheSelection();
             });
+        },
+        writeHtml(html) {
+            const editor = this.editorInstance;
+            const viewFragment = editor.data.processor.toView( html );
+            const modelFragment = editor.data.toModel( viewFragment );
+            editor.model.insertContent(modelFragment);
         },
         changePluginStatus() {
             if (!this.editorInstance) {
