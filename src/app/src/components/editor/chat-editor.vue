@@ -42,7 +42,7 @@
                 <v-btn
                     icon :disabled="!internalValue"
                     @click="onErase"
-                    title="Erase (Ctrl + Del)"
+                    title="Erase (Ctrl+Del)"
                 >
                     <v-icon size="18" color="red"
                         >mdi-eraser</v-icon

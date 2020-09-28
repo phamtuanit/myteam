@@ -106,7 +106,7 @@ export default {
             }
         },
         onEditorReady() {
-            this.editorInstance = this.$refs.editor.instance;
+            this.editorInstance = this.$refs.editor.$_instance;
             this.updateTopbar();
             this.$emit("ready", this.editorInstance);
         },
