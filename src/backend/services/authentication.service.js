@@ -29,32 +29,35 @@ module.exports = {
             },
             async handler(ctx) {
                 const token = ctx.params.token || ctx.meta.token;
+                // Check token
                 if (!token) {
-                    throw new MoleculerClientError("Token is missing.");
+                    throw new MoleculerClientError("No token!", 401);
                 }
+                let decoded;
                 try {
-                    const decoded = await jwt.verify(token, privateKey);
+
+                    // Verify token
+                    decoded = await jwt.verify(token, privateKey);
                     if (decoded.forRefresh == true) {
                         // The token is refresh-token
-                        throw new MoleculerClientError(
-                            "Token cannot be accepted. Considering to use right access token."
-                        );
+                        throw new MoleculerClientError("Token cannot be accepted. Considering to use right access token.", 401);
                     }
-
-                    const user = decoded.data;
-                    const today = new Date();
-                    const expirationDate = new Date(decoded.exp);
-                    if (today > expirationDate) {
-                        // "Token is expired." + " User: " + user.id
-                        throw new MoleculerClientError(`You ${user.id} is trying to login with expired token. Expiration ${expirationDate.toLocaleString()}`);
-                    }
-                    this.logger.debug("Logged in user:", user.id);
-                    return user;
                 } catch (error) {
                     this.logger.info(error);
-                    error.code = 401;
                     throw error;
                 }
+
+                // Check expiration date
+                const user = decoded.data;
+                const expirationDate = new Date(decoded.exp);
+                const today = new Date();
+                if (today > expirationDate) {
+                    throw new MoleculerClientError(`You "${user.id}" is trying to login with expired token. Expiration date: ${expirationDate.toLocaleString()}`, 460);
+                }
+
+                
+                this.logger.debug("Logged in user:", user.id);
+                return user;
             },
         },
         login: {
@@ -88,10 +91,7 @@ module.exports = {
                     this.broker.emit(eventName, user);
                     return userToken;
                 } else {
-                    throw new MoleculerClientError(
-                        "Missing user name or password",
-                        400
-                    );
+                    throw new MoleculerClientError("Missing user name or password", 412);
                 }
             },
         },
@@ -103,15 +103,13 @@ module.exports = {
                     const decoded = await jwt.verify(token, privateKey);
                     if (decoded.forRefresh != true) {
                         // The token is refresh-token
-                        throw new MoleculerClientError(
-                            "Token cannot be accepted. Considering to use refresh access token."
-                        );
+                        throw new MoleculerClientError("Token cannot be accepted. Considering to use refresh access token.", 412);
                     }
 
                     const today = new Date();
                     const expirationDate = new Date(decoded.exp);
                     if (today > expirationDate) {
-                        throw new MoleculerClientError("Token is expired");
+                        throw new MoleculerClientError("Token is expired", 460);
                     }
 
                     const user = decoded.data;
@@ -124,8 +122,7 @@ module.exports = {
                     const userToken = this.getUserToken(latestUserInfo);
                     return userToken;
                 } catch (error) {
-                    this.logger.error(error, );
-                    error.code = 401;
+                    this.logger.info("Could not renew token.", error);
                     throw error;
                 }
             },
@@ -161,7 +158,7 @@ module.exports = {
          */
         generateJWT(user, forRefresh = false) {
             const now = new Date();
-            const expirationDate = new Date(now);
+            const expirationDate = new Date();
             expirationDate.setDate(now.getDate() + authConf.expiration.maxDate);
 
             const payload = { data: { ...user } };
@@ -173,10 +170,7 @@ module.exports = {
             payload.created = new Date().getTime();
             payload.exp = exp;
             const token = jwt.sign(payload, privateKey);
-            return {
-                token,
-                exp,
-            };
+            return { token, exp, };
         },
     },
 

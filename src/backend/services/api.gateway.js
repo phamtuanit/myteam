@@ -233,7 +233,8 @@ module.exports = {
                     return user;
                 } catch (err) {
                     this.logger.error("Could not verify user.", err.message);
-                    throw new Errors.UnAuthorizedError(Errors.ERR_INVALID_TOKEN, err.message);
+                    err.code = err.code || 401;
+                    throw err;
                 }
             }
 
