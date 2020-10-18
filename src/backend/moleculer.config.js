@@ -121,7 +121,7 @@ module.exports = {
 	registry: {
 		// Define balancing strategy. More info: https://moleculer.services/docs/0.14/balancing.html
 		// Available values: "RoundRobin", "Random", "CpuUsage", "Latency", "Shard"
-		strategy: "CpuUsage",
+		strategy: "RoundRobin",
 		// Enable local action call preferring. Always call the local action instance if available.
 		preferLocal: true
 	},

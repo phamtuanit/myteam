@@ -1,11 +1,9 @@
 const Base = require("../processor-base.js");
 const Mention = require("../mention/index.js");
-// const EmojiEncoder = require("../emoji/index.js");
-// const HtmlMinifier = require("./minifier.js");
 module.exports = class HtmlProcessor extends Base {
     constructor(logger) {
         super(logger, "Html");
-        this.subProcessors = [new Mention(logger)/*, new EmojiEncoder(logger)*/];
+        this.subProcessors = [new Mention(logger)];
     }
 
     process(message, operation) {

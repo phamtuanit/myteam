@@ -1,10 +1,6 @@
 "use strict";
 
 const dbConf = require("../conf/db.json");
-const fs = require("fs");
-const mkdir = require("mkdirp").sync;
-
-const DbService = require("moleculer-db");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -14,7 +10,7 @@ module.exports = function(collection) {
     const cacheCleanEventName = `cache.clean.${collection}`;
 
     const schema = {
-        mixins: [DbService],
+        mixins: [],
 
         events: {
             /**
@@ -69,19 +65,6 @@ module.exports = function(collection) {
 
         schema.adapter = new MongoAdapter(uri, { useUnifiedTopology: true });
         schema.collection = collection;
-    } else if (process.env.TEST) {
-        // NeDB memory adapter for testing
-        schema.adapter = new DbService.MemoryAdapter();
-    } else {
-        // Create data folder
-        const dbPath = "./DB/mongodb-mem";
-        if (!fs.existsSync(dbPath)) {
-            mkdir(dbPath);
-        }
-
-        schema.adapter = new DbService.MemoryAdapter({
-            filename: dbPath + `${collection}.db`,
-        });
     }
 
     return schema;
