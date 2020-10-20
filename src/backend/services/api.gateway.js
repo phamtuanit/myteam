@@ -1,10 +1,8 @@
 "use strict";
-let fs = require("fs");
-let path = require("path");
-
+const fs = require("fs");
+const path = require("path");
 const ApiGateway = require("moleculer-web");
 const sysConf = require("../conf/system.json");
-const SocketService = require("./socket.gateway");
 const Errors = ApiGateway.Errors;
 
 /**
@@ -30,8 +28,9 @@ const onBeforeCall = function onBeforeCall(ctx, route, req, res) {
 
 module.exports = {
     name: "api",
+    version: 1,
     dependencies: ["v1.auth", "v1.authorization", "v1.live"],
-    mixins: [SocketService, ApiGateway],
+    mixins: [ApiGateway],
 
     // More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
     settings: {
@@ -42,7 +41,7 @@ module.exports = {
         // Global Express middleware. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
         use: [],
         // Use HTTP2 server
-        http2: false,
+        http2: true,
         // HTTPS server with certificate
         https: sysConf.ssl.enabled ? {
             key: fs.readFileSync(path.join(__dirname, "../ssl",  "ssl.key")),

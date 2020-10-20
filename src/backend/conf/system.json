@@ -6,6 +6,9 @@
         "authentication": true,
         "authorization": true
     },
+    "io": {
+        "port": 8082
+    },
     "ssl": {
         "enabled": true
     }

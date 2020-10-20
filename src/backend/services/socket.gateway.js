@@ -1,14 +1,33 @@
+"use strict";
 const io = require("socket.io");
+const fs = require("fs");
+const path = require("path");
+const https = require("https");
+const os = require("os");
+
+const ApiGateway = require("moleculer-web");
+const sysConf = require("../conf/system.json");
 module.exports = {
     name: "socket",
+    version: 1,
+    dependencies: ["v1.api"],
+    mixins: [],
 
     settings: {
-        version: 3,
+        version: 6,
         server: true,
         io: {
             path: "/chat-io",
             secure: true,
         },
+        port: process.env.IOPORT || sysConf.io.port,
+        ip: process.env.HOST || sysConf.gateway.host,
+        https: sysConf.ssl.enabled ? {
+                  key: fs.readFileSync(path.join(__dirname, "../ssl", "ssl.key")),
+                  cert: fs.readFileSync(path.join(__dirname, "../ssl", "ssl.cer")),
+              } : null,
+        cors: {},
+        routes: [],
     },
 
     /**
@@ -21,23 +40,15 @@ module.exports = {
             const status = data.status;
             data.event = event;
 
-            this.logger.info(
-                `WS >>> Status of user [${userId}] has been changed to`,
-                status
-            );
-
-            this.logger.debug("WS >>> Broadcast message to all of user.");
+            this.logger.info(`WS >>> Status of user [${userId}] has been changed to`, status);
+            this.logger.debug("WS >>> Broadcast message to all of live user.");
             this.io.to("live").emit("live", status, data, event);
         },
         // user-queue.*
         "user-queue.*"(data, sender, event) {
             const [, act] = event.split(".");
             const { userId, payload: message } = data;
-            this.logger.info(
-                "WS >>> Receiving a message from user-queue.",
-                userId,
-                event
-            );
+            this.logger.info("WS >>> Receiving a message from user-queue.", userId, event);
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
                 message.event = event;
@@ -48,11 +59,60 @@ module.exports = {
     },
 
     methods: {
+        /**
+         * Create HTTP server
+         */
+        createServer() {
+            if (this.settings.https && this.settings.https.key && this.settings.https.cert) {
+                this.server = this.settings.http2
+                    ? this.tryLoadHTTP2Lib().createSecureServer(
+                          this.settings.https,
+                          this.httpHandler
+                      )
+                    : https.createServer(this.settings.https, this.httpHandler);
+                this.isHTTPS = true;
+            } else {
+                this.server = this.settings.http2
+                    ? this.tryLoadHTTP2Lib().createServer(this.httpHandler)
+                    : http.createServer(this.httpHandler);
+                this.isHTTPS = false;
+            }
+        },
+        /**
+         * Try to require HTTP2 servers
+         */
+        tryLoadHTTP2Lib() {
+            try {
+                return require("http2");
+            } catch (err) {
+                this.broker.fatal("HTTP2 server is not available. (>= Node 8.8.1)");
+            }
+        },
+        /**
+         * HTTP request handler. It is called from native NodeJS HTTP server.
+         *
+         * @param {HttpRequest} req HTTP request
+         * @param {HttpResponse} res HTTP response
+         * @param {Function} next Call next middleware (for Express)
+         * @returns {Promise}
+         */
+        async httpHandler(req, res, next) {
+            return next();
+        },
+        startSocket() {
+            // Init Socket
+            this.sockets = {};
+            if (!this.server) {
+                this.logger.error("WS >>> Server is required for Socket-IO.");
+                return;
+            }
+            this.io = io(this.server, this.settings.io);
+            this.io.on("connection", this.onConnected);
+        },
         onConnected(socket) {
             let token = socket.handshake.query.token;
             let clientVersion = socket.handshake.query.version;
-            this.broker
-                .call("v1.auth.verifyToken", { token })
+            this.broker.call("v1.auth.verifyToken", { token })
                 .then((user) => {
                     socket.handshake.user = user;
                     this.handleNewSocket(socket);
@@ -66,10 +126,7 @@ module.exports = {
                     }
                 })
                 .catch((err) => {
-                    this.logger.warn(
-                        "WS >>> Incoming socket don't has valid access-token. Disconnecting...",
-                        err.message
-                    );
+                    this.logger.warn("WS >>> Incoming socket don't has valid access-token. Disconnecting...", err.message);
                     socket.emit("unauthenticated");
                     setTimeout(socket.disconnect, 100);
                 });
@@ -145,35 +202,54 @@ module.exports = {
 
             const userId = socket.handshake.user.id;
             if (userId) {
-                this.broker
-                    .call("v1.user-queue.cleanQueue", { userId, lastId: info.id })
+                this.broker .call("v1.user-queue.cleanQueue", { userId, lastId: info.id, })
                     .catch((error) => {
-                        this.logger.error(
-                            "Could not clean message-queue.",
-                            userId,
-                            error
-                        );
+                        this.logger.error("Could not clean message-queue.", userId, error.message);
                     });
             }
         },
     },
 
+    /**
+	 * Service created lifecycle event handler
+	 */
     created() {
-        // Init Socket
-        this.sockets = {};
-        if (!this.server) {
-            this.logger.error("WS >>> Server is required for Socket-IO.");
-            return;
-        }
-        this.io = io(this.server, this.settings.io);
-        this.io.on("connection", this.onConnected);
+        this.createServer();
     },
+    /**
+     * Service started lifecycle event handler
+     */
+    started() {
+        return new this.Promise((resolve, reject) => {
+            this.server.listen(this.settings.port, this.settings.ip, (err) => {
+                if (err) {
+                    return reject(err);
+                }
 
+                const addr = this.server.address();
+                const listenAddr = addr.address == "0.0.0.0" && os.platform() == "win32" ? "localhost" : addr.address;
+                this.logger.info(`Socket Gateway listening on ${this.isHTTPS ? "https" : "http"}://${listenAddr}:${addr.port}`);
+                this.startSocket();
+                resolve();
+            });
+        });
+    },
     stopped() {
         if (this.io) {
             this.logger.info("WS >>> Broadcast live status to all WS client.");
             this.io.to("live").emit("live", "broadcast", { status: "off" });
             this.io.close();
         }
+
+        return new this.Promise((resolve, reject) => {
+            this.server.close((err) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                this.logger.info("Socket Gateway is stopped!");
+                resolve();
+            });
+        });
     },
 };

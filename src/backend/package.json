@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "MyTeam project",
   "scripts": {
-    "dev": "moleculer-runner --repl --hot --instances=1 services/*.*.js",
+    "dev": "moleculer-runner --repl --hot --instances=1 services/*.*",
     "start": "moleculer-runner services/**/*.*.js",
     "service": "moleculer-runner --instances=2 services/*.service.js",
     "gateway": "moleculer-runner services/api.gateway.js",
