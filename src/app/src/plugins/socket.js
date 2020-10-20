@@ -130,7 +130,7 @@ class Socket {
 
         this.io.on("unauthenticated", () => {
             this.lastError = "unauthenticated";
-            this.eventBus.emit("socket:unauthenticated", this);
+            this.eventBus.emit("server:unauthenticated", this);
         });
 
         this.io.on("system", (event, ...args) => {

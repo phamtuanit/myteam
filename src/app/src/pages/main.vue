@@ -50,7 +50,7 @@ export default {
         // Listen message from server to update title
         this.eventBus.on("messages", this.onNewMessage);
         // Listen socket connection failed
-        this.eventBus.on("socket:unauthenticated", this.onWSUnauthenticated);
+        this.eventBus.on("server:unauthenticated", this.onWSUnauthenticated);
         // Listen server request
         this.eventBus.on("server:incompatible", this.onReloadApp);
 
@@ -58,7 +58,7 @@ export default {
     },
     destroyed() {
         this.eventBus.off("messages", this.onNewMessage);
-        this.eventBus.off("socket:unauthenticated", this.onWSUnauthenticated);
+        this.eventBus.off("server:unauthenticated", this.onWSUnauthenticated);
         this.eventBus.off("server:incompatible", this.onReloadApp);
 
         if (this.imgZoomModal) {
@@ -164,6 +164,10 @@ export default {
             }
         },
         onWSUnauthenticated() {
+            if (this.$route.name == "login") {
+                return;
+            }
+
             const auth = window.IoC.get("auth");
             auth.verifyToken()
                 .then(() => {
