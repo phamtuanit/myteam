@@ -17,9 +17,7 @@ In the terminal, try the following commands:
 
 
 ## Services
-- **api**: API Gateway services
-- **greeter**: Sample service with `hello` and `welcome` actions.
-- **products**: Sample DB service. To use with MongoDB, set `MONGO_URI` environment variables and install MongoDB adapter with `npm i moleculer-db-adapter-mongo`.
+- **api.gateway**: API Gateway services
 
 ## Mixins
 - **db.mixin**: Database access mixin for services. Based on [moleculer-db](https://github.com/moleculerjs/moleculer-db#readme)
@@ -34,10 +32,6 @@ In the terminal, try the following commands:
 
 - `npm run dev`: Start development mode (load all services locally with hot-reload & REPL)
 - `npm run start`: Start production mode (set `SERVICES` env variable to load certain services)
-- `npm run cli`: Start a CLI and connect to production. Don't forget to set production namespace with `--ns` argument in script
-- `npm run lint`: Run ESLint
-- `npm run ci`: Run continuous test mode with watching
-- `npm test`: Run tests & generate coverage report
 
 ## Debug
-`node --inspect=0.0.0.0:9229 node_modules/moleculer/bin/moleculer-runner services`
+`node --inspect=0.0.0.0:9229 node_modules/moleculer/bin/moleculer-runner services\*.*`
