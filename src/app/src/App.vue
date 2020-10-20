@@ -7,9 +7,14 @@
             :timeout="snackbar.timeout"
         >
             <div class="snackbar--body" v-html="snackbar.content"></div>
-            <v-btn text @click="snackbar.display = false">
-                Close
-            </v-btn>
+            <template v-slot:action="{ attrs }">
+                <v-btn text v-bind="attrs" @click="onConfirmSnack" v-if="snackbar.confirm">
+                    OK
+                </v-btn>
+                <v-btn text v-bind="attrs" @click="snackbar.display = false">
+                    Close
+                </v-btn>
+            </template>
         </v-snackbar>
         <router-view key="root"></router-view>
     </v-app>
@@ -25,6 +30,7 @@ export default {
                 display: false,
                 content: "",
                 timeout: 8000,
+                confirm: null
             },
         };
     },
@@ -34,6 +40,13 @@ export default {
     },
     methods: {
         onShowSnack(info) {
+            if (this.snackbar.display == true) {
+                // Waiting for current message closed
+                setTimeout(() => {
+                    this.onShowSnack(info);
+                }, this.snackbar.timeout > 0 ? this.snackbar.timeout : 1000);
+            }
+
             if (!info || !info.message) {
                 this.snackbar.display = false;
                 return;
@@ -47,6 +60,8 @@ export default {
             } else {
                 this.snackbar.timeout = info.timeout;
             }
+
+            this.snackbar.confirm = typeof info.confirm  === "function" ? info.confirm : null;
 
             // Adjust message
             let content = info.message;
@@ -65,6 +80,10 @@ export default {
             this.snackbar.background = info.type || null;
             this.snackbar.display = true;
         },
+        onConfirmSnack() {
+            this.snackbar.display = false;
+            this.snackbar.confirm && this.snackbar.confirm();
+        }
     },
 };
 </script>

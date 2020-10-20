@@ -14,12 +14,12 @@ module.exports = function httpResponseSetup(axios) {
                         eventBus.emit("show-snack", { message: "There is a permission problem. Please refresh your page.", type: "error", });
                     }
                 } else if (err.response.status == 460) {
-                    console.warn("Token is expired!", err.response);
-                    eventBus.emit("show-snack", { message: "Token is expired!", type: "error", });
+                    console.warn("Token is expired. Do you want to re-login?", err.response);
                     // Refresh token state -> Need to re-login
-                    setTimeout(() => {
+                    const confirmCallback = () => {
                         eventBus.emit("server:unauthenticated", this);
-                    }, 1000);
+                    };
+                    eventBus.emit("show-snack", { message: "Token is expired!", type: "error", confirm: confirmCallback });
                 }  else {
                     const msg = `${err.response ? err.response.statusText + '. ' : ""}${err.message}`;
                     eventBus.emit("show-snack", { message: msg, type: "error", data: err, });
