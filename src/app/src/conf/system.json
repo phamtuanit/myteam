@@ -1,5 +1,5 @@
 {
-    "env": "prd-",
+    "env": "prd",
     "server": {
         "address": "https://localhost",
         "port": 8081,
