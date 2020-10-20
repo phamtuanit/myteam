@@ -1,8 +1,14 @@
 {
     "env": "prd-",
     "server": {
-        "address": "https://192.168.106.248:8081",
-        "api": "/api/v1/"
+        "address": "https://localhost",
+        "port": 8081,
+        "api": "/api/v1/",
+        "io": {
+            "address": "https://localhost",
+            "port": 8082,
+            "path": "/chat-io"
+        }
     },
     "attachment": {
         "url": "/upload/"

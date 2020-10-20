@@ -1,11 +1,9 @@
 const axios = require("axios");
 const sysConfig = require("../../conf/system.json");
 const responseInterceptor = require("../../utils/http-injector/response-injector.js");
+const baseServerAddr = (sysConfig.env == "prd" ? window.location.origin : sysConfig.server.address + `:${sysConfig.server.port}`);
 const axiosInstance = axios.create({
-    baseURL:
-        sysConfig.env == "prd"
-            ? window.location.origin
-            : sysConfig.server.address,
+    baseURL: baseServerAddr,
 });
 
 const Service = function () {
