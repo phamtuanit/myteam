@@ -2,7 +2,7 @@
     "gateway": {
         "port": 8081,
         "host": "0.0.0.0",
-        "static": "public",
+        "static": ["./public/web", "./public"],
         "authentication": true,
         "authorization": true
     },

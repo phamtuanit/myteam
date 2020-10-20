@@ -37,6 +37,10 @@ node_modules/
 jspm_packages/
 **/test/**
 
+# Dependency directories
+public/web/
+public/attachments/
+
 # Typescript v1 declaration files
 typings/
 

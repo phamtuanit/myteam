@@ -1,6 +1,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const serveStatic = require("serve-static");
 const ApiGateway = require("moleculer-web");
 const sysConf = require("../conf/system.json");
 const Errors = ApiGateway.Errors;
@@ -69,7 +70,7 @@ module.exports = {
                 // Middleware
                 use: [],
                 // Enable/disable logging
-                logging: true,
+                logging: false,
                 // Whitelist of actions (array of string mask or regex)
                 whitelist: ["**"],
                 // Enable authentication. Implement the logic into `authenticate` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authentication
@@ -191,8 +192,9 @@ module.exports = {
         // Logging the response data. Set to any log level to enable it. E.g. "info"
         logResponseData: null,
         // Serve assets from "public" folder. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Serve-static-files
-        assets: {
-            folder: process.env.STATIC_DIR || sysConf.gateway.static || "public",
+        assets: null, // Ignore auto serving sttaic files
+        myAssets: {
+            folders: process.env.STATIC_DIR || sysConf.gateway.static || "public",
             // Options to `server-static` module
             options: {},
         },
@@ -253,5 +255,38 @@ module.exports = {
                     .catch(this.logger.error);
             }
         },
+        serveStaticFiles(req, res, callback, index = 0) {
+            this.serveRoots[index](req, res, (err) => {
+                index++;
+                if (index >= this.serveRoots.length) {
+                    callback(err);
+                    return;
+                }
+                // Next serve
+                this.serveStaticFiles(req, res, callback, index);
+            });
+        },
+        createServeStatic() {
+            if (!this.settings.myAssets || !this.settings.myAssets.folders || this.settings.myAssets.folders.length == 0) {
+                return;
+            }
+
+            this.serveRoots = [];
+            const myAssets = this.settings.myAssets;
+            const opts = myAssets.options || {};
+            myAssets.folders.forEach(dir => {
+                const serve = serveStatic(dir, opts);
+                this.serveRoots.push(serve);
+                this.logger.info("Registered static DIR:", dir);
+            });
+
+            this.serve = this.serveStaticFiles;
+        }
     },
+    /**
+	 * Service created lifecycle event handler
+	 */
+    created() {
+        this.createServeStatic();
+    }
 };
