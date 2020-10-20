@@ -64,28 +64,11 @@ module.exports = {
          */
         createServer() {
             if (this.settings.https && this.settings.https.key && this.settings.https.cert) {
-                this.server = this.settings.http2
-                    ? this.tryLoadHTTP2Lib().createSecureServer(
-                          this.settings.https,
-                          this.httpHandler
-                      )
-                    : https.createServer(this.settings.https, this.httpHandler);
+                this.server = https.createServer(this.settings.https, this.httpHandler);
                 this.isHTTPS = true;
             } else {
-                this.server = this.settings.http2
-                    ? this.tryLoadHTTP2Lib().createServer(this.httpHandler)
-                    : http.createServer(this.httpHandler);
+                this.server = http.createServer(this.httpHandler);
                 this.isHTTPS = false;
-            }
-        },
-        /**
-         * Try to require HTTP2 servers
-         */
-        tryLoadHTTP2Lib() {
-            try {
-                return require("http2");
-            } catch (err) {
-                this.broker.fatal("HTTP2 server is not available. (>= Node 8.8.1)");
             }
         },
         /**
@@ -97,6 +80,7 @@ module.exports = {
          * @returns {Promise}
          */
         async httpHandler(req, res, next) {
+            // Do nothing
             return next();
         },
         startSocket() {

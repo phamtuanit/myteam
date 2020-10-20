@@ -35,7 +35,6 @@ module.exports = {
                 }
                 let decoded;
                 try {
-
                     // Verify token
                     decoded = await jwt.verify(token, privateKey);
                     if (decoded.forRefresh == true) {
@@ -55,7 +54,6 @@ module.exports = {
                     throw new MoleculerClientError(`You "${user.id}" is trying to login with expired token. Expiration date: ${expirationDate.toLocaleString()}`, 460);
                 }
 
-                
                 this.logger.debug("Logged in user:", user.id);
                 return user;
             },
