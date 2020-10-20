@@ -1,7 +1,7 @@
 const config = require("../conf/system.json");
 const Socket = require("../plugins/socket.js");
 const baseServerAddr = (config.env == "prd" ? window.location.origin : config.server.address + `:${config.server.port}`);
-const ioBaseAddr = (config.env == "prd" ? (window.location.protocol + window.location.host) : config.server.io.address) + `:${config.server.io.port}`;
+const ioBaseAddr = (config.env == "prd" ? (window.location.protocol + "//" + window.location.hostname) : config.server.io.address) + `:${config.server.io.port}`;
 const messageQueueSvr = new (require("../services/message-queue.service.js").default)();
 const notification = new (require("../plugins/notification.js"))();
 
