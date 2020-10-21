@@ -12,7 +12,7 @@ export default {
             theme: this.$vuetify.theme,
             newMessage: null,
             messages: [],
-            allowReadMore: false,
+            hasUnreadMessages: false,
             unreadMessages: this.conversation.meta.unreadMessages,
         };
     },
@@ -21,17 +21,11 @@ export default {
     },
     mounted() {
         // Watch scroll
-        this.$refs.messageFeed.$el.addEventListener(
-            "scroll",
-            this.handleScroll
-        );
+        this.$refs.messageFeed.$el.addEventListener("scroll", this.handleScroll);
         setTimeout(this.scrollToBottom, 1000, this);
     },
     destroyed() {
-        this.$refs.messageFeed.$el.removeEventListener(
-            "scroll",
-            this.handleScroll
-        );
+        this.$refs.messageFeed.$el.removeEventListener("scroll", this.handleScroll);
     },
     watch: {
         "unreadMessages"() {
@@ -41,9 +35,7 @@ export default {
     methods: {
         // Message actions
         onDeleteMessage(message) {
-            this.$store
-                .dispatch("conversations/deleteMessage", message)
-                .catch(console.error);
+            this.$store.dispatch("conversations/deleteMessage", message).catch(console.error);
         },
         onReact(type, message, status = true) {
             this.$store
@@ -62,11 +54,8 @@ export default {
         },
         onQuote(message) {
             this.onRead();
-            if (
-                !message ||
-                !message.body.content ||
-                (message.body.type != null && message.body.type != "html")
-            ) {
+            if (!message || !message.body.content ||
+                (message.body.type != null && message.body.type != "html")) {
                 return;
             }
             this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
@@ -102,21 +91,12 @@ export default {
                 this.$store.dispatch("conversations/watchAllMessage", conv.id).catch(console.error);
             }
         },
-        onReadMore() {
+        loadUnreadMessages() {
             setTimeout(this.scrollToBottom, 0);
             this.onRead();
         },
-        handleScroll() {
-            const el = this.$refs.messageFeed.$el;
-            if (el.scrollTop + el.clientHeight + 100 >= el.scrollHeight) {
-                this.allowReadMore = false;
-                return;
-            }
-
-            this.allowReadMore = true;
-        },
         scrollToBottom() {
-            this.allowReadMore = false;
+            this.hasUnreadMessages = false;
             const msgSheetEl = this.$refs.messageFeed.$el;
             scrollToBottom(msgSheetEl);
         },
@@ -129,8 +109,16 @@ export default {
             return this.$store
                 .dispatch("conversations/getConversationContent", {
                     convId: this.conversation.id,
-                })
-                .catch(console.error);
+                }).catch(console.error);
+        },
+        handleScroll() {
+            const el = this.$refs.messageFeed.$el;
+            if (el.scrollTop + el.clientHeight + 100 >= el.scrollHeight) {
+                this.hasUnreadMessages = false;
+                return;
+            }
+
+            this.hasUnreadMessages = true;
         },
     }
 }
