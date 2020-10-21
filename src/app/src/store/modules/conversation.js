@@ -193,21 +193,6 @@ const moduleState = {
             } else {
                 state.chat.active = conv;
             }
-
-            const needToLoadMore =
-                conv.messages &&
-                conv.messages.length <= 10 &&
-                !conv.reachedFullHistories;
-            const notVerifyYet = conv._isTemp != true && !conv.isVerified;
-            if (notVerifyYet || needToLoadMore) {
-                // Load conversation content
-                this.dispatch("conversations/getConversationContent", {
-                    convId: conv.id,
-                    top: 10,
-                }).then(() => {
-                    conv.isVerified = true;
-                });
-            }
         },
         addConversation(state, conv) {
             if (!conv.messages) {
@@ -804,7 +789,7 @@ const moduleState = {
 
                 if (!conv) {
                     console.warn("The conversation could not be found.", convId);
-                    return;
+                    return [];
                 }
 
                 top = top || 10;
@@ -829,7 +814,7 @@ const moduleState = {
                         }
 
                         if (!messages || messages.length === 0) {
-                            return conv.messages;
+                            return [[], conv.messages];
                         }
 
                         if (!conv.meta) {
@@ -867,7 +852,7 @@ const moduleState = {
                             }
                         }
 
-                        return conv.messages;
+                        return [messages, conv.messages];
                     });
             }
             console.warn("Conversation Id is required");
@@ -938,13 +923,7 @@ const moduleState = {
                         this.dispatch(
                             "conversations/loadLatestConversation",
                             convId
-                        )
-                            .catch(console.error)
-                            .then(conv => {
-                                if (conv) {
-                                    conv.isVerified = true;
-                                }
-                            });
+                        ).catch(console.error);
                         break;
                 }
             }

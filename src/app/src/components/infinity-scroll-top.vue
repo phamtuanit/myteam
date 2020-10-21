@@ -1,25 +1,14 @@
 <template>
     <div class="infinity-scroll-container">
-        <div
-            class="infinity-scroll infinity-scroll--top d-flex justify-center"
-            v-bind="$attrs"
-        >
-            <div
-                v-show="isLoading & scrollBar"
-                class="spinner loading-spinner lds-dual-ring my-2"
-            ></div>
-            <v-btn
-                icon
-                rounded
-                class="my-2 color-1"
-                :loading="isLoading"
-                v-if="!scrollBar"
-                title="Load more"
-                @click="onLoadMore"
-            >
-                <v-icon>mdi-reload</v-icon>
-            </v-btn>
-        </div>
+        <!-- Loading -->
+        <v-progress-linear
+            :active="isLoading"
+            :indeterminate="true"
+            class="progress-bar"
+        ></v-progress-linear>
+
+        <!-- Load more detector -->
+        <div class="loading-detector" v-intersect="onReachingTopIntersect"></div>
     </div>
 </template>
 
@@ -34,125 +23,67 @@ export default {
     data() {
         return {
             isLoading: false,
-            isBusy: false,
-            scrollBar: true,
+            isReachedAllData: false,
+            isReachedTop: false,
         };
+    },
+    created() {
+        this.locker = Promise.resolve();
     },
     mounted() {
         this.parent = this.$parent;
-
-        setTimeout(() => {
-            if (this._isDestroyed || this._isBeingDestroyed) {
-                return;
-            }
-            this.scrollBar = this.hasScrollBar();
-            this.setupObserver();
-        }, 500);
     },
     destroyed() {
-        if (this.mutationObserver) {
-            this.mutationObserver.disconnect();
-            this.mutationObserver = undefined;
-        }
-        this.parent.$el.removeEventListener("scroll", this.onScroll);
     },
     methods: {
-        onLoadMore() {
-            if (this.isBusy == true || typeof this.load != "function") {
-                return;
-            }
-
+        loadMore() {
+            this.isLoading = true;
+            // List of message element
             const containerEl = this.parent.$el;
             // To keep scroll position after scrolling
             this.scrollHeight = containerEl.scrollHeight;
-            const currContentHeight =
-                containerEl.lastElementChild.getBoundingClientRect().top -
-                containerEl.firstElementChild.getBoundingClientRect().top;
-
-            this.isBusy = true;
-            this.isLoading = true;
 
             // Load more content
             const result = this.load();
-
-            const finishLoading = function finish() {
-                setTimeout(() => {
-                    this.isBusy = false;
-                }, 1000);
-                // Simulate loading incase API runs fast
-                this.isLoading = false;
-                this.scrollBar = this.hasScrollBar();
-
-                if (this.scrollBar) {
-                    containerEl.scrollTop =
-                        -4 + containerEl.scrollHeight - this.scrollHeight;
-                } else {
-                    containerEl.scrollTop =
-                        containerEl.scrollHeight - currContentHeight;
-                }
-            }.bind(this);
-
             if (typeof result.then == "function") {
                 // Result is a promise
-                result.finally(finishLoading);
+                this.locker = result;
             } else {
-                finishLoading();
+                this.locker = Promise.resolve(result);
             }
-        },
-        hasScrollBar() {
-            const containerEl = this.parent.$el;
-            return containerEl.scrollHeight > containerEl.clientHeight;
-        },
-        setupObserver() {
-            // Watch scroll
-            this.parent.$el.addEventListener("scroll", this.onScroll);
 
-            // Watch inner items
-            this.mutationObserver = new MutationObserver(() => {
-                if (!this.isBusy) {
-                    this.scrollBar = this.hasScrollBar();
-                }
-            });
-
-            this.mutationObserver.observe(this.parent.$el, {
-                childList: true,
-                subtree: true,
-            });
+            this.locker.then(([list]) => {
+                // Append result
+                console.log(list);
+                this.isReachedAllData = !list || list.length == 0;
+                setTimeout(() => {
+                    // If current data is not enought, need to load more
+                    if (this.isReachedTop && !this.isReachedAllData) {
+                        containerEl.scrollTop = containerEl.scrollHeight;
+                        this.locker.finally(this.loadMore);
+                    }
+                }, 1000);
+            }).finally(() => {
+                this.isLoading = false;
+                containerEl.scrollTop = -4 + containerEl.scrollHeight - this.scrollHeight;
+            })
         },
-        checkScroll() {
-            if (this.isBusy == true || this.isLoading == true) {
-                return;
+        onReachingTopIntersect([evt]) {
+            this.isReachedTop = evt.isIntersecting;
+            if (evt.isIntersecting == true && this.isReachedAllData == false) {
+                this.locker.finally(this.loadMore);
             }
-            this.scrollBar = this.hasScrollBar();
-
-            const containerEl = this.parent.$el;
-            this.isLoading = containerEl.scrollTop == 0 && this.hasScrollBar();
-
-            if (this.isLoading == true) {
-                this.onLoadMore();
-            }
-        },
-        onScroll() {
-            setTimeout(this.checkScroll, 0);
         },
     },
 };
 </script>
 
-<style>
+<style lang="scss">
 .infinity-scroll-container {
-    position: relative;
-}
-
-.infinity-scroll {
-    position: absolute;
-    z-index: 9;
-}
-
-.infinity-scroll--top {
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
+    .loading-detector {
+        height: 2px;
+        width: 100%;
+        background-color: transparent;
+    }
 }
 </style>

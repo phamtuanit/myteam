@@ -119,7 +119,7 @@ const SEARCH_TEMPLATE = {
                 { range: { created: {} } },
                 {
                     multi_match: {
-                        query: "ID & Print",
+                        query: "OK",
                         fields: ["body.html", "body.text"],
                         type: "phrase",
                     },
@@ -208,12 +208,6 @@ export default {
         onClose() {
             this.$emit("close");
         },
-        onLoadingElIntersect([ent]) {
-            this.hasScrollBar = ent.isIntersecting;
-            if (ent.isIntersecting == true && this.isReachedEnd == false) {
-                this.searchLocker.finally(this.loadMore);
-            }
-        },
         onQuote(message) {
             const rawMsg = {...message};
             rawMsg.body.content = rawMsg.body.html;
@@ -259,6 +253,12 @@ export default {
                     this.updateSearchState(res.data);
                     this.confirmContent();
                 });
+        },
+        onLoadingElIntersect([evt]) {
+            this.hasScrollBar = evt.isIntersecting;
+            if (evt.isIntersecting == true && this.isReachedEnd == false) {
+                this.searchLocker.finally(this.loadMore);
+            }
         },
         loadMore() {
             if (this.isReachedEnd) {

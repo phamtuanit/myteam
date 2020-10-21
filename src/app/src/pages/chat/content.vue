@@ -47,7 +47,7 @@
 
         <!-- Content -->
         <v-sheet
-            class="flex-grow-1 overflow-y-auto message-sheet no-border-radius transparent pt-1"
+            class="flex-grow-1 overflow-y-auto message-sheet no-border-radius transparent pt-0"
             v-chat-scroll="{ always: false, smooth: true }"
             ref="messageFeed"
             @click="onRead"
