@@ -337,9 +337,10 @@ const moduleState = {
                 } else {
                     const foundMessage = conv.messages.find(i => i.id == message.id);
                     if (!foundMessage) {
-                        // Remove oldest message
+                        // Remove oldest messages
                         if (conv.messages.length >= MAX_MESSAGES) {
                             conv.messages.splice(0, conv.messages.length - MAX_MESSAGES + 1);
+                            // Update data list state
                             conv.reachedFullHistories = false;
                         }
 

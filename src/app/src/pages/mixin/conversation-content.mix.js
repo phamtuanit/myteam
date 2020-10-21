@@ -39,17 +39,7 @@ export default {
         }
     },
     methods: {
-        onLoadMore() {
-            if (this.conversation._isTemp == true) {
-                return Promise.resolve([]);
-            }
-
-            return this.$store
-                .dispatch("conversations/getConversationContent", {
-                    convId: this.conversation.id,
-                })
-                .catch(console.error);
-        },
+        // Message actions
         onDeleteMessage(message) {
             this.$store
                 .dispatch("conversations/deleteMessage", message)
@@ -109,9 +99,7 @@ export default {
         onRead() {
             const conv = this.conversation;
             if (conv && this.unreadMessages.length > 0) {
-                this.$store
-                    .dispatch("conversations/watchAllMessage", conv.id)
-                    .catch(console.error);
+                this.$store.dispatch("conversations/watchAllMessage", conv.id).catch(console.error);
             }
         },
         onReadMore() {
@@ -131,6 +119,18 @@ export default {
             this.allowReadMore = false;
             const msgSheetEl = this.$refs.messageFeed.$el;
             scrollToBottom(msgSheetEl);
+        },
+        // Load more message
+        onLoadMore() {
+            if (this.conversation._isTemp == true) {
+                return Promise.resolve([]);
+            }
+
+            return this.$store
+                .dispatch("conversations/getConversationContent", {
+                    convId: this.conversation.id,
+                })
+                .catch(console.error);
         },
     }
 }
