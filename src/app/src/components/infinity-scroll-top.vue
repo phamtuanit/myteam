@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { scrollToBottom } from "../utils/layout.js";
 export default {
     props: {
         load: {
@@ -41,7 +42,7 @@ export default {
             // List of message element
             const containerEl = this.parent.$el;
             // To keep scroll position after scrolling
-            this.scrollHeight = containerEl.scrollHeight;
+            const scrollHeight = containerEl.scrollHeight;
 
             // Load more content
             const result = this.load();
@@ -56,16 +57,27 @@ export default {
                 // Append result
                 console.log(list);
                 this.isReachedAllData = !list || list.length == 0;
+                // If current data is not enought, need to load more
                 setTimeout(() => {
-                    // If current data is not enought, need to load more
                     if (this.isReachedTop && !this.isReachedAllData) {
-                        containerEl.scrollTop = containerEl.scrollHeight;
                         this.locker.finally(this.loadMore);
+                    } else {
+                        // Incase loading continuously, scroll to botom
+                        scrollToBottom(containerEl);
                     }
                 }, 1000);
+                
+                // Update scroll position
+                if (this.isReachedTop) {
+                    // Incase user is still at bottom
+                    const currContentHeight = containerEl.lastElementChild.getBoundingClientRect().top - containerEl.firstElementChild.getBoundingClientRect().top;
+                    containerEl.scrollTop = currContentHeight
+                } else {
+                    // Incase user already scrolled to top
+                    containerEl.scrollTop = -4 + containerEl.scrollHeight - scrollHeight;
+                }
             }).finally(() => {
                 this.isLoading = false;
-                containerEl.scrollTop = -4 + containerEl.scrollHeight - this.scrollHeight;
             })
         },
         onReachingTopIntersect([evt]) {
