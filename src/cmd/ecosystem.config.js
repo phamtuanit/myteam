@@ -76,9 +76,17 @@ module.exports = {
             name: "myteam-gateway",
             cwd: "../backend",
             script: "./node_modules/moleculer/bin/moleculer-runner.js",
-            args: ["services/*.gateway.js"],
+            args: ["services/api.gateway.js"],
             out_file: "../logs/myteam-gateway.logs",
             error_file: "../logs/myteam-gateway.error.logs",
+        },
+        {
+            name: "myteam-socket",
+            cwd: "../backend",
+            script: "./node_modules/moleculer/bin/moleculer-runner.js",
+            args: ["services/socket.gateway.js"],
+            out_file: "../logs/myteam-socket.logs",
+            error_file: "../logs/myteam-socket.error.logs",
         },
     ],
 };
