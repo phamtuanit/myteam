@@ -9,7 +9,7 @@
         >
             <Loading
                 :load="loadMore"
-                v-if="!conversation.reachedFullHistories"
+                v-if="messages && messages.length > 0 && !conversation.reachedFullHistories"
                 class="conversation-loading"
             ></Loading>
 
@@ -36,9 +36,9 @@
 
         <Notification
             class="notification"
-            :read-more="allowReadMore"
+            :read-more="hasUnreadMessages"
             :editing="editingMessage != null"
-            @read-more="onReadMore"
+            @read-more="loadUnreadMessages"
             @edit:locate="onLocateEditingMessage"
             @edit:cancel="onCancelEditingMessage"
         />

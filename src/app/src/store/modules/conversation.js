@@ -193,6 +193,17 @@ const moduleState = {
             } else {
                 state.chat.active = conv;
             }
+
+            const notVerifyYet = conv._isTemp != true && !conv.isVerified;
+            if (notVerifyYet) {
+                // Load conversation content
+                this.dispatch("conversations/getConversationContent", {
+                    convId: conv.id,
+                    top: 10,
+                }).then(() => {
+                    conv.isVerified = true;
+                });
+            }
         },
         addConversation(state, conv) {
             if (!conv.messages) {
@@ -923,7 +934,11 @@ const moduleState = {
                         this.dispatch(
                             "conversations/loadLatestConversation",
                             convId
-                        ).catch(console.error);
+                        ).then(conv => {
+                            if (conv) {
+                                conv.isVerified = true;
+                            }
+                        }).catch(console.error);
                         break;
                 }
             }

@@ -56,9 +56,9 @@
             <Loading
                 :load="loadMore"
                 class="conversation-loading"
-                v-if="!conversation.reachedFullHistories && conversation.id"
+                v-if="messages && messages.length > 0 && !conversation.reachedFullHistories && conversation.id"
             ></Loading>
-            <!-- Message -->
+            <!-- Messages -->
             <template v-for="(msg, index) in messages">
                 <MyMessage
                     v-if="msg._isMe == true"
@@ -90,8 +90,8 @@
 
         <Notification
             class="notification"
-            :read-more="allowReadMore"
-            @read-more="onReadMore"
+            :read-more="hasUnreadMessages"
+            @read-more="loadUnreadMessages"
         />
 
         <!-- Input box -->
