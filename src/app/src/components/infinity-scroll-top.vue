@@ -7,8 +7,17 @@
             class="progress-bar"
         ></v-progress-linear>
 
+        <v-skeleton-loader class="skeleton-loader"
+          type="list-item-avatar-three-line"
+        ></v-skeleton-loader>
+
         <!-- Load more detector -->
         <div class="loading-detector" v-intersect="onReachingTopIntersect"></div>
+
+        <v-skeleton-loader class="skeleton-loader"
+          type="list-item-avatar-three-line"
+        >
+        </v-skeleton-loader>
     </div>
 </template>
 
@@ -90,6 +99,24 @@ export default {
         height: 2px;
         width: 100%;
         background-color: transparent;
+    }
+
+    .skeleton-loader {
+        margin-left: 4px;
+        margin-right: 56px;
+
+        .v-skeleton-loader__list-item-avatar-three-line {
+            background: transparent;
+        }
+
+        .v-skeleton-loader__list-item-avatar-three-line {
+            height: 64px;
+        }
+
+        .v-skeleton-loader__list-item-avatar-three-line .v-skeleton-loader__avatar {
+            height: 30px;
+            width: 30px;
+        }
     }
 }
 </style>
