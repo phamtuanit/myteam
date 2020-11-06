@@ -16,39 +16,42 @@ const MIN_LINK_LENGTH_WITH_SPACE_AT_END = 4; // Ie: "t.co " (length 5).
 
 // This was tweak from https://gist.github.com/dperini/729294.
 const URL_REG_EXP = new RegExp(
-	// Group 1: Line start or after a space.
-	'(^|\\s)' +
-	// Group 2: Detected URL (or e-mail).
-	'(' +
-		// Protocol identifier or short syntax "//"
-		// a. Full form http://user@foo.bar.baz:8080/foo/bar.html#baz?foo=bar
-		'(' +
-			'(?:(?:(?:https?|ftp):)?\\/\\/)' +
-			// BasicAuth using user:pass (optional)
-			'(?:\\S+(?::\\S*)?@)?' +
-			'(?:' +
-				// Host & domain names.
-				'(?![-_])(?:[-\\w\\u00a1-\\uffff]{0,63}[^-_]\\.)+' +
-				// TLD identifier name.
-				'(?:[a-z\\u00a1-\\uffff]{2,})' +
-			')' +
-			// port number (optional)
-			'(?::\\d{2,5})?' +
-			// resource path (optional)
-			'(?:[/?#]\\S*)?' +
-		')' +
-		'|' +
-		// b. Short form (either www.example.com or example@example.com)
-		'(' +
-			'(www.|(\\S+@))' +
-			// Host & domain names.
-			'((?![-_])(?:[-\\w\\u00a1-\\uffff]{0,63}[^-_]\\.))+' +
-	// TLD identifier name.
-	'(?:[a-z\\u00a1-\\uffff]{2,})' +
-	')' +
-	')$', 'i' );
-
-const URL_GROUP_IN_MATCH = 2;
+		// protocol identifier (optional)
+		// short syntax // still required
+		"(?:(?:(?:https?|ftp):)?\\/\\/)" +
+		// user:pass BasicAuth (optional)
+		"(?:\\S+(?::\\S*)?@)?" +
+		"(?:" +
+			"(?:localhost)" +
+			"|" +
+			"(?:" +
+				// IP address dotted notation octets
+				// excludes loopback network 0.0.0.0
+				// excludes reserved space >= 224.0.0.0
+				// excludes network & broadcast addresses
+				// (first & last IP address of each class)
+				"(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" +
+				"(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" +
+				"(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" +
+				"|" +
+				// host & domain names, may end with dot
+				// can be replaced by a shortest alternative
+				// (?![-_])(?:[-\\w\\u00a1-\\uffff]{0,63}[^-_]\\.)+
+				"(?:" +
+					"(?:" +
+					"[a-z0-9\\u00a1-\\uffff]" +
+					"[a-z0-9\\u00a1-\\uffff_-]{0,62}" +
+					")?" +
+					"[a-z0-9\\u00a1-\\uffff]\\." +
+				")+" +
+				// TLD identifier name, may end with dot
+				"(?:[a-z\\u00a1-\\uffff]{2,}\\.?)" +
+			")" +
+		")" +
+		// port number (optional)
+		"(?::\\d{2,5})?" +
+		// resource path (optional)
+		"(?:[/?#]\\S*)?" + "$", "i");
 
 // Simplified email test - should be run over previously found URL.
 const EMAIL_REG_EXP = /^[\S]+@((?![-_])(?:[-\w\u00a1-\uffff]{0,63}[^-_]\.))+(?:[a-z\u00a1-\uffff]{2,})$/i;
@@ -223,7 +226,6 @@ export default class AutoLink extends Plugin {
 		// Enqueue change to make undo step.
 		model.enqueueChange( writer => {
 			const linkHrefValue = isEmail( url ) ? `mailto:${ url }` : url;
-
 			writer.setAttribute( 'linkHref', linkHrefValue, range );
 		} );
 	}
@@ -235,9 +237,8 @@ function isSingleSpaceAtTheEnd( text ) {
 }
 
 function getUrlAtTextEnd( text ) {
-	const match = URL_REG_EXP.exec( text );
-
-	return match ? match[ URL_GROUP_IN_MATCH ] : null;
+	const match = URL_REG_EXP.exec( text.trim() );
+	return match ? match[0] : null;
 }
 
 function isEmail( linkHref ) {
