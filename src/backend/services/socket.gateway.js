@@ -121,9 +121,7 @@ module.exports = {
             // Save socket
             this.sockets[user.id] = this.sockets[user.id] || {};
             this.sockets[user.id][socket.id] = socket;
-            this.logger.info(
-                `WS >>> User [${user.id}] has been connected via WebSocket.`
-            );
+            this.logger.info(`WS >>> User [${user.id}] has been connected via WebSocket.`);
 
             // Join to required room
             requiredRooms.forEach((room) => {
