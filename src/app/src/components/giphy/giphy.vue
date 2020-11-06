@@ -142,22 +142,21 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss">
 .giphy-popup-content {
     padding: 0 6px 6px 6px;
     background: #ffffff;
-}
 
-.gifs-content {
-    overflow-y: auto;
-    overflow-x: hidden;
+    .gifs-content {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    img.giphy-gif-img + div {
+        display: none;
+    }
 }
 
 .theme--dark.giphy-popup-content {
     background: #1E1E1E;
-}
-
-.giphy-popup-content img.giphy-gif-img + div {
-    display: none;
 }
 </style>

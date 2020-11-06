@@ -10,8 +10,8 @@ export default {
 };
 </script>
 
-<style scoped>
-.keep-alive-view >>> div[data-active="false"] {
+<style >
+.keep-alive-view > div[data-active="false"] {
     display: none !important;
 }
 </style>

@@ -232,6 +232,11 @@ export default {
 .conversation-content {
     height: 100%;
     width: 100%;
+    background: rgb(243, 242, 241);
+}
+
+.theme--dark .conversation-content {
+    background: #121212;
 }
 
 .conversation-content .notification,

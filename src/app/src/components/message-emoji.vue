@@ -196,7 +196,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .emoji-panel {
     display: flex;
     align-items: center;
@@ -225,9 +225,7 @@ export default {
         transform: scale(1);
     }
 }
-</style>
 
-<style>
 .v-list.emoji-reactors,
 .v-list.emoji-count {
     padding: 4px 0 4px 0;

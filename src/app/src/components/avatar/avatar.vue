@@ -218,10 +218,10 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 /* Avatar effect */
 /* Ref: https://codepen.io/FlorinPop17/pen/drJJzK */
-@keyframes pulse {
+@keyframes avatar-pulse {
     0% {
         transform: scale(0.7);
         box-shadow: 0 0 0 0 rgba(52, 172, 224, 0.8);
@@ -245,7 +245,7 @@ export default {
 .initial-avatar.animated::before,
 .initial-avatar.animated::after {
     /* animation: pulse 1s linear infinite, cycle-colors 6s linear infinite; */
-    animation: pulse 2.5s linear infinite;
+    animation: avatar-pulse 2.5s linear infinite;
     /* border: #fff solid 8px; */
     border-radius: 9999px;
     box-sizing: border-box;

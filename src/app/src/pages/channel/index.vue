@@ -214,15 +214,7 @@ export default {
 };
 </script>
 
-<style scoped>
-.channel-conversation {
-    background: rgb(243, 242, 241);
-}
-
-.channel-conversation.theme--dark {
-    background: #121212;
-}
-
+<style>
 .conversation-context-container {
     height: calc(100vh - 58px);
 }
