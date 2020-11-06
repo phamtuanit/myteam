@@ -19,15 +19,22 @@ module.exports = {
         io: {
             path: "/chat-io",
             secure: true,
+            origins: "*:*",
         },
         port: process.env.IOPORT || sysConf.io.port,
         ip: process.env.HOST || sysConf.gateway.host,
         https: sysConf.ssl.enabled ? {
                   key: fs.readFileSync(path.join(__dirname, "../ssl", "ssl.key")),
                   cert: fs.readFileSync(path.join(__dirname, "../ssl", "ssl.cer")),
-              } : null,
-        cors: {},
-        routes: [],
+        } : null,
+        cors: {
+            // Configures the Access-Control-Allow-Origin CORS header.
+            origin: "*",
+            // Configures the Access-Control-Allow-Methods CORS header. 
+            methods: ["GET", "OPTIONS"],
+            // Configures the Access-Control-Allow-Headers CORS header.
+            allowedHeaders: ["*"],
+        },
     },
 
     /**
@@ -80,7 +87,6 @@ module.exports = {
          * @returns {Promise}
          */
         async httpHandler(req, res, next) {
-            // Do nothing
             return next();
         },
         startSocket() {
