@@ -204,14 +204,14 @@ export default {
 }
 
 .emoji-panel:hover .v-icon.my-reaction {
-    animation: opacity 1s linear infinite;
+    animation: my-reaction-opacity 1s linear infinite;
 }
 
 .emoji-panel:hover .v-icon:not(.my-reaction) {
     cursor: default;
 }
 
-@keyframes opacity {
+@keyframes my-reaction-opacity {
     0% {
         opacity: 1;
         transform: scale(1);
