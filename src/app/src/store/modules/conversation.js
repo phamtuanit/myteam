@@ -139,10 +139,7 @@ function handleWSConversation(socket, state, commit, act, data) {
         case "left":
         case "updated":
             if (payload.subscribers.includes(me.id)) {
-                this.dispatch(
-                    "conversations/loadLatestConversation",
-                    convId
-                ).catch(console.error);
+                this.dispatch("conversations/loadLatestConversation", convId).catch(console.error);
             } else {
                 commit("removeConv", convId);
             }
@@ -528,22 +525,26 @@ const moduleState = {
 
                 // Load subscriber information
                 if (conv.subscribers && conv.subscribers.length > 0) {
+                    const subscribers = [...new Set(conv.subscribers)]; // unique subscribers
+                    conv.subscribers = [];
                     // Get user info
-                    const users = await this.dispatch(
-                        "users/resolve",
-                        conv.subscribers
-                    );
-                    conv.subscribers = users;
-
-                    // Update conversation name
-                    if (!conv.name) {
-                        const friends = conv.subscribers.filter(
-                            user => !user._isMe
-                        );
-                        if (friends.length > 0) {
-                            conv.name = friends[0].fullName;
+                        this.dispatch("users/require", subscribers).then(users => {
+                        if (!users) {
+                            console.warn("Could not load subscribers", conv.id);
+                            return;
                         }
-                    }
+                        conv.subscribers.push(...users);
+
+                        // Update conversation name
+                        if (!conv.name) {
+                            const friends = conv.subscribers.filter(
+                                user => !user._isMe
+                            );
+                            if (friends.length > 0) {
+                                conv.name = friends[0].fullName;
+                            }
+                        }
+                    });
                 }
 
                 // Add message

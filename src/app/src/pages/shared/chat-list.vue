@@ -53,7 +53,7 @@
                 v-model="activatedConv"
                 class="conversation-list flex-grow-1 overflow-y-auto"
             >
-                <Conversation
+                <ConversationItem
                     :conversation="chat"
                     v-for="chat in convList"
                     :key="chat.id || chat._id"
@@ -67,7 +67,7 @@
 <script>
 import { fillHeight } from "../../utils/layout.js";
 import UserAvatar from "../../components/avatar/user-avatar.vue";
-import Conversation from "../../components/conversation-item.vue";
+import ConversationItem from "../../components/conversation-item.vue";
 export default {
     props: {
         list: Array,
@@ -77,7 +77,7 @@ export default {
             default: false,
         },
     },
-    components: { UserAvatar, Conversation },
+    components: { UserAvatar, ConversationItem },
     data() {
         return {
             searchText: null,

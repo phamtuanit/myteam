@@ -3,7 +3,7 @@ const moduleState = {
     namespaced: true,
     state: {
         all: [],
-        requireList: new Set(),
+        requireList: {},
         me: null,
         moduleState: "startup",
     },
@@ -22,21 +22,11 @@ const moduleState = {
             state.me = user;
             state.all.push(user);
         },
-        require(state, userIds) {
-            const userCache = state.all;
-            if (Array.isArray(userIds)) {
-                userIds.forEach(ui => {
-                    const existingUser = userCache.find(i => i.id == ui);
-                    if (!existingUser && !state.requireList.has(ui)) {
-                        state.requireList.add(ui);
-                    }
-                });
-            } else {
-                const existingUser = userCache.find(i => i.id == userIds);
-                if (!existingUser && !state.requireList.has(userIds)) {
-                    state.requireList.add(userIds);
-                }
-            }
+        require(state, { id, info }) {
+            state.requireList[id] = info;
+        },
+        clearRequired(state, userId) {
+            delete state.requireList[userId];
         },
         cache(state, users) {
             const userCache = state.all;
@@ -49,7 +39,6 @@ const moduleState = {
                         user.status = user.status || "off";
                         userCache.push(user);
                     }
-                    state.requireList.delete(user.id);
                 });
             } else {
                 const existingUser = userCache.find(i => i.id == users.id);
@@ -59,7 +48,6 @@ const moduleState = {
                     users.status = users.status || "off";
                     userCache.push(users);
                 }
-                state.requireList.delete(users.id);
             }
         },
         setStatus(state, { user, status }) {
@@ -72,10 +60,49 @@ const moduleState = {
             await this.dispatch("users/setupSocket");
             commit("setModuleState", "initialized");
         },
-        require({ commit }, userId) {
-            commit("require", userId);
+        async require({ state, commit }, userIds) {
+            if (Array.isArray(userIds)) {
+                const refUsers = [];
+                userIds.forEach(ui => {
+                    let refUser = state.requireList[ui] || state.all.find(i => i.id == ui);
+                    if (!refUser) {
+                        refUser = {
+                            id: ui,
+                            firstName: null,
+                            lastName: null,
+                            fullName: ui,
+                            mail: null,
+                            phone: null,
+                            role: 100,
+                            status: "off",
+                            userName: ui,
+                        };
+                        commit("require", { id: ui, info: refUser});
+                    }
+                    refUsers.push(refUser);
+                });
+                return refUsers;
+            } else {
+                const ui = userIds;
+                let refUser = state.requireList[ui] || state.all.find(i => i.id == ui);
+                if (!refUser) {
+                    refUser = {
+                        id: ui,
+                        userName: ui,
+                        firstName: null,
+                        lastName: null,
+                        fullName: ui,
+                        mail: null,
+                        phone: null,
+                        role: 100,
+                        status: "off",
+                    };
+                    commit("require", { id: ui, info: refUser});
+                }
+                return refUser;
+            }
         },
-        async resolve({ commit, getters }, userId) {
+        async resolve({ commit, state, getters }, userId) {
             const users = Array.isArray(userId) ? userId : [userId];
             const result = {};
             const remainUserIds = [];
@@ -94,10 +121,22 @@ const moduleState = {
             // Request more from Server
             if (remainUserIds.length > 0) {
                 const userList = (await service.getByIds(remainUserIds)).data;
+                const userToBeCache = [];
                 userList.forEach(userInfo => {
                     result[userInfo.id] = userInfo;
+                    if (state.requireList.length > 0) {
+                        const refUser = state.requireList[userInfo.id];
+                        if (refUser) {
+                            // Update user information and keep reference
+                            Object.assign(refUser, userInfo);
+                            commit("clearRequired", userInfo.id);
+                            userToBeCache.push(refUser);
+                            return;
+                        }
+                    }
+                    userToBeCache.push(userInfo);
                 });
-                commit("cache", userList);
+                commit("cache", userToBeCache);
             }
 
             return Array.isArray(userId)
@@ -105,14 +144,25 @@ const moduleState = {
                 : Object.values(result)[0];
         },
         async resolveAll({ state, commit }) {
-            if (state.requireList.size > 0) {
-                const res = await service.getByIds(
-                    Array.from(state.requireList)
-                );
+            const requireList = Object.keys(state.requireList);
+            if (requireList.length > 0) {
+                const res = await service.getByIds(requireList);
                 const users = res.data;
 
                 if (users && users.length > 0) {
-                    commit("cache", users);
+                    const toBeCached = [];
+                    users.forEach(user => {
+                        const refUser = state.requireList[user.id];
+                        if (refUser) {
+                            // Update user information and keep reference
+                            Object.assign(refUser, user);
+                            commit("clearRequired", user.id);
+                            toBeCached.push(refUser);
+                            return;
+                        }
+                        toBeCached.push(user);
+                    });
+                    commit("cache", toBeCached);
                 }
             }
         },

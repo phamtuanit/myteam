@@ -170,52 +170,8 @@ module.exports = {
         });
     },
     end(commit) {
-        commit("setAppState", "finished");
+        commit("setAppState", "ready");
         commit("setInitialization", true);
         console.info("Application is ready");
-        // informApplication();
     },
 };
-
-// function informApplication() {
-//     // Notify Desktop app
-//     const bus = window.IoC.get("bus");
-
-//     const Axios = require("axios");
-//     const axiosInstance = Axios.create({
-//         baseURL:
-//             config.env == "prd"
-//                 ? window.location.origin
-//                 : config.server.address,
-//     });
-//     axiosInstance.get("/application.json").then(res => {
-//         const { latest_version } = res.data;
-//         const icon = `<i class="v-icon notranslate mdi mdi-download-outline"></i>`;
-//         const filePath = `/attachments/application/myteam-win-portable.${latest_version}.exe`;
-//         let msg = `<span>Get Desktop application <a href="${filePath}" target="_blank" class="ml-1 white--text" style="text-decoration:none">${icon}</a></span>`;
-//         if (!window.isElectron) {
-//             // setTimeout(() => {
-//             //     bus.emit("show-snack", {
-//             //         message: msg,
-//             //         type: "info",
-//             //         timeout: 10000,
-//             //     });
-//             // }, 2000);
-//         } else {
-//             if (
-//                 !window.app ||
-//                 !window.app.version ||
-//                 latest_version != window.app.version
-//             ) {
-//                 msg = `<span>New version available V${latest_version} <a href="${filePath}" target="_blank" class="ml-1 white--text" style="text-decoration:none">${icon}</a></span>`;
-//                 setTimeout(() => {
-//                     bus.emit("show-snack", {
-//                         message: msg,
-//                         type: "info",
-//                         timeout: 10000,
-//                     });
-//                 }, 2000);
-//             }
-//         }
-//     });
-// }

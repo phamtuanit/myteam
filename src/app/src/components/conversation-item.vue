@@ -10,12 +10,12 @@
         }"
     >
         <template v-if="!conversation.channel">
-            <UserAvatar :user="targetUser" :infinity="hasNewMessage" />
+            <UserAvatar :user="user" :infinity="hasNewMessage" />
 
             <v-list-item-content class="py-1 px-2 content__text">
                 <v-list-item-title
                     class="subtitle-2 mb-0"
-                    v-text="conversation.name"
+                    v-text="name"
                 ></v-list-item-title>
                 <v-list-item-subtitle
                     v-if="recentMessage || conversation._isTemp"
@@ -33,7 +33,7 @@
                 :class="{ 'font-weight-bold': hasNewMessage }"
             >
                 <v-icon size="15">mdi-pound</v-icon>
-                <span class="ml-1" v-text="conversation.name"></span>
+                <span class="ml-1" v-text="name"></span>
             </v-list-item-title>
         </template>
     </v-list-item>
@@ -50,8 +50,11 @@ export default {
         unreadMessages: vm.conversation.meta.unreadMessages,
     }),
     computed: {
-        targetUser() {
-            if (this.conversation) {
+        hasNewMessage() {
+            return this.unreadMessages.length > 0;
+        },
+        user() {
+            if (!this.conversation.channel && this.conversation.subscribers) {
                 const friends = this.conversation.subscribers.filter(
                     user => !user._isMe
                 );
@@ -60,11 +63,15 @@ export default {
                 }
             }
             // Dummy data
-            return {};
+            return null;
         },
-        hasNewMessage() {
-            return this.unreadMessages.length > 0;
-        },
+        name() {
+            if (this.user) {
+                return this.user.fullName || this.user.firstName + ', ' + this.user.lastName
+            }
+
+            return this.conversation.name;
+        }
     },
     watch: {
         messages() {

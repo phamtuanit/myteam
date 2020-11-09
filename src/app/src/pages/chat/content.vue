@@ -9,7 +9,7 @@
             <!-- User info -->
             <v-list-item class="px-4 ma-0">
                 <Avatar
-                    :user-name="conversation.name"
+                    :user-name="conversationName"
                     :src="destUser.avatar"
                     :size="30"
                     class="ml-1"
@@ -17,7 +17,7 @@
                 <!-- User name -->
                 <v-list-item-title
                     class="title ml-3"
-                    v-text="conversation.name"
+                    v-text="conversationName"
                 ></v-list-item-title>
 
                 <v-spacer></v-spacer>
@@ -141,7 +141,7 @@ export default {
     },
     computed: {
         destUser() {
-            if (this.conversation) {
+            if (this.conversation && !this.conversation.channel ) {
                 const subscribers = this.conversation.subscribers.filter(
                     user => !user._isMe
                 );
@@ -149,8 +149,14 @@ export default {
                     return subscribers[0];
                 }
             }
-            return {};
+            return null;
         },
+        conversationName() {
+            if (this.destUser) {
+                return this.destUser.fullName || this.destUser.firstName + ', ' + this.destUser.lastName
+            }
+            return this.conversation.name;
+        }
     },
     created() {
         this.bus = window.IoC.get("bus");
