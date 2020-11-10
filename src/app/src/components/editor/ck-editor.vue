@@ -78,10 +78,8 @@ export default {
 
         if (simpleUpload && !simpleUpload.uploadUrl) {
             const config = require("../../conf/system.json");
-            const baseUrl =
-                config.env == "prd"
-                    ? window.location.origin
-                    : config.server.address;
+            // eslint-disable-next-line no-undef
+            const baseUrl = APP_PRODUCTION ? window.location.origin : config.server.address;
             simpleUpload.uploadUrl = baseUrl + config.attachment.url;
 
             if (simpleUpload.id) {
