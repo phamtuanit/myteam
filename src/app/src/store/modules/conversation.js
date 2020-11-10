@@ -292,11 +292,12 @@ const moduleState = {
             let conv;
             let convIndex = -1;
             let convGroup;
-            [state.channel.all, state.chat.all].forEach(convItems => {
+            [state.channel.all, state.chat.all].find(convItems => {
                 convIndex = convItems.findIndex(c => c.id == convId);
                 if (convIndex >= 0) {
                     conv = convItems[convIndex];
                     convGroup = convItems;
+                    return true;
                 }
             });
 
@@ -306,10 +307,7 @@ const moduleState = {
                         conv.meta.unreadMessages.push(message);
 
                         // Push information to unread
-                        const unread =
-                            conv.channel == true
-                                ? state.channel.unread
-                                : state.chat.unread;
+                        const unread = conv.channel == true ? state.channel.unread : state.chat.unread;
                         const foundConv = unread.find(c => c.id == convId);
                         if (!foundConv) {
                             unread.push(conv);
@@ -700,19 +698,11 @@ const moduleState = {
             return convInfo;
         },
         async activeChat({ commit, state }, convId) {
-            const conv = state.channel.all
-                .concat(state.chat.all)
-                .find(c => (c.id || c._id) == convId);
+            const conv = state.channel.all.concat(state.chat.all).find(c => (c.id || c._id) == convId);
             if (conv) {
-                const currentConv =
-                    conv.channel == true
-                        ? state.channel.active
-                        : state.chat.active;
+                const currentConv = conv.channel == true ? state.channel.active : state.chat.active;
                 if (currentConv) {
-                    if (
-                        currentConv.id === conv.id ||
-                        (currentConv._id && currentConv._id === conv._id)
-                    ) {
+                    if (currentConv.id === conv.id || (currentConv._id && currentConv._id === conv._id)) {
                         // Already activated
                         return conv;
                     }
@@ -795,9 +785,7 @@ const moduleState = {
         },
         async getConversationContent({ state }, { convId, top, before }) {
             if (typeof convId === "number") {
-                const conv = state.channel.all
-                    .concat(state.chat.all)
-                    .find(c => c.id == convId);
+                const conv = state.channel.all .concat(state.chat.all) .find(c => c.id == convId);
 
                 if (!conv) {
                     console.warn("The conversation could not be found.", convId);
