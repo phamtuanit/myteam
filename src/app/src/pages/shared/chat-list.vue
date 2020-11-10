@@ -197,9 +197,7 @@ export default {
             // Request searching
             this.searchLocker = new Promise(resolve => {
                 const list = this.list.filter(conv =>
-                    conv.name
-                        .toLowerCase()
-                        .includes(this.searchText.toLowerCase())
+                    conv.name.toLowerCase().includes(this.searchText.toLowerCase())
                 );
                 resolve(list);
             }).then(list => {
