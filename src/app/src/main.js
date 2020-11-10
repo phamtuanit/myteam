@@ -13,7 +13,8 @@ Vue.use(VueRouter);
 const router = require("./plugins/vue-router").default(store);
 
 // Check electron environment
-window.isElectron = typeof process != "undefined" && process.platform != "browser";
+// eslint-disable-next-line no-undef
+window.isElectron = APP_PRODUCTION && typeof process != "undefined" && process.platform != "browser";
 if (window.isElectron == true) {
     setupElectronEnv();
 } else {

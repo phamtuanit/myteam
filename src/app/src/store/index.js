@@ -8,7 +8,6 @@ window.IoC.register("bus", eventBus);
 
 const Vuex = require("vuex");
 const Vue = require("vue").default;
-const sysConfig = require("../conf/system.json");
 const createLogger = require("vuex/dist/logger");
 const conversationModule = require("./modules/conversation.js");
 const userModule = require("./modules/user");
@@ -17,7 +16,8 @@ const appStateMap = require("./app-state.js");
 const plugins = [];
 
 // Prepare plugins
-if (sysConfig.env != "prd") {
+// eslint-disable-next-line no-undef
+if (!APP_PRODUCTION) {
     plugins.push(createLogger());
 }
 

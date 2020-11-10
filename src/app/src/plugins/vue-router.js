@@ -2,12 +2,14 @@ import VueRouter from "vue-router";
 import Preparation from "../pages/preparation.vue";
 import Main from "../pages/main.vue";
 import Chat from "../pages/chat/index.vue";
+import Channel from "../pages/channel/index.vue";
 
 export default function init(store) {
     VueRouter.prototype.updateQuery = function update(query) {
         const newQuery = JSON.parse(JSON.stringify(query));
         return this.replace({ query: newQuery });
     }
+
     const router = new VueRouter({
         routes: [
             { path: "/", name: "root", redirect: { name: "preparation" } },
@@ -34,7 +36,7 @@ export default function init(store) {
                     {
                         name: "app-channel",
                         path: "channel",
-                        component: () => import(/* webpackPreload: true */ "../pages/channel/index.vue"),
+                        component: Channel,
                     },
                 ],
             },
@@ -63,7 +65,7 @@ export default function init(store) {
             delete to.query["next-to"];
         }
 
-        if (to.name.includes("error")) {
+        if (to.name && to.name.includes("error")) {
             return next();
         }
 

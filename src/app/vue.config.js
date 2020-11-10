@@ -1,18 +1,28 @@
 const path = require("path");
+const webpack = require("webpack");
 
 // configure to build CKEditor
 const CKEditorWebpackPlugin = require("@ckeditor/ckeditor5-dev-webpack-plugin");
 const { styles } = require("@ckeditor/ckeditor5-dev-utils");
+const systemConfig = require("./src/conf/system.json");
+
+const isProductionMode = process.env.NODE_ENV === "production" || systemConfig.env === "prd";
+const buildTarget = isProductionMode ? "electron-renderer" : "web";
+console.info("Run mode:", isProductionMode ? "PRD" : "DEV");
+console.info("Build target:", buildTarget);
 
 module.exports = {
     configureWebpack: {
         devtool: "source-map",
-        target: "electron-renderer",
+        target: buildTarget,
         plugins: [
             // CKEditor needs its own plugin to be built using webpack.
-            new CKEditorWebpackPlugin({
-                // See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
-                language: "en",
+            // See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
+            new CKEditorWebpackPlugin({ language: "en", }),
+            // Define global variable
+            // https://webpack.js.org/plugins/define-plugin/
+            new webpack.DefinePlugin({
+                "APP_PRODUCTION": isProductionMode,
             }),
         ],
     },
@@ -56,9 +66,7 @@ module.exports = {
             .tap(() => {
                 return styles.getPostCssConfig({
                     themeImporter: {
-                        themePath: require.resolve(
-                            "@ckeditor/ckeditor5-theme-lark"
-                        ),
+                        themePath: require.resolve("@ckeditor/ckeditor5-theme-lark"),
                     },
                     minify: true,
                 });
@@ -78,17 +86,8 @@ module.exports = {
                     artifactName: "${name}-${os}-portable.${version}.exe",
                 },
             },
-            chainWebpackMainProcess: config => {
-                // Chain webpack config for electron main process only
-            },
-            chainWebpackRendererProcess: config => {
-                // Chain webpack config for electron renderer process only
-                // The following example will set IS_ELECTRON to true in your app
-                config.plugin("define").tap(args => {
-                    args[0]["IS_ELECTRON"] = true;
-                    return args;
-                });
-            },
+            chainWebpackMainProcess: config => { },
+            chainWebpackRendererProcess: config => {},
         },
     },
 };
