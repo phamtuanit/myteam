@@ -1,6 +1,6 @@
 {
     "gateway": {
-        "port": 8083,
+        "port": 8084,
         "host": "0.0.0.0",
         "static": "./public/web",
         "authentication": true,
