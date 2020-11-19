@@ -103,12 +103,13 @@ module.exports = {
 
                 // Delete _id and get status
                 if (result) {
-                    const userIds = result.filter(u => !u.application).map((i) => i.id);
+                    const usersList = result.filter(u => !u.application);
+                    const userIds = usersList.map((i) => i.id);
                     if (userIds && userIds.length > 0) {
                         const statusList = await ctx.call("v1.live.getUserById", { userId: userIds, });
     
-                        for (let index = 0; index < result.length; index++) {
-                            const userInfo = result[index];
+                        for (let index = 0; index < usersList.length; index++) {
+                            const userInfo = usersList[index];
                             cleanDbMark(userInfo);
                             userInfo.status = statusList[index].status;
                         }
