@@ -35,3 +35,5 @@ In the terminal, try the following commands:
 
 ## Debug
 `node --inspect=0.0.0.0:9229 node_modules/moleculer/bin/moleculer-runner services\*.*`
+### Extensions
+`node --inspect=0.0.0.0:9229 node_modules/moleculer/bin/moleculer-runner --repl --hot  extension-services/*.js`
