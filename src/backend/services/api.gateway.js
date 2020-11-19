@@ -45,6 +45,7 @@ module.exports = {
         http2: true,
         // HTTPS server with certificate
         https: sysConf.ssl.enabled ? {
+            allowHTTP1: true,
             key: fs.readFileSync(path.join(__dirname, "../ssl",  "ssl.key")),
             cert: fs.readFileSync(path.join(__dirname, "../ssl", "ssl.cer")),
         } : null,
