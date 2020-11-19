@@ -75,9 +75,7 @@ module.exports = class HandlerBase {
             case "getPinned":
                 return await this.getPinnedMessage();
             case "add":
-                latestMessage = await this.addMessage(this.message).then(
-                    cleanDbMark
-                );
+                latestMessage = await this.addMessage(this.message).then(cleanDbMark);
                 break;
             case "update":
                 latestMessage = await this.editMessage(this.message);
@@ -114,9 +112,7 @@ module.exports = class HandlerBase {
                 };
                 break;
             case "delete":
-                latestMessage = await this.deleteMessage(this.message).then(
-                    cleanDbMark
-                );
+                latestMessage = await this.deleteMessage(this.message).then(cleanDbMark);
                 break;
 
             default:
@@ -134,18 +130,14 @@ module.exports = class HandlerBase {
     async checkConversationInfo() {
         // Verify conversation
         const conversationId = parseInt(this.convId);
-        const convInfo = await this.ctx.call(
-            "v1.conversations.getConversationById",
+        const convInfo = await this.ctx.call("v1.conversations.getConversationById",
             {
                 id: conversationId,
             }
         );
 
         if (!convInfo) {
-            throw new Errors.MoleculerClientError(
-                "The conversation could not be found.",
-                404
-            );
+            throw new Errors.MoleculerClientError("The conversation could not be found.", 404);
         }
 
         this.convInfo = convInfo;
@@ -194,11 +186,7 @@ module.exports = class HandlerBase {
                     userId: subscriberId,
                     message: msgQueue,
                 }).catch((error) => {
-                    this.logger.warn(
-                        "Could not save message to queue.",
-                        msgQueue,
-                        error
-                    );
+                    this.logger.warn("Could not save message to queue.", subscriberId, msgQueue, error);
                 });
             }
         }
@@ -399,13 +387,8 @@ module.exports = class HandlerBase {
 
         const { user } = this.ctx.meta;
         if (user.id !== existingMessage.from.issuer) {
-            this.logger.warn(
-                `${user.id} are not creator of the message ${messageId}.`
-            );
-            throw new Errors.MoleculerError(
-                "You are not allowed to update this message.",
-                401
-            );
+            this.logger.warn(`${user.id} are not creator of the message ${messageId}.`);
+            throw new Errors.MoleculerError("You are not allowed to update this message.", 401);
         }
 
         message = this.processMessage(this.message);
@@ -653,7 +636,7 @@ module.exports = class HandlerBase {
                 message = newMsg || message;
             }
         } catch (error) {
-            console.warn("Cannot process message.", error);
+            this.logger.warn("Cannot process message.", error);
         }
         return message;
     }

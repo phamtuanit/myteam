@@ -1,5 +1,4 @@
 "use strict";
-const Errors = require("moleculer").Errors;
 const DBCollectionService = require("../mixins/collection.db.mixin");
 const { cleanDbMark } = require("../utils/entity");
 const HandlerFactory = require("../message-handler/factory.js");
@@ -120,11 +119,7 @@ module.exports = {
             },
             async handler(ctx) {
                 const { conversation, body } = ctx.params;
-                const { user } = ctx.meta;
-
-                const controller = this.controllerFactory.getController(
-                    body.type
-                );
+                const controller = this.controllerFactory.getController(body.type);
                 return await controller
                     .setConversation(conversation)
                     .setContext(ctx)

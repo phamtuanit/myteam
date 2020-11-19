@@ -99,6 +99,10 @@ module.exports = {
      */
     events: {
         async "messages.*"(message, sender, event) {
+            if (!message.to) {
+                this.logger.warn("Could process this event.", event, message);
+                return;
+            }
             const [, act] = event.split(".");
             const convId = message.to.conversation;
             const esIndex = this.getESConvIndex(convId);
