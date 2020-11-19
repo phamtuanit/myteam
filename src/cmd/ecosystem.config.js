@@ -88,5 +88,13 @@ module.exports = {
             out_file: "../logs/myteam-socket.logs",
             error_file: "../logs/myteam-socket.error.logs",
         },
+        {
+            name: "myteam-extensions",
+            cwd: "../backend",
+            script: "./node_modules/moleculer/bin/moleculer-runner.js",
+            args: ["extension-services/*.js"],
+            out_file: "../logs/myteam-extensions.logs",
+            error_file: "../logs/myteam-extensions.error.logs",
+        },
     ],
 };
