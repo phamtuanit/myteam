@@ -66,6 +66,7 @@ module.exports = {
                 channel: {
                     name: "",
                     subscribers: [userId, String(ctx.meta.user.id)],
+                    applications: [String(ctx.meta.user.id)],
                     channel: false,
                 },
             };
