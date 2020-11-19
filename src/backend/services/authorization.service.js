@@ -23,14 +23,12 @@ module.exports = {
                 /* -1: Allow all traffics
                     0: Admin
                     2: Creator
-                    3: External App
+                    3: Reservation
                     4: Contributor
                     10: Normal member
+                    15: External application / Extension
                 */
-                if (
-                    action.roles &&
-                    Array.isArray(action.roles) &&
-                    !action.roles.includes(-1)
+                if (action.roles && Array.isArray(action.roles) && !action.roles.includes(-1)
                 ) {
                     const user = ctx.meta.user;
                     const userEntity = await ctx.call("v1.users.getUserById", {

@@ -55,11 +55,7 @@ module.exports = {
 
                 if (convInfo.subscribers && convInfo.subscribers.length > 0) {
                     // 2. Save information to user queue and send message to WS
-                    for (
-                        let index = 0;
-                        index < convInfo.subscribers.length;
-                        index++
-                    ) {
+                    for (let index = 0; index < convInfo.subscribers.length; index++) {
                         const subscriberId = convInfo.subscribers[index];
 
                         // 2.1 Save new information to DB of corresponding user cache
@@ -100,14 +96,18 @@ module.exports = {
                         return collection
                             .findOne({ id })
                             .then((convInfo) => {
-                                if (
-                                    convInfo &&
-                                    !convInfo.subscribers.includes(me.id)
-                                ) {
-                                    throw new Errors.MoleculerClientError(
-                                        "You are not member of that conversation.",
-                                        404
-                                    );
+                                if (!convInfo) {
+                                    throw new Errors.MoleculerClientError( "The conversation could not be found.", 404);
+                                }
+
+                                // Check subscribers
+                                if (!me.isApplication && !convInfo.subscribers.includes(me.id)) {
+                                    throw new Errors.MoleculerClientError( "You are not member of that conversation.", 401);
+                                }
+
+                                // Check allowe application
+                                if (me.isApplication && convInfo.channel && (!convInfo.applications || !convInfo.applications.includes(String(me.id)))) {
+                                    throw new Errors.MoleculerClientError( "The application is allowed to access the conversation.", 401);
                                 }
 
                                 return convInfo;
@@ -155,10 +155,7 @@ module.exports = {
 
                 if (user) {
                     if (user !== me.id) {
-                        throw new Errors.MoleculerClientError(
-                            "You don't have permission to do this request.",
-                            404
-                        );
+                        throw new Errors.MoleculerClientError("You don't have permission to do this request.", 404);
                     }
 
                     user = [user];
@@ -171,8 +168,32 @@ module.exports = {
                     $in: user,
                 };
 
-                return this.getDBCollection("conversations").then(
-                    (collection) => {
+                return this.getDBCollection("conversations").then((collection) => {
+                        return collection.find(filter).then((records) => {
+                            return records.map(cleanDbMark);
+                        });
+                    }
+                );
+            },
+        },
+        // Get Chat information
+        getSimpleConversationByUserId: {
+            visibility: "public",
+            params: {
+                id: { type: "string" },
+            },
+            handler(ctx) {
+                const friend = ctx.params.id;
+                const me = ctx.meta.user;
+                const filter = {
+                    query: {
+                        channel: false,
+                        subscribers: {
+                            $all: [friend, me.id],
+                        },
+                    }
+                };
+                return this.getDBCollection("conversations").then((collection) => {
                         return collection.find(filter).then((records) => {
                             return records.map(cleanDbMark);
                         });
@@ -335,9 +356,7 @@ module.exports = {
 
                 // Broadcast message
                 const eventName = `conversation.${existingConv.id}.updated`;
-                this.broker
-                    .broadcast(eventName, existingConv)
-                    .catch(this.logger.error);
+                this.broker .broadcast(eventName, existingConv).catch(this.logger.error);
                 return existingConv;
             },
         },
@@ -359,14 +378,8 @@ module.exports = {
                 const existingConv = await dbCollection.findOne({ id: convId });
                 if (!existingConv) {
                     // The conversation not found
-                    this.logger.warn(
-                        "The conversation could not be found.",
-                        convId
-                    );
-                    throw new Errors.MoleculerError(
-                        "The conversation could not be found.",
-                        404
-                    );
+                    this.logger.warn("The conversation could not be found.", convId);
+                    throw new Errors.MoleculerError("The conversation could not be found.", 404);
                 }
 
                 // Delete tracking information
@@ -386,11 +399,7 @@ module.exports = {
                     existingConv.subscribers.length > 0
                 ) {
                     // 2. Save information to user queue and send message to WS
-                    for (
-                        let index = 0;
-                        index < existingConv.subscribers.length;
-                        index++
-                    ) {
+                    for (let index = 0; index < existingConv.subscribers.length; index++) {
                         const subscriberId = existingConv.subscribers[index];
 
                         // 2.1 Save new information to DB of corresponding user cache
@@ -398,20 +407,14 @@ module.exports = {
                             userId: subscriberId,
                             message: msgQueue,
                         }).catch((error) => {
-                            this.logger.warn(
-                                "Could not save message to queue.",
-                                msgQueue,
-                                error
-                            );
+                            this.logger.warn("Could not save message to queue.", msgQueue, error);
                         });
                     }
                 }
 
                 // Broadcast message
                 const eventName = `conversation.${existingConv.id}.removed`;
-                this.broker
-                    .broadcast(eventName, existingConv)
-                    .catch(this.logger.error);
+                this.broker.broadcast(eventName, existingConv).catch(this.logger.error);
                 return existingConv;
             },
         },
@@ -424,13 +427,8 @@ module.exports = {
         checkCreatorRole(ctx, conv) {
             const { user } = ctx.meta;
             if (user.id !== conv.creator) {
-                this.logger.warn(
-                    `${user.id} are not admin of this channel ${conv.id}.`
-                );
-                throw new Errors.MoleculerError(
-                    "You are not admin of this channel.",
-                    401
-                );
+                this.logger.warn(`${user.id} are not admin of this channel ${conv.id}.`);
+                throw new Errors.MoleculerError("You are not admin of this channel.", 401);
             }
         },
         async createConversation(ctx) {
@@ -441,6 +439,7 @@ module.exports = {
             convInfo.id = new Date().getTime();
             convInfo.creator = user.id;
             convInfo.created = new Date();
+            convInfo.subscribers = [... new Set(convInfo.subscribers || [])];
 
             // Get adapter
             const dbCollection = await this.getDBCollection("conversations");

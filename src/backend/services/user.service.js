@@ -36,7 +36,15 @@ module.exports = {
             async handler(ctx) {
                 const { id } = ctx.params;
                 const dbCollection = await this.getDBCollection("users");
-                return await dbCollection.findOne({ id }).then(cleanDbMark);
+                const user = await dbCollection.findOne({ id }).then(cleanDbMark);
+                if (!user) {
+                    const dbCollection = await this.getDBCollection("applications");
+                    const app = await dbCollection.findOne({ id: id }).then(cleanDbMark);
+                    app.application = true;
+                    app.fullName = app.name || app.fullName;
+                    return app;
+                }
+                return user;
             },
         },
         getUser: {
@@ -58,13 +66,10 @@ module.exports = {
                 const { user: loggedUser } = ctx.meta;
 
                 if (!text && !user && loggedUser.role != 0) {
-                    throw new Errors.RequestRejectedError(
-                        "You don't have permission to get all users.",
-                        403
-                    );
+                    throw new Errors.RequestRejectedError("You don't have permission to get all users.", 403);
                 }
 
-                const dbCollection = await this.getDBCollection("users");
+                let dbCollection = await this.getDBCollection("users");
                 const filter = {
                     query: {},
                 };
@@ -86,19 +91,27 @@ module.exports = {
                     filter.search = text;
                 }
 
+                // Find users
                 const result = await dbCollection.find(filter);
+                // Find applicationa
+                dbCollection = await this.getDBCollection("applications");
+                let apps = await dbCollection.find(filter).then(cleanDbMark);
+                if (apps) {
+                    apps = apps.map(app => { app.fullName = app.name || app.fullName; app.application = true; app.status = "on"; return app;});
+                    result.push(...apps);
+                }
 
                 // Delete _id and get status
                 if (result) {
-                    const userIds = result.map((i) => i.id);
-                    const statusList = await ctx.call("v1.live.getUserById", {
-                        userId: userIds,
-                    });
-
-                    for (let index = 0; index < result.length; index++) {
-                        const userInfo = result[index];
-                        cleanDbMark(userInfo);
-                        userInfo.status = statusList[index].status;
+                    const userIds = result.filter(u => !u.application).map((i) => i.id);
+                    if (userIds && userIds.length > 0) {
+                        const statusList = await ctx.call("v1.live.getUserById", { userId: userIds, });
+    
+                        for (let index = 0; index < result.length; index++) {
+                            const userInfo = result[index];
+                            cleanDbMark(userInfo);
+                            userInfo.status = statusList[index].status;
+                        }
                     }
                 }
 
@@ -146,9 +159,7 @@ module.exports = {
                 const update = {
                     $set: user,
                 };
-                return await dbCollection
-                    .updateById(existingUser._id, update)
-                    .then(cleanDbMark);
+                return await dbCollection.updateById(existingUser._id, update).then(cleanDbMark);
             }
         },
     },
@@ -162,13 +173,21 @@ module.exports = {
      * Service started lifecycle event handler
      */
     async started() {
-        const dbCollection = await this.getDBCollection("users");
-        dbCollection.collection.createIndex({
-            firstName: "text",
-            lastName: "text",
-            fullName: "text",
-            mail: "text",
-            phone: "text",
+        await this.getDBCollection("users").then(dbCollection => {
+            dbCollection.collection.createIndex({
+                firstName: "text",
+                lastName: "text",
+                fullName: "text",
+                mail: "text",
+                phone: "text",
+            });
+        });
+
+        await this.getDBCollection("applications").then(dbCollection => {
+            dbCollection.collection.createIndex({
+                name: "text",
+                owner: "text",
+            });
         });
     },
 
