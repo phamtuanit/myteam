@@ -194,7 +194,7 @@ module.exports = {
         // Serve assets from "public" folder. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Serve-static-files
         assets: null, // Ignore auto serving sttaic files
         myAssets: {
-            folders: [process.env.STATIC_DIR] || (Array.isArray(sysConf.gateway.static) && sysConf.gateway.static) || [sysConf.gateway.static] || ["public"],
+            folders: process.env.STATIC_DIR && [process.env.STATIC_DIR] || sysConf.gateway.static || ["public"],
             // Options to `server-static` module
             options: {},
         },
