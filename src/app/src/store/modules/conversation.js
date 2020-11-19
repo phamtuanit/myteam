@@ -554,10 +554,7 @@ const moduleState = {
             commit("setModuleState", "initialized");
         },
         async createConversation({ commit, state }, convInfo) {
-            const invalid =
-                !convInfo ||
-                !convInfo.subscribers ||
-                convInfo.subscribers.length <= 0;
+            const invalid = !convInfo || !convInfo.subscribers || convInfo.subscribers.length <= 0;
             if (invalid) {
                 console.warn("The input data is invalid");
                 return;

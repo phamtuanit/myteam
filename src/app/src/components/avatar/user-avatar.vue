@@ -8,7 +8,7 @@
         bordered
     >
         <Avatar
-            :user-name="user.fullName"
+            :user-name="user.fullName || user.name || user.userName"
             :src="user.avatar"
             :size="size"
             :animation="animation"
