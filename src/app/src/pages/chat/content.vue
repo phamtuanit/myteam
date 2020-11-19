@@ -153,7 +153,7 @@ export default {
         },
         conversationName() {
             if (this.destUser) {
-                return this.destUser.fullName || this.destUser.firstName + ', ' + this.destUser.lastName
+                return this.destUser.fullName || this.destUser.name || this.destUser.firstName + ', ' + this.destUser.lastName
             }
             return this.conversation.name;
         }

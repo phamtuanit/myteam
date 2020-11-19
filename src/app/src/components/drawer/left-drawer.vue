@@ -15,7 +15,7 @@
                     <Avatar
                         :size="40"
                         v-on="on"
-                        :user-name="me.fullName"
+                        :user-name="me.fullName || me.name || me.userName"
                         class="mx-auto user-avatar"
                         :src="me.avatar"
                     >
@@ -28,7 +28,7 @@
                             <v-list-item-avatar>
                                 <Avatar
                                     :size="48"
-                                    :user-name="me.fullName"
+                                    :user-name="me.fullName || me.name || me.userName"
                                     class="mx-auto"
                                     :src="me.avatar"
                                 ></Avatar>
