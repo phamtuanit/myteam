@@ -63,7 +63,7 @@ module.exports = {
     methods: {
         async findConvByUserId(userId, ctx) {
             const convList = await ctx.call("v1.conversations.getSimpleConversationByUserId", { id: userId }).catch(this.logger.error);
-            return convList[0];
+            return convList && convList[0] || null;
         },
         async createConvForUser(userId, ctx) {
             const request = {

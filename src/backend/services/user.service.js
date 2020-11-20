@@ -34,15 +34,16 @@ module.exports = {
                 id: "string",
             },
             async handler(ctx) {
-                const { id } = ctx.params;
+                const id = ctx.params.id;
                 const dbCollection = await this.getDBCollection("users");
                 const user = await dbCollection.findOne({ id }).then(cleanDbMark);
                 if (!user) {
-                    const dbCollection = await this.getDBCollection("applications");
-                    const app = await dbCollection.findOne({ id: id }).then(cleanDbMark);
-                    app.application = true;
-                    app.fullName = app.name || app.fullName;
-                    return app;
+                    const appDBCollection = await this.getDBCollection("applications");
+                    const app = await appDBCollection.findOne({ id: id }).then(cleanDbMark);
+					if (app) {
+						app.application = true;
+						app.fullName = app.name || app.fullName;
+					}
                 }
                 return user;
             },
@@ -138,9 +139,7 @@ module.exports = {
     methods: {
         async addOrUpdateUser(user) {
             const dbCollection = await this.getDBCollection("users");
-            const existingUser = await dbCollection.findOne({
-                id: user.id,
-            });
+            const existingUser = await dbCollection.findOne({id: user.id,});
 
             if (!existingUser) {
                 user.created = new Date();
