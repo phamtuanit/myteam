@@ -35,7 +35,7 @@ module.exports = {
         // Global Express middleware. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
         use: [],
         // Use HTTP2 server
-        http2: true,
+        http2: false,
         // HTTPS server with certificate
         https: extensionConf.ssl.enabled ? {
             allowHTTP1: true,
