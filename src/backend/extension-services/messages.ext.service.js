@@ -38,6 +38,10 @@ module.exports = {
                 if (!conversationId) {
                     let convInfo = await this.findConvByUserId(userId, ctx);
                     if (!convInfo) {
+                        const userInfo = await ctx.call("v1.users.getUserById", { id: userId, });
+                        if (!userInfo) {
+                            throw new Errors.ValidationError("The user could not be found.", 404);
+                        }
                         convInfo = await this.createConvForUser(userId, ctx);
                     }
                     conversationId = convInfo.id;
