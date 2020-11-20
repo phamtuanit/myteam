@@ -63,7 +63,7 @@ module.exports = {
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: (dbConf.redis.uri + dbConf.redis.transport) || "TCP", //"TCP"
+	transporter: (dbConf.redis.uri + dbConf.redis.transport) || "TCP",
 
 
 	// Define a cacher.
@@ -81,7 +81,7 @@ module.exports = {
 	// Retry policy settings. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Retry
 	retryPolicy: {
 		// Enable feature
-		enabled: false,
+		enabled: true,
 		// Count of retries
 		retries: 5,
 		// First delay in milliseconds.
