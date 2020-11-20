@@ -10,9 +10,6 @@ const Errors = ApiGateway.Errors;
  * @typedef {import('http').IncomingMessage} IncomingRequest Incoming HTTP Request
  * @typedef {import('http').ServerResponse} ServerResponse HTTP Server Response
  */
-
-console.info("ENV:", process.env);
-
 const onBeforeCall = function onBeforeCall(ctx, route, req, res) {
     // Set request headers to context meta
     res.setHeader("x-handler", "m_" + ctx.nodeID);
@@ -26,13 +23,13 @@ const onBeforeCall = function onBeforeCall(ctx, route, req, res) {
 module.exports = {
     name: "extensions.api",
     version: 1,
-    dependencies: ["v1.extensions.auth"],
+    dependencies: ["v1.extensions.auth", "v1.authorization"],
     mixins: [ApiGateway],
 
     // More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
     settings: {
         // Exposed port
-        port: process.env.EXTPORT || extensionConf.gateway.port,
+        port: process.env.PORT || extensionConf.gateway.port,
         // Exposed IP
         ip: process.env.HOST || extensionConf.gateway.host,
         // Global Express middleware. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
@@ -41,6 +38,7 @@ module.exports = {
         http2: true,
         // HTTPS server with certificate
         https: extensionConf.ssl.enabled ? {
+            allowHTTP1: true,
             key: fs.readFileSync(path.join(__dirname, "../ssl",  "ssl.key")),
             cert: fs.readFileSync(path.join(__dirname, "../ssl", "ssl.cer")),
         } : null,
@@ -60,6 +58,31 @@ module.exports = {
             maxAge: 3600
         },
         routes: [
+            {
+                // Root
+                path: "/",
+                // Middleware
+                use: [],
+                // Enable/disable logging
+                logging: false,
+                // Whitelist of actions (array of string mask or regex)
+                whitelist: ["**"],
+                // Enable authentication. Implement the logic into `authenticate` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authentication
+                authentication: false,
+                // Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
+                authorization: false,
+                mappingPolicy: "all", // Available values: "all", "restrict"
+                // Action aliases refreshToken
+                aliases: {},
+                // Use bodyparser module
+                bodyParsers: {
+                    json: true,
+                    urlencoded: { extended: true },
+                },
+                callOptions: {
+                    timeout: 3000,
+                },
+            },
             {
                 path: "/api",
                 whitelist: ["*.extensions.**"],
@@ -164,6 +187,5 @@ module.exports = {
     /**
 	 * Service created lifecycle event handler
 	 */
-    created() {
-    }
+    created() { }
 };
