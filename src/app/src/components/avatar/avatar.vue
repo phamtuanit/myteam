@@ -24,6 +24,7 @@ export default {
         },
         userName: {
             type: String,
+            default: "Unknown",
         },
         initials: {
             type: String,
@@ -93,10 +94,7 @@ export default {
             if (!this.isImage) {
                 return (
                     this.backgroundColor ||
-                    this.randomBackgroundColor(
-                        this.userName.length,
-                        this.backgroundColors
-                    )
+                    this.randomBackgroundColor(this.userName ? this.userName.length : 7, this.backgroundColors)
                 );
             }
             return null;
