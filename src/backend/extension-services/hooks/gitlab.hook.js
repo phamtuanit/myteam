@@ -39,7 +39,7 @@ module.exports = {
 
                     const destinations = ctx.params.assignees.map(u => u.username);
                     destinations.forEach(reviewer => {
-                        ctx.call("v1.extensions.messages.postMessages", {user_id: reviewer.replace(/./, "-"), body: {content: messageContent}}).catch(this.logger.error);
+                        ctx.call("v1.extensions.messages.postMessages", {user_id: reviewer.replace(/\./g, "-"), body: {content: messageContent}}).catch(this.logger.error);
                     });
                 }
             },
