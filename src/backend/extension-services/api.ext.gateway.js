@@ -14,10 +14,7 @@ const onBeforeCall = function onBeforeCall(ctx, route, req, res) {
     // Set request headers to context meta
     res.setHeader("x-handler", "m_" + ctx.nodeID);
     ctx.meta.headers = { ...req.headers };
-
-    if (ctx.meta.headers["app-token"]) {
-        ctx.meta.token = ctx.meta.headers["app-token"];
-    }
+    ctx.meta.token = ctx.meta.headers["authentication"]  ctx.meta.headers["app-token"] || ctx.meta.headers["x-gitlab-token"];
 };
 
 module.exports = {
@@ -105,6 +102,29 @@ module.exports = {
                 mappingPolicy: "all", // Available values: "all", "restrict"
                 aliases: {},
                 // Calling options. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Calling-options
+                callingOptions: {},
+                bodyParsers: {
+                    json: {
+                        strict: false,
+                        limit: "1MB",
+                    },
+                    urlencoded: {
+                        extended: true,
+                        limit: "1MB",
+                    },
+                },
+                onBeforeCall: onBeforeCall,
+            },
+            {
+                path: "/webhooks",
+                whitelist: ["*.*hook.*"],
+                use: [],
+                logging: true,
+                autoAliases: true,
+                authentication: extensionConf.gateway.authentication,
+                authorization: extensionConf.gateway.authorization,
+                mappingPolicy: "all", // Available values: "all", "restrict"
+                aliases: {},
                 callingOptions: {},
                 bodyParsers: {
                     json: {
