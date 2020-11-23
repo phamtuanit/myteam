@@ -24,6 +24,9 @@ module.exports = class NotificationWrapper {
             return;
         }
 
+        // Correct body. Trim empty line
+        body = body.split("\n").map(str => str.trim()).filter(str => str != "").join("\n");
+
         if (!("Notification" in window)) {
             alert(body);
             return;

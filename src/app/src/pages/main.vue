@@ -84,19 +84,21 @@ export default {
                 case "added":
                     {
                         // Notify to user vie Notification API
-                        let notifyBody = "Non-html message";
+                        let notifyBody = "Media content";
                         if (
                             message.body.type == "" ||
                             message.body.type == "html"
                         ) {
                             // Convert raw html to text
                             let html = message.body.content;
-                            html = html
-                                .replace(/<img/g, "<span")
-                                .replace(/<\/img/g, "</span");
+                            // Remove image
+                            html = html.replace(/<img/g, "<span").replace(/<\/img/g, "</span");
                             const el = document.createElement("div");
                             el.innerHTML = html;
-                            notifyBody = el.innerText;
+                            // Remove link
+                            const links = el.querySelectorAll("a");
+                            links.forEach(cEl => cEl.remove());
+                            notifyBody = el.innerText || notifyBody;
                         }
 
                         const userId = message.from.issuer;
