@@ -30,7 +30,7 @@ const onBeforeCall = function onBeforeCall(ctx, route, req, res) {
 module.exports = {
     name: "api",
     version: 1,
-    dependencies: ["v1.auth", "v1.authorization"],
+    dependencies: ["v1.auth", "v1.authorization", "v1.live"],
     mixins: [ApiGateway],
 
     // More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
