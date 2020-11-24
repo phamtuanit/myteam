@@ -28,6 +28,7 @@ module.exports = {
                     type: "object",
                     props: {
                         name: { type: "string" },
+                        type: { type: "string", optional: true }
                     },
                 },
             },
@@ -91,6 +92,7 @@ module.exports = {
             auth: true,
             roles: [-1],
             rest: "GET /:id",
+            cache: true,
             params: {
                 id: { type: "string", convert: true }
             },
@@ -157,6 +159,7 @@ module.exports = {
                 app.id = String(Date.now());
                 app.created = new Date();
                 app.role = 15; // default
+                app.type = "sender"; // default
                 return await dbCollection.insert(app).catch(this.logger.error);
             } else {
                 const existingApp = await dbCollection.findOne({ id: app.id, });

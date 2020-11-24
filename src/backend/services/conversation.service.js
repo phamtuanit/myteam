@@ -63,11 +63,7 @@ module.exports = {
                             userId: subscriberId,
                             message: msgQueue,
                         }).catch((error) => {
-                            this.logger.warn(
-                                "Could not save message to queue.",
-                                msgQueue,
-                                error
-                            );
+                            this.logger.warn("Could not save message to queue.", msgQueue, error);
                         });
                     }
                 }
@@ -440,6 +436,11 @@ module.exports = {
             convInfo.creator = user.id;
             convInfo.created = new Date();
             convInfo.subscribers = [... new Set(convInfo.subscribers || [])];
+            if (convInfo.applications && convInfo.applications.length > 0) {
+                convInfo.applications = [... new Set(convInfo.applications)];
+            } else {
+                delete convInfo.applications;
+            }
 
             // Get adapter
             const dbCollection = await this.getDBCollection("conversations");

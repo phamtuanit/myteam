@@ -11,7 +11,7 @@ module.exports = {
     name: "user-queue",
     version: 1,
     settings: {},
-    dependencies: ["v1.auth", "v1.authorization"],
+    dependencies: ["v1.auth", "v1.authorization", "v1.applications"],
     mixins: [DBCollectionService],
 
     /**
@@ -164,21 +164,26 @@ module.exports = {
                 const { userId, message } = ctx.params;
                 const msgEntity = cleanDbMark({ ...message });
 
+                const appInfo = await ctx.call("v1.applications.getAppById", { id: userId });
+                if (appInfo) {
+                    const retrcitAppTypes = ["sender"];
+                    if (!appInfo.type || retrcitAppTypes.inludes(appInfo.type)) {
+                        this.logger.debug("Don't need to save a message into message-queue of an extension application.", userId, appInfo.name);
+                        return;
+                    }
+                }
+
                 try {
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
-                    const res = await dbCollection.insert(msgEntity);
+                    const res = await dbCollection.insert(msgEntity).then(cleanDbMark);
 
                     // Emit event to live user
                     const eventName = `user-queue.${msgEntity.action}`;
                     this.broker.broadcast(eventName, {userId, payload: msgEntity}).catch(this.logger.error);
                     return res;
                 } catch (error) {
-                    this.logger.error(
-                        "Could not store message to queue.",
-                        msgEntity.id,
-                        error
-                    );
+                    this.logger.error("Could not store message to queue.", msgEntity.id, error);
                     throw error;
                 }
             },
@@ -192,10 +197,7 @@ module.exports = {
         verifyUser(ctx, userId) {
             const { user } = ctx.meta;
             if (user.id != userId) {
-                throw new Errors.MoleculerClientError(
-                    "It is not your queue.",
-                    401
-                );
+                throw new Errors.MoleculerClientError("It is not your queue.", 401);
             }
         },
     },
