@@ -107,7 +107,7 @@ module.exports = {
 
                                 // Check allowe application
                                 if (me.isApplication && convInfo.channel && (!convInfo.applications || !convInfo.applications.includes(String(me.id)))) {
-                                    throw new Errors.MoleculerClientError( "The application is allowed to access the conversation.", 401);
+                                    throw new Errors.MoleculerClientError( "The application is not allowed to access the conversation.", 401);
                                 }
 
                                 return convInfo;
