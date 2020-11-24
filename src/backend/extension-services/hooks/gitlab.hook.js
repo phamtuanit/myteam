@@ -21,32 +21,41 @@ module.exports = {
                 changes: { type: "object" },
             },
             async handler(ctx) {
-                if (ctx.params.assignees) {
-                    const mergeStatus = ctx.params.object_attributes.merge_status.replace(/_/g, " ");
-                    const creatorName = ctx.params.user.name;
-                    const { title, state, url } = ctx.params.object_attributes;
-                    const toBranch = ctx.params.object_attributes.target_branch;
-                    const fromBranch = ctx.params.object_attributes.source_branch;
+                const mergeStatus = ctx.params.object_attributes.merge_status.replace(/_/g, " ");
+                const creatorName = ctx.params.user.name;
+                const { title, state, url } = ctx.params.object_attributes;
+                const toBranch = ctx.params.object_attributes.target_branch;
+                const fromBranch = ctx.params.object_attributes.source_branch;
 
-                    const messageContent =
-                            `<div>
-                                <span class="mention">@${creatorName}</span><span> have just ${state} a merge request.</span><br>
-                                <strong>🔔 ${title}</strong><br>
-                                <span>📌 ${fromBranch}  →  ${toBranch}</span><br>
-                                <span>⚡ Action: <code>${state.toUpperCase()}</code></span><br>
-                                <span>📢 Status: <code>${mergeStatus.toUpperCase()}</code></span><br>
-                                <span>🔗 <a target="_blank" rel="noopener noreferrer" href="${url}">View detail</a></span>
-                            </div>`;
+                let messageContent =
+                        `<div>
+                            <span class="mention">@${creatorName}</span><span> have just ${state} a merge request.</span><br>
+                            <strong>🔔 ${title}</strong><br>
+                            <span>📌 ${fromBranch}  →  ${toBranch}</span><br>
+                            <span>⚡ Action: <code>${state.toUpperCase()}</code></span><br>
+                            <span>📢 Status: <code>${mergeStatus.toUpperCase()}</code></span><br>
+                            <span>🔗 <a target="_blank" rel="noopener noreferrer" href="${url}">View detail</a></span>
+                        </div>`;
+                messageContent = messageContent.replace(/\n/g, "");
 
-                    const destinations = ctx.params.assignees.map(u => u.username);
-                    destinations.forEach((reviewer) => {
-                        ctx.call("v1.extensions.messages.postMessages", {
-                            conversation_id: 1588579604801,
-                            user_id: reviewer.replace(/\./g, "-"),
-                            body: { content: messageContent },
-                        }).catch(this.logger.error);
-                    });
-                }
+                // Post a message to Application channel
+                ctx.call("v1.extensions.messages.postMessages", {
+                    conversation_id: 1588579604801,
+                    body: { content: messageContent },
+                })
+                .catch(this.logger.error)
+                .then(() => {
+                    // Post a message to reviewers
+                    if (ctx.params.assignees.length > 0) {
+                        const destinations = ctx.params.assignees.map(u => u.username);
+                        destinations.forEach((reviewer) => {
+                            ctx.call("v1.extensions.messages.postMessages", {
+                                user_id: reviewer.replace(/\./g, "-"),
+                                body: { content: messageContent },
+                            }).catch(this.logger.error);
+                        });
+                    }
+                });
             },
         },
     },
