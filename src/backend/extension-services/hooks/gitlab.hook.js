@@ -31,15 +31,20 @@ module.exports = {
                     const messageContent =
                             `<div>
                                 <span class="mention">@${creatorName}</span><span> have just ${state} a merge request.</span><br>
-                                <strong>⚡ ${title}</strong><br>
-                                <span>📍 ${fromBranch}  →  ${toBranch}</span><br>
+                                <strong>🔔 ${title}</strong><br>
+                                <span>📌 ${fromBranch}  →  ${toBranch}</span><br>
+                                <span>⚡ Action: <code>${state.toUpperCase()}</code></span><br>
                                 <span>📢 Status: <code>${mergeStatus.toUpperCase()}</code></span><br>
                                 <span>🔗 <a target="_blank" rel="noopener noreferrer" href="${url}">View detail</a></span>
                             </div>`;
 
                     const destinations = ctx.params.assignees.map(u => u.username);
-                    destinations.forEach(reviewer => {
-                        ctx.call("v1.extensions.messages.postMessages", {user_id: reviewer.replace(/\./g, "-"), body: {content: messageContent}}).catch(this.logger.error);
+                    destinations.forEach((reviewer) => {
+                        ctx.call("v1.extensions.messages.postMessages", {
+                            conversation_id: 1588579604801,
+                            user_id: reviewer.replace(/\./g, "-"),
+                            body: { content: messageContent },
+                        }).catch(this.logger.error);
                     });
                 }
             },
