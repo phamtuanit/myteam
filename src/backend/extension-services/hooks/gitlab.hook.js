@@ -21,22 +21,46 @@ module.exports = {
                 changes: { type: "object" },
             },
             async handler(ctx) {
+                this.logger.debug("Params >>,", JSON.stringify(ctx.params));
+
+                if (ctx.params.object_attributes.action == "update" && !ctx.params.changes.last_edited_at && !ctx.params.changes.assignees) {
+                    // User just pushed code
+                    this.logger.debug("User just pushed code.");
+                    return;
+                }
+
                 const mergeStatus = ctx.params.object_attributes.merge_status.replace(/_/g, " ");
-                const creatorName = ctx.params.user.name;
-                const { title, state, url } = ctx.params.object_attributes;
+                const user = ctx.params.user;
+                const { title, url, iid, action, state } = ctx.params.object_attributes;
                 const toBranch = ctx.params.object_attributes.target_branch;
                 const fromBranch = ctx.params.object_attributes.source_branch;
+                let destinations = [];
+                if (ctx.params.assignees.length > 0) {
+                    destinations = ctx.params.assignees.map(u => ({ id: u.username.replace(/\./g, "-"), name: u.name }));
+                }
 
+                // Correct user name
+                user.username = user.username.replace(/\./g, "-");
+                const mentionStr = `<span class="mention user-mention" data-mention="@${user.username}" data-user-id="${user.username}">@${user.name}</span>`;
+                let assigneesStr = "";
+                if (destinations.length > 0) {
+                    assigneesStr = destinations.map(u => {
+                        return `<span class="mention user-mention" data-mention="@${u.id}" data-user-id="${u.id}">@${u.name}</span>`;
+                    }).join(", ");
+                    assigneesStr = `<span>🙍‍♂️ Assignees: ${assigneesStr}</span><br>`;
+                }
                 let messageContent =
                         `<div>
-                            <span class="mention">@${creatorName}</span><span> have just ${state} a merge request.</span><br>
+                            ${mentionStr}<span> have just ${state} a merge request #${iid}.</span><br>
                             <strong>🔔 ${title}</strong><br>
-                            <span>📌 ${fromBranch}  →  ${toBranch}</span><br>
-                            <span>⚡ Action: <code>${state.toUpperCase()}</code></span><br>
-                            <span>📢 Status: <code>${mergeStatus.toUpperCase()}</code></span><br>
+                            <span>🗺️ Branch: ${fromBranch}  ⇒  ${toBranch}</span><br>
+                            <span>⚡ Action: <code>${action.toUpperCase()}</code></span><br>
+                            <span>📌 Status: <code>${mergeStatus.toUpperCase()}</code></span><br>
+                            ${assigneesStr}
                             <span>🔗 <a target="_blank" rel="noopener noreferrer" href="${url}">View detail</a></span>
                         </div>`;
-                messageContent = messageContent.replace(/\n/g, "");
+                // Minify message content
+                messageContent = messageContent.split("\n").map(ln => ln.trim()).join("");
 
                 // Post a message to Application channel
                 ctx.call("v1.extensions.messages.postMessages", {
@@ -46,11 +70,14 @@ module.exports = {
                 .catch(this.logger.error)
                 .then(() => {
                     // Post a message to reviewers
-                    if (ctx.params.assignees.length > 0) {
-                        const destinations = ctx.params.assignees.map(u => u.username);
+                    if (destinations.length > 0) {
                         destinations.forEach((reviewer) => {
+                            if (user.username == reviewer.id) {
+                                return; // Don't notify to operator
+                            }
+
                             ctx.call("v1.extensions.messages.postMessages", {
-                                user_id: reviewer.replace(/\./g, "-"),
+                                user_id: reviewer.id.replace(/\./g, "-"),
                                 body: { content: messageContent },
                             }).catch(this.logger.error);
                         });
