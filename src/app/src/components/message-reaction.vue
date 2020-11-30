@@ -63,13 +63,12 @@ export default {
             const borderColor = colors[colorRange[0]][colorRange[1]];
             effectEl.className = "emoji-click-effect";
             effectEl.style.borderColor = borderColor;
-            effectEl.style.top = e.clientY + "px";
-            effectEl.style.left = e.clientX + "px";
+            effectEl.style.top = (e.clientY) + "px";
+            effectEl.style.left = (e.clientX) + "px";
             this.$el.appendChild(effectEl);
             effectEl.addEventListener("animationend", function() {
-                    effectEl.parentElement.removeChild(effectEl);
-                }.bind(this)
-            );
+                effectEl.parentElement.removeChild(effectEl);
+            }.bind(this));
         },
     },
 };
@@ -131,25 +130,27 @@ export default {
 
     div.emoji-click-effect{
         position:fixed;
-        box-sizing:border-box;
-        border-style:solid;
-        border-radius:50%;
+        box-sizing: border-box;
+        border-style: solid;
+        border-radius: 50%;
         animation: emoji-click-effect 0.4s ease-out;
-        z-index:99999;
+        z-index: 99999;
     }
 
     @keyframes emoji-click-effect{
         0% {
-            opacity:1;
-            width:0.5em; height:0.5em;
-            margin:-0.25em;
-            border-width:0.5em;
+            width: 0.25rem;
+            height: 0.25rem;
+            margin: -0.125rem;
+            opacity: 1;
+            border-width: 0.5em;
         }
         100% {
-            opacity:0.2;
-            width:15em; height:15em;
-            margin:-7.5em;
-            border-width:0.03em;
+            opacity: 0.2;
+            width: 8rem;
+            height: 8rem;
+            margin: -4rem;
+            border-width: 0.03em;
         }
     }
 }
