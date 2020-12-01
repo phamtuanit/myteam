@@ -293,28 +293,19 @@ export default {
             const rootEl = document.createElement("div");
             rootEl.innerHTML = content;
 
-            // Reset color and background
-            rootEl.children.forEach(el => {
-                el.style.color = "";
-                el.style.backgroundColor = "";
-            });
-
-            const removeTableStyle = function(el) {
-                // Update table's width
-                el.removeAttribute("style");
-
-                const acceptedEls = ["TABLE", "TBODY", "THEAD", "TH", "TD", "TR"];
-                if (acceptedEls.includes(el.nodeName)) {
-                    el.children.forEach(removeTableStyle);
+            const removeStyle = function (el) {
+                const tableEls = ["TABLE", "TBODY", "THEAD", "TH", "TD", "TR"];
+                if (tableEls.includes(el.nodeName)) {
+                    el.removeAttribute("style");
+                } else {
+                    el.style.font = "";
+                    el.style.color = "";
+                    el.style.backgroundColor = "";
                 }
+                el.children.forEach(removeStyle);
             };
 
-            // Format table
-            const tableEls = rootEl.getElementsByTagName("table");
-            if (tableEls && tableEls.length > 0) {
-                tableEls.forEach(removeTableStyle);
-            }
-
+            removeStyle(rootEl);
             return rootEl.innerHTML.trim();
         },
     },
