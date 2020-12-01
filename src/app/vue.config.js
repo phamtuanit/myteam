@@ -4,9 +4,8 @@ const webpack = require("webpack");
 // configure to build CKEditor
 const CKEditorWebpackPlugin = require("@ckeditor/ckeditor5-dev-webpack-plugin");
 const { styles } = require("@ckeditor/ckeditor5-dev-utils");
-const systemConfig = require("./src/conf/system.json");
 
-const isProductionMode = process.env.NODE_ENV === "production" || systemConfig.env === "prd";
+const isProductionMode = process.env.NODE_ENV === "production";
 const buildTarget = isProductionMode ? "electron-renderer" : "web";
 console.info("Run mode:", isProductionMode ? "PRD" : "DEV");
 console.info("Build target:", buildTarget);
