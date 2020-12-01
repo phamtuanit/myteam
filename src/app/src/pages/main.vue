@@ -181,7 +181,7 @@ export default {
                 });
         },
         onReloadApp() {
-            location.reload();
+            location.reload(true);
         },
         setupZoomModal() {
             const modals = document.body.getElementsByClassName("image-modal");
