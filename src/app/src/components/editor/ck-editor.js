@@ -9,7 +9,7 @@ import BlockQuote from "@ckeditor/ckeditor5-block-quote/src/blockquote.js";
 import Bold from "@ckeditor/ckeditor5-basic-styles/src/bold.js";
 import Italic from "@ckeditor/ckeditor5-basic-styles/src/italic.js";
 import List from "@ckeditor/ckeditor5-list/src/list.js";
-import PasteFromOffice from "@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice";
+// import PasteFromOffice from "@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice";
 import Table from "@ckeditor/ckeditor5-table/src/table.js";
 import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar.js";
 import TableCellProperties from "@ckeditor/ckeditor5-table/src/tablecellproperties";
@@ -66,7 +66,7 @@ Editor.builtinPlugins = [
     Bold,
     Italic,
     List,
-    PasteFromOffice,
+    // PasteFromOffice, // to fix table's width when pasting
     Table,
     TableToolbar,
     TableProperties,

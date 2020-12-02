@@ -301,7 +301,9 @@ export default {
                     el.style.font = "";
                     el.style.color = "";
                     el.style.backgroundColor = "";
+                    el.style.width = "";
                 }
+                el.removeAttribute("width");
                 el.children.forEach(removeStyle);
             };
 
