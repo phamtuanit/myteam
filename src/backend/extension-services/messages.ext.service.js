@@ -1,6 +1,5 @@
 "use strict";
 const Errors = require("moleculer").Errors;
-const HandlerFactory = require("../message-handler/factory.js");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -25,6 +24,7 @@ module.exports = {
                     props: {
                         content: { type: "string" },
                         type: { type: "string", optional: true, default: "html" },
+                        parent_message_ids: { type: "array", items: "number", optional: true },
                     },
                 },
             },

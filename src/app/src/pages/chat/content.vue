@@ -193,6 +193,7 @@ export default {
                 convId: this.chatId,
                 body: {
                     content: html,
+                    parent_message_ids: this.parentMessageIds,
                 },
             };
 

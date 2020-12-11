@@ -114,6 +114,7 @@ module.exports = {
                     props: {
                         type: { type: "string" },
                         content: [{ type: "string" }, { type: "object" }],
+                        parent_message_ids: { type: "array", items: "number", optional: true },
                     },
                 },
             },

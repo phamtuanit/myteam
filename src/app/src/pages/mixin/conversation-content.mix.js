@@ -14,6 +14,7 @@ export default {
             messages: [],
             hasUnreadMessages: false,
             unreadMessages: this.conversation.meta.unreadMessages,
+            parentMessageIds: null, // To keep parent message list when user do quote
         };
     },
     created() {
@@ -30,6 +31,12 @@ export default {
     watch: {
         "unreadMessages"() {
             this.handleScroll();
+        },
+        newMessage(value) {
+            if (!value) {
+                // Reset quote status
+                this.parentMessageIds = null;
+            }
         }
     },
     methods: {
@@ -59,6 +66,9 @@ export default {
                 return;
             }
             this.newMessage = `<blockquote>${message.body.content}</blockquote><p></p>`;
+            const parentMsgIds = (message.body.parent_message_ids && [...message.body.parent_message_ids]) || [];
+            parentMsgIds.push(message.id);
+            this.parentMessageIds = parentMsgIds;
 
             const userId = message.from.issuer;
             if (this.$store.state.users.me.id !== userId) {
@@ -76,11 +86,7 @@ export default {
         },
         onCopy(message) {
             this.onRead();
-            if (
-                !message ||
-                !message.body.content ||
-                (message.body.type != null && message.body.type != "html")
-            ) {
+            if (!message || !message.body.content || (message.body.type != null && message.body.type != "html")) {
                 return;
             }
             this.newMessage = message.body.content;
@@ -106,10 +112,9 @@ export default {
                 return Promise.resolve([]);
             }
 
-            return this.$store
-                .dispatch("conversations/getConversationContent", {
-                    convId: this.conversation.id,
-                }).catch(console.error);
+            return this.$store.dispatch("conversations/getConversationContent", {
+                convId: this.conversation.id,
+            }).catch(console.error);
         },
         handleScroll() {
             const el = this.$refs.messageFeed.$el;

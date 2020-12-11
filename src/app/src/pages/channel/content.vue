@@ -180,6 +180,7 @@ export default {
                 convId: convId,
                 body: {
                     content: html,
+                    parent_message_ids: this.parentMessageIds,
                 },
             };
 
