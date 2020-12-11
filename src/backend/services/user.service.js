@@ -40,10 +40,10 @@ module.exports = {
                 if (!user) {
                     const appDBCollection = await this.getDBCollection("applications");
                     const app = await appDBCollection.findOne({ id: id }).then(cleanDbMark);
-					if (app) {
-						app.application = true;
-						app.fullName = app.name || app.fullName;
-					}
+                    if (app) {
+                        app.application = true;
+                        app.fullName = app.name || app.fullName;
+                    }
                 }
                 return user;
             },

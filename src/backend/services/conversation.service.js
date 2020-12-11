@@ -113,7 +113,7 @@ module.exports = {
                 );
             },
         },
-        getConversation: {
+        getConversationByUser: {
             auth: true,
             roles: [-1],
             cache: true,
@@ -122,7 +122,7 @@ module.exports = {
                 limit: { type: "number", optional: true, convert: true },
                 offset: { type: "number", optional: true, convert: true },
                 sort: { type: "string", optional: true },
-                user: { type: "string", optional: true },
+                user: { type: "string" },
                 channel: {
                     type: "boolean",
                     optional: true,
@@ -164,31 +164,6 @@ module.exports = {
                     $in: user,
                 };
 
-                return this.getDBCollection("conversations").then((collection) => {
-                        return collection.find(filter).then((records) => {
-                            return records.map(cleanDbMark);
-                        });
-                    }
-                );
-            },
-        },
-        // Get Chat information
-        getSimpleConversationByUserId: {
-            visibility: "public",
-            params: {
-                id: { type: "string" },
-            },
-            handler(ctx) {
-                const friend = ctx.params.id;
-                const me = ctx.meta.user;
-                const filter = {
-                    query: {
-                        channel: false,
-                        subscribers: {
-                            $all: [friend, me.id],
-                        },
-                    }
-                };
                 return this.getDBCollection("conversations").then((collection) => {
                         return collection.find(filter).then((records) => {
                             return records.map(cleanDbMark);
@@ -412,6 +387,44 @@ module.exports = {
                 const eventName = `conversation.${existingConv.id}.removed`;
                 this.broker.broadcast(eventName, existingConv).catch(this.logger.error);
                 return existingConv;
+            },
+        },
+        // Get Chat information
+        getSimpleConversationByUserId: {
+            visibility: "public",
+            params: {
+                id: { type: "string" },
+            },
+            handler(ctx) {
+                const friend = ctx.params.id;
+                const me = ctx.meta.user;
+                const filter = {
+                    query: {
+                        channel: false,
+                        subscribers: {
+                            $all: [friend, me.id],
+                        },
+                    }
+                };
+                return this.getDBCollection("conversations").then((collection) => {
+                        return collection.find(filter).then((records) => {
+                            return records.map(cleanDbMark);
+                        });
+                    }
+                );
+            },
+        },
+        getConversationByIdLocal: {
+            visibility: "public",
+            cache: true,
+            params: {
+                id: { type: "number", convert: true },
+            },
+            handler(ctx) {
+                const { id } = ctx.params;
+                return this.getDBCollection("conversations").then((collection) => {
+                    return collection.findOne({ id }).then(cleanDbMark);
+                });
             },
         },
     },

@@ -14,7 +14,7 @@ const onBeforeCall = function onBeforeCall(ctx, route, req, res) {
     // Set request headers to context meta
     res.setHeader("x-handler", "m_" + ctx.nodeID);
     ctx.meta.headers = { ...req.headers };
-    ctx.meta.token = ctx.meta.headers["authentication"]  ctx.meta.headers["app-token"] || ctx.meta.headers["x-gitlab-token"];
+    ctx.meta.token = ctx.meta.headers["authentication"] || ctx.meta.headers["app-token"] || ctx.meta.headers["x-gitlab-token"];
 };
 
 module.exports = {
