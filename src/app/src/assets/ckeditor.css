@@ -23,6 +23,9 @@
     /* Mention */
     --ck-color-mention-background: transparent;
     --ck-color-mention-text: #1e88e5;
+
+    /* Size */
+    --ck-max-height: 60vh;
 }
 
 .ck.ck-form .ck.ck-toolbar.ck-toolbar_compact {

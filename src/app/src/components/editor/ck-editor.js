@@ -9,7 +9,6 @@ import BlockQuote from "@ckeditor/ckeditor5-block-quote/src/blockquote.js";
 import Bold from "@ckeditor/ckeditor5-basic-styles/src/bold.js";
 import Italic from "@ckeditor/ckeditor5-basic-styles/src/italic.js";
 import List from "@ckeditor/ckeditor5-list/src/list.js";
-// import PasteFromOffice from "@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice";
 import Table from "@ckeditor/ckeditor5-table/src/table.js";
 import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar.js";
 import TableCellProperties from "@ckeditor/ckeditor5-table/src/tablecellproperties";
@@ -30,7 +29,6 @@ import TextTransformation from "@ckeditor/ckeditor5-typing/src/texttransformatio
 // Essentials plugin
 import Clipboard from "@ckeditor/ckeditor5-clipboard/src/clipboard";
 import ShiftEnter from "@ckeditor/ckeditor5-enter/src/shiftenter";
-// import Enter from '@ckeditor/ckeditor5-enter/src/enter';
 import Typing from "@ckeditor/ckeditor5-typing/src/typing";
 import Undo from "@ckeditor/ckeditor5-undo/src/undo";
 
@@ -41,7 +39,6 @@ import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import SimpleUploadAdapter from "@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter";
-
 import Link from '@ckeditor/ckeditor5-link/src/link';
 import AutoLink from './plugins/autolink';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
@@ -169,19 +166,14 @@ ClassicEditor.defaultConfig = {
         // You need to configure the image toolbar, too, so it uses the new style buttons.
         toolbar: [
             "imageStyle:alignLeft",
-            "imageStyle:full",
+            "imageStyle:fullSize",
             "imageStyle:alignRight",
         ],
 
         styles: [
-            // This option is equal to a situation where no style is applied.
-            "full",
-
-            // This represents an image aligned to the left.
-            "alignLeft",
-
-            // This represents an image aligned to the right.
-            "alignRight",
+            { name: 'alignLeft', className: 'image-style-align-left', isDefault: true },
+            { name: 'fullSize', title: "Full size", icon: "full", className: 'image-style-full-size'},
+            { name: 'alignRight', className: 'image-style-align-right'}
         ],
     },
     link: {

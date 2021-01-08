@@ -59,13 +59,10 @@ export default {
         },
     },
     created() {
+        this.auth = window.IoC.get("auth");
         const simpleUpload = this.editorConfig.simpleUpload;
-        if (
-            simpleUpload &&
-            (!simpleUpload.headers || !simpleUpload.headers["Authorization"])
-        ) {
+        if (simpleUpload && (!simpleUpload.headers || !simpleUpload.headers["Authorization"])) {
             !simpleUpload.headers && (simpleUpload.headers = {});
-            this.auth = window.IoC.get("auth");
             if (this.auth) {
                 this.auth
                     .getToken()
