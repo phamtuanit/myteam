@@ -23,7 +23,7 @@
                         <v-icon small v-text="currentConvState.activePinnedMessages == true ? 'mdi-pin' : 'mdi-pin-off-outline'"></v-icon>
                     </v-btn>
                     <!-- Search -->
-                    <v-btn icon small class="mr-2"
+                    <v-btn icon small class="mr-2 btn-search"
                             v-show="!activeSearch"
                             title="Search"
                             @click="onSearch" >
