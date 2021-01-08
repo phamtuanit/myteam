@@ -43,7 +43,7 @@
                 <!-- Body -->
                 <v-card-text
                     class="message-item__content-text pa-0 mt-1 hl"
-                    v-html="message.body.content"
+                    v-html="message.body.content + `<div class='clearfix'></div>`"
                 >
                 </v-card-text>
             </v-card>

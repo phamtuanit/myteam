@@ -26,6 +26,14 @@ body::-webkit-scrollbar {
 }
 
 /* Utilities */
+.clearfix::after { 
+    content: "."; 
+    visibility: hidden; 
+    display: block; 
+    height: 0; 
+    clear: both;
+ }
+
 .overflow-y-auto {
     overflow-y: auto !important;
 }
@@ -163,7 +171,7 @@ div.v-subheader {
     margin-bottom: 8px;
 }
 
-.v-application .message-item * > p:last-child {
+.v-application .message-item * > p:last-of-type {
     margin-bottom: 2px;
 }
 

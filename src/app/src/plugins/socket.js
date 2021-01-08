@@ -9,7 +9,7 @@ class Socket {
      * @param {*} path
      */
     constructor(baseUri, path) {
-        this.version = 8;
+        this.version = 10;
         this.baseUri = baseUri;
         this.path = path;
         this.io = null;

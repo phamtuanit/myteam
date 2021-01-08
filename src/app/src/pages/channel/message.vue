@@ -64,12 +64,12 @@
                                 </v-list-item>
                                 <template v-if="isMyMessage">
                                     <v-list-item @click="onEdit">
-                                        <v-list-item-title class="color-1"
+                                        <v-list-item-title class="blue--text text--darken-4"
                                             >Edit</v-list-item-title
                                         >
                                     </v-list-item>
                                     <v-list-item @click="onDelete">
-                                        <v-list-item-title class="red--text"
+                                        <v-list-item-title class="red--text text--darken-1"
                                             >Delete</v-list-item-title
                                         >
                                     </v-list-item>
@@ -81,7 +81,7 @@
                 <!-- Content -->
                 <v-card-text
                     class="message-item__content-text px-3 pt-0 pb-0 mt-1 hl"
-                    v-html="message.body.content"
+                    v-html="message.body.content + `<div class='clearfix'></div>`"
                 ></v-card-text>
 
                 <!-- Actions -->

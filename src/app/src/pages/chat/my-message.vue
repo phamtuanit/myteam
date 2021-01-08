@@ -17,7 +17,7 @@
                 @click="onDeleteMessage"
                 v-if="isAvailable"
             >
-                <v-icon small>mdi-delete</v-icon>
+                <v-icon small color="red">mdi-delete</v-icon>
             </v-btn>
         </div>
 
@@ -51,7 +51,7 @@
                 <!-- Body -->
                 <v-card-text
                     class="message-item__content-text pa-0 my-0 hl"
-                    v-html="message.body.content"
+                    v-html="message.body.content + `<div class='clearfix'></div>`"
                 >
                 </v-card-text>
             </v-card>
