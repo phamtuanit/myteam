@@ -50,6 +50,7 @@ module.exports = {
                 // Prepare folder
                 const subDir = path.join(
                     fileType,
+                    `${now.getFullYear()}${ now.getMonth() + 1 }`,
                     ctx.params.sub,
                     "" + hasCode(ctx.meta.user.id)
                 );
@@ -69,9 +70,7 @@ module.exports = {
                     const f = fs.createWriteStream(filePath);
                     f.on("close", () => {
                         // File written successfully
-                        this.logger.info(
-                            `Uploaded file stored in '${filePath}'`
-                        );
+                        this.logger.debug(`A file is stored in '${filePath}'`);
                         resolve({
                             url: path.join(rootDir, subDir, fileName),
                             meta: ctx.meta,
@@ -79,7 +78,7 @@ module.exports = {
                     });
 
                     ctx.params.on("error", (err) => {
-                        this.logger.info("File error received", err.message);
+                        this.logger.warn("File error received", err.message);
                         reject({
                             error: err,
                         });
