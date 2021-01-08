@@ -1,0 +1,25 @@
+@media screen and (max-width: 1200px) {
+    .pinned-messages {
+        max-width: 300px;
+    }
+
+    .search-message-panel {
+        max-width: 300px;
+    }
+
+    .search-message-panel .filter-panel {
+        min-width: 300px;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    .channel-header {
+        .btn-pin, .btn-search {
+            display: none;
+        }
+    }
+
+    .conversation-panel {
+        min-width: auto;
+    }
+}

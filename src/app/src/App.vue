@@ -88,8 +88,13 @@ export default {
 };
 </script>
 <style lang="css">
+@import "./assets/layout.scss";
 @import "./assets/common.css";
 @import "./assets/color.css";
 @import "./assets/spinner.css";
 @import "./assets/image.css";
+</style>
+
+<style lang="scss">
+@import "./assets/layout.scss";
 </style>
