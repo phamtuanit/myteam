@@ -21,11 +21,10 @@ module.exports = {
                 changes: { type: "object" },
             },
             async handler(ctx) {
-                this.logger.debug("Params >>,", JSON.stringify(ctx.params));
-
-                if (ctx.params.object_attributes.action == "update" && !ctx.params.changes.last_edited_at && !ctx.params.changes.assignees) {
+                this.logger.debug("Params object_attributes >>,", JSON.stringify(ctx.params.object_attributes));
+                if (ctx.params.object_attributes.action == "update") {
                     // User just pushed code
-                    this.logger.debug("User just pushed code.");
+                    this.logger.debug("User just pushed code or update MR.");
                     return;
                 }
 
@@ -35,7 +34,7 @@ module.exports = {
                 const toBranch = ctx.params.object_attributes.target_branch;
                 const fromBranch = ctx.params.object_attributes.source_branch;
                 let destinations = [];
-                if (ctx.params.assignees.length > 0) {
+                if (ctx.params.assignees && ctx.params.assignees.length > 0) {
                     destinations = ctx.params.assignees.map(u => ({ id: u.username.replace(/\./g, "-"), name: u.name }));
                 }
 
@@ -51,7 +50,7 @@ module.exports = {
                 }
                 let messageContent =
                         `<div>
-                            ${mentionStr}<span> have just ${state} a merge request #${iid}.</span><br>
+                            ${mentionStr}<span> just ${state} a merge request #${iid}.</span><br>
                             <strong>🔔 ${title}</strong><br>
                             <span>🗺️ Branch: ${fromBranch}  ⇒  ${toBranch}</span><br>
                             <span>⚡ Action: <code>${action.toUpperCase()}</code></span><br>
@@ -63,12 +62,17 @@ module.exports = {
                 messageContent = messageContent.split("\n").map(ln => ln.trim()).join("");
 
                 // Post a message to Application channel
+                let generalChannel = 1588579604801; // Application
+                if (toBranch.includes("IT6_2.2")) {
+                    generalChannel = 1605770299913; // IT6_2.2
+                }
                 ctx.call("v1.extensions.messages.postMessages", {
-                    conversation_id: 1588579604801,
+                    conversation_id: generalChannel,
                     body: { content: messageContent },
                 })
                 .catch(this.logger.error)
-                .then(() => {
+                    .then(() => {
+                    this.logger.info("Post a message to", generalChannel);
                     // Post a message to reviewers
                     if (destinations.length > 0) {
                         destinations.forEach((reviewer) => {
