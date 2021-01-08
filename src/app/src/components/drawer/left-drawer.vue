@@ -80,13 +80,13 @@
                     @click="onActivateMenu(menu)"
                 >
                     <v-badge
-                        :value="menu.inform && menu.inform.count > 0"
+                        :value="!menu.inform ? 0 : menu.inform.count > 0"
                         :key="menu.key + 'badge'"
                         overlap
                         color="red darken-3"
                         light
                         :dot="menu.inform && menu.inform.count > 99"
-                        :content="menu.inform.count"
+                        :content="!menu.inform ? 0 : menu.inform.count"
                     >
                         <v-tooltip right>
                             <template v-slot:activator="{ on }">
