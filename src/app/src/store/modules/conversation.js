@@ -193,13 +193,16 @@ const moduleState = {
 
             const notVerifyYet = conv._isTemp != true && !conv.isVerified;
             if (notVerifyYet) {
-                // Load conversation content
-                this.dispatch("conversations/getConversationContent", {
-                    convId: conv.id,
-                    top: 10,
-                }).then(() => {
-                    conv.isVerified = true;
-                });
+                // Delay loading content to release process thread
+                setTimeout(() => {
+                    // Load conversation content
+                    this.dispatch("conversations/getConversationContent", {
+                        convId: conv.id,
+                        top: 10,
+                    }).then(() => {
+                        conv.isVerified = true;
+                    });
+                }, 10);
             }
         },
         addConversation(state, conv) {
@@ -343,6 +346,14 @@ const moduleState = {
                         Object.assign(foundMessage, message);
                     }
                 }
+            }
+        },
+        trancateMessages(state, convId) {
+            const conv = state.channel.all.concat(state.chat.all).find(c => c.id == convId);
+            if (conv && conv.messages.length >= MAX_MESSAGES) {
+                conv.messages.splice(0, conv.messages.length - MAX_MESSAGES + 1);
+                // Update data list state
+                conv.reachedFullHistories = false;
             }
         },
         removeMessage(state, { convId, message }) {
@@ -1124,6 +1135,9 @@ const moduleState = {
                 return deletedCount;
             }
         },
+        async trancateMessages({ commit }, { convId }) {
+            commit("trancateMessages", convId);
+        }
     },
 };
 

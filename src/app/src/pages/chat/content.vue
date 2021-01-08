@@ -220,8 +220,7 @@ export default {
                 return true;
             }
 
-            const diffMiliseconds =
-                new Date(message.created) - new Date(previousMsg.created);
+            const diffMiliseconds = new Date(message.created) - new Date(previousMsg.created);
             return diffMiliseconds / (60 * 1000) < 30; // 30 mins
         },
     },

@@ -1,5 +1,7 @@
 
 import { scrollToBottom } from "../../utils/layout.js";
+import { mapState } from "vuex";
+const MAX_MESSAGES = 30;
 export default {
     props: {
         conversation: {
@@ -17,13 +19,20 @@ export default {
             parentMessageIds: null, // To keep parent message list when user do quote
         };
     },
+    computed: {
+        ...mapState({
+            activatedConv: state => state.conversations.channel.active,
+        })
+    },
     created() {
         this.messages = this.conversation.messages;
     },
     mounted() {
-        // Watch scroll
-        this.$refs.messageFeed.$el.addEventListener("scroll", this.handleScroll);
-        setTimeout(this.scrollToBottom, 1000, this);
+        setTimeout(() => {
+            this.$nextTick(this.scrollToBottom);
+            // Watch scroll
+            this.$refs.messageFeed.$el.addEventListener("scroll", this.handleScroll);
+        }, 2000);
     },
     destroyed() {
         this.$refs.messageFeed.$el.removeEventListener("scroll", this.handleScroll);
@@ -37,7 +46,14 @@ export default {
                 // Reset quote status
                 this.parentMessageIds = null;
             }
-        }
+        },
+        activatedConv(conv) {
+            if (conv && conv.id == this.conversation.id) {
+                setTimeout(this.scrollToBottom, 200);
+            } else {
+                setTimeout(this.trancateMessages, 1000);
+            }
+        },
     },
     methods: {
         // Message actions
@@ -125,5 +141,17 @@ export default {
 
             this.hasUnreadMessages = true;
         },
+        trancateMessages() {
+            if (!this.activatedConv || this.activatedConv.id == this.conversation.id) {
+                return;
+            }
+
+            // Trancate inactive conversation's messages
+            if (this.conversation.messages.length >= MAX_MESSAGES) {
+                return this.$store.dispatch("conversations/trancateMessages", {
+                    convId: this.conversation.id,
+                }).catch(console.error);
+            }
+        }
     }
 }
