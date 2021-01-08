@@ -34,8 +34,10 @@ export default {
             const imgEls = containerEl.getElementsByTagName("img");
             imgEls.forEach(img => {
                 img.onclick = function() {
+                    modalContent.srcset = this.srcset || "";
+                    modalContent.src = this.src;
+                    modalContent.title = this.alt || "";
                     modal.style.display = "flex";
-                    modalContent.src = this.dataset.originalSrc || this.src;
                 };
             });
         },

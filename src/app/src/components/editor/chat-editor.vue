@@ -162,10 +162,20 @@ export default {
                             : "giphy";
                 }
 
-                let imageEl = `<img id="gif-${gif.id}" class="image image-gif" alt="${alt}"  data-author="${author}" `;
-                imageEl += `src="${gif.images.downsized_medium.url}" data-original-src="${gif.images.original.url}" data-preview-src="${gif.images.preview_gif.url}"></img>`;
+                // Build source set
+                const srcsetArr = [gif.images.original, gif.images.fixed_width, gif.images.fixed_width_small, gif.images.preview_gif];
+                const srcset = [];
+                srcsetArr.forEach(sz => {
+                    if (sz.url && sz.width) {
+                        srcset.push(`${sz.url} ${sz.width}w`);
+                    }
+                });
+
+                let imageEl = `<img class="image image-gif" alt="${alt}" data-author="${author}"`;
+                imageEl += ` src="${gif.images.preview_gif.url}" srcset="${srcset.join(", ")}" width="auto"></img>`;
                 const figureEl = `<figure class="image gif">${imageEl}</figure>`;
                 this.writeHtml(figureEl);
+                this.showToolBar = true;
             }
         },
         onSelectEmoji(emoji) {
@@ -215,6 +225,12 @@ export default {
                 this.formatClipboardData
             );
 
+            
+            this.editorInstance.editing.view.document.on(
+                "imageLoaded",
+                this.onImageLoaded
+            );
+
             this.$emit("ready");
         },
         onSend() {
@@ -222,6 +238,7 @@ export default {
         },
         onErase() {
             this.editorInstance.setData("");
+            this.showToolBar = false;
         },
         triggerSendEvent() {
             const currVal = this.editorInstance.getData();
@@ -310,6 +327,9 @@ export default {
             removeStyle(rootEl);
             return rootEl.innerHTML.trim();
         },
+        onImageLoaded() {
+            this.showToolBar = true;
+        }
     },
 };
 </script>
@@ -328,7 +348,7 @@ export default {
 }
 
 .chat-editor-expanded .ck .ck-editor__editable_inline {
-    max-height: 60vh;
+    max-height: var(--ck-max-height);
     height: 40vh;
 }
 
