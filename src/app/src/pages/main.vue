@@ -15,10 +15,10 @@ const BASE_WEB_TITLE = "My Team";
 const IMAGE_ZOOM_MODAL_TEMPLATE = `
         <div class="image-modal">
             <!-- The Close Button -->
-            <span class="image-modal_close">&times;</span>
+            <span class="image-modal_close" title="Close">&times;</span>
 
             <!-- Modal Content (The Image) -->
-            <img class="image-modal_content"/>
+            <img class="image-modal_content" sizes="calc(100vw - 100px)"/>
         </div>
 `;
 export default {
