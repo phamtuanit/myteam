@@ -305,12 +305,12 @@ export default {
 
 <style>
 .search-message-panel {
-    max-width: 25vw;
+    max-width: 450px;
     box-sizing: border-box;
 }
 
 .search-message-panel .filter-panel {
-    min-width: 25vw;
+    min-width: 450px;
     box-sizing: border-box;
 }
 

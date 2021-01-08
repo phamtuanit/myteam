@@ -126,7 +126,7 @@ export default {
 
 <style>
 .pinned-messages {
-    max-width: 20vw;
+    max-width: 450px;
 }
 
 .pinned-messages-list  {
@@ -135,7 +135,7 @@ export default {
 }
 
 .pinned-messages .pinned-messages--title {
-    min-width: 20vw;
+    min-width: 450px;
 }
 
 .pinned-messages--title .btn-refresh {
