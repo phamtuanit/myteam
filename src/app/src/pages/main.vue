@@ -214,6 +214,11 @@ export default {
 };
 </script>
 
+
+<style lang="css">
+@import "../assets/emoji/emotion.css";
+</style>
+
 <style lang="css">
 @import "../assets/hightlight.css";
 </style>

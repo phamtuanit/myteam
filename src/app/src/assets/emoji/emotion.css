@@ -1,0 +1,27 @@
+.emoji-type-image.thumb-up {
+    background-position: 23.21% 67.86%;
+}
+
+.emoji-type-image.heart {
+    background-position: 98.21% 50%;
+}
+
+.emoji-type-image.surprised {
+    background-position: 55.36% 42.86%;
+}
+
+.emoji-type-image.smile {
+    background-position: 53.57% 73.21%;
+}
+
+.emoji-type-image.cry {
+    background-position: 55.36% 41.07%;
+}
+
+.emoji-type-image.angry {
+    background-position: 55.36% 17.86%;
+}
+
+.emoji-type-image.angry:hover {
+    background-position: 55.36% 19.64%;
+}

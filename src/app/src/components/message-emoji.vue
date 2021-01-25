@@ -16,21 +16,12 @@
                             content-class="elevation-1"
                         >
                             <template v-slot:activator="{ on }">
-                                <v-icon
-                                    size="16"
-                                    class="mr-1"
-                                    v-on="on"
-                                    :color="reaction.color"
-                                    :class="{
-                                        'my-reaction': reaction.mine == true,
-                                    }"
-                                    v-text="'mdi-' + reaction.icon"
-                                    @click="
-                                        reaction.mine == true
-                                            ? onReaction(reaction)
-                                            : ''
-                                    "
-                                ></v-icon>
+                                <span class="emoji-item-wrapper" :title="`:${reaction.type}:`"
+                                        :class="{'my-reaction': reaction.mine == true,}"
+                                        @mouseenter="on.mouseenter" @mouseleave="on.mouseleave"
+                                        @click="reaction.mine == true ? onReaction(reaction, on) : undefined">
+                                    <span :class="reaction.icon"></span>
+                                </span>
                             </template>
                             <!-- Reactors -->
                             <v-list
@@ -58,10 +49,7 @@
                     content-class="elevation-1"
                 >
                     <template v-slot:activator="{ on }">
-                        <small
-                            v-on="on"
-                            v-text="totalReactor"
-                        ></small>
+                        <small v-on="on" v-text="totalReactor"></small>
                     </template>
                     <!-- Detail -->
                     <v-list
@@ -73,12 +61,9 @@
                             :key="reaction.type"
                             class="px-3 py-1"
                         >
-                            <v-icon
-                                size="16"
-                                class="mr-2"
-                                :color="reaction.color"
-                                v-text="'mdi-' + reaction.icon"
-                            ></v-icon>
+                            <span class="mr-2 emoji-item-wrapper" :title="`:${reaction.type}:`">
+                                <span :class="reaction.icon"></span>
+                            </span>
                             <small v-text="reaction.reactors.length"></small>
                         </v-list-item>
                     </v-list>
@@ -90,6 +75,8 @@
 
 <script>
 import { mapState } from "vuex";
+import { getEmotions } from '../utils/emotion.js'
+const emotions = getEmotions();
 export default {
     props: {
         message: Object,
@@ -115,32 +102,7 @@ export default {
     },
     methods: {
         getReactionStyle(type) {
-            let icon = "";
-            let color = "yellow darken-3";
-            switch (type) {
-                case "like":
-                    icon = "thumb-up";
-                    break;
-                case "heart":
-                    icon = "heart";
-                    color = "red darken-1";
-                    break;
-                case "happy":
-                    icon = "emoticon-excited";
-                    break;
-                case "angry":
-                    icon = "emoticon-angry";
-                    color = "red light-1";
-                    break;
-                case "cry":
-                    icon = "emoticon-cry";
-                    color = "blue light-1";
-                    break;
-
-                default:
-                    break;
-            }
-            return { icon, color };
+            return emotions.find(i => i.type == type);
         },
         onReaction(reaction) {
             this.$emit("change", reaction.type);
@@ -196,19 +158,49 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .emoji-panel {
     display: flex;
     align-items: center;
     -webkit-box-align: center;
+
+    .emoji-item-wrapper {
+        display: inline-block;
+        font-size: 0;
+        margin-right: 6px;
+        cursor: default;
+    }
+
+    .emoji-item-wrapper .emoji-type-image {
+        width: 17px;
+        height: 17px;
+    }
+
+    .emoji-item-wrapper span {
+        display: inline-block;
+    }
 }
 
-.emoji-panel:hover .v-icon.my-reaction {
+.emoji-count {
+    .emoji-item-wrapper {
+        display: inline-block;
+        font-size: 0;
+        margin-right: 2px;
+    }
+
+    .emoji-item-wrapper .emoji-type-image {
+        width: 17px;
+        height: 17px;
+    }
+
+    .emoji-item-wrapper span {
+        display: inline-block;
+    }
+}
+
+.emoji-panel:hover .emoji-item-wrapper.my-reaction {
     animation: my-reaction-opacity 1s linear infinite;
-}
-
-.emoji-panel:hover .v-icon:not(.my-reaction) {
-    cursor: default;
+    cursor: pointer;;
 }
 
 @keyframes my-reaction-opacity {

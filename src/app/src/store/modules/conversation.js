@@ -1066,8 +1066,8 @@ const moduleState = {
                             return;
                         }
                     } else {
-                        if (lastReaction && lastReaction.type == type) {
-                            // Incase user has reacted
+                        if (lastReaction && lastReaction.type === type) {
+                            // Incase user has reacted this type
                             return;
                         }
                     }

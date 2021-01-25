@@ -1,53 +1,21 @@
 <template>
     <div class="reactions-wrapper">
         <v-card class="reactions-panel py-1 px-1" elevation="1">
-            <v-icon
-                v-for="reaction in reactions"
-                :key="reaction.type"
-                size="18"
-                class="ml-2"
-                :class="{ selected: reaction.type == selected }"
-                :title="`:${reaction.type}:`"
-                @click="onReact($event, reaction)"
-                :color="reaction.color"
-                v-text="'mdi-' + reaction.icon"
-            ></v-icon>
+            <span v-for="reaction in reactions" :key="reaction.type" class="emoji-item-wrapper"
+                    :class="{ selected: reaction.type == selected }" :title="`:${reaction.type}:`"
+                    @click="onReact($event, reaction)">
+                <span :class="reaction.icon"></span>
+            </span>
         </v-card>
     </div>
 </template>
 
 <script>
-import colors from 'vuetify/lib/util/colors'
+import { getEmotions } from '../utils/emotion.js'
 export default {
     props: ["selected"],
     data: () => ({
-        reactions: [
-            {
-                type: "like",
-                icon: "thumb-up",
-                color: "yellow darken-3",
-            },
-            {
-                type: "heart",
-                icon: "heart",
-                color: "red darken-1",
-            },
-            {
-                type: "happy",
-                icon: "emoticon-excited",
-                color: "yellow darken-3",
-            },
-            {
-                type: "cry",
-                icon: "emoticon-cry",
-                color: "blue lighten-1",
-            },
-            {
-                type: "angry",
-                icon: "emoticon-angry",
-                color: "red lighten-1",
-            },
-        ],
+        reactions: getEmotions(),
     }),
     methods: {
         onReact(e, reaction) {
@@ -59,10 +27,9 @@ export default {
         },
         attachEffect(e, reaction) {
             const effectEl = document.createElement("div");
-            const colorRange = reaction.color.replace("-", "").split(" ");
-            const borderColor = colors[colorRange[0]][colorRange[1]];
+            const color = reaction.color;
             effectEl.className = "emoji-click-effect";
-            effectEl.style.borderColor = borderColor;
+            effectEl.style.borderColor = color;
             effectEl.style.top = (e.clientY) + "px";
             effectEl.style.left = (e.clientX) + "px";
             this.$el.appendChild(effectEl);
@@ -76,12 +43,28 @@ export default {
 
 <style lang="scss">
 .reactions-wrapper {
-    width: 140px;
+    width: 164px;
     height: 26px;
     position: relative;
     z-index: 1;
 
-    .reactions-panel .v-icon {
+    .emoji-item-wrapper {
+        display: inline-block;
+        font-size: 0;
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+
+    .emoji-item-wrapper .emoji-type-image {
+        width: 19px;
+        height: 19px;
+    }
+
+    .emoji-item-wrapper span {
+        display: inline-block;
+    }
+
+    .reactions-panel .emoji-item-wrapper {
         cursor: pointer;
     }
 
@@ -93,7 +76,7 @@ export default {
         z-index: 9;
     }
 
-    .reactions-panel:hover .v-icon {
+    .reactions-panel:hover .emoji-item-wrapper {
         transition: all 0.2s ease-in;
         opacity: 0.5;
     }
@@ -113,12 +96,12 @@ export default {
         }
     }
 
-    .reactions-panel .v-icon.selected {
+    .reactions-panel .emoji-item-wrapper.selected {
         animation: opacity 1s linear infinite;
         cursor: default;
     }
 
-    .reactions-panel .v-icon:hover {
+    .reactions-panel .emoji-item-wrapper:hover {
         transition: all 0.2s ease-in;
         opacity: 1;
         transform: scale(1.2);
