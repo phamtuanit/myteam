@@ -1,6 +1,7 @@
 "use strict";
 const axios = require("axios");
 const https = require("https");
+const Extnotifier = require("./ext-notifier");
 const Errors = require("moleculer").Errors;
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -11,7 +12,7 @@ module.exports = {
     version: 1,
     settings: {},
     dependencies: ["v1.auth", "v1.authorization"],
-    mixins: [],
+    mixins: [Extnotifier],
     actions: {
     },
 
