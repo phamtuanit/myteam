@@ -22,6 +22,7 @@ module.exports = {
                 const { target: action } = ctx.params;
                 /* -1: Allow all traffics
                     0: Admin
+                    1: System extension
                     2: Creator
                     3: Reservation
                     4: Contributor

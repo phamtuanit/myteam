@@ -28,7 +28,21 @@ module.exports = {
                     type: "object",
                     props: {
                         name: { type: "string" },
-                        type: { type: "string", optional: true }
+                        type: { type: "string", optional: true },
+                        role: { type: "number", convert: true, default: 15 },
+                        enable: { type: "boolean", convert: true, default: true },
+                        endpoint: {
+                            type: "object",
+                            optional: true,
+                            props: {
+                                enable: { type: "boolean", convert: true, default: true },
+                                type: { type: "string", default: "webhook" },
+                                uri: { type: "string", optional: true },
+                                http_method: { type: "string", optional: true },
+                                auto_resolve: { type: "boolean", default: true },
+                                settings: { type: "object", default: {} },
+                            },
+                        }
                     },
                 },
             },
@@ -46,7 +60,21 @@ module.exports = {
             rest: "PUT /:id",
             params: {
                 app: "object",
-                id: { type: "string", convert: true }
+                id: { type: "string", convert: true },
+                role: { type: "number", convert: true, optional: true },
+                enable: { type: "boolean", convert: true, default: true, optional: true },
+                endpoint: {
+                    type: "object",
+                    optional: true,
+                    props: {
+                        enable: { type: "boolean", convert: true, optional: true },
+                        type: { type: "string", optional: true },
+                        uri: { type: "string", optional: true },
+                        http_method: { type: "string", optional: true },
+                        auto_resolve: { type: "boolean", optional: true },
+                        settings: { type: "object", optional: true},
+                    },
+                },
             },
             handler(ctx) {
                 const { app, id } = ctx.params;
@@ -159,11 +187,19 @@ module.exports = {
                 app.id = String(Date.now());
                 app.created = new Date();
                 app.role = 15; // default
-                app.type = "sender"; // default
+                app.type =  app.type || "sender"; // default
+
+                if (app.type === "bot" && !app.endpoint) {
+                    app.endpoint = {
+                        enable: false,
+                        auto_resolve: true,
+                        settings: null
+                    };
+                }
                 return await dbCollection.insert(app).catch(this.logger.error);
             } else {
                 const existingApp = await dbCollection.findOne({ id: app.id, });
-                if (!existingApp.role || app.role < 15) {
+                if (!existingApp.role) {
                     app.role = 15; // default
                 } else {
                     delete app.role;

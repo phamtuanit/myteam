@@ -26,7 +26,10 @@ module.exports = {
             rest: "PUT /:userId/messages",
             params: {
                 userId: "string",
-                ids: { type: "string", optional: true },
+                ids: [
+                    { type: "string", optional: true },
+                    { type: "array", optional: true },
+                ]
             },
             async handler(ctx) {
                 const { userId } = ctx.params;
@@ -37,7 +40,7 @@ module.exports = {
                 const filter = {};
 
                 if (ids) {
-                    ids = ids.split(",");
+                    ids = Array.isArray(ids) ? ids : ids.split(",");
                     ids = ids.map((s) => new Number(s).valueOf());
                     filter["payload.id"] = {
                         $in: ids,
@@ -75,7 +78,7 @@ module.exports = {
             roles: [-1],
             params: {
                 userId: "string",
-                lastId: "number"
+                lastId: { type: "number", convert: true, optional: true, },
             },
             async handler(ctx) {
                 const { userId, lastId } = ctx.params;
@@ -83,11 +86,14 @@ module.exports = {
                     const queueId = `msg-queue-${userId}`;
                     const dbCollection = await this.getDBCollection(queueId);
 
-                    const filter = {
-                        id: {
+                    const filter = {}; // This means remove all entities
+
+                    if (lastId) {
+                        // Remove less than or equal
+                        filter.id = {
                             $lte: lastId,
-                        },
-                    };
+                        };
+                    }
 
                     const res = await dbCollection.removeMany(filter);
 
@@ -163,24 +169,25 @@ module.exports = {
             async handler(ctx) {
                 const { userId, message } = ctx.params;
                 const msgEntity = cleanDbMark({ ...message });
+                let queueSuffix = userId;
 
                 const appInfo = await ctx.call("v1.applications.getAppById", { id: userId });
                 if (appInfo) {
                     const retrcitAppTypes = ["sender"];
-                    if (!appInfo.type || retrcitAppTypes.inludes(appInfo.type)) {
+                    if (appInfo.enable === false || !appInfo.type || retrcitAppTypes.includes(appInfo.type)) {
                         this.logger.debug("Don't need to save a message into message-queue of an extension application.", userId, appInfo.name);
                         return;
                     }
                 }
 
                 try {
-                    const queueId = `msg-queue-${userId}`;
+                    const queueId = `msg-queue-` + queueSuffix;
                     const dbCollection = await this.getDBCollection(queueId);
                     const res = await dbCollection.insert(msgEntity).then(cleanDbMark);
 
                     // Emit event to live user
                     const eventName = `user-queue.${msgEntity.action}`;
-                    this.broker.broadcast(eventName, {userId, payload: msgEntity}).catch(this.logger.error);
+                    this.broker.broadcast(eventName, { userId, payload: msgEntity }).catch(this.logger.error);
                     return res;
                 } catch (error) {
                     this.logger.error("Could not store message to queue.", msgEntity.id, error);
@@ -205,15 +212,15 @@ module.exports = {
     /**
      * Service created lifecycle event handler
      */
-    created() {},
+    created() { },
 
     /**
      * Service started lifecycle event handler
      */
-    started() {},
+    started() { },
 
     /**
      * Service stopped lifecycle event handler
      */
-    stopped() {},
+    stopped() { },
 };

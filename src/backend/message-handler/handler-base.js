@@ -168,8 +168,11 @@ module.exports = class HandlerBase {
                 break;
         }
 
+        const subscribers = [...convInfo.subscribers];
+        subscribers.push(...convInfo.applications);
+
         // Store information to message queue
-        if (Array.isArray(convInfo.subscribers) && convInfo.subscribers.length > 0) {
+        if (Array.isArray(subscribers) && subscribers.length > 0) {
             const msgQueue = {
                 id: new Date().getTime(),
                 type: "message",
@@ -178,8 +181,8 @@ module.exports = class HandlerBase {
             };
 
             const ctx = this.ctx;
-            for (let index = 0; index < convInfo.subscribers.length; index++) {
-                const subscriberId = convInfo.subscribers[index];
+            for (let index = 0; index < subscribers.length; index++) {
+                const subscriberId = subscribers[index];
 
                 // Store information to message queue
                 ctx.call("v1.user-queue.pushMessageToQueue", {
@@ -411,7 +414,6 @@ module.exports = class HandlerBase {
 
     /**
      * Protect method
-     *
      */
     async reactMessage({ id, type, operation }) {
         const convCollId = this.getHistoryCollectionName(this.convId);

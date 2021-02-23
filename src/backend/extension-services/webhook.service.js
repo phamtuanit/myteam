@@ -1,6 +1,4 @@
 "use strict";
-const fs = require("fs");
-const path = require("path");
 const axios = require("axios");
 const https = require("https");
 const Errors = require("moleculer").Errors;
@@ -23,7 +21,7 @@ module.exports = {
     events: {
         // user.connected
         "messages.*"(message, sender, event) {
-            if (!message.to || !message.from || !message.body) {
+            if (!message.to || !message.from) {
                 this.logger.warn("Could process this event. Missing important information.", event, message);
                 return;
             }
