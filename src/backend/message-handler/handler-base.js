@@ -169,7 +169,9 @@ module.exports = class HandlerBase {
         }
 
         const subscribers = [...convInfo.subscribers];
-        subscribers.push(...convInfo.applications);
+        if (convInfo.applications && convInfo.applications.length > 0) {
+            subscribers.push(...convInfo.applications);
+        }
 
         // Store information to message queue
         if (Array.isArray(subscribers) && subscribers.length > 0) {
