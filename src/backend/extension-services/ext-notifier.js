@@ -24,7 +24,7 @@ module.exports = {
             this.logger.debug("Receiving a message from user-queue.", appID);
 
             if (payload && appID) {
-                this.processMessage(payload, act, appID);
+                this.handleMessageQueue(payload, act, appID);
             } else {
                 this.logger.warn("Will not handle this message. Missing identify information.");
             }
@@ -35,14 +35,14 @@ module.exports = {
      * Methods
      */
     methods: {
-        async processMessage(payload, action, appID) {
+        async handleMessageQueue(payload, action, appID) {
             const appInfo = await this.broker.call("v1.applications.getAppById", { id: appID });
             if (!appInfo || appInfo.enable === false) {
                 return;
             }
 
             if (!appInfo.endpoint || appInfo.endpoint.enable === false || !appInfo.endpoint.type) {
-                this.logger.info("The hook is not configured yet.", appID, appInfo.endpoint);
+                this.logger.debug("The hook is not configured yet.", appID, appInfo.endpoint);
                 return;
             }
 
