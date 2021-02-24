@@ -2,7 +2,7 @@
     <v-app id="app">
         <v-snackbar
             v-model="snackbar.display"
-            top
+            top id="global-snackbar"
             :color="snackbar.background"
             :timeout="snackbar.timeout"
         >
@@ -93,6 +93,10 @@ export default {
 @import "./assets/color.css";
 @import "./assets/spinner.css";
 @import "./assets/image.css";
+
+#app #global-snackbar > div {
+    max-width: 800px;
+}
 </style>
 
 <style lang="scss">
