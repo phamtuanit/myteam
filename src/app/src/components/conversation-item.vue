@@ -41,6 +41,7 @@
 
 <script>
 import UserAvatar from "./avatar/user-avatar.vue";
+import {getMessageText} from "../utils/message.js"
 export default {
     props: ["conversation"],
     components: { UserAvatar },
@@ -87,24 +88,7 @@ export default {
     methods: {
         updateRecentMessage() {
             const recentMsg = this.getRecentMessage();
-
-            if (recentMsg) {
-                const msgType = recentMsg.body.type || "html";
-                switch (msgType) {
-                    case "html":
-                        {
-                            let html = recentMsg.body.content;
-                            html = html.replace(/<img/g, '<span').replace(/<\/img/g, '</span');
-                            const el = document.createElement("div");
-                            el.innerHTML = html;
-                            this.recentMessage = el.innerText;
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            }
+            this.recentMessage = getMessageText(recentMsg);
         },
         getRecentMessage() {
             // Show unread message
