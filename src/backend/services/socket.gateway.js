@@ -14,7 +14,7 @@ module.exports = {
     mixins: [],
 
     settings: {
-        version: 6,
+        version: 11,
         server: true,
         io: {
             path: "/chat-io",

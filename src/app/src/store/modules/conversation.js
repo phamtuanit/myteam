@@ -1,6 +1,7 @@
 const messageService = new (require("../../services/message.service").default)();
 const convService = new (require("../../services/conversation.service").default)();
 const messageQueueSvr = new (require("../../services/message-queue.service.js").default)();
+const { getMessageText } = require("../../utils/message.js");
 
 const MAX_MESSAGES = 30;
 let eventBus = null;
@@ -77,6 +78,7 @@ function handleWSMessage(socket, state, commit, act, data) {
                 break;
             }
         case "pinned":
+            console.info("PIN --------------------------->", message);
             commit("updateMessage", {
                 convId,
                 message: { pins: message.pins },
@@ -88,11 +90,13 @@ function handleWSMessage(socket, state, commit, act, data) {
             confirmMsgFn();
             break;
         case "updated":
+            console.info("PIN --------------------------->", message);
             commit("updateMessage", { convId, message });
             commit("updatePinStatus", message);
             confirmMsgFn();
             break;
         case "removed":
+            console.info("DEL --------------------------->", message);
             commit("removeMessage", { convId, message });
             commit("updatePinStatus", {
                 id: message.id,
@@ -411,6 +415,7 @@ const moduleState = {
             }
         },
         updatePinStatus(state, message) {
+            console.info("updatePinStatus --------------------------->", message);
             const convId = message.to.conversation;
             const existingConv = state.channel.all
                 .concat(state.chat.all)
@@ -420,8 +425,25 @@ const moduleState = {
                 return;
             }
 
+            // Support inform user about new Pin.
+            const showPinMessage = (message) => {
+                this.dispatch("users/resolve", [message.from.issuer])
+                .then(users => {
+                    let fromUser = "";
+                    if (users && users.length > 0) {
+                        fromUser = "from @" + users[0].fullName || users[0].userName;
+                        const content = getMessageText(message, "N/A", 230);
+                        let msg = `🔔<strong class="text-capitalize">There is a new Pin message ${fromUser}.</strong>`;
+                        msg += `<br/><i aria-hidden="true" class="v-icon notranslate mdi mdi-pound" style="font-size: 15px;"></i><strong> Channel: ${ existingConv.name }</strong>`;
+                        msg += `<br/>📌${ content }`;
+                        eventBus.emit("show-snack", { message: msg, type: "info", timeout: 60000 });
+                    }
+                })
+                .catch(console.error);
+            }
+
             const me = this.state.users.me;
-            if (message.pins.length == 0) {
+            if (!message.pins || message.pins.length == 0) {
                 // Unpin => Remove if needed
                 if (
                     existingConv.pinnedMessages &&
@@ -439,16 +461,17 @@ const moduleState = {
                 message.pinnedByMe = message.pins && message.pins.includes(me.id);
                 if (!existingConv.pinnedMessages) {
                     existingConv.pinnedMessages = [message];
+                    showPinMessage(message); // Inform new Pin to user.
                 } else {
-                    const foundIndex = existingConv.pinnedMessages.findIndex(
+                    const currMsg = existingConv.pinnedMessages.find(
                         i => i.id === message.id
                     );
-                    if (foundIndex >= 0) {
-                        const currMsg = existingConv.pinnedMessages[foundIndex];
+                    if (currMsg) {
                         currMsg.pins = message.pins || currMsg.pins;
-                        currMsg.body = message.body;
+                        currMsg.body = message.body || currMsg.body;
                     } else {
-                        existingConv.pinnedMessages.push(message);
+                        existingConv.pinnedMessages.unshift(message);
+                        showPinMessage(message); // Inform new Pin to user.
                     }
                 }
             }
