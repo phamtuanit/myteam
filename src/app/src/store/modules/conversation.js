@@ -78,7 +78,6 @@ function handleWSMessage(socket, state, commit, act, data) {
                 break;
             }
         case "pinned":
-            console.info("PIN --------------------------->", message);
             commit("updateMessage", {
                 convId,
                 message: { pins: message.pins },
@@ -90,13 +89,11 @@ function handleWSMessage(socket, state, commit, act, data) {
             confirmMsgFn();
             break;
         case "updated":
-            console.info("PIN --------------------------->", message);
             commit("updateMessage", { convId, message });
             commit("updatePinStatus", message);
             confirmMsgFn();
             break;
         case "removed":
-            console.info("DEL --------------------------->", message);
             commit("removeMessage", { convId, message });
             commit("updatePinStatus", {
                 id: message.id,
@@ -415,7 +412,6 @@ const moduleState = {
             }
         },
         updatePinStatus(state, message) {
-            console.info("updatePinStatus --------------------------->", message);
             const convId = message.to.conversation;
             const existingConv = state.channel.all
                 .concat(state.chat.all)
@@ -433,7 +429,7 @@ const moduleState = {
                     if (users && users.length > 0) {
                         fromUser = "from @" + users[0].fullName || users[0].userName;
                         const content = getMessageText(message, "N/A", 230);
-                        let msg = `🔔<strong class="text-capitalize">There is a new Pin message ${fromUser}.</strong>`;
+                        let msg = `🔔<strong class="text-capitalize">A message ${fromUser} has been pinned.</strong>`;
                         msg += `<br/><i aria-hidden="true" class="v-icon notranslate mdi mdi-pound" style="font-size: 15px;"></i><strong> Channel: ${ existingConv.name }</strong>`;
                         msg += `<br/>📌${ content }`;
                         eventBus.emit("show-snack", { message: msg, type: "info", timeout: 60000 });
