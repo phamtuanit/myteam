@@ -575,6 +575,20 @@ const moduleState = {
                     });
                 }
 
+                // Load application information delay
+                if (conv.applications && conv.applications.length > 0) {
+                    const applications = [...new Set(conv.applications)]; // unique applications
+                    conv.applications.splice(0);
+                    // Get user info
+                    this.dispatch("users/require", applications).then(apps => {
+                        if (!apps) {
+                            console.warn("Could not load applications", conv.id);
+                            return;
+                        }
+                        conv.applications.push(...apps);
+                    });
+                }
+
                 // Add message
                 commit("addConversation", conv);
             }

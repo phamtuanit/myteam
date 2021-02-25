@@ -197,7 +197,8 @@ export default {
                 });
         },
         getUsers(queryText) {
-            if (queryText.toLowerCase() == "all") {
+            queryText = queryText.toLowerCase();
+            if (queryText == "all") {
                 return [
                     {
                         id: "@All",
@@ -207,19 +208,23 @@ export default {
                 ];
             }
 
-            const found = this.conversation.subscribers.filter(u => {
-                return (
-                    (u.userName && u.userName.includes(queryText)) ||
-                    (u.fullName && u.fullName.includes(queryText))
-                );
+            let results = this.conversation.subscribers.filter(u => {
+                const name = (u.userName || "" ) + " " + (u.fullName || "");
+                return name.toLocaleLowerCase().includes(queryText);
             });
 
-            if (found && found.length > 0) {
-                return found.map(u => {
+            const apps = this.conversation.applications.filter(app => {
+                return app.type == "bot" && app.name.toLocaleLowerCase().includes(queryText);
+            });
+
+            results.push(...apps);
+
+            if (results.length > 0) {
+                return results.map(u => {
                     const item = { ...u };
-                    item.id = "@" + (u.fullName || u.userName);
+                    item.name = u.fullName || u.userName || u.name;
+                    item.id = "@" + item.name;
                     item.userId = u.id;
-                    item.name = u.fullName || u.userName;
                     return item;
                 });
             }
