@@ -98,7 +98,14 @@ module.exports = {
                 dbCollection = await this.getDBCollection("applications");
                 let apps = await dbCollection.find(filter).then(cleanDbMark);
                 if (apps) {
-                    apps = apps.map(app => { app.fullName = app.name || app.fullName; app.application = true; app.status = "on"; return app;});
+                    apps = apps.map(app => {
+                        app.fullName = app.name || app.fullName;
+                        app.application = true;
+                        app.status = "on";
+                        delete app.endpoint;
+                        delete app.owner;
+                        return app;
+                    });
                     result.push(...apps);
                 }
 
