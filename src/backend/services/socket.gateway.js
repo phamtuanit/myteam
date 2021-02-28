@@ -46,17 +46,16 @@ module.exports = {
             const status = data.status;
             data.event = event;
 
-            this.logger.info(`WS >>> Status of user [${userId}] has been changed to`, status);
-            this.logger.debug("WS >>> Broadcast message to all of live user.");
+            this.logger.info(`Status of user [${userId}] has been changed to ${status}. Broadcast message to all of live user.`, status);
             this.io.to("live").emit("live", status, data, event);
         },
         // user-queue.*
         "user-queue.*"(data, sender, event) {
             const [, act] = event.split(".");
             const { userId, payload: message } = data;
-            this.logger.info("WS >>> Receiving a message from user-queue.", userId, event);
             const socketDict = this.sockets[userId];
             if (socketDict && Object.keys(socketDict).length > 0) {
+                this.logger.debug("Receiving a message from user-queue.", userId, event);
                 message.event = event;
                 // To private user room
                 this.io.to(userId).emit(message.type || "message", act, message, event);
@@ -92,7 +91,7 @@ module.exports = {
             // Init Socket
             this.sockets = {};
             if (!this.server) {
-                this.logger.error("WS >>> Server is required for Socket-IO.");
+                this.logger.error("Server is required for Socket IO.");
                 return;
             }
             this.io = io(this.server, this.settings.io);
@@ -108,45 +107,60 @@ module.exports = {
                 })
                 .then(() => {
                     const serverVer = this.settings.version;
+                    // Check incompatible version
                     if (!clientVersion || parseInt(clientVersion) < serverVer) {
                         setTimeout(() => {
+                            // Raise "incompatible" after the connection is established
                             socket.emit("system", "incompatible", serverVer);
                         }, 1000);
                     }
                 })
                 .catch((err) => {
-                    this.logger.warn("WS >>> Incoming socket don't has valid access-token. Disconnecting...", err.message);
+                    this.logger.warn("Incoming socket don't has valid access-token. Disconnecting...", err.message);
                     socket.emit("unauthenticated");
-                    setTimeout(socket.disconnect, 100);
+                    // Disconnect after raising "unauthenticated".
+                    setTimeout(socket.disconnect, 10);
                 });
         },
         handleNewSocket(socket) {
             const user = socket.handshake.user;
+            // Default topic needs to be subscribed
             const requiredRooms = [user.id, "live"];
-            // Save socket
+            // Save socket instance
             this.sockets[user.id] = this.sockets[user.id] || {};
             this.sockets[user.id][socket.id] = socket;
-            this.logger.info(`WS >>> User [${user.id}] has been connected via WebSocket.`);
+            this.logger.info(`User [${user.id}] has been connected via Websocket.`);
 
             // Join to required room
             requiredRooms.forEach((room) => {
                 socket.join(room);
             });
 
-            // Broadcast to the others about new user
+            // Broadcast to the others about new connection
             const connectedEvt = `user.${user.id}.socket.connected`;
             this.broker.broadcast(connectedEvt, user, ["live"]); // live service only
 
+            // Handle "join" request
+            socket.on("join", (room) => {
+                socket.join(room);
+            });
+
+            // Handle "leave" request
+            socket.on("leave", (room) => {
+                socket.leave(room);
+            });
+
+            // Handle "confirm" request
             socket.on("confirm", (data) => {
+                // Client confirmed the message
                 return this.onSocketConfirmed(socket, data);
             });
 
+            // Handle "disconnect" request. Clean up data
             socket.on("disconnect", () => {
-                this.logger.info(
-                    `WS >>> User ${user.id} has been disconnected.`
-                );
+                this.logger.info(`User ${user.id} has been disconnected websocket.`);
 
-                // Leave to required room
+                // Leave th rooms
                 requiredRooms.forEach((room) => {
                     socket.leave(room);
                 });
@@ -162,21 +176,16 @@ module.exports = {
                     delete this.sockets[user.id];
                 }
 
+                // Broadcast to the others about new status
                 const disconnectedEvt = `user.${user.id}.socket.disconnected`;
                 this.broker.broadcast(disconnectedEvt, user, ["live"]);
-            });
-
-            socket.on("join", (room) => {
-                socket.join(room);
-            });
-
-            socket.on("leave", (room) => {
-                socket.leave(room);
             });
         },
         onSocketConfirmed(socket, data) {
             if (data.status == "confirmed") {
+                // User confirmation the message
                 if (data.type == "message" && data.action) {
+                    // Clean message queue after confirming
                     this.cleanMessageQueue(socket, data);
                     return;
                 }
@@ -189,6 +198,7 @@ module.exports = {
 
             const userId = socket.handshake.user.id;
             if (userId) {
+                // Clean up message queue
                 this.broker .call("v1.user-queue.cleanQueue", { userId, lastId: info.id, })
                     .catch((error) => {
                         this.logger.error("Could not clean message-queue.", userId, error.message);
@@ -223,7 +233,7 @@ module.exports = {
     },
     stopped() {
         if (this.io) {
-            this.logger.info("WS >>> Broadcast live status to all WS client.");
+            this.logger.info("Broadcast live status to all WS client.");
             this.io.to("live").emit("live", "broadcast", { status: "off" });
             this.io.close();
         }

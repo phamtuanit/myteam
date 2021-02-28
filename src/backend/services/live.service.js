@@ -2,7 +2,6 @@
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
-
 module.exports = {
     name: "live",
     version: 1,
@@ -16,10 +15,7 @@ module.exports = {
             rest: "GET /",
             handler() {
                 return Object.values(this.livingUser).map(user => {
-                    return {
-                        info: user,
-                        status: "on",
-                    };
+                    return { info: user, status: "on",};
                 });
             },
         },
@@ -39,10 +35,7 @@ module.exports = {
                     userId.forEach(id => {
                         const user = this.livingUser[id];
                         const status = user ? "on" : "off";
-                        result.push({
-                            info: user,
-                            status: status,
-                        });
+                        result.push({ info: user, status: status,});
                     });
                     return result;
                 }
@@ -50,10 +43,7 @@ module.exports = {
                 // Get single user status
                 const user = this.livingUser[userId];
                 const status = user ? "on" : "off";
-                return {
-                    info: user,
-                    status: status,
-                };
+                return { info: user, status: status,};
             },
         },
     },
@@ -65,19 +55,13 @@ module.exports = {
         // user.connected
         "user.*.socket.connected"(user) {
             this.logger.info(`User ${user.id} has been connected.`);
-            this.livingUser[user.id] = this.livingUser[user.id] || {
-                user,
-                count: 0,
-            };
+            this.livingUser[user.id] = this.livingUser[user.id] || { user, count: 0,};
             this.livingUser[user.id].count += 1;
 
             if (this.livingUser[user.id].count == 1) {
-                // Inform to
+                // Broadcast live status to socket and the others
                 const eventName = `user.${user.id}.status.on`;
-                this.broker.broadcast(eventName, {
-                    user,
-                    status: "on",
-                });
+                this.broker.broadcast(eventName, { user, status: "on",});
             }
         },
         // user.disconnected
@@ -87,11 +71,9 @@ module.exports = {
                 this.livingUser[user.id].count -= 1;
                 if (this.livingUser[user.id].count == 0) {
                     delete this.livingUser[user.id];
+                    // Broadcast live status to socket and the others
                     const eventName = `user.${user.id}.status.off`;
-                    this.broker.broadcast(eventName, {
-                        user,
-                        status: "off",
-                    });
+                    this.broker.broadcast(eventName, { user, status: "off",});
                 }
             }
         },

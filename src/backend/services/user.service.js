@@ -94,7 +94,7 @@ module.exports = {
 
                 // Find users
                 const result = await dbCollection.find(filter);
-                // Find applicationa
+                // Find application
                 dbCollection = await this.getDBCollection("applications");
                 let apps = await dbCollection.find(filter).then(cleanDbMark);
                 if (apps) {

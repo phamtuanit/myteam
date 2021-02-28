@@ -48,10 +48,7 @@ module.exports = {
                 }
 
                 if (!ids) {
-                    throw new Errors.MoleculerClientError(
-                        "Ids or payload id is required.",
-                        400
-                    );
+                    throw new Errors.MoleculerClientError("Ids or payload id is required.", 400);
                 }
 
                 try {
@@ -65,10 +62,7 @@ module.exports = {
 
                     return res;
                 } catch (error) {
-                    this.logger.error(
-                        "Could not remove message in queue.",
-                        error
-                    );
+                    this.logger.error("Could not remove message in queue.", error);
                     throw error;
                 }
             },

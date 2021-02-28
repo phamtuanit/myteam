@@ -85,8 +85,7 @@ module.exports = {
                     const userToken = this.getUserToken(user);
 
                     // Inform user login
-                    const eventName = `user.login`;
-                    this.broker.emit(eventName, user);
+                    this.broker.emit("user.login", user);
                     return userToken;
                 } else {
                     throw new MoleculerClientError("Missing user name or password", 412);
