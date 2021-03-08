@@ -213,11 +213,12 @@ export default {
                 return name.toLocaleLowerCase().includes(queryText);
             });
 
-            const apps = this.conversation.applications.filter(app => {
-                return app.type == "bot" && app.name.toLocaleLowerCase().includes(queryText);
-            });
-
-            results.push(...apps);
+            if (this.conversation.applications) {
+                const apps = this.conversation.applications.filter(app => {
+                    return app.type == "bot" && app.name.toLocaleLowerCase().includes(queryText);
+                });
+                results.push(...apps);
+            }
 
             if (results.length > 0) {
                 return results.map(u => {

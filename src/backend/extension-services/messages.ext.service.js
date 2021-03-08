@@ -25,6 +25,7 @@ module.exports = {
                         content: { type: "string" },
                         type: { type: "string", optional: true, default: "html" },
                         parent_message_ids: { type: "array", items: "number", optional: true },
+                        mentions: { type: "array", items: "string", convert: true, optional: true },
                     },
                 },
             },

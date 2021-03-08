@@ -36,7 +36,7 @@ module.exports = {
      */
     methods: {
         async handleMessageQueue(payload, action, appID) {
-            const appInfo = await this.broker.call("v1.applications.getAppById", { id: appID });
+            const appInfo = await this.broker.call("v1.applications.getAppByIdLocal", { id: appID });
             if (!appInfo || appInfo.enable === false) {
                 return;
             }
@@ -46,7 +46,9 @@ module.exports = {
                 return;
             }
 
-            await this.notifyMessageToExternal(appInfo, payload, action);
+            if (payload.payload.from.issuer != appInfo.id) {
+                await this.notifyMessageToExternal(appInfo, payload, action);
+            }
         },
         async notifyViaAPI(appInfo, payload, action) {
             const endpoint = appInfo.endpoint;
@@ -83,8 +85,12 @@ module.exports = {
             await httpReq(endpoint.uri, body, config).then(({ data: result }) => {
                 this.logger.debug("Successfully notify information to external.", appInfo.name);
 
-                if (result.feddback && endpoint.auto_resolve === true && result.feddback.status) {
+                if (result.feedback && endpoint.auto_resolve === true && result.feedback.status) {
                     this.resolveMessage(appInfo, payload, result);
+                }
+
+                if (result.reply) {
+                    this.replyMessage(appInfo, payload, result.reply);
                 }
             }).catch(err => {
                 this.logger.debug("Could not notify information to external.", appInfo.name, err);
@@ -128,7 +134,10 @@ module.exports = {
                 },
                 payload: {
                     message_id: message.id,
-                    message_body: message.body,
+                    message_body: {
+                        ...message.body,
+                        plain: this.getPlainText(message.body),
+                    },
                     created: message.created,
                     updated: message.updated,
                     mentions: message.mentions,
@@ -142,24 +151,22 @@ module.exports = {
                 await this.broker.call("v1.user-queue.cleanQueue", {
                     userId: appInfo.id,
                     lastId: lastMsgId,
-                },
-                    {
-                        meta: {
-                            user: appInfo
-                        }
-                    })
-                    .catch((error) => {
-                        this.logger.error("Could not clean message-queue.", appInfo, error && error.message);
-                    });
+                }, {
+                    meta: {
+                        user: appInfo
+                    }
+                }).catch((error) => {
+                    this.logger.error("Could not clean message-queue.", appInfo, error && error.message);
+                });
             }
         },
         async confirmMessagesInQueue(appInfo, lastMsgIds) {
             if (appInfo.id) {
                 lastMsgIds = lastMsgIds.map(id => ("" + id));
                 await this.broker.call("v1.user-queue.confirmMessage", {
-                        userId: appInfo.id,
-                        ids: lastMsgIds,
-                    },
+                    userId: appInfo.id,
+                    ids: lastMsgIds,
+                },
                     {
                         meta: {
                             user: appInfo
@@ -171,11 +178,11 @@ module.exports = {
             }
         },
         async resolveMessage(appInfo, payload, result) {
-            if (result.feddback.status == "resolved" && result.feddback.action) {
-                this.logger.debug("User had resolved the message.", result.feddback);
+            if (result.feedback.status == "resolved" && result.feedback.action) {
+                this.logger.debug("User had resolved the message.", result.feedback);
 
                 // External resolved the message.
-                switch (result.feddback.action) {
+                switch (result.feedback.action) {
                     case "confirm":
                         return this.confirmMessagesInQueue(appInfo, [payload.id]);
                     case "confirm_before":
@@ -187,6 +194,17 @@ module.exports = {
                         break;
                 }
             }
+        },
+
+        async replyMessage(appInfo, payload, reply) {
+            this.broker.call("v1.extensions.messages.postMessages", {
+                conversation_id: payload.payload.to.conversation,
+                body: reply,
+            }, { meta: { user: {...appInfo, isApplication: true}}}).catch(this.logger.error);
+        },
+
+        getPlainText(body) {
+            return body.content.replace(/<[^>]+>/g, '');
         }
     },
 

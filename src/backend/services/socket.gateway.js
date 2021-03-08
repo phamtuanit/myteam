@@ -5,7 +5,6 @@ const path = require("path");
 const https = require("https");
 const os = require("os");
 
-const ApiGateway = require("moleculer-web");
 const sysConf = require("../conf/system.json");
 module.exports = {
     name: "socket",
@@ -14,7 +13,7 @@ module.exports = {
     mixins: [],
 
     settings: {
-        version: 11,
+        version: 9,
         server: true,
         io: {
             path: "/chat-io",

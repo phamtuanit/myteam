@@ -127,6 +127,24 @@ module.exports = {
             async handler(ctx) {
                 const { id } = ctx.params;
                 const dbCollection = await this.getDBCollection("applications");
+                return await dbCollection.findOne({ id }).then(app => {
+                    if (app) {
+                        delete app.endpoint;
+                        delete app.owner;
+                    }
+                    return app;
+                });
+            },
+        },
+        getAppByIdLocal: {
+            visibility: "public",
+            cache: true,
+            params: {
+                id: { type: "string", convert: true }
+            },
+            async handler(ctx) {
+                const { id } = ctx.params;
+                const dbCollection = await this.getDBCollection("applications");
                 return await dbCollection.findOne({ id }).then(cleanDbMark);
             },
         },
