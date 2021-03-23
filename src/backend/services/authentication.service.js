@@ -1,6 +1,6 @@
 "use strict";
 const { MoleculerClientError } = require("moleculer").Errors;
-const DBCollectionService = require("../mixins/collection.db.mixin");
+const DBCollectionService = require("../mixins/collection.db.mixin")
 
 const fs = require("fs");
 const path = require("path");
