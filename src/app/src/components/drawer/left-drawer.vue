@@ -17,7 +17,7 @@
                         v-on="on"
                         :user-name="me.fullName || me.name || me.userName || user.id"
                         class="mx-auto user-avatar"
-                        :src="me.avatar"
+                        :src="me.avatarUrl"
                     >
                     </Avatar>
                 </template>
@@ -30,7 +30,7 @@
                                     :size="48"
                                     :user-name="me.fullName || me.name || me.userName || user.id"
                                     class="mx-auto"
-                                    :src="me.avatar"
+                                    :src="me.avatarUrl"
                                 ></Avatar>
                             </v-list-item-avatar>
 

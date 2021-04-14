@@ -30,7 +30,7 @@ module.exports = {
                         name: { type: "string" },
                         type: { type: "string", optional: true },
                         role: { type: "number", convert: true, default: 15 },
-                        enable: { type: "boolean", convert: true, default: true },
+                        disabled: { type: "boolean", convert: true, default: false },
                         endpoint: {
                             type: "object",
                             optional: true,
@@ -62,7 +62,7 @@ module.exports = {
                 app: "object",
                 id: { type: "string", convert: true },
                 role: { type: "number", convert: true, optional: true },
-                enable: { type: "boolean", convert: true, default: true, optional: true },
+                disabled: { type: "boolean", convert: true, default: false, optional: true },
                 endpoint: {
                     type: "object",
                     optional: true,
@@ -128,11 +128,12 @@ module.exports = {
                 const { id } = ctx.params;
                 const dbCollection = await this.getDBCollection("applications");
                 return await dbCollection.findOne({ id }).then(app => {
-                    if (app) {
+                    const { user } = ctx.meta;
+                    if (app && user.role > 2) {
                         delete app.endpoint;
                         delete app.owner;
                     }
-                    return app;
+                    return cleanDbMark(app);
                 });
             },
         },
@@ -145,7 +146,7 @@ module.exports = {
             async handler(ctx) {
                 const { id } = ctx.params;
                 const dbCollection = await this.getDBCollection("applications");
-                return await dbCollection.findOne({ id }).then(cleanDbMark);
+                return await dbCollection.findOne({ id });
             },
         },
         getToken: {
@@ -166,11 +167,11 @@ module.exports = {
                     throw new Errors.MoleculerError(`Application ${appId} could not be found.`);
                 }
 
-                if (user.id !== appInfo.owner) {
+                if (user.role > 2) {
                     this.logger.warn(`${user.id} is not owner of the application.`);
                     throw new Errors.MoleculerError(`${user.id} is not owner of the application.`, 401);
                 }
-                
+
                 return this.getAppToken(appInfo);
             },
         },

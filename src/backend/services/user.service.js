@@ -15,13 +15,35 @@ module.exports = {
     actions: {
         addUser: {
             auth: true,
-            roles: [-1],
+            roles: [0],
             rest: "POST /",
             params: {
-                user: "object",
+                user:{
+                    type: "object",
+                    props: {
+                        userName: "string",
+                        firstName: "string",
+                        lastName: "string",
+                        fullName: "string",
+                    }
+                }
             },
             handler(ctx) {
                 const { user } = ctx.params;
+                return this.addOrUpdateUser(user);
+            },
+        },
+        updateUser: {
+            auth: true,
+            roles: [0],
+            rest: "PUT /:id",
+            params: {
+                id: "string",
+                user: "object",
+            },
+            handler(ctx) {
+                const { user, id } = ctx.params;
+                user.id = id;
                 return this.addOrUpdateUser(user);
             },
         },
@@ -52,6 +74,7 @@ module.exports = {
             auth: true,
             roles: [-1],
             rest: "GET /",
+            cache: true,
             params: {
                 user: { type: "string", optional: true },
                 text: { type: "string", optional: true },
@@ -158,15 +181,16 @@ module.exports = {
             } else {
                 if (typeof existingUser.role === "undefined") {
                     user.role = 10; // Normal member. TODO: to be delete when all users has role
-                } else {
-                    delete user.role;
                 }
 
                 user.updated = new Date();
                 const update = {
                     $set: user,
                 };
-                return await dbCollection.updateById(existingUser._id, update).then(cleanDbMark);
+                return await dbCollection.updateById(existingUser._id, update).then((user) => {
+                    this.broker.cacher.clean("*.users.*");
+                    return cleanDbMark(user);
+                });
             }
         },
     },

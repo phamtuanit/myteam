@@ -1,0 +1,30 @@
+{
+  "name": "api-doc",
+  "version": "1.0.0",
+  "description": "API document for server side",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack serve"
+  },
+  "keywords": [
+    "api-doc"
+  ],
+  "author": "Tuan Pham",
+  "license": "ISC",
+  "dependencies": {
+    "css-loader": "^5.2.1",
+    "json-loader": "^0.5.7",
+    "style-loader": "^2.0.0",
+    "swagger-ui": "^3.46.0",
+    "yaml-loader": "^0.6.0"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^4.0.0-alpha.0",
+    "copy-webpack-plugin": "^8.1.1",
+    "html-webpack-plugin": "^5.3.1",
+    "webpack": "^5.31.2",
+    "webpack-cli": "^4.6.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}

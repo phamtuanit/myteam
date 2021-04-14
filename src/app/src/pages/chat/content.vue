@@ -10,7 +10,7 @@
             <v-list-item class="px-4 ma-0">
                 <Avatar
                     :user-name="conversationName"
-                    :src="destUser.avatar"
+                    :src="destUser.avatarUrl"
                     :size="30"
                     class="ml-1"
                 ></Avatar>

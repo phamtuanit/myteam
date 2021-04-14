@@ -1,0 +1,413 @@
+openapi: 3.0.1
+info:
+  title: My Team - API Document
+  description: API Document Of My Team. To execute any API, token is required.
+  version: 0.0.1
+servers:
+- url: https://127.0.0.1:8081/
+- url: http://127.0.0.1:8081/
+- url: https://127.0.0.1:8084/
+security:
+- token: []
+tags:
+- name: application
+  description: Manage application
+- name: auth
+  description: Allow to login / verify token
+- name: message
+  description: Allow to post a message to a conversation
+- name: user
+  description: Allow to manage user
+paths:
+  /login:
+    post:
+      tags:
+      - auth
+      summary: Login and get user token
+      parameters:
+      - name: user-name
+        in: header
+        description: User name
+        required: true
+        schema:
+          type: string
+      - name: user-pass
+        in: header
+        description: Your password "Z2Nzdm4xMjM="
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content: {}
+        401:
+          description: Username or Password is not correct.
+          content: {}
+  /api/v1/applications/{appId}:
+    get:
+      tags:
+      - application
+      summary: Get specific application info
+      parameters:
+      - name: appId
+        in: path
+        description: Application Id (1614049524901)
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Application information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        401:
+          description: No token or the token is expired
+          content: {}
+    put:
+      tags:
+      - application
+      summary: Update a specific application
+      parameters:
+      - name: appId
+        in: path
+        description: Application Id (1614049524901)
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: An application information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppReq'
+        required: true
+      responses:
+        200:
+          description: Application information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        401:
+          description: No token or the token is expired
+          content: {}
+        422:
+          description: Invalid parameter
+          content: {}
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - application
+      summary: Delete a specific application
+      parameters:
+      - name: appId
+        in: path
+        description: Application Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Application information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+  /api/v1/applications/token/{appId}:
+    get:
+      tags:
+      - application
+      summary: Get a specific application token
+      parameters:
+      - name: appId
+        in: path
+        description: Application Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Application information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  app:
+                    $ref: '#/components/schemas/App'
+  /api/v1/applications:
+    post:
+      tags:
+      - application
+      summary: Add an application
+      requestBody:
+        description: An application information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppReq'
+        required: true
+      responses:
+        200:
+          description: Application information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        401:
+          description: No token or the token is expired
+          content: {}
+        422:
+          description: Invalid parameter
+          content: {}
+      x-codegen-request-body-name: body
+  /api/v1/extensions/messages:
+    post:
+      tags:
+      - message
+      summary: Post a message to a conversation
+      requestBody:
+        description: Message body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  default: "Use this field to send a message to a user"
+                conversation_id:
+                  type: string
+                  default: "Use this field to send a message to a group"
+                body:
+                  type: "object"
+                  properties:
+                    type:
+                      type: string
+                      default: html
+                    content:
+                      type: string
+                      default: "<p>Your message</p>"
+                    parent_message_ids:
+                      type: array
+                      items:
+                        type: string
+                        default: "message-id"
+                    mentions:
+                      type: array
+                      items:
+                        type: string
+                        default: "user-id"
+        required: true
+      responses:
+        200:
+          description: OK
+          content: {}
+        401:
+          description: No token or the token is expired
+          content: {}
+        422:
+          description: Invalid parameter
+          content: {}
+      x-codegen-request-body-name: body
+  /api/v1/users/{userId}:
+    get:
+      tags:
+      - user
+      summary: Get a specific user
+      parameters:
+      - name: userId
+        in: path
+        description: User Id
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          description: No token or the token is expired
+          content: {}
+        422:
+          description: Invalid parameter
+          content: {}
+      x-codegen-request-body-name: body
+    put:
+      tags:
+      - user
+      summary: Update user information
+      parameters:
+      - name: userId
+        in: path
+        description: User id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Message body
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          description: No token or the token is expired
+          content: {}
+        422:
+          description: Invalid parameter
+          content: {}
+      x-codegen-request-body-name: body
+  /api/v1/users/?user={userIdList}:
+    get:
+      tags:
+      - user
+      summary: Get a list of user by list of user-id
+      parameters:
+      - name: userIdList
+        in: path
+        description: User id list
+        required: true
+        schema:
+          type: string
+          default: "a,b"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: '#/components/schemas/User'
+        401:
+          description: No token or the token is expired
+          content: {}
+        422:
+          description: Invalid parameter
+          content: {}
+      x-codegen-request-body-name: body
+  /api/v1/users:
+    get:
+      tags:
+      - user
+      summary: Get all users
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: '#/components/schemas/User'
+        401:
+          description: No token or the token is expired
+          content: {}
+        422:
+          description: Invalid parameter
+          content: {}
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    App:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: integer
+          format: int32
+          default: 15
+        type:
+          type: string
+          default: sender
+          enum:
+          - bot
+          - sender
+          - webhook
+        disabled:
+          type: boolean
+          default: false
+        endpoint:
+          type: object
+          properties:
+            enable:
+              type: boolean
+            type:
+              type: string
+              description: webhook
+              default: webhook
+              enum:
+              - webhook
+            uri:
+              type: string
+            http_method:
+              type: string
+              description: post / get / put
+              enum:
+              - post
+              - get
+              - put
+            auto_resolve:
+              type: boolean
+            settings:
+              type: object
+              properties:
+                reject_unauthorized:
+                  type: boolean
+                  default: false
+                headers:
+                  type: object
+                  properties:
+                    authentication:
+                      type: string
+    AppReq:
+      type: object
+      properties:
+        app:
+          $ref: '#/components/schemas/App'
+    User:
+      type: object
+      properties:
+        id:
+          type: "string"
+        role:
+          type: "integer"
+          default: 10
+        userName:
+          type: "string"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        fullName:
+          type: "string"
+        status:
+          type: "string"
+  securitySchemes:
+    token:
+      type: apiKey
+      name: authorization
+      in: header

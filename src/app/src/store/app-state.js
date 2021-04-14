@@ -1,5 +1,6 @@
 const config = require("../conf/system.json");
 const Socket = require("../plugins/socket.js");
+const { buildAvatarUrl } = require("../utils/avatar");
 // eslint-disable-next-line no-undef
 const baseServerAddr = (APP_PRODUCTION ? window.location.origin : config.server.address + `:${config.server.port}`);
 // eslint-disable-next-line no-undef
@@ -52,6 +53,7 @@ module.exports = {
                 .then(token => {
                     if (token) {
                         auth.getUser().then(user => {
+                            user.avatarUrl = buildAvatarUrl(user);
                             commit("users/setMe", user);
                         });
 

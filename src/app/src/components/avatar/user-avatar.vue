@@ -8,8 +8,8 @@
         bordered
     >
         <Avatar
-            :user-name="user.fullName || user.name || user.userName || user.id"
-            :src="user.avatar"
+            :user-name="userName"
+            :src="user.avatarUrl"
             :size="size"
             :animation="animation"
         ></Avatar>
@@ -34,6 +34,18 @@ export default {
             enableAnimation: this.infinity,
         };
     },
+    computed: {
+        isOnline() {
+            return this.user.status == "on";
+        },
+        animation() {
+            return this.infinity == true || this.enableAnimation;
+        },
+        userName() {
+            const user = this.user;
+            return user.fullName || user.name || user.userName || user.id;
+        },
+    },
     watch: {
         isOnline(val) {
             if (
@@ -53,14 +65,6 @@ export default {
             if (!val) {
                 this.enableAnimation = val;
             }
-        },
-    },
-    computed: {
-        isOnline() {
-            return this.user.status == "on";
-        },
-        animation() {
-            return this.infinity == true || this.enableAnimation;
         },
     },
 };

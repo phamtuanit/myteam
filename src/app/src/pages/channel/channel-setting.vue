@@ -81,8 +81,8 @@
                                         <v-list-item-title v-text="wraper.value.fullName"></v-list-item-title>
                                     </v-list-item-content>
 
-                                    <v-list-item-avatar v-if="wraper.value.avatar">
-                                        <v-img :src="wraper.value.avatar"></v-img>
+                                    <v-list-item-avatar v-if="wraper.value.avatarUrl">
+                                        <v-img :src="wraper.value.avatarUrl"></v-img>
                                     </v-list-item-avatar>
                                 </template>
                             </v-list-item>
